@@ -46,7 +46,7 @@ jobs:
               --cov-append \
               --cov-report html:/tmp/grayskull/converage-html \
               --cov-report xml:coverage.xml \
-              --conv-config=.coveragerc \
+              --cov-config=.coveragerc \
               --junit-xml=junit/Linux-py${PYTHON_VERSION}.xml \
               --junit-prefix=Linux-py${PYTHON_VERSION}
 
