@@ -121,27 +121,27 @@ jobs:
       - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
         displayName: Add conda to PATH
 
-      - bash: conda update conda --yes
+      - script: conda update conda --yes
         displayName: Update Conda version
 
-      - bash: |
+      - script: |
           conda config --add channels conda-forge
           conda create --yes --name grayskull
         displayName: Create Conda environment (grayskull)
 
-      - bash: |
+      - script: |
           conda config --add channels conda-forge
           conda info -a
         displayName: Add Conda-Forge channel
 
-      - bash: |
-          source activate grayskull
+      - script: |
+          call activate grayskull
           conda install --yes python=%PYTHON_VERSION% $(grayskull_deps)
           conda list
         displayName: Installing dependencies
 
-      - bash: |
-          source activate grayskull
+      - script: |
+          call activate grayskull
           pytest tests ^
               -n auto ^
               --color=yes ^
