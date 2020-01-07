@@ -1,0 +1,10 @@
+[run]
+omit =
+    .cache/*
+    tests/*
+    docs/*
+    .pytest_cache/*
+    setup.py
+
+[paths]
+source = grayskull

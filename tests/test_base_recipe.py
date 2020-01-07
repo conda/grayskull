@@ -1,6 +1,7 @@
 import pytest
 
-from grayskull.base import Extra, Grayskull, Package
+from grayskull.base import Extra, Package
+from grayskull.base.base_recipe import Grayskull
 
 
 class EmptyGray(Grayskull):

@@ -5,8 +5,6 @@ from typing import List
 import requests
 import yaml
 
-from grayskull.base.base_recipe import Grayskull  # noqa
-
 
 def get_valid_fields(fields):
     return [
