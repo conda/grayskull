@@ -104,3 +104,51 @@ jobs:
               --cov-config=$(Build.Repository.LocalPath)/.coveragerc \
               --junit-xml=junit/OSX-py${PYTHON_VERSION}.xml \
               --junit-prefix=OSX-py${PYTHON_VERSION}
+
+  - job:
+    displayName: Windows
+    pool:
+      vmImage: 'vs2017-win2016'
+    strategy:
+      matrix:
+        python38:
+          python.version: '3.8'
+        python37:
+          python.version: '3.7'
+      maxParallel: 8
+
+    steps:
+      - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
+        displayName: Add conda to PATH
+
+      - bash: conda update conda --yes
+        displayName: Update Conda version
+
+      - bash: |
+          conda config --add channels conda-forge
+          conda create --yes --name grayskull
+        displayName: Create Conda environment (grayskull)
+
+      - bash: |
+          conda config --add channels conda-forge
+          conda info -a
+        displayName: Add Conda-Forge channel
+
+      - bash: |
+          source activate grayskull
+          conda install --yes python=%PYTHON_VERSION% $(grayskull_deps)
+          conda list
+        displayName: Installing dependencies
+
+      - bash: |
+          source activate grayskull
+          pytest tests ^
+              -n auto ^
+              --color=yes ^
+              --cov= ^
+              --cov-append ^
+              --cov-report xml:junit/coverage.xml ^
+              --test-run-title="OSX-py%PYTHON_VERSION%" ^
+              --cov-config=$(Build.Repository.LocalPath)/.coveragerc ^
+              --junit-xml=junit/OSX-py%PYTHON_VERSION%.xml ^
+              --junit-prefix=OSX-py%PYTHON_VERSION%
