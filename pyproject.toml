@@ -1,0 +1,22 @@
+[tool.black]
+target-version=["py37", "py38"]
+exclude='''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | \.pytest_cache
+  | _build
+  | buck-out
+  | build
+  | dist
+  | tests/data
+)/
+'''
+
+[build-system]
+requires = ["setuptools", "wheel", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
