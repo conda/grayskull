@@ -5,7 +5,8 @@ from collections import OrderedDict, namedtuple
 import requests
 from requests import HTTPError
 
-from grayskull.base import About, Grayskull, Package, Requirements, Source, Test
+from grayskull.base import About, Package, Requirements, Source, Test
+from grayskull.base.base_recipe import Grayskull
 
 log = logging.getLogger(__name__)
 PyVer = namedtuple("PyVer", ["major", "minor"])

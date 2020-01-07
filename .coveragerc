@@ -7,4 +7,4 @@ omit =
     setup.py
 
 [paths]
-source = src/grayskull
+source = grayskull

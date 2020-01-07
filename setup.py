@@ -1,11 +1,11 @@
-from setuptools import find_packages, setup
+from setuptools import setup
 
 setup(
     name="grayskull",
-    packages=find_packages(where="src"),
-    package_dir={"": "src"},
-    use_scm_version={"write_to": "src/grayskull/_version.py"},
-    setup_requires=["setuptools-scm>=3.4", "setuptools>=42.0"],
+    version="0.1.0",
+    packages=["grayskull", "grayskull.base", "grayskull.pypi"],
+    use_scm_version={"write_to": "grayskull/_version.py"},
+    setup_requires=["setuptools-scm>=3.4", "setuptools>=40.0"],
     install_requires=["requests", "pyyaml"],
     extras_require={"testing": ["pytest"]},
     url="https://github.com/marcelotrevisani/grayskull",
