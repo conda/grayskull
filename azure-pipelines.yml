@@ -46,7 +46,8 @@ jobs:
               --cov= \
               --cov-append \
               --cov-report html:/tmp/grayskull/converage-html \
-              --cov-report xml:coverage.xml \
+              --cov-report xml:junit/coverage.xml \
+              --test-run-title="Linux-py${PYTHON_VERSION}" \
               --cov-config=$(Build.Repository.LocalPath)/.coveragerc \
               --junit-xml=junit/Linux-py${PYTHON_VERSION}.xml \
               --junit-prefix=Linux-py${PYTHON_VERSION}
@@ -103,7 +104,8 @@ jobs:
               --cov= \
               --cov-append \
               --cov-report html:/tmp/grayskull/converage-html \
-              --cov-report xml:coverage.xml \
+              --cov-report xml:junit/coverage.xml \
+              --test-run-title="OSX-py${PYTHON_VERSION}" \
               --cov-config=$(Build.Repository.LocalPath)/.coveragerc \
               --junit-xml=junit/OSX-py${PYTHON_VERSION}.xml \
               --junit-prefix=OSX-py${PYTHON_VERSION}
