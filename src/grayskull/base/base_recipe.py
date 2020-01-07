@@ -5,7 +5,7 @@ from typing import Any, Dict, Iterator, Tuple, Union
 
 import yaml
 
-from grayskull import (
+from grayskull.base import (
     About,
     App,
     Build,
