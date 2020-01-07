@@ -52,11 +52,6 @@ jobs:
               --junit-xml=junit/Linux-py${PYTHON_VERSION}.xml \
               --junit-prefix=Linux-py${PYTHON_VERSION}
 
-      - task: PublishTestResults@2
-        inputs:
-          testResultsFiles: 'junit/*.xml'
-        condition: succeededOrFailed()
-
   - job:
     displayName: OSX
     pool:
@@ -109,8 +104,3 @@ jobs:
               --cov-config=$(Build.Repository.LocalPath)/.coveragerc \
               --junit-xml=junit/OSX-py${PYTHON_VERSION}.xml \
               --junit-prefix=OSX-py${PYTHON_VERSION}
-
-      - task: PublishTestResults@2
-        inputs:
-          testResultsFiles: 'junit/*.xml'
-        condition: succeededOrFailed()
