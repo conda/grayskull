@@ -39,6 +39,11 @@ jobs:
 
       - bash: |
           source activate grayskull
+          pip install -e .
+        displayName: Installing package in dev mode
+
+      - bash: |
+          source activate grayskull
           pytest tests \
               -n auto \
               --color=yes \
