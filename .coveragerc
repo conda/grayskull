@@ -1,4 +1,5 @@
 [run]
+source=grayskull
 omit =
     .cache/*
     tests/*
@@ -8,6 +9,3 @@ omit =
 
 [paths]
 source = grayskull
-
-[run]
-source=grayskull
