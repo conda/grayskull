@@ -1,4 +1,5 @@
 [run]
+source=grayskull
 omit =
     .cache/*
     tests/*

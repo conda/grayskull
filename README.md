@@ -1,6 +1,11 @@
 # Grayskull
 -------------
 [![Build Status](https://dev.azure.com/marceloduartetrevisani/Grayskull/_apis/build/status/Tests?branchName=master)](https://dev.azure.com/marceloduartetrevisani/Grayskull/_build/latest?definitionId=4&branchName=master)
+
+
+[![codecov](https://codecov.io/gh/marcelotrevisani/grayskull/branch/master/graph/badge.svg)](https://codecov.io/gh/marcelotrevisani/grayskull)
+
+
 -------------
 ![Grayskull](https://comicvine1.cbsistatic.com/uploads/original/4/49448/2661756-castle_grayskull.jpg)
 
