@@ -7,6 +7,7 @@ install:
   - source "$HOME/miniconda/etc/profile.d/conda.sh"
   - hash -r
   - conda config --set always_yes yes
+  - conda config --add channels conda-forge
   - conda update -q conda
   - conda info -a
   - conda create --name linter-env python=$TRAVIS_PYTHON_VERSION black flake8 flake8-builtins flake8-black flake8-bugbear flake8-comprehensions flake8-isort
