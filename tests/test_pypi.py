@@ -93,6 +93,28 @@ def test_py_version_to_selector(requires_python, exp_selector):
     assert PyPi.py_version_to_selector(metadata) == f"# [py{exp_selector}]"
 
 
+@pytest.mark.parametrize(
+    "requires_python, exp_limit",
+    [
+        (">=3.5", ">=3.6"),
+        (">=3.6", ">=3.6"),
+        (">=3.7", ">=3.7"),
+        ("<=3.7", "<3.8"),
+        ("<=3.7.1", "<3.8"),
+        ("<3.7", "<3.7"),
+        (">2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*", ">=3.6"),
+        (">=2.7, !=3.6.*", "!=3.6"),
+        (">3.7", ">=3.8"),
+        (">2.7", ">=3.6"),
+        ("<3", "<3.0"),
+        ("!=3.7", "!=3.7"),
+    ],
+)
+def test_py_version_to_limit_python(requires_python, exp_limit):
+    metadata = {"info": {"requires_python": requires_python}}
+    assert PyPi.py_version_to_limit_python(metadata) == f"{exp_limit}"
+
+
 def test_get_sha256_from_pypi_metadata():
     metadata = {
         "urls": [
