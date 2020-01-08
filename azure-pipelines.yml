@@ -47,11 +47,11 @@ jobs:
               --color=yes \
               --cov=./ \
               --cov-append \
-              --cov-report html:/tmp/grayskull/converage-html \
-              --cov-report xml:junit/coverage.xml \
+              --cov-report html:converage-html \
+              --cov-report xml:coverage.xml \
               --test-run-title="Linux-py${PYTHON_VERSION}" \
               --cov-config=$(Build.Repository.LocalPath)/.coveragerc \
-              --junit-xml=junit/Linux-py${PYTHON_VERSION}.xml \
+              --junit-xml=Linux-py${PYTHON_VERSION}.xml \
               --junit-prefix=Linux-py${PYTHON_VERSION}
         displayName: Running Tests
       - bash: |
@@ -103,14 +103,19 @@ jobs:
           pytest tests \
               -n auto \
               --color=yes \
-              --cov= \
+              --cov=./ \
               --cov-append \
-              --cov-report html:/tmp/grayskull/converage-html \
-              --cov-report xml:junit/coverage.xml \
+              --cov-report html:converage-html \
+              --cov-report xml:coverage.xml \
               --test-run-title="OSX-py${PYTHON_VERSION}" \
               --cov-config=$(Build.Repository.LocalPath)/.coveragerc \
-              --junit-xml=junit/OSX-py${PYTHON_VERSION}.xml \
+              --junit-xml=OSX-py${PYTHON_VERSION}.xml \
               --junit-prefix=OSX-py${PYTHON_VERSION}
+        displayName: Running Tests
+      - bash: |
+          source activate grayskull
+          codecov --token=$(CODECOV_TOKEN)
+        displayName: Codecov
 
   - job:
     displayName: Windows
@@ -152,10 +157,16 @@ jobs:
           pytest tests ^
               -n auto ^
               --color=yes ^
-              --cov= ^
+              --cov=./ ^
               --cov-append ^
-              --cov-report xml:junit/coverage.xml ^
+              --cov-report xml:coverage.xml ^
               --test-run-title="OSX-py%PYTHON_VERSION%" ^
               --cov-config=$(Build.Repository.LocalPath)/.coveragerc ^
-              --junit-xml=junit/OSX-py%PYTHON_VERSION%.xml ^
+              --junit-xml=OSX-py%PYTHON_VERSION%.xml ^
               --junit-prefix=OSX-py%PYTHON_VERSION%
+        displayName: Running tests
+
+      - script: |
+          call activate grayskull
+          codecov --token=$(CODECOV_TOKEN)
+        displayName: Codecov
