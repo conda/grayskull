@@ -1,5 +1,7 @@
 variables:
-  grayskull_deps: pytest pytest-azurepipelines pytest-xdist pytest-cov requests pyyaml
+- group: Codecov
+- name: grayskull_deps
+  value: pytest pytest-azurepipelines pytest-xdist pytest-cov requests pyyaml codecov
 
 jobs:
   - job:
@@ -43,7 +45,7 @@ jobs:
           pytest tests \
               -n auto \
               --color=yes \
-              --cov= \
+              --cov=./ \
               --cov-append \
               --cov-report html:/tmp/grayskull/converage-html \
               --cov-report xml:junit/coverage.xml \
@@ -51,6 +53,11 @@ jobs:
               --cov-config=$(Build.Repository.LocalPath)/.coveragerc \
               --junit-xml=junit/Linux-py${PYTHON_VERSION}.xml \
               --junit-prefix=Linux-py${PYTHON_VERSION}
+        displayName: Running Tests
+      - bash: |
+          source activate grayskull
+          codecov --token=$(CODECOV_TOKEN)
+        displayName: Codecov
 
   - job:
     displayName: OSX

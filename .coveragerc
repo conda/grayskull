@@ -8,3 +8,6 @@ omit =
 
 [paths]
 source = grayskull
+
+[run]
+source=grayskull
