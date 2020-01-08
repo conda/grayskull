@@ -1,0 +1,37 @@
+name: Python application
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+    - name: Setup Miniconda
+      uses: goanpeca/setup-miniconda@v1.0.2
+      with:
+        miniconda-version: 'latest'
+        activate-environment: gs-flake8
+        python-version: 3.8
+        auto-update-conda: true
+    - name: Config Channels
+      shell: pwsh
+      run: |
+        conda config --set always_yes yes
+        conda config --add channels conda-forge
+    - name: Install dependencies
+      shell: pwsh
+      run: |
+        conda install black flake8 flake8-builtins flake8-black flake8-bugbear flake8-comprehensions flake8-isort isort --yes
+    - name: Conda info
+      shell: pwsh
+      run: |
+        conda info -a
+        conda list
+    - name: Run flake8
+      shell: pwsh
+      run: flake8 . --statistics
