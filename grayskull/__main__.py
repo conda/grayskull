@@ -21,7 +21,9 @@ def main():
         default=".",
         help="Path to where the recipe will be created",
     )
-    parser.add_argument("--version", "-v", dest="version", help="Package version ")
+    parser.add_argument(
+        "--version", "-v", default="", dest="version", help="Package version "
+    )
 
     args = parser.parse_args()
 
@@ -29,8 +31,7 @@ def main():
         print("By the power of Grayskull...\nI have the power!")
         sys.exit()
 
-    options_generator = args.repo_type + [args.version if args.version else ""]
-    recipe = GrayskullFactory.create_recipe(*options_generator)
+    recipe = GrayskullFactory.create_recipe(args.repo_type, args.version)
     recipe.to_file(args.output)
 
 
