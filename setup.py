@@ -7,7 +7,7 @@ setup(
     entry_points={"console_scripts": ["grayskull = grayskull.__main__:main"]},
     use_scm_version={"write_to": "grayskull/_version.py"},
     setup_requires=["setuptools-scm", "setuptools>=30.3.0"],
-    install_requires=["requests", "pyyaml"],
+    install_requires=["requests", "ruamel.yaml"],
     extras_require={"testing": ["pytest"]},
     url="https://github.com/marcelotrevisani/grayskull",
     license="MIT",

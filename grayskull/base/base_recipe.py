@@ -3,14 +3,13 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Dict, Iterator, Tuple, Union
 
-import yaml
+import ruamel
 
-from grayskull.base import (
+from grayskull.base.sections import (
     About,
     App,
     Build,
     Extra,
-    GrayDumper,
     Outputs,
     Package,
     Requirements,
@@ -189,11 +188,8 @@ class Grayskull(ABC):
         for section in self.ALL_SECTIONS:
             if section not in body_dict:
                 continue
-            yaml_value = yaml.dump(
-                {section: body_dict[section]},
-                Dumper=GrayDumper,
-                default_flow_style=False,
-            )
+            yaml = ruamel.yaml.YAML()
+            yaml_value = yaml.dump({section: body_dict[section]},)
             body += f"{yaml_value}\n"
         return f"{self._get_jinja_declaration()}\n{body}"
 

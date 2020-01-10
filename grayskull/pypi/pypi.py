@@ -6,8 +6,8 @@ from typing import Dict, List, Optional, Tuple
 import requests
 from requests import HTTPError
 
-from grayskull.base import About, Package, Requirements, Source, Test
 from grayskull.base.base_recipe import Grayskull
+from grayskull.base.sections import About, Package, Requirements, Source, Test
 
 log = logging.getLogger(__name__)
 PyVer = namedtuple("PyVer", ["major", "minor"])
