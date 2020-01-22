@@ -47,45 +47,50 @@ class Selectors:
     def __getitem__(self, item: int) -> "SingleSelector":
         return self._selectors[item]
 
-    def _parser(self, str_selector: str) -> List["SingleSelector"]:
-        str_selector = re.sub(r"\s*#\s*", "", str_selector)
-        str_selector = re.sub(r"[\[\]]]*", "", str_selector)
-        selectors = str_selector.split()
-        re_py_sel = re.compile(r"(\w+)\s*([<>!=]+)\s*(\d+)")
+    @staticmethod
+    def _parse_bracket(selector: str) -> List["SingleSelector"]:
         re_open_bracket = re.compile(r"(.*)([\(])(.*)", re.DOTALL)
         re_close_bracket = re.compile(r"(.*)([\)])(.*)", re.DOTALL)
+        list_brackets = [("(", re_open_bracket), (")", re_close_bracket)]
         result = []
-        if isinstance(selectors, str):
-            selectors = [selectors]
+        for symbol, re_search in list_brackets:
+            if symbol == selector:
+                return [Selectors.SingleSelector(selector)]
+            if symbol in selector:
+                group_bracket = re_search.search(selector).groups()
+                for bracket in group_bracket:
+                    if not bracket:
+                        continue
+                    result += Selectors._parser(bracket)
+        return result
+
+    @staticmethod
+    def _clean_selector(selector: str) -> str:
+        selector = re.sub(r"\s*#\s*", "", selector)
+        selector = re.sub(r"[\[\]]]*", "", selector)
+        return selector.strip()
+
+    @staticmethod
+    def _parser(str_selector: str) -> List["SingleSelector"]:
+        str_selector = Selectors._clean_selector(str_selector)
+        selectors = str_selector.split()
+        re_py_sel = re.compile(r"(\w+)\s*([<>!=]+)\s*(\d+)")
+        result = []
         for sel in selectors:
             sel = sel.strip()
             if not sel:
                 continue
-            if "(" == sel:
-                result.append(self.SingleSelector(sel))
+            brackets = Selectors._parse_bracket(sel)
+            if brackets:
+                result += brackets
                 continue
-            if "(" in sel:
-                open_bracket = re_open_bracket.search(sel).groups()
-                for bracket in open_bracket:
-                    if not bracket:
-                        continue
-                    result += self._parser(bracket)
-            if ")" == sel:
-                result.append(self.SingleSelector(sel))
-                continue
-            if ")" in sel:
-                close_bracket = re_close_bracket.search(sel).groups()
-                for bracket in close_bracket:
-                    if not bracket:
-                        continue
-                    result += self._parser(bracket)
 
             py_sel = re_py_sel.findall(sel)
             if py_sel:
                 sel = py_sel[0]
-                result.append(self.SingleSelector(*sel))
+                result.append(Selectors.SingleSelector(*sel))
             else:
-                result.append(self.SingleSelector(sel))
+                result.append(Selectors.SingleSelector(sel))
         return result
 
     def remove_all(self):
