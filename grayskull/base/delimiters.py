@@ -47,6 +47,10 @@ class Delimiters:
         ]
 
     def add(self, delimiter: Union[str, "Delimiters"]):
+        """Add a new delimiter
+
+        :param delimiter: Delimiter to be added
+        """
         if isinstance(delimiter, str):
             self._delimiters += self._parse(delimiter)
         elif isinstance(delimiter, Delimiters):
@@ -58,6 +62,11 @@ class Delimiters:
             raise ValueError(f"Value received is not allowed. Received: {delimiter}")
 
     def remove(self, delimiter: Union[str, "Delimiters"]):
+        """Remove a specific delimiter, it is possible to pass a string with
+        the delimiter to be removed or a Delimiter object
+
+        :param delimiter: Delimiter to be removed
+        """
         if not isinstance(delimiter, (str, Delimiters)):
             raise ValueError(f"Value received is not allowed. Received: {delimiter}")
 
@@ -65,3 +74,7 @@ class Delimiters:
         for d in delimiter if is_delimiters else self._parse(delimiter):
             if d in self._delimiters:
                 self._delimiters.remove(d)
+
+    def remove_all(self):
+        """Remove all delimiters"""
+        self._delimiters = []
