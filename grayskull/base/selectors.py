@@ -1,6 +1,6 @@
 import re
-from dataclasses import dataclass
-from typing import List
+from dataclasses import astuple, dataclass
+from typing import List, Union
 
 ALL_SELECTORS = (
     "x86",
@@ -38,20 +38,35 @@ class Selectors:
         operator: str = ""
         value: str = ""
 
+        def __post_init__(self):
+            py_sel = re.search(r"(\w+)\s*([<>!=]+)\s*(\d+)", self.name)
+            if py_sel:
+                self.name, self.operator, self.value = py_sel.groups()
+
         def __str__(self):
             return f"{self.name.strip()}{self.operator.strip()}{self.value.strip()}"
 
+        def __eq__(self, other: Union[str, "SingleSelector"]) -> bool:
+            if isinstance(other, str):
+                return str(self) == other
+            return astuple(self) == astuple(other)
+
     def __init__(self, selectors: str):
-        self._selectors = self._parser(selectors)
+        self._selectors = self._parse(selectors)
 
     def __getitem__(self, item: int) -> "SingleSelector":
         return self._selectors[item]
 
+    def __repr__(self) -> str:
+        all_sel = " ".join([str(sel) for sel in self])
+        return f"[{all_sel}]"
+
     @staticmethod
     def _parse_bracket(selector: str) -> List["SingleSelector"]:
-        re_open_bracket = re.compile(r"(.*)([\(])(.*)", re.DOTALL)
-        re_close_bracket = re.compile(r"(.*)([\)])(.*)", re.DOTALL)
-        list_brackets = [("(", re_open_bracket), (")", re_close_bracket)]
+        list_brackets = [
+            ("(", re.compile(r"(.*)(\()(.*)", re.DOTALL)),
+            (")", re.compile(r"(.*)(\))(.*)", re.DOTALL)),
+        ]
         result = []
         for symbol, re_search in list_brackets:
             if symbol == selector:
@@ -61,7 +76,8 @@ class Selectors:
                 for bracket in group_bracket:
                     if not bracket:
                         continue
-                    result += Selectors._parser(bracket)
+                    result += Selectors._parse(bracket)
+                selector = re_search.sub(selector, "")
         return result
 
     @staticmethod
@@ -71,10 +87,9 @@ class Selectors:
         return selector.strip()
 
     @staticmethod
-    def _parser(str_selector: str) -> List["SingleSelector"]:
+    def _parse(str_selector: str) -> List["SingleSelector"]:
         str_selector = Selectors._clean_selector(str_selector)
         selectors = str_selector.split()
-        re_py_sel = re.compile(r"(\w+)\s*([<>!=]+)\s*(\d+)")
         result = []
         for sel in selectors:
             sel = sel.strip()
@@ -85,12 +100,7 @@ class Selectors:
                 result += brackets
                 continue
 
-            py_sel = re_py_sel.findall(sel)
-            if py_sel:
-                sel = py_sel[0]
-                result.append(Selectors.SingleSelector(*sel))
-            else:
-                result.append(Selectors.SingleSelector(sel))
+            result.append(Selectors.SingleSelector(sel))
         return result
 
     def remove_all(self):
