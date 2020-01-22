@@ -39,7 +39,8 @@ class Delimiters:
             result.append(str(d))
         return Delimiters(",".join(result))
 
-    def _parse(self, delimiter: str) -> List["Delimiters.SingleDelimiter"]:
+    @staticmethod
+    def _parse(delimiter: str) -> List["Delimiters.SingleDelimiter"]:
         re_delimiter = re.findall(r"([<>!=]+)\s*([0-9a-zA-Z.\-_\*]+)", delimiter)
         return [
             Delimiters.SingleDelimiter(operator=val[0], version=val[1])

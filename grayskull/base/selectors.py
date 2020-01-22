@@ -1,6 +1,6 @@
 import re
 from dataclasses import astuple, dataclass
-from typing import List, Union
+from typing import Iterator, List, Union
 
 ALL_SELECTORS = (
     "x86",
@@ -46,7 +46,7 @@ class Selectors:
         def __str__(self):
             return f"{self.name.strip()}{self.operator.strip()}{self.value.strip()}"
 
-        def __eq__(self, other: Union[str, "SingleSelector"]) -> bool:
+        def __eq__(self, other: Union[str, "Selectors.SingleSelector"]) -> bool:
             if isinstance(other, str):
                 return str(self) == other
             return astuple(self) == astuple(other)
@@ -54,15 +54,18 @@ class Selectors:
     def __init__(self, selectors: str):
         self._selectors = self._parse(selectors)
 
-    def __getitem__(self, item: int) -> "SingleSelector":
+    def __getitem__(self, item: int) -> "Selectors.SingleSelector":
         return self._selectors[item]
+
+    def __iter__(self) -> Iterator["Selectors.SingleSelector"]:
+        return iter(self._selectors)
 
     def __repr__(self) -> str:
         all_sel = " ".join([str(sel) for sel in self])
         return f"[{all_sel}]"
 
     @staticmethod
-    def _parse_bracket(selector: str) -> List["SingleSelector"]:
+    def _parse_bracket(selector: str) -> List["Selectors.SingleSelector"]:
         list_brackets = [
             ("(", re.compile(r"(.*)(\()(.*)", re.DOTALL)),
             (")", re.compile(r"(.*)(\))(.*)", re.DOTALL)),
@@ -87,7 +90,7 @@ class Selectors:
         return selector.strip()
 
     @staticmethod
-    def _parse(str_selector: str) -> List["SingleSelector"]:
+    def _parse(str_selector: str) -> List["Selectors.SingleSelector"]:
         str_selector = Selectors._clean_selector(str_selector)
         selectors = str_selector.split()
         result = []
@@ -98,9 +101,8 @@ class Selectors:
             brackets = Selectors._parse_bracket(sel)
             if brackets:
                 result += brackets
-                continue
-
-            result.append(Selectors.SingleSelector(sel))
+            else:
+                result.append(Selectors.SingleSelector(sel))
         return result
 
     def remove_all(self):
