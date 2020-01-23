@@ -51,8 +51,11 @@ class Selectors:
                 return str(self) == other
             return astuple(self) == astuple(other)
 
-    def __init__(self, selectors: str):
+    def __init__(self, selectors: str = ""):
         self._selectors = self._parse(selectors)
+
+    def __len__(self) -> int:
+        return len(self._selectors)
 
     def __getitem__(self, item: int) -> "Selectors.SingleSelector":
         return self._selectors[item]
@@ -62,7 +65,16 @@ class Selectors:
 
     def __repr__(self) -> str:
         all_sel = " ".join([str(sel) for sel in self])
-        return f"[{all_sel}]"
+        return f"{all_sel}"
+
+    def __add__(self, other: Union[str, "Selectors"]) -> "Selectors":
+        selector = []
+        if str(self):
+            selector.append(str(self))
+        if str(other):
+            other = Selectors(other) if isinstance(other, str) else other
+            selector.append(str(other))
+        return Selectors(" or ".join(selector))
 
     @staticmethod
     def _parse_bracket(selector: str) -> List["Selectors.SingleSelector"]:

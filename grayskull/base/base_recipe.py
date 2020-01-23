@@ -5,11 +5,11 @@ from typing import Any, Dict, Iterator, Tuple, Union
 
 import ruamel
 
-from grayskull.base.sections import (
+from grayskull.base.extra import Extra
+from grayskull.base.old_section import (
     About,
     App,
     Build,
-    Extra,
     Outputs,
     Package,
     Requirements,

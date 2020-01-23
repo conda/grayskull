@@ -3,13 +3,19 @@ from grayskull.base.selectors import Selectors
 
 def test_selectors():
     sel = Selectors(" # [win and (py<36)]")
-    assert str(sel) == "[win and ( py<36 )]"
+    assert str(sel) == "win and ( py<36 )"
     assert sel[0] == "win"
     assert sel[0] == Selectors.SingleSelector("win")
     assert sel[3].name == "py"
     assert sel[3].operator == "<"
     assert sel[3].value == "36"
     assert sel[3] == "py<36"
+
+
+def test_add_selectors():
+    sel = Selectors("win")
+    assert str(Selectors("py2k") + sel) == "py2k or win"
+    assert str(sel + "py2k") == "win or py2k"
 
 
 def test_selectors_parse():

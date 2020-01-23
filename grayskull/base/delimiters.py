@@ -15,6 +15,9 @@ class Delimiters:
     def __init__(self, delimiter: str = ""):
         self._delimiters: List[Delimiters.SingleDelimiter] = self._parse(delimiter)
 
+    def __len__(self) -> int:
+        return len(self._delimiters)
+
     def __iter__(self) -> Iterator["Delimiters.SingleDelimiter"]:
         return iter(self._delimiters)
 
