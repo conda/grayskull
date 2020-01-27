@@ -7,18 +7,25 @@ from grayskull.base.selectors import Selectors
 class RecipeItem:
     def __init__(
         self,
-        value: str,
+        name: str,
         delimiter: Union[str, Delimiters] = "",
         selector: Union[str, Selectors] = "",
     ):
-        self._value: str = value.strip()
         self._delimiter: Delimiters = Delimiters()
         self._selector: Selectors = Selectors()
-        self.add_delimiter(delimiter)
+        self._name: str = name.strip().split()[0]
+        self.add_delimiter(delimiter if delimiter else name)
+        if self._has_selector(name):
+            name = name.strip().split()[1:]
+            name = name[name.index("#") :]
+            self.add_selector(" ".join(name))
         self.add_selector(selector)
 
+    def _has_selector(self, value: str) -> bool:
+        return " # [" in value
+
     def __repr__(self) -> str:
-        rep = f"{self.value}"
+        rep = f"{self.name}"
         if len(self.delimiter) > 0:
             rep += f" {self.delimiter}"
         if len(self.selector) > 0:
@@ -26,12 +33,8 @@ class RecipeItem:
         return rep.strip()
 
     @property
-    def value(self) -> str:
-        return self._value
-
-    @value.setter
-    def value(self, item: str):
-        self._value = item.strip()
+    def name(self) -> str:
+        return self._name
 
     def add_delimiter(self, value: Union[str, Delimiters]):
         self._delimiter += value
