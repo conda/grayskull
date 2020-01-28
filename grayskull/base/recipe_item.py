@@ -32,6 +32,9 @@ class RecipeItem:
             rep += f"  # [{self.selector}]"
         return rep.strip()
 
+    def __eq__(self, other) -> bool:
+        return str(self) == other
+
     @property
     def name(self) -> str:
         return self._name

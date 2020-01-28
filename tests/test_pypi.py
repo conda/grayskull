@@ -39,7 +39,7 @@ def test_extract_pypi_requirements(pypi_metadata):
 def test_get_pypi_metadata(pypi_metadata):
     recipe = PyPi(name="pytest", version="5.3.1")
     metadata = recipe._get_pypi_metadata()
-    assert metadata["package"].name == "pytest"
+    assert metadata["package"].section_name == "pytest"
     assert metadata["package"].version == "5.3.1"
     assert metadata["test"].imports == ["pytest"]
 
