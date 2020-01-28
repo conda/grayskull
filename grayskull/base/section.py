@@ -1,10 +1,9 @@
-from abc import ABC
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 
 from grayskull.base.recipe_item import RecipeItem
 
 
-class Section(ABC):
+class Section:
     ALL_SUBSECTIONS_ALLOWED = tuple()
 
     def __init__(
@@ -23,8 +22,8 @@ class Section(ABC):
     ):
         self._section_name = section_name.strip()
         self._value: Union[List["Section"], List[RecipeItem]] = []
-        self.add_items(items)
         self._populate_subsections(subsections)
+        self.add_items(items)
 
     def _populate_subsections(self, subsections: Union[List, Dict]):
         if not subsections:
@@ -36,9 +35,9 @@ class Section(ABC):
             for key, value in subsections.items():
                 self.add_subsection(key, value)
 
-    # def __repr__(self) -> str:
-    #     elements = ", ".join(str(v) for v in self._value)
-    #     return f"{self._section_name}({elements})"
+    def __repr__(self) -> str:
+        elements = ", ".join(str(v) for v in self._value)
+        return f"{self._section_name}({elements})"
 
     @property
     def section_name(self) -> str:
@@ -64,6 +63,10 @@ class Section(ABC):
         self.add_subsection(item)
         return self.__getitem__(item)
 
+    def __setitem__(self, key, value):
+
+        self.__getitem__(key).value = value
+
     def __getattr__(self, item: str):
         return self[item]
 
@@ -73,10 +76,21 @@ class Section(ABC):
         return self._value == value or value == [str(v) for v in self._value]
 
     @property
-    def value(self,) -> Union[RecipeItem, List[RecipeItem], "Section", List["Section"]]:
+    def value(self) -> Union[RecipeItem, List[RecipeItem], "Section", List["Section"]]:
         if len(self._value) == 1:
             return self._value[0]
         return self._value
+
+    @value.setter
+    def value(self, val: Any):
+        if not isinstance(val, list):
+            val = [val]
+        self._value = []
+        for v in val:
+            if isinstance(v, str):
+                self._value.append(RecipeItem(v))
+            else:
+                self._value.append(v)
 
     def add_subsection(
         self,
@@ -167,8 +181,9 @@ class Source(Section):
     )
 
     def __init__(self, url: str, **kwargs):
+        kwargs["url"] = url
         super(Source, self).__init__(
-            section_name=__name__.lower(), subsections=kwargs.update({"url": url})
+            section_name=Source.__name__.lower(), subsections=kwargs
         )
 
 
@@ -211,7 +226,10 @@ class Build(Section):
         "merge_build_host",
     )
 
-    def __init__(self, number=0, **kwargs):
-        super(Build, self).__init__(
-            section_name=__name__.lower(), subsections=kwargs.update({"number": number})
-        )
+    def __init__(self, number: int = 0, **kwargs):
+        self._number = number
+        kwargs["number"] = number
+        super(Build, self).__init__(section_name=__name__.lower(), subsections=kwargs)
+
+    def bump_build_number(self):
+        self.number.value += 1
