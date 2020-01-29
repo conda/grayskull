@@ -1,5 +1,7 @@
 from typing import Any, Dict, List, Union
 
+import ruamel.yaml
+
 from grayskull.base.recipe_item import RecipeItem
 
 
@@ -20,6 +22,8 @@ class Section:
         ] = None,
         subsections: Union[List, Dict, None] = None,
     ):
+        self._yaml = ruamel.yaml.comments.CommentedMap()
+        self._yaml[section_name.strip()] = None
         self._section_name = section_name.strip()
         self._value: Union[List["Section"], List[RecipeItem]] = []
         self._populate_subsections(subsections)
@@ -229,7 +233,32 @@ class Build(Section):
     def __init__(self, number: int = 0, **kwargs):
         self._number = number
         kwargs["number"] = number
-        super(Build, self).__init__(section_name=__name__.lower(), subsections=kwargs)
+        super(Build, self).__init__(
+            section_name=Build.__name__.lower(), subsections=kwargs
+        )
 
     def bump_build_number(self):
         self.number.value += 1
+
+
+class Outputs(Section):
+    ALL_SUBSECTIONS_ALLOWED = (
+        "name",
+        "version",
+        "number",
+        "script",
+        "script_interpreter",
+        "build",
+        "requirements",
+        "test",
+        "about",
+        "extra",
+        "files",
+        "type",
+        "run_exports",
+    )
+
+    def __init__(self, **kwargs):
+        super(Outputs, self).__init__(
+            section_name=Outputs.__name__.lower(), subsections=kwargs
+        )
