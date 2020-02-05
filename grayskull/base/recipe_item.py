@@ -62,8 +62,13 @@ class RecipeItem:
 
     @value.setter
     def value(self, value: Union[str, int]):
-        self.__yaml()[self.__pos] = self._remove_selector(value)
-        selector = self._extract_selector(value)
+        if isinstance(value, int):
+            self.__yaml()[self.__pos] = value
+        elif value:
+            self.__yaml()[self.__pos] = self._remove_selector(value)
+        else:
+            self.__yaml()[self.__pos] = ""
+        selector = self._extract_selector(str(value))
         if selector:
             self.__yaml().yaml_add_eol_comment(f"[{selector}]", self.__pos, 0)
 

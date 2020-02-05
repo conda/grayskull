@@ -19,18 +19,21 @@ class Section:
             self.__parent = weakref.ref(parent_yaml)
 
     @property
-    def children(self) -> List:
+    def children(self) -> Union[List, RecipeItem, "Section"]:
         parent = self._get_parent()
+        result = []
         if isinstance(self.yaml_obj, dict):
             parent[self.section_name] = CommentedMap(self.yaml_obj)
         if isinstance(self.yaml_obj, CommentedMap):
-            return [Section(name, self.yaml_obj) for name in self.yaml_obj.keys()]
-        if isinstance(self.yaml_obj, CommentedSeq):
-            return [RecipeItem(pos, self.yaml_obj) for pos in range(len(self.yaml_obj))]
-        if self.yaml_obj is not None:
+            result = [Section(name, self.yaml_obj) for name in self.yaml_obj.keys()]
+        elif isinstance(self.yaml_obj, CommentedSeq):
+            result = [
+                RecipeItem(pos, self.yaml_obj) for pos in range(len(self.yaml_obj))
+            ]
+        elif self.yaml_obj is not None:
             parent[self.section_name] = CommentedSeq([self.yaml_obj])
-            return [RecipeItem(0, parent[self.section_name])]
-        return []
+            result = [RecipeItem(0, parent[self.section_name])]
+        return result
 
     @property
     def section_name(self) -> str:
@@ -72,14 +75,20 @@ class Section:
         return iter(self.yaml_obj) if self.yaml_obj else iter([])
 
     def __getitem__(self, item: Union[str, int]) -> Union["Section", RecipeItem, None]:
-        if not self.children:
-            raise ValueError(f"Key {item} does not exist.")
         if isinstance(item, str):
             for child in self.children:
                 if child.section_name == item:
                     return child
-            raise ValueError(f"Key {item} does not exist.")
+            return self.add_subsection(item)
         return self.children[item]
+
+    def __setitem__(self, key, value):
+        if key not in self.yaml_obj:
+            self.add_subsection(key)
+        if isinstance(value, (str, int)):
+            self[key].add_item([value])
+        elif isinstance(value, dict):
+            self[key].add_subsection(value)
 
     def __getattr__(self, item: str) -> Union["Section", RecipeItem, None]:
         return self.__getitem__(item)
@@ -93,9 +102,9 @@ class Section:
         :return: Return the subsection added.
         """
         if not isinstance(self.yaml_obj, CommentedMap):
-            self.__parent[self.section_name] = CommentedMap()
+            self._get_parent()[self.section_name] = CommentedMap()
         if isinstance(section, Section):
-            self.yaml_obj[section.section_name] = section.yaml_obj
+            self._get_parent()[section.section_name] = section.yaml_obj
         return Section(section, parent_yaml=self.yaml_obj)
 
     def add_item(self, item: Union[str, int]) -> RecipeItem:
@@ -105,6 +114,6 @@ class Section:
         :return: Return the item added to the current section
         """
         if not isinstance(self.yaml_obj, CommentedSeq):
-            self.__parent[self.section_name] = CommentedSeq()
-        self.__parent[self.section_name].append(item)
+            self._get_parent()[self.section_name] = CommentedSeq()
+        self._get_parent()[self.section_name].append(item)
         return RecipeItem(len(self) - 1, self.yaml_obj)
