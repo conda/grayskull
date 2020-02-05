@@ -1,5 +1,5 @@
 import weakref
-from typing import Any, Iterator, Optional, Union
+from typing import Iterator, List, Optional, Union
 
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 
@@ -19,18 +19,35 @@ class Section:
             self.__parent = weakref.ref(parent_yaml)
 
     @property
+    def children(self) -> List:
+        parent = self._get_parent()
+        if isinstance(self.yaml_obj, dict):
+            parent[self.section_name] = CommentedMap(self.yaml_obj)
+        if isinstance(self.yaml_obj, CommentedMap):
+            return [Section(name, self.yaml_obj) for name in self.yaml_obj.keys()]
+        if isinstance(self.yaml_obj, CommentedSeq):
+            return [RecipeItem(pos, self.yaml_obj) for pos in range(len(self.yaml_obj))]
+        if self.yaml_obj is not None:
+            parent[self.section_name] = CommentedSeq([self.yaml_obj])
+            return [RecipeItem(0, parent[self.section_name])]
+        return []
+
+    @property
     def section_name(self) -> str:
         return self._section_name
+
+    def _get_parent(self):
+        if isinstance(self.__parent, CommentedMap):
+            return self.__parent
+        return self.__parent()
 
     @property
     def yaml_obj(self) -> Union[CommentedMap, CommentedSeq]:
         """Get of the yaml object which is being handled for this section.
+        Please do not modify this object directly unless you know what you are
+        doing.
         """
-        parent = (
-            self.__parent
-            if isinstance(self.__parent, CommentedMap)
-            else self.__parent()
-        )
+        parent = self._get_parent()
         return parent[self.section_name]
 
     def __hash__(self) -> int:
@@ -38,10 +55,10 @@ class Section:
 
     def __repr__(self) -> str:
         val = ""
-        if isinstance(self.yaml_obj, CommentedSeq):
-            val = f"items={self.yaml_obj}"
-        elif isinstance(self.yaml_obj, CommentedMap):
+        if isinstance(self.yaml_obj, (CommentedMap, dict)):
             val = f"subsection={self.yaml_obj.keys()}"
+        elif self.yaml_obj is not None:
+            val = f"items={self.yaml_obj}"
         if val:
             val = f", {val}"
         return f"Section(section_name={self._section_name}{val})"
@@ -55,14 +72,14 @@ class Section:
         return iter(self.yaml_obj) if self.yaml_obj else iter([])
 
     def __getitem__(self, item: Union[str, int]) -> Union["Section", RecipeItem, None]:
-        if isinstance(self.yaml_obj, CommentedMap):
-            return self.yaml_obj.get(item, None)
-        if isinstance(self.yaml_obj, CommentedSeq) and isinstance(item, int):
-            return self.yaml_obj[item]
-        return None
-
-    def __setitem__(self, key: Union[str, int], value: Any):
-        self.yaml_obj[key] = value
+        if not self.children:
+            raise ValueError(f"Key {item} does not exist.")
+        if isinstance(item, str):
+            for child in self.children:
+                if child.section_name == item:
+                    return child
+            raise ValueError(f"Key {item} does not exist.")
+        return self.children[item]
 
     def __getattr__(self, item: str) -> Union["Section", RecipeItem, None]:
         return self.__getitem__(item)

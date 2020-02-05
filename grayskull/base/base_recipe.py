@@ -3,19 +3,8 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Dict, Iterator, Tuple, Union
 
-import ruamel
-
-from grayskull.base.extra import Extra
-from grayskull.base.old_section import (
-    About,
-    App,
-    Build,
-    Outputs,
-    Package,
-    Requirements,
-    Source,
-    Test,
-)
+from ruamel.yaml import YAML
+from ruamel.yaml.comments import CommentedMap
 
 
 class Grayskull(ABC):
@@ -32,17 +21,9 @@ class Grayskull(ABC):
     )
 
     def __init__(self, name=None, version=None):
-        self._package = Package(name=name, version=version)
-        self._source = Source()
-        self._build = Build(number=0)
-        self._outputs = Outputs()
-        self._requirements = Requirements()
-        self._app = App()
-        self._test = Test()
-        self._about = About()
-        self._extra = Extra()
-        self._extra.add_git_current_user()
-        self._extra_jinja_variables = {}
+        yml = YAML()
+        yml.indent(mapping=2, sequence=4, offset=2)
+        self._yaml = CommentedMap()
         self.refresh_all_recipe()
         super(Grayskull, self).__init__()
 
@@ -53,78 +34,6 @@ class Grayskull(ABC):
     @abstractmethod
     def refresh_section(self, section: str = "", **kwargs):
         pass
-
-    @property
-    def extra(self) -> Extra:
-        return self._extra
-
-    @extra.setter
-    def extra(self, value):
-        self._extra = Extra(**value)
-
-    @property
-    def package(self) -> Package:
-        return self._package
-
-    @package.setter
-    def package(self, value):
-        self._package = Package(**value)
-
-    @property
-    def source(self) -> Source:
-        return self._source
-
-    @source.setter
-    def source(self, value):
-        self._source = Source(**value)
-
-    @property
-    def build(self) -> Build:
-        return self._build
-
-    @build.setter
-    def build(self, value):
-        self._build = Build(**value)
-
-    @property
-    def outputs(self) -> Outputs:
-        return self._outputs
-
-    @outputs.setter
-    def outputs(self, value):
-        self._outputs = Outputs(**value)
-
-    @property
-    def requirements(self) -> Requirements:
-        return self._requirements
-
-    @requirements.setter
-    def requirements(self, value):
-        self._requirements = Requirements(**value)
-
-    @property
-    def app(self) -> App:
-        return self._app
-
-    @app.setter
-    def app(self, value):
-        self._app = App(**value)
-
-    @property
-    def test(self) -> Test:
-        return self._test
-
-    @test.setter
-    def test(self, value):
-        self._test = Test(**value)
-
-    @property
-    def about(self) -> About:
-        return self._about
-
-    @about.setter
-    def about(self, value):
-        self._about = About(**value)
 
     def __getitem__(self, item) -> Any:
         if item in self.ALL_SECTIONS:
@@ -188,7 +97,7 @@ class Grayskull(ABC):
         for section in self.ALL_SECTIONS:
             if section not in body_dict:
                 continue
-            yaml = ruamel.yaml.YAML()
+            yaml = YAML()
             yaml_value = yaml.dump({section: body_dict[section]},)
             body += f"{yaml_value}\n"
         return f"{self._get_jinja_declaration()}\n{body}"
