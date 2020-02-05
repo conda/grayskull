@@ -10,9 +10,13 @@ class RecipeItem:
     def __init__(self, position: int, yaml: CommentedSeq):
         self.__yaml = weakref.ref(yaml)
         self.__pos = position
+        self.value = self.__yaml()[self.__pos]
 
     def __repr__(self) -> str:
-        return f"RecipeItem(position={self.__pos}, yaml={self.__yaml()}"
+        return (
+            f"RecipeItem(position={self.__pos},"
+            f" value={self.value}, selector={self.selector})"
+        )
 
     def __str__(self) -> str:
         val = f"{self.__yaml()[self.__pos]}"
@@ -21,8 +25,18 @@ class RecipeItem:
             val += f"  {comment.value}"
         return val
 
+    def __eq__(self, other: Union[str, int, "RecipeItem"]):
+        if isinstance(other, RecipeItem):
+            return self.value == other.value and self.selector == other.selector
+        return str(self) == str(other)
+
     @staticmethod
     def _extract_selector(item: str) -> str:
+        """Extract the selectors from the string received.
+
+        :param item: String to be parsed
+        :return: It will return just the content of the selector
+        """
         selector = re.search(r"\#\s+\[(.*)\]\s*$", item, re.DOTALL)
         if selector:
             return selector.groups()[0].strip()
@@ -30,6 +44,12 @@ class RecipeItem:
 
     @staticmethod
     def _remove_selector(item: str) -> str:
+        """Remove the special characters which identifies the selector, if they
+        are not present it will just return the same string as received.
+
+        :param item: String to be removed the selector
+        :return: New string without the selectors representation
+        """
         return re.sub(r"\#\s+\[(.*)\]\s*$", "", item).strip()
 
     def _get_comment_token(self) -> Optional[CommentToken]:
@@ -45,10 +65,15 @@ class RecipeItem:
         self.__yaml()[self.__pos] = self._remove_selector(value)
         selector = self._extract_selector(value)
         if selector:
-            self.__yaml().yaml_add_eol_comment(selector, self.__pos, 0)
+            self.__yaml().yaml_add_eol_comment(f"[{selector}]", self.__pos, 0)
 
     @property
     def selector(self) -> Optional[str]:
+        """Return just the content of the selector, without the special characters
+        such as # and [ ]
+
+        :return: Return the selector
+        """
         comment = self._get_comment_token()
         if comment:
             return self._extract_selector(self._get_comment_token().value)
@@ -56,6 +81,11 @@ class RecipeItem:
 
     @selector.setter
     def selector(self, value: str):
+        """Set the selector for this specific item. It is not necessary to
+        add the # and [ or ]. Please add just the values.
+
+        :param value: string values which represent the content of the selector
+        """
         comment = self._get_comment_token()
         sel = self._extract_selector(value)
         if not sel:

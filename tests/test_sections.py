@@ -1,37 +1,33 @@
+from ruamel.yaml.comments import CommentedMap
+
 from grayskull.base.section import Section
 
 
 def test_section():
-    sec = Section("run", ["pytest", "pkg2"])
-    assert str(sec) == "run(pytest, pkg2)"
-    assert sec.as_dict() == {"run": ["pytest", "pkg2"]}
-    assert sec == ["pytest", "pkg2"]
-
-    sec = Section("requirements")
-    sec.add_subsection("run", ["pytest <5.2.0", "pkg2"])
-    sec.add_subsection("host", ["pkg2"])
-    assert str(sec) == "requirements(run(pytest <5.2.0, pkg2), host(pkg2))"
-    assert sec.run == ["pytest <5.2.0", "pkg2"]
-    assert sec.host == ["pkg2"]
-
-    assert sec.as_dict() == {
-        "requirements": {"run": ["pytest <5.2.0", "pkg2"], "host": ["pkg2"]}
-    }
+    commented_map = CommentedMap({"section1": {"subsection1": {"subsection2": "item"}}})
+    sec = Section("MAIN_SECTION", parent_yaml=commented_map)
+    assert sec.yaml_obj == commented_map.update({"MAIN_SECTION": None})
 
 
-def test_add_subsection_items():
-    sec = Section("requirements")
-    sec.add_subsection("run")
-    assert sec.get_subsection("run").section_name == "run"
+def test_add_subsection():
+    sec = Section("MAIN_SEC")
+    sec.add_subsection("SUBSECTION")
+    assert "SUBSECTION" in sec
+    assert sec.section_name == "MAIN_SEC"
 
-    run_sec = sec.get_subsection("run")
-    run_sec.add_items(["pytest", "python <3.8", "pkg3 <1.0  # [win]"])
-    assert run_sec.value[0].section_name == "pytest"
-    assert run_sec.value[1].section_name == "python"
-    assert str(run_sec.value[1].delimiter) == "<3.8"
-    assert str(run_sec.value[1]) == "python <3.8"
 
-    assert run_sec.value[2].section_name == "pkg3"
-    assert str(run_sec.value[2].delimiter) == "<1.0"
-    assert str(run_sec.value[2].selector) == "win"
-    assert str(run_sec.value[2]) == "pkg3 <1.0  # [win]"
+def test_add_item():
+    sec = Section("MAIN_SEC")
+    sec.add_item("pkg1")
+    item2 = sec.add_item("pkg2  # [win]")
+    item3 = sec.add_item("pkg3")
+    assert "pkg1" in sec
+    assert "pkg2" in sec
+    assert "pkg3" in sec
+
+    assert item2.value == "pkg2"
+    assert item2.selector == "win"
+    assert str(item2) == "pkg2  # [win]"
+    assert item3.value == "pkg3"
+    assert item3.selector == ""
+    assert str(item3) == "pkg3"
