@@ -1,62 +1,67 @@
-from typing import Union
+import re
+import weakref
+from typing import Optional, Union
 
-from grayskull.base.delimiters import Delimiters
-from grayskull.base.selectors import Selectors
+from ruamel.yaml import CommentToken
+from ruamel.yaml.comments import CommentedSeq
 
 
 class RecipeItem:
-    def __init__(
-        self,
-        name: str,
-        delimiter: Union[str, Delimiters] = "",
-        selector: Union[str, Selectors] = "",
-    ):
-        self._delimiter: Delimiters = Delimiters()
-        self._selector: Selectors = Selectors()
-        self._name: str = name.strip().split()[0]
-        self.add_delimiter(delimiter if delimiter else name)
-        if self._has_selector(name):
-            name = name.strip().split()[1:]
-            name = name[name.index("#") :]
-            self.add_selector(" ".join(name))
-        self.add_selector(selector)
-
-    def _has_selector(self, value: str) -> bool:
-        return " # [" in value
+    def __init__(self, position: int, yaml: CommentedSeq):
+        self.__yaml = weakref.ref(yaml)
+        self.__pos = position
 
     def __repr__(self) -> str:
-        rep = f"{self.name}"
-        if len(self.delimiter) > 0:
-            rep += f" {self.delimiter}"
-        if len(self.selector) > 0:
-            rep += f"  # [{self.selector}]"
-        return rep.strip()
+        return f"RecipeItem(position={self.__pos}, yaml={self.__yaml()}"
 
-    def __eq__(self, other) -> bool:
-        return str(self) == other
+    def __str__(self) -> str:
+        val = f"{self.__yaml()[self.__pos]}"
+        comment = self._get_comment_token()
+        if comment:
+            val += f"  {comment.value}"
+        return val
 
-    @property
-    def name(self) -> str:
-        return self._name
+    @staticmethod
+    def _extract_selector(item: str) -> str:
+        selector = re.search(r"\#\s+\[(.*)\]\s*$", item, re.DOTALL)
+        if selector:
+            return selector.groups()[0].strip()
+        return ""
 
-    def add_delimiter(self, value: Union[str, Delimiters]):
-        self._delimiter += value
+    @staticmethod
+    def _remove_selector(item: str) -> str:
+        return re.sub(r"\#\s+\[(.*)\]\s*$", "", item).strip()
 
-    def add_selector(self, value: Union[str, Delimiters]):
-        self._selector += value
-
-    @property
-    def delimiter(self) -> Delimiters:
-        return self._delimiter
-
-    @delimiter.setter
-    def delimiter(self, value: Union[str, Delimiters]):
-        self._delimiter = Delimiters(value) if isinstance(value, str) else value
+    def _get_comment_token(self) -> Optional[CommentToken]:
+        all_comment = self.__yaml().ca.items.get(self.__pos, None)
+        return all_comment[0] if all_comment else None
 
     @property
-    def selector(self) -> Selectors:
-        return self._selector
+    def value(self) -> Union[str, int, None]:
+        return self.__yaml()[self.__pos]
+
+    @value.setter
+    def value(self, value: Union[str, int]):
+        self.__yaml()[self.__pos] = self._remove_selector(value)
+        selector = self._extract_selector(value)
+        if selector:
+            self.__yaml().yaml_add_eol_comment(selector, self.__pos, 0)
+
+    @property
+    def selector(self) -> Optional[str]:
+        comment = self._get_comment_token()
+        if comment:
+            return self._extract_selector(self._get_comment_token().value)
+        return ""
 
     @selector.setter
-    def selector(self, value: Union[str, Selectors]):
-        self._selector = Selectors(value) if isinstance(value, str) else value
+    def selector(self, value: str):
+        comment = self._get_comment_token()
+        sel = self._extract_selector(value)
+        if not sel:
+            sel = self._remove_selector(value)
+        sel = f"[{sel}]"
+        if comment:
+            comment.value = f"# {sel}"
+        else:
+            self.__yaml().yaml_add_eol_comment(sel, self.__pos, 0)

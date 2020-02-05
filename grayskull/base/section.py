@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Union
 
-import ruamel.yaml
+from ruamel.yaml.comments import CommentedMap
 
 from grayskull.base.recipe_item import RecipeItem
 
@@ -21,10 +21,9 @@ class Section:
             None,
         ] = None,
         subsections: Union[List, Dict, None] = None,
+        yaml: CommentedMap = None,
     ):
-        self._yaml = ruamel.yaml.comments.CommentedMap()
-        self._yaml[section_name.strip()] = None
-        self._section_name = section_name.strip()
+        self.__yaml = yaml if yaml else CommentedMap({section_name.strip(): ""})
         self._value: Union[List["Section"], List[RecipeItem]] = []
         self._populate_subsections(subsections)
         self.add_items(items)
