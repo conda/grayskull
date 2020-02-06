@@ -6,7 +6,7 @@ from typing import Dict, List, Optional, Tuple
 import requests
 from requests import HTTPError
 
-from grayskull.base.base_recipe import Grayskull
+from grayskull.base.base_recipe import AbstractRecipeModel
 from grayskull.base.old_section import About, Package, Requirements, Source, Test
 
 log = logging.getLogger(__name__)
@@ -14,7 +14,7 @@ PyVer = namedtuple("PyVer", ["major", "minor"])
 SUPPORTED_PY = sorted([PyVer(2, 7), PyVer(3, 6), PyVer(3, 7), PyVer(3, 8)])
 
 
-class PyPi(Grayskull):
+class PyPi(AbstractRecipeModel):
     URL_PYPI_METADATA = "https://pypi.org/pypi/{pkg_name}/json"
 
     def __init__(self, name=None, version=None, force_setup=False):

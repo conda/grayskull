@@ -1,8 +1,8 @@
-from grayskull.base.base_recipe import Grayskull
+from grayskull.base.base_recipe import AbstractRecipeModel
 from grayskull.base.extra import Extra
 
 
-class EmptyGray(Grayskull):
+class EmptyGray(AbstractRecipeModel):
     def refresh_section(self, section="", **kwargs):
         if section == "package":
             self._name = "PkgName"

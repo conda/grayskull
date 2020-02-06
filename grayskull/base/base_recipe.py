@@ -8,7 +8,7 @@ from ruamel.yaml.comments import CommentedMap
 from grayskull.base.section import Section
 
 
-class Grayskull(ABC):
+class AbstractRecipeModel(ABC):
     ALL_SECTIONS = (
         "package",
         "source",
@@ -31,7 +31,7 @@ class Grayskull(ABC):
         for section in self.ALL_SECTIONS:
             Section(section, self._yaml)
         self.refresh_all_recipe()
-        super(Grayskull, self).__init__()
+        super(AbstractRecipeModel, self).__init__()
 
     def refresh_all_recipe(self):
         for section in self.ALL_SECTIONS:
