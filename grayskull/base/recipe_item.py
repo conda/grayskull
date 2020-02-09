@@ -1,15 +1,17 @@
 import re
 import weakref
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 from ruamel.yaml import CommentToken
 from ruamel.yaml.comments import CommentedSeq
 
 
 class RecipeItem:
-    def __init__(self, position: int, yaml: CommentedSeq):
+    def __init__(self, position: int, yaml: CommentedSeq, item: Any = None):
         self.__yaml = weakref.ref(yaml)
         self.__pos = position
+        if position >= len(yaml):
+            yaml.append(item)
         self.value = self.__yaml()[self.__pos]
 
     def __repr__(self) -> str:
@@ -25,7 +27,7 @@ class RecipeItem:
             val += f"  {comment.value}"
         return val
 
-    def __eq__(self, other: Union[str, int, "RecipeItem"]):
+    def __eq__(self, other: Union[str, int, "RecipeItem"]) -> bool:
         if isinstance(other, RecipeItem):
             return self.value == other.value and self.selector == other.selector
         return str(self) == str(other) or str(self.value) == str(other)

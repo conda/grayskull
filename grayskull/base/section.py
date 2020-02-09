@@ -26,6 +26,7 @@ class Section:
             result = [Section(name, self.yaml_obj) for name in self.yaml_obj.keys()]
         elif isinstance(self.yaml_obj, dict):
             parent[self.section_name] = CommentedMap(self.yaml_obj)
+            result = [Section(name, self.yaml_obj) for name in self.yaml_obj.keys()]
         elif isinstance(self.yaml_obj, CommentedSeq):
             result = [
                 RecipeItem(pos, self.yaml_obj) for pos in range(len(self.yaml_obj))
@@ -89,6 +90,8 @@ class Section:
             return other.yaml_obj == self.yaml_obj
         if len(self.values) == 1:
             return self.values[0] == other
+        if isinstance(other, str):
+            return self.section_name == other
         return other == self.values
 
     def __iter__(self) -> Iterator:
@@ -101,7 +104,7 @@ class Section:
             for child in self.values:
                 if child.section_name == item:
                     return child
-            raise KeyError(f"Key {item} was not set.")
+            return Section(item, parent_yaml=self.yaml_obj)
         return self.values[item]
 
     def __setitem__(self, key: str, value: Any):
@@ -109,6 +112,8 @@ class Section:
             self.add_subsection(key)
         if isinstance(value, (str, int)):
             self.yaml_obj[key] = CommentedSeq([value])
+        elif isinstance(value, dict):
+            Section(key, self.yaml_obj)
 
     def add_subsection(self, section: Union[str, "Section"]):
         """Add a subsection to the current Section. If the current section has a
@@ -130,4 +135,8 @@ class Section:
         """
         if not isinstance(self.yaml_obj, CommentedSeq):
             self._get_parent()[self.section_name] = CommentedSeq()
-        self._get_parent()[self.section_name].append(item)
+        RecipeItem(len(self.yaml_obj), self.yaml_obj, item)
+
+    def add_items(self, items: List):
+        for item in items:
+            self.add_item(item)

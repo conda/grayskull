@@ -19,18 +19,11 @@ def test_add_subsection():
 def test_add_item():
     sec = Section("MAIN_SEC")
     sec.add_item("pkg1")
-    item2 = sec.add_item("pkg2  # [win]")
-    item3 = sec.add_item("pkg3")
+    sec.add_item("pkg2  # [win]")
+    sec.add_item("pkg3")
     assert "pkg1" in sec
     assert "pkg2" in sec
     assert "pkg3" in sec
-
-    assert item2.value == "pkg2"
-    assert item2.selector == "win"
-    assert str(item2) == "pkg2  # [win]"
-    assert item3.value == "pkg3"
-    assert item3.selector == ""
-    assert str(item3) == "pkg3"
 
 
 def test_section_children():
