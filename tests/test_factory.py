@@ -1,7 +1,7 @@
 import pytest
 from pip._internal.models.index import PyPI
 
-from grayskull.base.base_recipe import Grayskull
+from grayskull.base.base_recipe import AbstractRecipeModel
 from grayskull.base.factory import GrayskullFactory
 
 
@@ -11,5 +11,5 @@ from grayskull.base.factory import GrayskullFactory
 def test_factory(repo_type, pkg_name, version, obj_type):
     assert isinstance(
         GrayskullFactory.create_recipe(repo_type, pkg_name, version),
-        (Grayskull, obj_type),
+        (AbstractRecipeModel, obj_type),
     )

@@ -1,25 +1,21 @@
+import re
 from abc import ABC, abstractmethod
-from dataclasses import asdict
+from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Iterator, Tuple, Union
+from typing import Any, Optional, Union
 
-import yaml
+from ruamel.yaml import YAML, CommentToken
+from ruamel.yaml.comments import CommentedMap
+from ruamel.yaml.error import CommentMark
 
-from grayskull.base import (
-    About,
-    App,
-    Build,
-    Extra,
-    GrayDumper,
-    Outputs,
-    Package,
-    Requirements,
-    Source,
-    Test,
-)
+from grayskull.base.recipe_item import RecipeItem
+from grayskull.base.section import Section
+
+yaml = YAML(typ="jinja2")
+yaml.indent(mapping=2, sequence=4, offset=2)
 
 
-class Grayskull(ABC):
+class AbstractRecipeModel(ABC):
     ALL_SECTIONS = (
         "package",
         "source",
@@ -31,219 +27,162 @@ class Grayskull(ABC):
         "about",
         "extra",
     )
+    re_jinja_var = re.compile(
+        r"^[{#]%\s*set\s+([a-zA-Z\._0-9\-]+)\s*=\s*(.*)\s*%}[\\n]*$",
+        re.IGNORECASE | re.MULTILINE,
+    )
 
-    def __init__(self, name=None, version=None):
-        self._package = Package(name=name, version=version)
-        self._source = Source()
-        self._build = Build(number=0)
-        self._outputs = Outputs()
-        self._requirements = Requirements()
-        self._app = App()
-        self._test = Test()
-        self._about = About()
-        self._extra = Extra()
-        self._extra.add_git_current_user()
-        self._extra_jinja_variables = {}
-        self.refresh_all_recipe()
-        super(Grayskull, self).__init__()
+    def __init__(self, name=None, version=None, load_recipe: str = ""):
+        if load_recipe:
+            with open(load_recipe, "r") as yaml_file:
+                self._yaml = yaml.load(yaml_file)
+        else:
+            self._yaml = yaml.load(
+                f'{{% set name = "{name}" %}}\n\n\n'
+                "package:\n    name: {{ name|lower }}\n"
+            )
+            for section in self.ALL_SECTIONS[1:]:
+                Section(section, self._yaml)
+            if version:
+                self.add_jinja_var("version", version)
+                self["package"]["version"] = "<{ version }}"
+            self.update_all_recipe()
+        super(AbstractRecipeModel, self).__init__()
 
-    def refresh_all_recipe(self):
+    def __repr__(self) -> str:
+        name = self.get_var_content(self["package"]["name"].values[0])
+        version = self.get_var_content(self["package"]["version"].values[0])
+        return f"{self.__class__.__name__}(name={name}, version={version})"
+
+    def get_var_content(self, item: RecipeItem) -> str:
+        re_var = re.match(
+            r"^\s*[?:'\"]?\s*[{<]{\s*(\w+).*}}\s*[?:'\"]?\s*$",
+            item.value,
+            re.DOTALL | re.MULTILINE,
+        )
+        return self.get_jinja_var(re_var.groups()[0]) if re_var else item.value
+
+    def set_var_content(self, item: RecipeItem, value: Any):
+        re_var = re.match(
+            r"^\s*[?:'\"]?\s*[{<]{\s*(\w+).*}}\s*[?:'\"]?\s*$",
+            item.value,
+            re.DOTALL | re.MULTILINE,
+        )
+        if re_var:
+            self.set_jinja_var(re_var.groups()[0], value)
+        else:
+            item.value = value
+
+    def add_jinja_var(self, name: str, value: Any):
+        if self._yaml.ca.comment:
+            if self._yaml.ca.comment[1]:
+                self._yaml.ca.comment[1][-1].value = re.sub(
+                    r"[\n]+$", "\n", self._yaml.ca.comment[1][-1].value, re.MULTILINE
+                )
+        else:
+            self._yaml.ca.comment = [None, []]
+
+        self._yaml.ca.comment[1] += [
+            CommentToken(
+                f'#% set {name} = "{value}" %}}\n\n\n',
+                start_mark=CommentMark(0),
+                end_mark=CommentMark(0),
+            )
+        ]
+
+    def update_all_recipe(self):
         for section in self.ALL_SECTIONS:
             self.refresh_section(section)
+
+    def get_jinja_var(self, key: str) -> str:
+        if not self._yaml.ca.comment and not self._yaml.ca.comment[1]:
+            raise ValueError(f"Key {key} does not exist")
+
+        comment = self.__find_commented_token_jinja_var(key)
+        if comment.value:
+            value = self.re_jinja_var.match(comment.value)
+            value = re.sub(r"^\s*[\'\"]", "", value.groups()[1].strip())
+            return re.sub(r"[\'\"]\s*$", "", value)
+        raise ValueError(f"Key {key} does not exist")
+
+    def __find_commented_token_jinja_var(self, key: str) -> Optional[CommentToken]:
+        for comment in self._yaml.ca.comment[1]:
+            match_jinja = AbstractRecipeModel.re_jinja_var.match(comment.value)
+            if match_jinja and match_jinja.groups()[0] == key:
+                return comment
+        return None
+
+    def set_jinja_var(self, key: str, value: Any):
+        if not self._yaml.ca.comment and not self._yaml.ca.comment[1]:
+            self.add_jinja_var(key, value)
+            return
+        comment = self.__find_commented_token_jinja_var(key)
+        if comment:
+            comment.value = f"#% set {key} = {value} %}}"
+        else:
+            self.add_jinja_var(key, value)
 
     @abstractmethod
     def refresh_section(self, section: str = "", **kwargs):
         pass
 
     @property
-    def extra(self) -> Extra:
-        return self._extra
+    def yaml_obj(self) -> CommentedMap:
+        return self._yaml
 
-    @extra.setter
-    def extra(self, value):
-        self._extra = Extra(**value)
-
-    @property
-    def package(self) -> Package:
-        return self._package
-
-    @package.setter
-    def package(self, value):
-        self._package = Package(**value)
-
-    @property
-    def source(self) -> Source:
-        return self._source
-
-    @source.setter
-    def source(self, value):
-        self._source = Source(**value)
-
-    @property
-    def build(self) -> Build:
-        return self._build
-
-    @build.setter
-    def build(self, value):
-        self._build = Build(**value)
-
-    @property
-    def outputs(self) -> Outputs:
-        return self._outputs
-
-    @outputs.setter
-    def outputs(self, value):
-        self._outputs = Outputs(**value)
-
-    @property
-    def requirements(self) -> Requirements:
-        return self._requirements
-
-    @requirements.setter
-    def requirements(self, value):
-        self._requirements = Requirements(**value)
-
-    @property
-    def app(self) -> App:
-        return self._app
-
-    @app.setter
-    def app(self, value):
-        self._app = App(**value)
-
-    @property
-    def test(self) -> Test:
-        return self._test
-
-    @test.setter
-    def test(self, value):
-        self._test = Test(**value)
-
-    @property
-    def about(self) -> About:
-        return self._about
-
-    @about.setter
-    def about(self, value):
-        self._about = About(**value)
-
-    def __getitem__(self, item) -> Any:
+    def __getitem__(self, item: str) -> Any:
         if item in self.ALL_SECTIONS:
-            return getattr(self, item.lower())
-        raise ValueError(f"Section {item} not found.")
+            if self._yaml.get(item) is None:
+                self._yaml[item] = CommentedMap()
+            return Section(item, parent_yaml=self._yaml)
+        else:
+            raise KeyError(f"Section {item} not found.")
 
     def __setitem__(self, item: str, value: Any):
         if item in self.ALL_SECTIONS:
-            setattr(self, item, asdict(value))
+            self._yaml[item] = value
         else:
-            raise ValueError(f"Section {item} not found.")
+            raise KeyError(f"Section {item} not found.")
 
-    def __len__(self) -> int:
-        return len(self.ALL_SECTIONS)
-
-    def __iter__(self) -> Iterator[Tuple[str, Any]]:
+    def __iter__(self) -> Section:
         for section in self.ALL_SECTIONS:
-            yield section, self[section]
+            yield self[section]
 
-    def as_dict(self, exclude_empty_values: bool = True) -> Dict[str, Any]:
-        """Convert the recipe attributes to a dict to be able to dump it in a
-        yaml file.
-
-        :param exclude_empty_values: If True it will exclude the empty values
-            in the recipe. Otherwise it will return everything
-        :return dict:
-        """
-        if exclude_empty_values:
-            result = self.clean_section(
-                {
-                    section: self.clean_section(value)
-                    for section, value in self
-                    if section != "extra"
-                }
-            )
-        else:
-            result = dict(self)
-        result.update({"extra": {"recipe-maintainers": self.extra.recipe_maintainers}})
-        return result
-
-    @staticmethod
-    def clean_section(section: Any) -> dict:
-        """Create a new dictionary without None values.
-
-        :param section: Receives a dict or a namedtuple
-        :return dict: return a new dict without the None values
-        """
-        if not isinstance(section, dict):
-            section = asdict(section)
-        return {key: value for key, value in section.items() if value}
-
-    def generate_recipe(self) -> str:
-        """Generate the recipe in a string format.
-
-        :return str:
-        """
-        body_dict = self.as_dict()
-        body_dict["package"]["version"] = r"{{ version }}"
-        body_dict["package"]["name"] = r"{{ name|lower }}"
-        body = ""
-        for section in self.ALL_SECTIONS:
-            if section not in body_dict:
-                continue
-            yaml_value = yaml.dump(
-                {section: body_dict[section]},
-                Dumper=GrayDumper,
-                default_flow_style=False,
-            )
-            body += f"{yaml_value}\n"
-        return f"{self._get_jinja_declaration()}\n{body}"
-
-    def _get_jinja_declaration(self) -> str:
-        """Responsible to generate the jinja variable declaration.
-
-        :return str: String with jinja variable declaration
-        """
-        extra_header = ""
-        for name_jinja, jinja_value in self._extra_jinja_variables.items():
-            extra_header += f'{{% set {name_jinja} = "{jinja_value}" %}}\n'
-        return (
-            f'{{% set name = "{self.package.name}" %}}\n'
-            f'{{% set version = "{self.package.version}" %}}\n'
-            f"{extra_header}\n"
-        )
-
-    def set_jinja_variable(self, name: str, value: Any):
-        """Set new jinja variables to be add
-
-        :param name: Variable name
-        :param value: Value
-        """
-        self._extra_jinja_variables[name] = value
-
-    def remove_jinja_variable(self, name: str):
-        """Remove Jinja variable from the recipe
-
-        :param name: Jinja variable name
-        """
-        if name in self._extra_jinja_variables:
-            del self._extra_jinja_variables[name]
-
-    def get_jinja_variable(self, name: str) -> Any:
-        """Get the value of the Jinja variable
-
-        :param name: Jinja variable name
-        :return: Jinja variable value
-        """
-        return self._extra_jinja_variables.get(name, None)
-
-    def to_file(self, folder_path: Union[str, Path] = "."):
+    def generate_recipe(self, folder_path: Union[str, Path] = "."):
         """Write the recipe in a location. It will create a folder with the
         package name and the recipe will be there.
 
         :param folder_path: Path to the folder
         """
-        recipe_dir = Path(folder_path) / self.package.name.lower()
+        recipe_dir = Path(folder_path) / self.get_var_content(
+            self["package"]["name"].values[0]
+        )
         if not recipe_dir.is_dir():
             recipe_dir.mkdir()
         recipe_path = recipe_dir / "meta.yaml"
-        with recipe_path.open("w+") as recipe:
-            recipe.write(self.generate_recipe())
+        with recipe_path.open("w") as recipe:
+            yaml.dump(self.get_clean_yaml(self._yaml), recipe)
+
+    def get_clean_yaml(self, recipe_yaml: CommentedMap) -> CommentedMap:
+        result = self._clean_yaml(recipe_yaml)
+        return self._add_new_lines_after_section(result)
+
+    def _add_new_lines_after_section(self, recipe_yaml: CommentedMap) -> CommentedMap:
+        for section in recipe_yaml.keys():
+            if section == "package":
+                continue
+            recipe_yaml.yaml_set_comment_before_after_key(section, "\n")
+        return recipe_yaml
+
+    def _clean_yaml(self, recipe_yaml: CommentedMap):
+        recipe = deepcopy(recipe_yaml)
+        for key, value in recipe_yaml.items():
+            if not value:
+                del recipe[key]
+            elif isinstance(recipe[key], CommentedMap):
+                self.__reduce_list(key, recipe)
+        return recipe
+
+    def __reduce_list(self, name, recipe: CommentedMap):
+        for section in Section(name, recipe):
+            section.reduce_section()

@@ -1,0 +1,14 @@
+{% set name = "pkg1" %}
+{% set version = "1.0.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  sha256: sha256_foo
+  url: URL
+
+build:
+  number: 1

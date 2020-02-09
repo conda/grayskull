@@ -17,6 +17,7 @@ repos:
     -   id: fix-encoding-pragma
         args: [--remove]
     -   id: check-yaml
+        exclude: tests
     -   id: check-toml
     -   id: check-json
     -   id: check-merge-conflict

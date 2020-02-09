@@ -7,13 +7,14 @@ setup(
     entry_points={"console_scripts": ["grayskull = grayskull.__main__:main"]},
     use_scm_version={"write_to": "grayskull/_version.py"},
     setup_requires=["setuptools-scm", "setuptools>=30.3.0"],
-    install_requires=["requests", "pyyaml"],
+    install_requires=["requests", "ruamel.yaml", "ruamel.yaml.jinja2"],
     extras_require={"testing": ["pytest"]},
     url="https://github.com/marcelotrevisani/grayskull",
     license="MIT",
     author="Marcelo Duarte Trevisani",
     author_email="marceloduartetrevisani@gmail.com",
-    description="Skeletor's main goal is to conquer the mysterious fortress of"
+    description="Project to generate recipes for conda packages. "
+    "Skeletor's main goal is to conquer the mysterious fortress of"
     " Castle Grayskull. If he succeeds, Skeletor would be able to conquer not"
     " only Eternia, but the whole universe.",
 )

@@ -6,20 +6,19 @@ from typing import Dict, List, Optional, Tuple
 import requests
 from requests import HTTPError
 
-from grayskull.base import About, Package, Requirements, Source, Test
-from grayskull.base.base_recipe import Grayskull
+from grayskull.base.base_recipe import AbstractRecipeModel
 
 log = logging.getLogger(__name__)
 PyVer = namedtuple("PyVer", ["major", "minor"])
 SUPPORTED_PY = sorted([PyVer(2, 7), PyVer(3, 6), PyVer(3, 7), PyVer(3, 8)])
 
 
-class PyPi(Grayskull):
+class PyPi(AbstractRecipeModel):
     URL_PYPI_METADATA = "https://pypi.org/pypi/{pkg_name}/json"
 
     def __init__(self, name=None, version=None, force_setup=False):
         self._force_setup = force_setup
-        self._pypi_metadata = None
+        self._pypi_metadata = {}
         self._setup_metadata = None
         self._is_using_selectors = False
         self._is_no_arch = True
@@ -36,54 +35,52 @@ class PyPi(Grayskull):
 
         if self._get_pypi_metadata().get(section):
             self[section] = self._get_pypi_metadata().get(section)
-        if not self.requirements.run or len(self.requirements.run) == 1:
+        if not self["requirements"]["run"] or len(self["requirements"]["run"]) == 1:
             self._force_setup = True
             self.refresh_section(section, force_distutils=True)
 
     def _get_pypi_metadata(self) -> dict:
-        if not self.package.version:
-            log.info(
-                f"Version for {self.package.name} not specified.\n"
-                f"Getting the latest one."
-            )
-            url_pypi = self.URL_PYPI_METADATA.format(pkg_name=self.package.name)
+        name = self.get_var_content(self["package"]["name"].values[0])
+        if self["package"]["version"].values:
+            version = self.get_var_content(self["package"]["version"].values[0])
+            url_pypi = self.URL_PYPI_METADATA.format(pkg_name=f"{name}/{version}")
         else:
-            url_pypi = self.URL_PYPI_METADATA.format(
-                pkg_name=f"{self.package.name}/{self.package.version}"
-            )
-        if self._pypi_metadata and self._pypi_metadata["package"] == self.package:
+            version = None
+            log.info(f"Version for {name} not specified.\nGetting the latest one.")
+            url_pypi = self.URL_PYPI_METADATA.format(pkg_name=name)
+
+        if (
+            self._pypi_metadata
+            and version
+            and self._pypi_metadata["package"]["version"] == version
+        ):
             return self._pypi_metadata
 
         metadata = requests.get(url=url_pypi)
         if metadata.status_code != 200:
-            raise HTTPError(
-                "It was not possible to recover PyPi metadata for"
-                f" {self.package.name}."
-            )
+            raise HTTPError(f"It was not possible to recover PyPi metadata for {name}.")
+
         metadata = metadata.json()
         info = metadata["info"]
         project_urls = info.get("project_urls", {})
 
         self._pypi_metadata = {
-            "package": Package(name=self.package.name, version=info["version"]),
+            "package": {"name": name, "version": info["version"]},
             "requirements": self._extract_pypi_requirements(metadata),
-            "test": Test(imports=[self.package.name.lower()]),
-            "about": About(
-                home=info.get("project_url"),
-                summary=info.get("summary"),
-                doc_url=info.get("docs_url"),
-                dev_url=project_urls.get("Source"),
-                license=info.get("license"),
-            ),
-            "source": Source(
-                url=r"https://pypi.io/packages/source/{{ name[0] }}/"
-                r"{{ name }}/{{ name }}-{{ version }}.tar.gz",
-                sha256=PyPi.get_sha256_from_pypi_metadata(metadata),
-            ),
+            "test": {"imports": [name.lower()]},
+            "about": {
+                "home": info.get("project_url"),
+                "summary": info.get("summary"),
+                "doc_url": info.get("docs_url"),
+                "dev_url": project_urls.get("Source"),
+                "license": info.get("license"),
+            },
+            "source": {
+                "url": "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/"
+                "{{ name }}-{{ version }}.tar.gz",
+                "sha256": PyPi.get_sha256_from_pypi_metadata(metadata),
+            },
         }
-        log.info(
-            f"Extracting metadata for {self.package.name}" f" {self.package.version}."
-        )
         return self._pypi_metadata
 
     @staticmethod
@@ -93,14 +90,12 @@ class PyPi(Grayskull):
                 return pkg_info["digests"]["sha256"]
         raise ValueError("Hash information for sdist was not found on PyPi metadata.")
 
-    def _extract_pypi_requirements(self, metadata: dict) -> Requirements:
+    def _extract_pypi_requirements(self, metadata: dict) -> dict:
         if not metadata["info"].get("requires_dist"):
-            return Requirements(host=["python", "pip"], run=["python"])
+            return {"host": ["python", "pip"], "run": ["python"]}
         run_req = []
-
         for req in metadata["info"].get("requires_dist"):
             list_raw_requirements = req.split(";")
-
             selector = ""
             if len(list_raw_requirements) > 1:
                 option, operation, value = PyPi._get_extra_from_requires_dist(
@@ -119,15 +114,15 @@ class PyPi(Grayskull):
 
         limit_python = metadata["info"].get("requires_python", "")
         if limit_python and self._is_using_selectors:
-            self.build.skip = f"true  {PyPi.py_version_to_selector(metadata)}"
+            self["build"]["skip"] = f"true  {PyPi.py_version_to_selector(metadata)}"
             limit_python = ""
         else:
-            self.build.skip = None
+            self["build"]["skip"] = None
             limit_python = PyPi.py_version_to_limit_python(metadata)
 
         host_req = [f"python{limit_python}", "pip"]
         run_req.insert(0, f"python{limit_python}")
-        return Requirements(host=host_req, run=run_req)
+        return {"host": host_req, "run": run_req}
 
     @staticmethod
     def _get_extra_from_requires_dist(string_parse: str) -> Tuple[str, str, str]:
@@ -163,11 +158,11 @@ class PyPi(Grayskull):
     ) -> Optional[str]:
         """Generic function which abstract the parse of the requires_python
         present in the PyPi metadata. Basically it can generate the selectors
-        for Python or the delimiters if it is a `noarch: python` python package
+        for Python or the constrained version if it is a `noarch: python` python package
 
         :param pypi_metadata: PyPi metadata
         :param is_selector:
-        :return:
+        :return: return the constrained versions or the selectors
         """
         req_python = re.findall(
             r"([><=!]+)\s*(\d+)(?:\.(\d+))?", pypi_metadata["info"]["requires_python"],
