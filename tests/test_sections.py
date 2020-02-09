@@ -43,7 +43,7 @@ def test_section_children():
     )
     sec = Section("section1", parent_yaml=commented_map)
     assert sec.section_name == "section1"
-    assert sec.children[0].section_name == "subsection1"
+    assert sec.values[0].section_name == "subsection1"
 
 
 def test_section_load():

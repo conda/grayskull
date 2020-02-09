@@ -1,5 +1,5 @@
 import weakref
-from typing import Iterator, List, Optional, Union
+from typing import Any, Iterator, List, Optional, Union
 
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 
@@ -19,13 +19,13 @@ class Section:
             self.__parent = weakref.ref(parent_yaml)
 
     @property
-    def children(self) -> Union[List, RecipeItem, "Section"]:
+    def values(self) -> List:
         parent = self._get_parent()
         result = []
-        if isinstance(self.yaml_obj, dict):
-            parent[self.section_name] = CommentedMap(self.yaml_obj)
         if isinstance(self.yaml_obj, CommentedMap):
             result = [Section(name, self.yaml_obj) for name in self.yaml_obj.keys()]
+        elif isinstance(self.yaml_obj, dict):
+            parent[self.section_name] = CommentedMap(self.yaml_obj)
         elif isinstance(self.yaml_obj, CommentedSeq):
             result = [
                 RecipeItem(pos, self.yaml_obj) for pos in range(len(self.yaml_obj))
@@ -51,7 +51,20 @@ class Section:
         doing.
         """
         parent = self._get_parent()
+        if self.section_name not in parent:
+            self.add_subsection(self.section_name)
         return parent[self.section_name]
+
+    def reduce_section(self):
+        if not self.values:
+            return
+        if isinstance(self.values[0], Section):
+            for section in self.values:
+                section.reduce_section()
+        elif isinstance(self.values[0], RecipeItem):
+            if len(self.values) == 1:
+                val = self._get_parent()[self.section_name][0]
+                self._get_parent()[self.section_name] = val
 
     def __hash__(self) -> int:
         return hash(str(self))
@@ -71,35 +84,38 @@ class Section:
             return len(self.yaml_obj)
         return 0
 
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, Section):
+            return other.yaml_obj == self.yaml_obj
+        if len(self.values) == 1:
+            return self.values[0] == other
+        return other == self.values
+
     def __iter__(self) -> Iterator:
-        return iter(self.yaml_obj) if self.yaml_obj else iter([])
+        if not self.yaml_obj:
+            return iter([])
+        return iter(self.values)
 
     def __getitem__(self, item: Union[str, int]) -> Union["Section", RecipeItem, None]:
         if isinstance(item, str):
-            for child in self.children:
+            for child in self.values:
                 if child.section_name == item:
                     return child
-            return self.add_subsection(item)
-        return self.children[item]
+            raise KeyError(f"Key {item} was not set.")
+        return self.values[item]
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: Any):
         if key not in self.yaml_obj:
             self.add_subsection(key)
         if isinstance(value, (str, int)):
-            self[key].add_item([value])
-        elif isinstance(value, dict):
-            self[key].add_subsection(value)
+            self.yaml_obj[key] = CommentedSeq([value])
 
-    def __getattr__(self, item: str) -> Union["Section", RecipeItem, None]:
-        return self.__getitem__(item)
-
-    def add_subsection(self, section: Union[str, "Section"]) -> "Section":
+    def add_subsection(self, section: Union[str, "Section"]):
         """Add a subsection to the current Section. If the current section has a
         list of items or just an item, it will replace it by a subsection.
 
         :param section: Receives the name of a new subsection or a section object
         which will be populated as a child of the current section
-        :return: Return the subsection added.
         """
         if not isinstance(self.yaml_obj, CommentedMap):
             self._get_parent()[self.section_name] = CommentedMap()
@@ -107,13 +123,11 @@ class Section:
             self._get_parent()[section.section_name] = section.yaml_obj
         return Section(section, parent_yaml=self.yaml_obj)
 
-    def add_item(self, item: Union[str, int]) -> RecipeItem:
+    def add_item(self, item: Union[str, int]):
         """Add a new item to the current section
 
         :param item: Receive the value for the current item
-        :return: Return the item added to the current section
         """
         if not isinstance(self.yaml_obj, CommentedSeq):
             self._get_parent()[self.section_name] = CommentedSeq()
         self._get_parent()[self.section_name].append(item)
-        return RecipeItem(len(self) - 1, self.yaml_obj)

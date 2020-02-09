@@ -30,7 +30,5 @@ def test_recipe_item_extract_selector():
 
 def test_recipe_item_remove_selector():
     assert RecipeItem._remove_selector("# [win or osx]") == ""
-
     assert RecipeItem._remove_selector("deps1 >=0.12") == "deps1 >=0.12"
-
     assert RecipeItem._remove_selector("pytest  # [unix]") == "pytest"

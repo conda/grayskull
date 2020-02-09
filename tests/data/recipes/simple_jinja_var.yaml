@@ -1,0 +1,6 @@
+{% set name = "foo_pkg-123.test" %}
+{% set version = "1.2.4" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}

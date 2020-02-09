@@ -28,7 +28,7 @@ class RecipeItem:
     def __eq__(self, other: Union[str, int, "RecipeItem"]):
         if isinstance(other, RecipeItem):
             return self.value == other.value and self.selector == other.selector
-        return str(self) == str(other)
+        return str(self) == str(other) or str(self.value) == str(other)
 
     @staticmethod
     def _extract_selector(item: str) -> str:

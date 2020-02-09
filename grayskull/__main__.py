@@ -9,7 +9,7 @@ def main():
     parser.add_argument(
         "repo_type",
         nargs=2,
-        help="Specify the repository (PyPi, Cran) and the package name.",
+        help="Specify the repository (pypi, cran) and the package name.",
     )
     parser.add_argument(
         "--heman", "--shera", default=False, action="store_true", dest="grayskull_power"
