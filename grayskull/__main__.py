@@ -1,5 +1,4 @@
 import argparse
-import sys
 
 from grayskull.base.factory import GrayskullFactory
 
@@ -29,10 +28,11 @@ def main():
 
     if args.grayskull_power:
         print("By the power of Grayskull...\nI have the power!")
-        sys.exit()
 
-    recipe = GrayskullFactory.create_recipe(args.repo_type, args.version)
-    recipe.to_file(args.output)
+    recipe = GrayskullFactory.create_recipe(
+        args.repo_type[0], args.repo_type[1], args.version
+    )
+    recipe.generate_recipe(args.output)
 
 
 if __name__ == "__main__":
