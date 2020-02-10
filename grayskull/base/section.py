@@ -65,6 +65,18 @@ class Section:
         elif isinstance(self.values[0], RecipeItem):
             if len(self.values) == 1:
                 val = self._get_parent()[self.section_name][0]
+                if self._get_parent()[self.section_name].ca.items:
+                    comment_token = self._get_parent()[self.section_name].ca.items.get(
+                        0
+                    )
+                    if comment_token:
+                        comment_token[0].value = f" {comment_token[0].value}"
+                        self._get_parent().ca.items[self.section_name] = [
+                            None,
+                            None,
+                            comment_token[0],
+                            None,
+                        ]
                 self._get_parent()[self.section_name] = val
 
     def __hash__(self) -> int:
@@ -111,7 +123,8 @@ class Section:
         if key not in self.yaml_obj:
             self.add_subsection(key)
         if isinstance(value, (str, int)):
-            self.yaml_obj[key] = CommentedSeq([value])
+            self.yaml_obj[key] = CommentedSeq()
+            self[key].add_item(value)
         elif isinstance(value, dict):
             Section(key, self.yaml_obj)
 

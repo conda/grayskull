@@ -11,8 +11,8 @@ class RecipeItem:
         self.__yaml = weakref.ref(yaml)
         self.__pos = position
         if position >= len(yaml):
-            yaml.append(item)
-        self.value = self.__yaml()[self.__pos]
+            yaml.append(None)
+            self.value = item
 
     def __repr__(self) -> str:
         return (
