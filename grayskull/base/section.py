@@ -63,12 +63,13 @@ class Section:
             for section in self.values:
                 section.reduce_section()
         elif isinstance(self.values[0], RecipeItem):
+            for recipe_item in self.values:
+                if recipe_item.value is None:
+                    self.yaml_obj.pop(self.yaml_obj.index(recipe_item.value))
             if len(self.values) == 1:
                 val = self._get_parent()[self.section_name][0]
                 if self._get_parent()[self.section_name].ca.items:
-                    comment_token = self._get_parent()[self.section_name].ca.items.get(
-                        0
-                    )
+                    comment_token = self.yaml_obj.ca.items.get(0)
                     if comment_token:
                         comment_token[0].value = f" {comment_token[0].value}"
                         self._get_parent().ca.items[self.section_name] = [

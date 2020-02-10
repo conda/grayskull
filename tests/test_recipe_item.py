@@ -5,7 +5,7 @@ from grayskull.base.recipe_item import RecipeItem
 
 def test_recipe():
     seq = CommentedSeq(["importlib-metadata >=0.12", "pytest"])
-    seq.yaml_add_eol_comment("[py<38]", 0, 0)
+    seq.yaml_add_eol_comment("[py<38]", 0)
     item = RecipeItem(0, seq)
     assert item.value == "importlib-metadata >=0.12"
     assert item.selector == "py<38"

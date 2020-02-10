@@ -8,6 +8,7 @@ from ruamel.yaml import YAML, CommentToken
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.error import CommentMark
 
+from grayskull.base.extra import get_git_current_user
 from grayskull.base.recipe_item import RecipeItem
 from grayskull.base.section import Section
 
@@ -161,8 +162,13 @@ class AbstractRecipeModel(ABC):
         if not recipe_dir.is_dir():
             recipe_dir.mkdir()
         recipe_path = recipe_dir / "meta.yaml"
+        self._add_missing_sections()
         with recipe_path.open("w") as recipe:
             yaml.dump(self.get_clean_yaml(self._yaml), recipe)
+
+    def _add_missing_sections(self):
+        if not self["extra"]:
+            self["extra"]["recipe-maintainers"].add_item(get_git_current_user())
 
     def get_clean_yaml(self, recipe_yaml: CommentedMap) -> CommentedMap:
         result = self._clean_yaml(recipe_yaml)
@@ -178,12 +184,31 @@ class AbstractRecipeModel(ABC):
     def _clean_yaml(self, recipe_yaml: CommentedMap):
         recipe = deepcopy(recipe_yaml)
         for key, value in recipe_yaml.items():
-            if not value:
+            if key in ("extra", "test"):
+                continue
+            if not isinstance(value, bool) and not value:
                 del recipe[key]
-            elif isinstance(recipe[key], CommentedMap):
-                self.__reduce_list(key, recipe)
+            elif isinstance(value, (CommentedMap, dict)):
+                if key != "requirements":
+                    self.__reduce_list(key, recipe)
         return recipe
 
     def __reduce_list(self, name, recipe: CommentedMap):
         for section in Section(name, recipe):
             section.reduce_section()
+
+    def populate_metadata_from_dict(self, metadata: Any, section: Section) -> Section:
+        if not isinstance(metadata, bool) and not metadata:
+            return section
+        if isinstance(metadata, list):
+            section.add_items(metadata)
+            return section
+        if isinstance(metadata, dict):
+            for name, value in metadata.items():
+                if isinstance(value, bool) or value:
+                    self.populate_metadata_from_dict(
+                        value, Section(name, section.yaml_obj)
+                    )
+        else:
+            section.add_item(metadata)
+        return section

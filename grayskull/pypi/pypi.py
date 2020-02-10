@@ -32,10 +32,12 @@ class PyPi(AbstractRecipeModel):
         pypi_metadata = self._get_pypi_metadata()
         if pypi_metadata.get(section):
             if section == "package":
-                self.add_jinja_var("version", pypi_metadata[section]["version"])
-                pypi_metadata[section]["version"] = "<{ version }}"
+                self.add_jinja_var("version", pypi_metadata["package"]["version"])
+                self["package"]["version"] = "<{ version }}"
             else:
-                self[section] = pypi_metadata.get(section)
+                self.populate_metadata_from_dict(
+                    pypi_metadata.get(section), self[section]
+                )
 
     def _get_pypi_metadata(self) -> dict:
         name = self.get_var_content(self["package"]["name"].values[0])
@@ -114,7 +116,8 @@ class PyPi(AbstractRecipeModel):
         if limit_python and self._is_using_selectors:
             version_to_selector = PyPi.py_version_to_selector(metadata)
             if version_to_selector:
-                self["build"]["skip"] = f"true  {version_to_selector}"
+                self["build"]["skip"] = True
+                self["build"]["skip"].values[0].selector = version_to_selector
             limit_python = ""
         else:
             self["build"]["skip"] = None
