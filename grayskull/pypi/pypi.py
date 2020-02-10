@@ -92,7 +92,7 @@ class PyPi(AbstractRecipeModel):
 
     def _extract_pypi_requirements(self, metadata: dict) -> dict:
         if not metadata["info"].get("requires_dist"):
-            return {"host": ["python", "pip"], "run": ["python"]}
+            return {"host": sorted(["python", "pip"]), "run": ["python"]}
         run_req = []
         for req in metadata["info"].get("requires_dist"):
             list_raw_requirements = req.split(";")
@@ -125,7 +125,7 @@ class PyPi(AbstractRecipeModel):
 
         host_req = [f"python{limit_python}", "pip"]
         run_req.insert(0, f"python{limit_python}")
-        return {"host": host_req, "run": run_req}
+        return {"host": sorted(host_req), "run": sorted(run_req)}
 
     @staticmethod
     def _get_extra_from_requires_dist(string_parse: str) -> Tuple[str, str, str]:
