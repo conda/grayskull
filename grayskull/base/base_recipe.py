@@ -48,6 +48,7 @@ class AbstractRecipeModel(ABC):
             if version:
                 self.add_jinja_var("version", version)
                 self["package"]["version"] = "<{ version }}"
+            self["build"]["number"] = 0
             self.update_all_recipe()
         super(AbstractRecipeModel, self).__init__()
 
