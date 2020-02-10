@@ -2,7 +2,7 @@ import re
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, List, Optional, Union
 
 from ruamel.yaml import YAML, CommentToken
 from ruamel.yaml.comments import CommentedMap
@@ -150,7 +150,12 @@ class AbstractRecipeModel(ABC):
         for section in self.ALL_SECTIONS:
             yield self[section]
 
-    def generate_recipe(self, folder_path: Union[str, Path] = "."):
+    def generate_recipe(
+        self,
+        folder_path: Union[str, Path] = ".",
+        mantainers: Optional[List] = None,
+        disable_extra: bool = False,
+    ):
         """Write the recipe in a location. It will create a folder with the
         package name and the recipe will be there.
 
@@ -162,13 +167,15 @@ class AbstractRecipeModel(ABC):
         if not recipe_dir.is_dir():
             recipe_dir.mkdir()
         recipe_path = recipe_dir / "meta.yaml"
-        self._add_missing_sections()
+        if not disable_extra:
+            self._add_extra_section(mantainers)
         with recipe_path.open("w") as recipe:
             yaml.dump(self.get_clean_yaml(self._yaml), recipe)
 
-    def _add_missing_sections(self):
+    def _add_extra_section(self, maintainers: Optional[List] = None):
         if not self["extra"]:
-            self["extra"]["recipe-maintainers"].add_item(get_git_current_user())
+            maintainers = maintainers if maintainers else [get_git_current_user()]
+            self["extra"]["recipe-maintainers"].add_items(maintainers)
 
     def get_clean_yaml(self, recipe_yaml: CommentedMap) -> CommentedMap:
         result = self._clean_yaml(recipe_yaml)
@@ -184,7 +191,7 @@ class AbstractRecipeModel(ABC):
     def _clean_yaml(self, recipe_yaml: CommentedMap):
         recipe = deepcopy(recipe_yaml)
         for key, value in recipe_yaml.items():
-            if key in ("extra", "test"):
+            if key == "extra" or (key == "test" and value):
                 continue
             if not isinstance(value, bool) and not value:
                 del recipe[key]
