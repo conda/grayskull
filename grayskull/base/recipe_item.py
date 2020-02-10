@@ -11,8 +11,8 @@ class RecipeItem:
         self.__yaml = weakref.ref(yaml)
         self.__pos = position
         if position >= len(yaml):
-            yaml.append(item)
-        self.value = self.__yaml()[self.__pos]
+            yaml.append(None)
+            self.value = item
 
     def __repr__(self) -> str:
         return (
@@ -64,15 +64,20 @@ class RecipeItem:
 
     @value.setter
     def value(self, value: Union[str, int]):
+        column = 7
         if isinstance(value, int):
+            column += len(str(value))
             self.__yaml()[self.__pos] = value
         elif value:
             self.__yaml()[self.__pos] = self._remove_selector(value)
+            column += len(str(self.__yaml()[self.__pos]))
         else:
-            self.__yaml()[self.__pos] = ""
+            column += len(str(value))
+            self.__yaml()[self.__pos] = value
         selector = self._extract_selector(str(value))
         if selector:
-            self.__yaml().yaml_add_eol_comment(f"[{selector}]", self.__pos, 0)
+            sel = f"[{selector}]"
+            self.__yaml().yaml_add_eol_comment(sel, self.__pos, column + len(sel))
 
     @property
     def selector(self) -> Optional[str]:
@@ -99,6 +104,6 @@ class RecipeItem:
             sel = self._remove_selector(value)
         sel = f"[{sel}]"
         if comment:
-            comment.value = f"# {sel}"
+            comment.value = f" # {sel}"
         else:
-            self.__yaml().yaml_add_eol_comment(sel, self.__pos, 0)
+            self.__yaml().yaml_add_eol_comment(sel, self.__pos)

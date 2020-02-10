@@ -29,15 +29,15 @@ class PyPi(AbstractRecipeModel):
         pass
 
     def refresh_section(self, section: str = "", force_distutils: bool = False):
-        if self._force_setup or force_distutils:
-            self._populate_fields_by_distutils()
-            return
-
-        if self._get_pypi_metadata().get(section):
-            self[section] = self._get_pypi_metadata().get(section)
-        if not self["requirements"]["run"] or len(self["requirements"]["run"]) == 1:
-            self._force_setup = True
-            self.refresh_section(section, force_distutils=True)
+        pypi_metadata = self._get_pypi_metadata()
+        if pypi_metadata.get(section):
+            if section == "package":
+                self.add_jinja_var("version", pypi_metadata["package"]["version"])
+                self["package"]["version"] = "<{ version }}"
+            else:
+                self.populate_metadata_from_dict(
+                    pypi_metadata.get(section), self[section]
+                )
 
     def _get_pypi_metadata(self) -> dict:
         name = self.get_var_content(self["package"]["name"].values[0])
@@ -92,7 +92,7 @@ class PyPi(AbstractRecipeModel):
 
     def _extract_pypi_requirements(self, metadata: dict) -> dict:
         if not metadata["info"].get("requires_dist"):
-            return {"host": ["python", "pip"], "run": ["python"]}
+            return {"host": sorted(["python", "pip"]), "run": ["python"]}
         run_req = []
         for req in metadata["info"].get("requires_dist"):
             list_raw_requirements = req.split(";")
@@ -114,7 +114,10 @@ class PyPi(AbstractRecipeModel):
 
         limit_python = metadata["info"].get("requires_python", "")
         if limit_python and self._is_using_selectors:
-            self["build"]["skip"] = f"true  {PyPi.py_version_to_selector(metadata)}"
+            version_to_selector = PyPi.py_version_to_selector(metadata)
+            if version_to_selector:
+                self["build"]["skip"] = True
+                self["build"]["skip"].values[0].selector = version_to_selector
             limit_python = ""
         else:
             self["build"]["skip"] = None
@@ -122,7 +125,7 @@ class PyPi(AbstractRecipeModel):
 
         host_req = [f"python{limit_python}", "pip"]
         run_req.insert(0, f"python{limit_python}")
-        return {"host": host_req, "run": run_req}
+        return {"host": sorted(host_req), "run": sorted(run_req)}
 
     @staticmethod
     def _get_extra_from_requires_dist(string_parse: str) -> Tuple[str, str, str]:

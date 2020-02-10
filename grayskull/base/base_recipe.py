@@ -2,17 +2,19 @@ import re
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, List, Optional, Union
 
 from ruamel.yaml import YAML, CommentToken
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.error import CommentMark
 
+from grayskull.base.extra import get_git_current_user
 from grayskull.base.recipe_item import RecipeItem
 from grayskull.base.section import Section
 
 yaml = YAML(typ="jinja2")
 yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.width = 600
 
 
 class AbstractRecipeModel(ABC):
@@ -148,7 +150,12 @@ class AbstractRecipeModel(ABC):
         for section in self.ALL_SECTIONS:
             yield self[section]
 
-    def generate_recipe(self, folder_path: Union[str, Path] = "."):
+    def generate_recipe(
+        self,
+        folder_path: Union[str, Path] = ".",
+        mantainers: Optional[List] = None,
+        disable_extra: bool = False,
+    ):
         """Write the recipe in a location. It will create a folder with the
         package name and the recipe will be there.
 
@@ -160,8 +167,15 @@ class AbstractRecipeModel(ABC):
         if not recipe_dir.is_dir():
             recipe_dir.mkdir()
         recipe_path = recipe_dir / "meta.yaml"
+        if not disable_extra:
+            self._add_extra_section(mantainers)
         with recipe_path.open("w") as recipe:
             yaml.dump(self.get_clean_yaml(self._yaml), recipe)
+
+    def _add_extra_section(self, maintainers: Optional[List] = None):
+        if not self["extra"]:
+            maintainers = maintainers if maintainers else [get_git_current_user()]
+            self["extra"]["recipe-maintainers"].add_items(maintainers)
 
     def get_clean_yaml(self, recipe_yaml: CommentedMap) -> CommentedMap:
         result = self._clean_yaml(recipe_yaml)
@@ -177,12 +191,31 @@ class AbstractRecipeModel(ABC):
     def _clean_yaml(self, recipe_yaml: CommentedMap):
         recipe = deepcopy(recipe_yaml)
         for key, value in recipe_yaml.items():
-            if not value:
+            if key == "extra" or (key == "test" and value):
+                continue
+            if not isinstance(value, bool) and not value:
                 del recipe[key]
-            elif isinstance(recipe[key], CommentedMap):
-                self.__reduce_list(key, recipe)
+            elif isinstance(value, (CommentedMap, dict)):
+                if key != "requirements":
+                    self.__reduce_list(key, recipe)
         return recipe
 
     def __reduce_list(self, name, recipe: CommentedMap):
         for section in Section(name, recipe):
             section.reduce_section()
+
+    def populate_metadata_from_dict(self, metadata: Any, section: Section) -> Section:
+        if not isinstance(metadata, bool) and not metadata:
+            return section
+        if isinstance(metadata, list):
+            section.add_items(metadata)
+            return section
+        if isinstance(metadata, dict):
+            for name, value in metadata.items():
+                if isinstance(value, bool) or value:
+                    self.populate_metadata_from_dict(
+                        value, Section(name, section.yaml_obj)
+                    )
+        else:
+            section.add_item(metadata)
+        return section
