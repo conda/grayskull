@@ -52,22 +52,18 @@ def test_get_name_version_from_requires_dist():
 
 
 def test_get_extra_from_requires_dist():
-    assert PyPi._get_extra_from_requires_dist(' python_version < "3.6"') == (
-        "python_version",
-        "<",
-        "3.6",
-    )
+    assert PyPi._get_extra_from_requires_dist(' python_version < "3.6"') == [
+        ("python_version", "<", "3.6", "", "",)
+    ]
 
 
 def test_get_selector():
     assert PyPi._parse_extra_metadata_to_selector("extra", "==", "win32") == ""
     assert (
-        PyPi._parse_extra_metadata_to_selector("sys_platform", "==", "win32")
-        == "  # [win]"
+        PyPi._parse_extra_metadata_to_selector("sys_platform", "==", "win32") == "win"
     )
     assert (
-        PyPi._parse_extra_metadata_to_selector("python_version", "<", "3.6")
-        == "  # [py<36]"
+        PyPi._parse_extra_metadata_to_selector("python_version", "<", "3.6") == "py<36"
     )
 
 

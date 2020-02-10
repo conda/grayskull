@@ -1,7 +1,7 @@
 import logging
 import re
 from collections import namedtuple
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import requests
 from requests import HTTPError
@@ -23,6 +23,7 @@ class PyPi(AbstractRecipeModel):
         self._is_using_selectors = False
         self._is_no_arch = True
         super(PyPi, self).__init__(name=name, version=version)
+        self["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
 
     def _populate_fields_by_distutils(self):
         # TODO: Implement injection in distutils when there is no PyPi metadata
@@ -38,6 +39,8 @@ class PyPi(AbstractRecipeModel):
                 self.populate_metadata_from_dict(
                     pypi_metadata.get(section), self[section]
                 )
+        if not self._is_using_selectors:
+            self["build"]["noarch"] = "python"
 
     def _get_pypi_metadata(self) -> dict:
         name = self.get_var_content(self["package"]["name"].values[0])
@@ -90,6 +93,12 @@ class PyPi(AbstractRecipeModel):
                 return pkg_info["digests"]["sha256"]
         raise ValueError("Hash information for sdist was not found on PyPi metadata.")
 
+    def __skip_pypi_requirement(self, list_extra: List) -> bool:
+        for extra in list_extra:
+            if extra[0] == "extra" or extra[2] == "testing":
+                return True
+        return False
+
     def _extract_pypi_requirements(self, metadata: dict) -> dict:
         if not metadata["info"].get("requires_dist"):
             return {"host": sorted(["python", "pip"]), "run": ["python"]}
@@ -98,15 +107,19 @@ class PyPi(AbstractRecipeModel):
             list_raw_requirements = req.split(";")
             selector = ""
             if len(list_raw_requirements) > 1:
-                option, operation, value = PyPi._get_extra_from_requires_dist(
+                list_extra = PyPi._get_extra_from_requires_dist(
                     list_raw_requirements[1]
                 )
-                if option == "extra" or value == "testing":
+                if self.__skip_pypi_requirement(list_extra):
                     continue
-                self._is_using_selectors = True
-                selector = PyPi._parse_extra_metadata_to_selector(
-                    option, operation, value
-                )
+
+                result_selector = self._get_all_selectors_pypi(list_extra)
+
+                if result_selector:
+                    selector = " ".join(result_selector)
+                    selector = f"  # [{selector}]"
+                else:
+                    selector = ""
             pkg_name, version = PyPi._get_name_version_from_requires_dist(
                 list_raw_requirements[0]
             )
@@ -120,25 +133,42 @@ class PyPi(AbstractRecipeModel):
                 self["build"]["skip"].values[0].selector = version_to_selector
             limit_python = ""
         else:
-            self["build"]["skip"] = None
             limit_python = PyPi.py_version_to_limit_python(metadata)
-
+        limit_python = limit_python if limit_python else ""
         host_req = [f"python{limit_python}", "pip"]
         run_req.insert(0, f"python{limit_python}")
         return {"host": sorted(host_req), "run": sorted(run_req)}
 
+    def _get_all_selectors_pypi(self, list_extra):
+        result_selector = []
+        for extra in list_extra:
+            self._is_using_selectors = True
+            selector = PyPi._parse_extra_metadata_to_selector(
+                extra[0], extra[1], extra[2]
+            )
+            if selector:
+                result_selector.append(selector)
+                if len(result_selector) < len(list_extra):
+                    if extra[3]:
+                        result_selector.append(extra[3])
+                    elif extra[4]:
+                        result_selector.append(extra[4])
+        return result_selector
+
     @staticmethod
-    def _get_extra_from_requires_dist(string_parse: str) -> Tuple[str, str, str]:
+    def _get_extra_from_requires_dist(string_parse: str) -> Union[List]:
         """Receives the extra metadata e parse it to get the option, operation
         and value.
 
         :param string_parse: metadata extra
         :return: return the option , operation and value of the extra metadata
         """
-        option, operation, value = re.match(
-            r"^\s*(\w+)\s+(\W*)\s+(.*)", string_parse, re.DOTALL
-        ).groups()
-        return option, operation, re.sub(r"['\"]", "", value)
+        return re.findall(
+            r"\s*(\w+)\s+(\W*)\s+[?:'\"]?([.a-zA-Z0-9_-]+)"
+            r"[?:'\"]?\s*\W*\s*(?:(and))?(?:(or))?\s*",
+            string_parse,
+            re.DOTALL,
+        )
 
     @staticmethod
     def _get_name_version_from_requires_dist(string_parse: str) -> Tuple[str, str]:
@@ -259,7 +289,7 @@ class PyPi(AbstractRecipeModel):
         if option == "python_version":
             value = value.split(".")
             value = "".join(value[:2])
-            return f"  # [py{operation}{value}]"
+            return f"py{operation}{value}"
         if option == "sys_platform":
             value = re.sub(r"[^a-zA-Z]+", "", value)
-            return f"  # [{value.lower()}]"
+            return value.lower()
