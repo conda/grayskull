@@ -129,3 +129,17 @@ def test_get_sha256_from_pypi_metadata():
     with pytest.raises(ValueError) as err:
         PyPi.get_sha256_from_pypi_metadata(metadata)
     assert err.match("Hash information for sdist was not found on PyPi metadata.")
+
+
+def test_injection_distutils():
+    recipe = PyPi(name="hypothesis", version="5.5.1")
+    data = recipe._extract_fields_by_distutils()
+    assert data["install_requires"] == [
+        "attrs>=19.2.0",
+        "sortedcontainers>=2.1.0,<3.0.0",
+    ]
+    assert data["entry_points"] == {
+        "pytest11": ["hypothesispytest = hypothesis.extra.pytestplugin"]
+    }
+    assert data["version"] == "5.5.1"
+    assert data["name"] == "hypothesis"

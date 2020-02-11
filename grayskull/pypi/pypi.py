@@ -1,6 +1,13 @@
 import logging
+import os
 import re
+import shutil
+import sys
 from collections import namedtuple
+from contextlib import contextmanager
+from pathlib import Path
+from subprocess import check_output
+from tempfile import mktemp
 from typing import Dict, List, Optional, Tuple, Union
 
 import requests
@@ -25,9 +32,75 @@ class PyPi(AbstractRecipeModel):
         super(PyPi, self).__init__(name=name, version=version)
         self["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
 
-    def _populate_fields_by_distutils(self):
+    def _extract_fields_by_distutils(self):
         # TODO: Implement injection in distutils when there is no PyPi metadata
-        pass
+        name = self.get_var_content(self["package"]["name"].values[0])
+        version = self.get_var_content(self["package"]["version"].values[0])
+        pkg = f"{name}=={version}"
+        temp_folder = mktemp(prefix=f"grayskull-{pkg}-")
+        check_output(
+            [
+                "pip",
+                "download",
+                pkg,
+                "--no-binary",
+                ":all:",
+                "--no-deps",
+                "-d",
+                str(temp_folder),
+            ]
+        )
+        shutil.unpack_archive(
+            os.path.join(temp_folder, os.listdir(temp_folder)[0]), temp_folder
+        )
+
+        with self._injection_distutils(temp_folder) as metadata:
+            return metadata
+
+    @contextmanager
+    def _injection_distutils(self, folder: str) -> dict:
+        """This is a bit of "dark magic", please don't do it at home.
+        It is injecting code in the distutils.core.setup and replacing the
+        setup function by the inner function __fake_distutils_setup.
+        This method is a contextmanager, after leaving the context it will return
+        with the normal implementation of the disutils.core.setup.
+        This method is necessary because some information are missing from the
+        pypi metadata and also for those packages which the pypi metadata is missing.
+
+        :pram folder: Path to the folder where the sdist package was extracted
+        :yield: return the
+        """
+        from distutils import core
+
+        setup_core = core.setup
+
+        data = {}
+
+        def __fake_distutils_setup(*args, **kwargs):
+            data["tests_require"] = kwargs.get("tests_require", None)
+            data["install_requires"] = kwargs.get("install_requires", None)
+            data["extras_require"] = kwargs.get("extras_require", None)
+            data["entry_points"] = kwargs.get("entry_points", None)
+            data["packages"] = kwargs.get("packages", None)
+            data["setuptools"] = "setuptools" in sys.modules
+            data["summary"] = kwargs.get("description", None)
+            data["home"] = kwargs.get("url", None)
+            data["license"] = kwargs.get("license", None)
+            data["name"] = kwargs.get("name", None)
+            data["classifiers"] = kwargs.get("classifiers", None)
+            data["version"] = kwargs.get("version", None)
+            return
+
+        try:
+            core.setup = __fake_distutils_setup
+            path_setup = list(Path(folder).rglob("setup.py"))[0]
+            try:
+                core.run_setup(str(path_setup), script_args=["install"])
+            except RuntimeError:
+                pass
+            yield data
+        finally:
+            core.setup = setup_core
 
     def refresh_section(self, section: str = "", force_distutils: bool = False):
         pypi_metadata = self._get_pypi_metadata()
