@@ -36,7 +36,7 @@ class PyPi(AbstractRecipeModel):
         name = self.get_var_content(self["package"]["name"].values[0])
         version = self.get_var_content(self["package"]["version"].values[0])
         pkg = f"{name}=={version}"
-        temp_folder = mktemp(prefix=f"grayskull-{pkg}-")
+        temp_folder = mktemp(prefix=f"grayskull-{name}-{version}-")
         check_output(
             [
                 "pip",
@@ -71,6 +71,9 @@ class PyPi(AbstractRecipeModel):
         from distutils import core
 
         setup_core_original = core.setup
+        old_dir = os.getcwd()
+        path_setup = list(Path(folder).rglob("setup.py"))[0]
+        os.chdir(os.path.dirname(str(path_setup)))
 
         data = {}
 
@@ -91,14 +94,16 @@ class PyPi(AbstractRecipeModel):
 
         try:
             core.setup = __fake_distutils_setup
-            path_setup = list(Path(folder).rglob("setup.py"))[0]
             try:
                 core.run_setup(str(path_setup), script_args=["install"])
             except RuntimeError:
                 pass
             yield data
+        except Exception:
+            yield {}
         finally:
             core.setup = setup_core_original
+            os.chdir(old_dir)
 
     def refresh_section(self, section: str = "", force_distutils: bool = False):
         pypi_metadata = self._get_pypi_metadata()
