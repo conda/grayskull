@@ -143,3 +143,20 @@ def test_injection_distutils():
     }
     assert data["version"] == "5.5.1"
     assert data["name"] == "hypothesis"
+
+
+def test_injection_distutils_pytest():
+    recipe = PyPi(name="pytest", version="5.3.2")
+    data = recipe._extract_fields_by_distutils()
+    assert data["install_requires"] == [
+        "py>=1.5.0",
+        "packaging",
+        "attrs>=17.4.0",
+        "more-itertools>=4.0.0",
+        'atomicwrites>=1.0;sys_platform=="win32"',
+        'pathlib2>=2.2.0;python_version<"3.6"',
+        'colorama;sys_platform=="win32"',
+        "pluggy>=0.12,<1.0",
+        'importlib-metadata>=0.12;python_version<"3.8"',
+        "wcwidth",
+    ]

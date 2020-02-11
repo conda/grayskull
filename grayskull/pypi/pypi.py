@@ -98,6 +98,15 @@ class PyPi(AbstractRecipeModel):
                 core.run_setup(str(path_setup), script_args=["install"])
             except RuntimeError:
                 pass
+            if not data:
+                with open(str(path_setup), "r+") as setup_file:
+                    content = setup_file.read()
+                    setup_file.seek(0)
+                    setup_file.write(f'__name__ = "__main__"\n{content}')
+                try:
+                    core.run_setup(str(path_setup), script_args=["install"])
+                except RuntimeError:
+                    pass
             yield data
         except Exception:
             yield {}
