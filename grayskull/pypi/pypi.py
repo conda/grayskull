@@ -134,7 +134,7 @@ class PyPi(AbstractRecipeModel):
             limit_python = ""
         else:
             limit_python = PyPi.py_version_to_limit_python(metadata)
-        limit_python = limit_python if limit_python else ""
+        limit_python = f" {limit_python}" if limit_python else ""
         host_req = [f"python{limit_python}", "pip"]
         run_req.insert(0, f"python{limit_python}")
         return {"host": sorted(host_req), "run": sorted(run_req)}
