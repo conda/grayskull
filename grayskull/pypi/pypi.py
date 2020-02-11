@@ -32,8 +32,7 @@ class PyPi(AbstractRecipeModel):
         super(PyPi, self).__init__(name=name, version=version)
         self["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
 
-    def _extract_fields_by_distutils(self):
-        # TODO: Implement injection in distutils when there is no PyPi metadata
+    def _extract_fields_by_distutils(self) -> dict:
         name = self.get_var_content(self["package"]["name"].values[0])
         version = self.get_var_content(self["package"]["version"].values[0])
         pkg = f"{name}=={version}"
@@ -53,7 +52,6 @@ class PyPi(AbstractRecipeModel):
         shutil.unpack_archive(
             os.path.join(temp_folder, os.listdir(temp_folder)[0]), temp_folder
         )
-
         with self._injection_distutils(temp_folder) as metadata:
             return metadata
 
@@ -63,7 +61,7 @@ class PyPi(AbstractRecipeModel):
         It is injecting code in the distutils.core.setup and replacing the
         setup function by the inner function __fake_distutils_setup.
         This method is a contextmanager, after leaving the context it will return
-        with the normal implementation of the disutils.core.setup.
+        with the normal implementation of the distutils.core.setup.
         This method is necessary because some information are missing from the
         pypi metadata and also for those packages which the pypi metadata is missing.
 
@@ -72,7 +70,7 @@ class PyPi(AbstractRecipeModel):
         """
         from distutils import core
 
-        setup_core = core.setup
+        setup_core_original = core.setup
 
         data = {}
 
@@ -100,7 +98,7 @@ class PyPi(AbstractRecipeModel):
                 pass
             yield data
         finally:
-            core.setup = setup_core
+            core.setup = setup_core_original
 
     def refresh_section(self, section: str = "", force_distutils: bool = False):
         pypi_metadata = self._get_pypi_metadata()
