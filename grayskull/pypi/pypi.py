@@ -140,11 +140,10 @@ class PyPi(AbstractRecipeModel):
             yield data_dist
         except Exception:
             yield data_dist
-        finally:
-            core.setup = setup_core_original
-            dist_ext.build_ext = original_build_ext_distutils
-            setup_ext.build_ext = original_build_ext_setuptools
-            os.chdir(old_dir)
+        core.setup = setup_core_original
+        dist_ext.build_ext = original_build_ext_distutils
+        setup_ext.build_ext = original_build_ext_setuptools
+        os.chdir(old_dir)
 
     def __run_setup_py(self, path_setup: str, data_dist: dict, run_py=False):
         original_path = sys.path
