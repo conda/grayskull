@@ -160,3 +160,11 @@ def test_injection_distutils_pytest():
         'importlib-metadata>=0.12;python_version<"3.8"',
         "wcwidth",
     ]
+    assert data["setup_requires"] == ["setuptools>=40.0", "setuptools_scm"]
+
+
+def test_injection_distutils_compiler_gws():
+    recipe = PyPi(name="gsw", version="3.3.1")
+    data = recipe._extract_fields_by_distutils()
+    assert data["c_compiler"]
+    assert data["packages"] == ["gsw"]

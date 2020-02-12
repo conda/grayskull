@@ -5,6 +5,7 @@ import shutil
 import sys
 from collections import namedtuple
 from contextlib import contextmanager
+from distutils import core
 from pathlib import Path
 from subprocess import check_output
 from tempfile import mktemp
@@ -69,50 +70,109 @@ class PyPi(AbstractRecipeModel):
         :yield: return the
         """
         from distutils import core
+        from distutils.command import build_ext as dist_ext
 
         setup_core_original = core.setup
         old_dir = os.getcwd()
         path_setup = list(Path(folder).rglob("setup.py"))[0]
         os.chdir(os.path.dirname(str(path_setup)))
 
-        data = {}
+        original_build_ext_distutils = dist_ext.build_ext
+
+        data_dist = {}
+        data_dist["setup_requires"] = []
+
+        class _fake_build_ext_distutils(original_build_ext_distutils):
+            def __init__(self, *args, **kwargs):
+                global data_dist
+                data_dist["c_compiler"] = True
+                super(_fake_build_ext_distutils, self).__init__(*args, **kwargs)
+
+        from setuptools.command import build_ext as setup_ext
+
+        original_build_ext_setuptools = setup_ext.build_ext
+
+        class _fake_build_ext_setuptools(original_build_ext_setuptools):
+            def __init__(self, *args, **kwargs):
+                global data_dist
+                data_dist["c_compiler"] = True
+                super(_fake_build_ext_setuptools, self).__init__(*args, **kwargs)
 
         def __fake_distutils_setup(*args, **kwargs):
-            data["tests_require"] = kwargs.get("tests_require", None)
-            data["install_requires"] = kwargs.get("install_requires", None)
-            data["extras_require"] = kwargs.get("extras_require", None)
-            data["entry_points"] = kwargs.get("entry_points", None)
-            data["packages"] = kwargs.get("packages", None)
-            data["setuptools"] = "setuptools" in sys.modules
-            data["summary"] = kwargs.get("description", None)
-            data["home"] = kwargs.get("url", None)
-            data["license"] = kwargs.get("license", None)
-            data["name"] = kwargs.get("name", None)
-            data["classifiers"] = kwargs.get("classifiers", None)
-            data["version"] = kwargs.get("version", None)
-            return
+            data_dist["tests_require"] = kwargs.get("tests_require", None)
+            data_dist["install_requires"] = kwargs.get("install_requires", None)
+            data_dist["setup_requires"] += kwargs.get("setup_requires", [])
+            data_dist["extras_require"] = kwargs.get("extras_require", None)
+            data_dist["python_requires"] = kwargs.get("python_requires", None)
+            data_dist["entry_points"] = kwargs.get("entry_points", None)
+            data_dist["packages"] = kwargs.get("packages", None)
+            data_dist["summary"] = kwargs.get("description", None)
+            data_dist["home"] = kwargs.get("url", None)
+            data_dist["license"] = kwargs.get("license", None)
+            data_dist["name"] = kwargs.get("name", None)
+            data_dist["classifiers"] = kwargs.get("classifiers", None)
+            data_dist["version"] = kwargs.get("version", None)
+
+            if "use_scm_version" in kwargs:
+                if "setuptools_scm" not in data_dist["setup_requires"]:
+                    data_dist["setup_requires"] += ["setuptools_scm"]
+                if "setuptools-scm" in data_dist["setup_requires"]:
+                    data_dist["setup_requires"].remove("setuptools-scm")
+
+            if kwargs.get("ext_modules", None):
+                data_dist["c_compiler"] = True
+            else:
+                data_dist["c_compiler"] = data_dist.get("c_compiler", False)
+            setup_core_original(*args, **kwargs)
 
         try:
             core.setup = __fake_distutils_setup
-            try:
-                core.run_setup(str(path_setup), script_args=["install"])
-            except RuntimeError:
-                pass
-            if not data:
-                with open(str(path_setup), "r+") as setup_file:
-                    content = setup_file.read()
-                    setup_file.seek(0)
-                    setup_file.write(f'__name__ = "__main__"\n{content}')
-                try:
-                    core.run_setup(str(path_setup), script_args=["install"])
-                except RuntimeError:
-                    pass
-            yield data
+            dist_ext.build_ext = _fake_build_ext_distutils
+            setup_ext.build_ext = _fake_build_ext_setuptools
+            path_setup = str(path_setup)
+            setup_requires = self.__run_setup_py(path_setup, data_dist)
+            if not data_dist:
+                setup_requires = self.__run_setup_py(path_setup, data_dist, run_py=True)
+            data_dist["setup_requires"] = (
+                data_dist.get("setup_requires", []) + setup_requires
+            )
+            yield data_dist
         except Exception:
-            yield {}
+            yield data_dist
         finally:
             core.setup = setup_core_original
+            dist_ext.build_ext = original_build_ext_distutils
+            setup_ext.build_ext = original_build_ext_setuptools
             os.chdir(old_dir)
+
+    def __run_setup_py(self, path_setup: str, data_dist, run_py=False):
+        if not data_dist.get("requires_dist"):
+            data_dist["requires_dist"] = []
+        original_path = sys.path
+        pip_dir = os.path.join(os.path.dirname(str(path_setup)), "pip-dir")
+        if not os.path.exists(pip_dir):
+            os.mkdir(pip_dir)
+        if os.path.dirname(path_setup) not in sys.path:
+            sys.path.append(os.path.dirname(path_setup))
+            sys.path.append(pip_dir)
+        try:
+            if run_py:
+                import runpy
+
+                runpy.run_path(path_setup, run_name="__main__")
+            else:
+                core.run_setup(
+                    path_setup, script_args=["install", f"--target={pip_dir}"]
+                )
+        except ModuleNotFoundError as err:
+            data_dist["requires_dist"].append(err.name)
+            check_output(["pip", "install", err.name, f"--target={pip_dir}"])
+            self.__run_setup_py(path_setup, data_dist, run_py)
+        except Exception:
+            pass
+        if os.path.exists(pip_dir):
+            os.rmdir(pip_dir)
+        sys.path = original_path
 
     def refresh_section(self, section: str = "", force_distutils: bool = False):
         pypi_metadata = self._get_pypi_metadata()
