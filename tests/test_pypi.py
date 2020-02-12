@@ -165,7 +165,7 @@ def test_injection_distutils_pytest():
     assert not data["c_compiler"]
 
 
-def test_injection_distutils_compiler_gws():
+def test_injection_distutils_compiler_gsw():
     recipe = PyPi(name="gsw", version="3.3.1")
     data = recipe._extract_fields_by_distutils()
     assert data["c_compiler"]
