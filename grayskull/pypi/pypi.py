@@ -80,7 +80,6 @@ class PyPi(AbstractRecipeModel):
         original_build_ext_distutils = dist_ext.build_ext
 
         data_dist = {}
-        data_dist["setup_requires"] = []
 
         class _fake_build_ext_distutils(original_build_ext_distutils):
             def __init__(self, *args, **kwargs):
@@ -101,6 +100,8 @@ class PyPi(AbstractRecipeModel):
         def __fake_distutils_setup(*args, **kwargs):
             data_dist["tests_require"] = kwargs.get("tests_require", None)
             data_dist["install_requires"] = kwargs.get("install_requires", None)
+            if not data_dist.get("setup_requires"):
+                data_dist["setup_requires"] = []
             data_dist["setup_requires"] += kwargs.get("setup_requires", [])
             data_dist["extras_require"] = kwargs.get("extras_require", None)
             data_dist["python_requires"] = kwargs.get("python_requires", None)
@@ -123,6 +124,9 @@ class PyPi(AbstractRecipeModel):
                 data_dist["c_compiler"] = True
             else:
                 data_dist["c_compiler"] = data_dist.get("c_compiler", False)
+            if data_dist.get("run_py", False):
+                del data_dist["run_py"]
+                return
             setup_core_original(*args, **kwargs)
 
         try:
@@ -130,12 +134,9 @@ class PyPi(AbstractRecipeModel):
             dist_ext.build_ext = _fake_build_ext_distutils
             setup_ext.build_ext = _fake_build_ext_setuptools
             path_setup = str(path_setup)
-            setup_requires = self.__run_setup_py(path_setup, data_dist)
+            self.__run_setup_py(path_setup, data_dist)
             if not data_dist:
-                setup_requires = self.__run_setup_py(path_setup, data_dist, run_py=True)
-            data_dist["setup_requires"] = (
-                data_dist.get("setup_requires", []) + setup_requires
-            )
+                self.__run_setup_py(path_setup, data_dist, run_py=True)
             yield data_dist
         except Exception:
             yield data_dist
@@ -145,9 +146,7 @@ class PyPi(AbstractRecipeModel):
             setup_ext.build_ext = original_build_ext_setuptools
             os.chdir(old_dir)
 
-    def __run_setup_py(self, path_setup: str, data_dist, run_py=False):
-        if not data_dist.get("requires_dist"):
-            data_dist["requires_dist"] = []
+    def __run_setup_py(self, path_setup: str, data_dist: dict, run_py=False):
         original_path = sys.path
         pip_dir = os.path.join(os.path.dirname(str(path_setup)), "pip-dir")
         if not os.path.exists(pip_dir):
@@ -159,13 +158,16 @@ class PyPi(AbstractRecipeModel):
             if run_py:
                 import runpy
 
+                data_dist["run_py"] = True
                 runpy.run_path(path_setup, run_name="__main__")
             else:
                 core.run_setup(
                     path_setup, script_args=["install", f"--target={pip_dir}"]
                 )
         except ModuleNotFoundError as err:
-            data_dist["requires_dist"].append(err.name)
+            if not data_dist.get("setup_requires"):
+                data_dist["setup_requires"] = []
+            data_dist["setup_requires"].append(err.name)
             check_output(["pip", "install", err.name, f"--target={pip_dir}"])
             self.__run_setup_py(path_setup, data_dist, run_py)
         except Exception:

@@ -143,6 +143,7 @@ def test_injection_distutils():
     }
     assert data["version"] == "5.5.1"
     assert data["name"] == "hypothesis"
+    assert not data["c_compiler"]
 
 
 def test_injection_distutils_pytest():
@@ -161,6 +162,7 @@ def test_injection_distutils_pytest():
         "wcwidth",
     ]
     assert data["setup_requires"] == ["setuptools>=40.0", "setuptools_scm"]
+    assert not data["c_compiler"]
 
 
 def test_injection_distutils_compiler_gws():
