@@ -6,6 +6,7 @@ import sys
 from collections import namedtuple
 from contextlib import contextmanager
 from distutils import core
+from functools import lru_cache
 from pathlib import Path
 from subprocess import check_output
 from tempfile import mktemp
@@ -26,16 +27,17 @@ class PyPi(AbstractRecipeModel):
 
     def __init__(self, name=None, version=None, force_setup=False):
         self._force_setup = force_setup
-        self._pypi_metadata = {}
         self._setup_metadata = None
         self._is_using_selectors = False
         self._is_no_arch = True
         super(PyPi, self).__init__(name=name, version=version)
         self["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
 
-    def _extract_fields_by_distutils(self) -> dict:
+    @lru_cache(maxsize=10)
+    def _get_sdist_metadata(self, version: Optional[str] = None) -> dict:
         name = self.get_var_content(self["package"]["name"].values[0])
-        version = self.get_var_content(self["package"]["version"].values[0])
+        if not version:
+            version = self.get_var_content(self["package"]["version"].values[0])
         pkg = f"{name}=={version}"
         temp_folder = mktemp(prefix=f"grayskull-{name}-{version}-")
         check_output(
@@ -67,7 +69,7 @@ class PyPi(AbstractRecipeModel):
         pypi metadata and also for those packages which the pypi metadata is missing.
 
         :pram folder: Path to the folder where the sdist package was extracted
-        :yield: return the
+        :yield: return the metadata from sdist
         """
         from distutils import core
         from distutils.command import build_ext as dist_ext
@@ -98,21 +100,22 @@ class PyPi(AbstractRecipeModel):
                 super(_fake_build_ext_setuptools, self).__init__(*args, **kwargs)
 
         def __fake_distutils_setup(*args, **kwargs):
-            data_dist["tests_require"] = kwargs.get("tests_require", None)
-            data_dist["install_requires"] = kwargs.get("install_requires", None)
+            data_dist["tests_require"] = kwargs.get("tests_require", [])
+            data_dist["install_requires"] = kwargs.get("install_requires", [])
             if not data_dist.get("setup_requires"):
                 data_dist["setup_requires"] = []
             data_dist["setup_requires"] += kwargs.get("setup_requires", [])
-            data_dist["extras_require"] = kwargs.get("extras_require", None)
-            data_dist["python_requires"] = kwargs.get("python_requires", None)
+            data_dist["extras_require"] = kwargs.get("extras_require", [])
+            data_dist["requires_python"] = kwargs.get("requires_python", None)
             data_dist["entry_points"] = kwargs.get("entry_points", None)
-            data_dist["packages"] = kwargs.get("packages", None)
+            data_dist["packages"] = kwargs.get("packages", [])
             data_dist["summary"] = kwargs.get("description", None)
             data_dist["home"] = kwargs.get("url", None)
             data_dist["license"] = kwargs.get("license", None)
             data_dist["name"] = kwargs.get("name", None)
             data_dist["classifiers"] = kwargs.get("classifiers", None)
             data_dist["version"] = kwargs.get("version", None)
+            data_dist["author"] = kwargs.get("author", None)
 
             if "use_scm_version" in kwargs:
                 if "setuptools_scm" not in data_dist["setup_requires"]:
@@ -175,11 +178,78 @@ class PyPi(AbstractRecipeModel):
             os.rmdir(pip_dir)
         sys.path = original_path
 
+    def _merge_pypi_sdist_metadata(
+        self, pypi_metadata: dict, sdist_metadata: dict
+    ) -> dict:
+        """This method is responsible to merge two dictionaries and it will give
+        priority to the pypi_metadata.
+
+        :param pypi_metadata: PyPI metadata
+        :param sdist_metadata: Metadata which comes from the ``setup.py``
+        :return: A new dict with the result of the merge
+        """
+
+        def get_val(key):
+            return pypi_metadata.get(key) or sdist_metadata.get(key)
+
+        return {
+            "author": sdist_metadata["author"],
+            "name": get_val("name"),
+            "version": get_val("version"),
+            "source": pypi_metadata["source"],
+            "packages": sdist_metadata["packages"],
+            "home": sdist_metadata["home"],
+            "classifiers": sdist_metadata["classifiers"],
+            "c_compiler": sdist_metadata.get("c_compiler", False),
+            "entry_points": self._get_entry_points_from_sdist(sdist_metadata),
+            "summary": get_val("summary"),
+            "requires_python": get_val("requires_python"),
+            "doc_url": get_val("doc_url"),
+            "dev_url": get_val("dev_url"),
+            "license": get_val("license"),
+            "setup_requires": get_val("setup_requires"),
+            "extra_requires": get_val("extra_requires"),
+            "project_url": get_val("project_url"),
+            "extras_require": get_val("extras_require"),
+            "requires_dist": self._merge_requires_dist(pypi_metadata, sdist_metadata),
+        }
+
+    def _get_entry_points_from_sdist(self, sdist_metadata: dict) -> List:
+        all_entry_points = sdist_metadata.get("entry_points", None)
+        if all_entry_points and (
+            all_entry_points.get("console_scripts")
+            or all_entry_points.get("gui_scripts")
+        ):
+            return all_entry_points.get("console_scripts", []) + all_entry_points.get(
+                "gui_scripts", []
+            )
+        return []
+
+    def _merge_requires_dist(self, pypi_metadata: dict, sdist_metadata: dict) -> List:
+        re_deps_name = re.compile(r"^\s*([\.a-zA-Z0-9_-]+)", re.MULTILINE)
+        if pypi_metadata.get("requires_dist"):
+            pypi_deps_name = [
+                re_deps_name.match(s).group(0).strip()
+                for s in pypi_metadata.get("requires_dist", [])
+                if re_deps_name.match(s)
+            ]
+        else:
+            pypi_deps_name = []
+
+        requires_dist = []
+        if pypi_metadata.get("requires_dist"):
+            requires_dist = pypi_metadata.get("requires_dist", [])
+        for sdist_pkg in sdist_metadata.get("install_requires", []):
+            match_deps = re_deps_name.match(sdist_pkg)
+            if match_deps and match_deps.group(0).strip() not in pypi_deps_name:
+                requires_dist.append(sdist_pkg)
+        return requires_dist
+
     def refresh_section(self, section: str = "", force_distutils: bool = False):
         pypi_metadata = self._get_pypi_metadata()
         if pypi_metadata.get(section):
             if section == "package":
-                self.add_jinja_var("version", pypi_metadata["package"]["version"])
+                self.add_jinja_var("version", pypi_metadata["version"])
                 self["package"]["version"] = "<{ version }}"
             else:
                 self.populate_metadata_from_dict(
@@ -188,56 +258,56 @@ class PyPi(AbstractRecipeModel):
         if not self._is_using_selectors:
             self["build"]["noarch"] = "python"
 
-    def _get_pypi_metadata(self) -> dict:
+    @lru_cache(maxsize=10)
+    def _get_pypi_metadata(self, version: Optional[str] = None) -> dict:
         name = self.get_var_content(self["package"]["name"].values[0])
-        if self["package"]["version"].values:
+
+        if not version and self["package"]["version"].values:
             version = self.get_var_content(self["package"]["version"].values[0])
+
+        if version:
             url_pypi = self.URL_PYPI_METADATA.format(pkg_name=f"{name}/{version}")
         else:
-            version = None
             log.info(f"Version for {name} not specified.\nGetting the latest one.")
             url_pypi = self.URL_PYPI_METADATA.format(pkg_name=name)
 
-        if (
-            self._pypi_metadata
-            and version
-            and self._pypi_metadata["package"]["version"] == version
-        ):
-            return self._pypi_metadata
-
         metadata = requests.get(url=url_pypi)
         if metadata.status_code != 200:
-            raise HTTPError(f"It was not possible to recover PyPi metadata for {name}.")
+            raise HTTPError(
+                f"It was not possible to recover PyPi metadata for {name}.\n"
+                f"Error code: {metadata.status_code}"
+            )
 
         metadata = metadata.json()
         info = metadata["info"]
         project_urls = info.get("project_urls", {})
-
-        self._pypi_metadata = {
-            "package": {"name": name, "version": info["version"]},
-            "requirements": self._extract_pypi_requirements(metadata),
-            "test": {"imports": [name.lower()]},
-            "about": {
-                "home": info.get("project_url"),
-                "summary": info.get("summary"),
-                "doc_url": info.get("docs_url"),
-                "dev_url": project_urls.get("Source"),
-                "license": info.get("license"),
-            },
+        log.info(f"Package: {name}=={info['version']}")
+        log.debug(f"Full PyPI metadata:\n{metadata}")
+        return {
+            "name": name,
+            "version": info["version"],
+            "requires_dist": info.get("requires_dist", []),
+            "requires_python": info.get("requires_python", None),
+            "summary": info.get("summary"),
+            "project_url": info.get("project_url"),
+            "doc_url": info.get("docs_url"),
+            "dev_url": project_urls.get("Source"),
+            "license": info.get("license"),
             "source": {
                 "url": "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/"
                 "{{ name }}-{{ version }}.tar.gz",
                 "sha256": PyPi.get_sha256_from_pypi_metadata(metadata),
             },
         }
-        return self._pypi_metadata
 
     @staticmethod
     def get_sha256_from_pypi_metadata(pypi_metadata: dict) -> str:
         for pkg_info in pypi_metadata.get("urls"):
             if pkg_info.get("packagetype", "") == "sdist":
                 return pkg_info["digests"]["sha256"]
-        raise ValueError("Hash information for sdist was not found on PyPi metadata.")
+        raise AttributeError(
+            "Hash information for sdist was not found on PyPi metadata."
+        )
 
     def __skip_pypi_requirement(self, list_extra: List) -> bool:
         for extra in list_extra:
@@ -245,11 +315,11 @@ class PyPi(AbstractRecipeModel):
                 return True
         return False
 
-    def _extract_pypi_requirements(self, metadata: dict) -> dict:
-        if not metadata["info"].get("requires_dist"):
+    def _extract_requirements(self, metadata: dict) -> dict:
+        if not metadata.get("requires_dist"):
             return {"host": sorted(["python", "pip"]), "run": ["python"]}
         run_req = []
-        for req in metadata["info"].get("requires_dist"):
+        for req in metadata.get("requires_dist", []):
             list_raw_requirements = req.split(";")
             selector = ""
             if len(list_raw_requirements) > 1:
@@ -271,8 +341,8 @@ class PyPi(AbstractRecipeModel):
             )
             run_req.append(f"{pkg_name} {version}{selector}".strip())
 
-        limit_python = metadata["info"].get("requires_python", "")
-        if limit_python and self._is_using_selectors:
+        limit_python = metadata.get("requires_python", "")
+        if limit_python and (self._is_using_selectors or metadata.get("compiler", [])):
             version_to_selector = PyPi.py_version_to_selector(metadata)
             if version_to_selector:
                 self["build"]["skip"] = True
@@ -344,7 +414,7 @@ class PyPi(AbstractRecipeModel):
         :return: return the constrained versions or the selectors
         """
         req_python = re.findall(
-            r"([><=!]+)\s*(\d+)(?:\.(\d+))?", pypi_metadata["info"]["requires_python"],
+            r"([><=!]+)\s*(\d+)(?:\.(\d+))?", pypi_metadata["requires_python"],
         )
         if not req_python:
             return None

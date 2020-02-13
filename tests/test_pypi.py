@@ -17,7 +17,7 @@ def pypi_metadata():
 
 def test_extract_pypi_requirements(pypi_metadata):
     recipe = PyPi(name="pytest")
-    pypi_reqs = recipe._extract_pypi_requirements(pypi_metadata)
+    pypi_reqs = recipe._extract_requirements(pypi_metadata["info"])
     assert sorted(pypi_reqs["host"]) == sorted(["python", "pip"])
     assert sorted(pypi_reqs["run"]) == sorted(
         [
@@ -39,9 +39,8 @@ def test_extract_pypi_requirements(pypi_metadata):
 def test_get_pypi_metadata(pypi_metadata):
     recipe = PyPi(name="pytest", version="5.3.1")
     metadata = recipe._get_pypi_metadata()
-    assert metadata["package"]["name"] == "pytest"
-    assert metadata["package"]["version"] == "5.3.1"
-    assert metadata["test"]["imports"] == ["pytest"]
+    assert metadata["name"] == "pytest"
+    assert metadata["version"] == "5.3.1"
 
 
 def test_get_name_version_from_requires_dist():
@@ -85,7 +84,7 @@ def test_get_selector():
     ],
 )
 def test_py_version_to_selector(requires_python, exp_selector):
-    metadata = {"info": {"requires_python": requires_python}}
+    metadata = {"requires_python": requires_python}
     assert PyPi.py_version_to_selector(metadata) == f"# [py{exp_selector}]"
 
 
@@ -107,7 +106,7 @@ def test_py_version_to_selector(requires_python, exp_selector):
     ],
 )
 def test_py_version_to_limit_python(requires_python, exp_limit):
-    metadata = {"info": {"requires_python": requires_python}}
+    metadata = {"requires_python": requires_python}
     assert PyPi.py_version_to_limit_python(metadata) == f"{exp_limit}"
 
 
@@ -126,14 +125,14 @@ def test_get_sha256_from_pypi_metadata():
             {"packagetype": "wheel", "digests": {"sha256": "1234sha256"}},
         ]
     }
-    with pytest.raises(ValueError) as err:
+    with pytest.raises(AttributeError) as err:
         PyPi.get_sha256_from_pypi_metadata(metadata)
     assert err.match("Hash information for sdist was not found on PyPi metadata.")
 
 
 def test_injection_distutils():
     recipe = PyPi(name="hypothesis", version="5.5.1")
-    data = recipe._extract_fields_by_distutils()
+    data = recipe._get_sdist_metadata()
     assert data["install_requires"] == [
         "attrs>=19.2.0",
         "sortedcontainers>=2.1.0,<3.0.0",
@@ -148,7 +147,7 @@ def test_injection_distutils():
 
 def test_injection_distutils_pytest():
     recipe = PyPi(name="pytest", version="5.3.2")
-    data = recipe._extract_fields_by_distutils()
+    data = recipe._get_sdist_metadata()
     assert data["install_requires"] == [
         "py>=1.5.0",
         "packaging",
@@ -167,6 +166,16 @@ def test_injection_distutils_pytest():
 
 def test_injection_distutils_compiler_gsw():
     recipe = PyPi(name="gsw", version="3.3.1")
-    data = recipe._extract_fields_by_distutils()
+    data = recipe._get_sdist_metadata()
     assert data["c_compiler"]
     assert data["packages"] == ["gsw"]
+
+
+def test_merge_pypi_sdist_metadata():
+    recipe = PyPi(name="gsw", version="3.3.1")
+    pypi_metadata = recipe._get_pypi_metadata()
+    sdist_metadata = recipe._get_sdist_metadata()
+    merged_data = recipe._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
+    assert merged_data["c_compiler"]
+    assert merged_data["requires_dist"] == ["numpy"]
+    assert merged_data["setup_requires"] == ["numpy"]
