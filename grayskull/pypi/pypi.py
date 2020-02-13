@@ -27,6 +27,7 @@ class PyPi(AbstractRecipeModel):
     PKG_NEEDS_C_COMPILER = ("cython",)
     PKG_NEEDS_CXX_COMPILER = ("pybind11",)
     RE_DEPS_NAME = re.compile(r"^\s*([\.a-zA-Z0-9_-]+)", re.MULTILINE)
+    PIN_PKG_COMPILER = {"numpy": "<{ pin_compatible('numpy') }}"}
 
     def __init__(self, name=None, version=None, force_setup=False):
         self._force_setup = force_setup
@@ -402,8 +403,15 @@ class PyPi(AbstractRecipeModel):
         result = {}
         if build_req:
             result["build"] = sorted(build_req)
-        result.update({"host": sorted(host_req), "run": sorted(run_req)})
 
+        for pkg in host_req:
+            pkg_name = PyPi.RE_DEPS_NAME.match(pkg).group(0)
+            if pkg_name in PyPi.PIN_PKG_COMPILER.keys():
+                if pkg_name in run_req:
+                    run_req.remove(pkg_name)
+                run_req.append(PyPi.PIN_PKG_COMPILER[pkg_name])
+
+        result.update({"host": sorted(host_req), "run": sorted(run_req)})
         return result
 
     def _get_all_selectors_pypi(self, list_extra):
