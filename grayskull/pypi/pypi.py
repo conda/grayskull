@@ -36,10 +36,10 @@ class PyPi(AbstractRecipeModel):
     @lru_cache(maxsize=10)
     def _get_sdist_metadata(self, version: Optional[str] = None) -> dict:
         name = self.get_var_content(self["package"]["name"].values[0])
-        if not version:
+        if not version and self["package"]["version"].values:
             version = self.get_var_content(self["package"]["version"].values[0])
-        pkg = f"{name}=={version}"
-        temp_folder = mktemp(prefix=f"grayskull-{name}-{version}-")
+        pkg = f"{name}=={version}" if version else name
+        temp_folder = mktemp(prefix=f"grayskull-{name}-")
         check_output(
             [
                 "pip",
@@ -245,18 +245,38 @@ class PyPi(AbstractRecipeModel):
                 requires_dist.append(sdist_pkg)
         return requires_dist
 
-    def refresh_section(self, section: str = "", force_distutils: bool = False):
-        pypi_metadata = self._get_pypi_metadata()
-        if pypi_metadata.get(section):
+    def refresh_section(self, section: str = ""):
+        metadata = self._get_metadata()
+        if metadata.get(section):
             if section == "package":
-                self.add_jinja_var("version", pypi_metadata["version"])
+                self.set_jinja_var("version", metadata["package"]["version"])
                 self["package"]["version"] = "<{ version }}"
             else:
-                self.populate_metadata_from_dict(
-                    pypi_metadata.get(section), self[section]
-                )
+                self.populate_metadata_from_dict(metadata.get(section), self[section])
         if not self._is_using_selectors:
             self["build"]["noarch"] = "python"
+
+    def _get_metadata(self) -> dict:
+        name = self.get_var_content(self["package"]["name"].values[0])
+        pypi_metada = self._get_pypi_metadata()
+        sdist_metada = self._get_sdist_metadata()
+        metadata = self._merge_pypi_sdist_metadata(pypi_metada, sdist_metada)
+        test_imports = (
+            metadata.get("packages") if metadata.get("packages") else [name.lower()]
+        )
+        return {
+            "package": {"name": name, "version": metadata["version"]},
+            "requirements": self._extract_requirements(metadata),
+            "test": {"imports": test_imports},
+            "about": {
+                "home": metadata.get("project_url"),
+                "summary": metadata.get("summary"),
+                "doc_url": metadata.get("doc_url"),
+                "dev_url": metadata.get("dev_url"),
+                "license": metadata.get("license"),
+            },
+            "source": metadata.get("source", {}),
+        }
 
     @lru_cache(maxsize=10)
     def _get_pypi_metadata(self, version: Optional[str] = None) -> dict:
@@ -316,7 +336,11 @@ class PyPi(AbstractRecipeModel):
         return False
 
     def _extract_requirements(self, metadata: dict) -> dict:
-        if not metadata.get("requires_dist"):
+        requires_dist = metadata.get("requires_dist")
+        host_req = (
+            metadata.get("setup_requires") if metadata.get("setup_requires") else []
+        )
+        if not requires_dist and not host_req:
             return {"host": sorted(["python", "pip"]), "run": ["python"]}
         run_req = []
         for req in metadata.get("requires_dist", []):
@@ -351,7 +375,8 @@ class PyPi(AbstractRecipeModel):
         else:
             limit_python = PyPi.py_version_to_limit_python(metadata)
         limit_python = f" {limit_python}" if limit_python else ""
-        host_req = [f"python{limit_python}", "pip"]
+        if "pip" not in host_req:
+            host_req += [f"python{limit_python}", "pip"]
         run_req.insert(0, f"python{limit_python}")
         return {"host": sorted(host_req), "run": sorted(run_req)}
 
@@ -413,6 +438,8 @@ class PyPi(AbstractRecipeModel):
         :param is_selector:
         :return: return the constrained versions or the selectors
         """
+        if not pypi_metadata["requires_python"]:
+            return None
         req_python = re.findall(
             r"([><=!]+)\s*(\d+)(?:\.(\d+))?", pypi_metadata["requires_python"],
         )
