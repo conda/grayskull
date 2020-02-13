@@ -300,7 +300,7 @@ class PyPi(AbstractRecipeModel):
 
         metadata = metadata.json()
         info = metadata["info"]
-        project_urls = info.get("project_urls", {})
+        project_urls = info.get("project_urls") if info.get("project_urls") else {}
         log.info(f"Package: {name}=={info['version']}")
         log.debug(f"Full PyPI metadata:\n{metadata}")
         return {
