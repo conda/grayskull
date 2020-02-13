@@ -160,7 +160,12 @@ def test_injection_distutils_pytest():
         'importlib-metadata>=0.12;python_version<"3.8"',
         "wcwidth",
     ]
-    assert data["setup_requires"] == ["setuptools>=40.0", "setuptools_scm"]
+    assert data["setup_requires"] == [
+        "setuptools>=40.0",
+        "setuptools_scm",
+        "python",
+        "pip",
+    ]
     assert not data["c_compiler"]
 
 
@@ -178,4 +183,4 @@ def test_merge_pypi_sdist_metadata():
     merged_data = recipe._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
     assert merged_data["c_compiler"]
     assert merged_data["requires_dist"] == ["numpy"]
-    assert merged_data["setup_requires"] == ["numpy"]
+    assert merged_data["setup_requires"] == ["numpy", "python", "pip"]
