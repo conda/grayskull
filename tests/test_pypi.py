@@ -163,8 +163,6 @@ def test_injection_distutils_pytest():
     assert data["setup_requires"] == [
         "setuptools>=40.0",
         "setuptools_scm",
-        "python",
-        "pip",
     ]
     assert not data.get("compilers")
 
@@ -182,7 +180,7 @@ def test_merge_pypi_sdist_metadata():
     sdist_metadata = recipe._get_sdist_metadata()
     merged_data = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
     assert merged_data["compilers"] == ["c"]
-    assert merged_data["setup_requires"] == ["numpy", "python", "pip"]
+    assert merged_data["setup_requires"] == ["numpy"]
 
 
 def test_update_requirements_with_pin():
