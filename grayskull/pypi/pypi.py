@@ -352,9 +352,11 @@ class PyPi(AbstractRecipeModel):
 
     def _extract_requirements(self, metadata: dict) -> dict:
         requires_dist = metadata.get("requires_dist")
-        host_req = (
+        setup_requires = (
             metadata.get("setup_requires") if metadata.get("setup_requires") else []
         )
+        host_req = self._format_host_requirements(setup_requires)
+
         if not requires_dist and not host_req:
             return {"host": sorted(["python", "pip"]), "run": ["python"]}
 
@@ -385,6 +387,23 @@ class PyPi(AbstractRecipeModel):
         result.update({"host": sorted(host_req), "run": sorted(run_req)})
         self._update_requirements_with_pin(result)
         return result
+
+    @staticmethod
+    def _format_host_requirements(setup_requires: List) -> List:
+        host_req = []
+        re_deps = re.compile(
+            r"^\s*([\.a-zA-Z0-9_-]+)\s*(.*)\s*$", re.MULTILINE | re.DOTALL
+        )
+        for req in setup_requires:
+            match_req = re_deps.match(req)
+            deps_name = req
+            if match_req:
+                match_req = match_req.groups()
+                deps_name = match_req[0]
+                if len(match_req) > 1:
+                    deps_name = " ".join(match_req)
+            host_req.append(deps_name.strip())
+        return host_req
 
     @staticmethod
     def _update_requirements_with_pin(requirements: dict):

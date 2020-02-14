@@ -229,3 +229,9 @@ def test_get_entry_points_from_sdist():
             }
         )
     ) == sorted(["gui_scripts=entrypoints", "console_scripts=entrypoints"])
+
+
+def test_format_host_requirements():
+    assert sorted(
+        PyPi._format_host_requirements(["setuptools>=40.0", "pkg2"])
+    ) == sorted(["setuptools >=40.0", "pkg2"])
