@@ -17,7 +17,7 @@ def pypi_metadata():
 
 def test_extract_pypi_requirements(pypi_metadata):
     recipe = PyPi(name="pytest")
-    pypi_reqs = recipe._extract_pypi_requirements(pypi_metadata)
+    pypi_reqs = recipe._extract_requirements(pypi_metadata["info"])
     assert sorted(pypi_reqs["host"]) == sorted(["python", "pip"])
     assert sorted(pypi_reqs["run"]) == sorted(
         [
@@ -39,9 +39,8 @@ def test_extract_pypi_requirements(pypi_metadata):
 def test_get_pypi_metadata(pypi_metadata):
     recipe = PyPi(name="pytest", version="5.3.1")
     metadata = recipe._get_pypi_metadata()
-    assert metadata["package"]["name"] == "pytest"
-    assert metadata["package"]["version"] == "5.3.1"
-    assert metadata["test"]["imports"] == ["pytest"]
+    assert metadata["name"] == "pytest"
+    assert metadata["version"] == "5.3.1"
 
 
 def test_get_name_version_from_requires_dist():
@@ -85,7 +84,7 @@ def test_get_selector():
     ],
 )
 def test_py_version_to_selector(requires_python, exp_selector):
-    metadata = {"info": {"requires_python": requires_python}}
+    metadata = {"requires_python": requires_python}
     assert PyPi.py_version_to_selector(metadata) == f"# [py{exp_selector}]"
 
 
@@ -107,7 +106,7 @@ def test_py_version_to_selector(requires_python, exp_selector):
     ],
 )
 def test_py_version_to_limit_python(requires_python, exp_limit):
-    metadata = {"info": {"requires_python": requires_python}}
+    metadata = {"requires_python": requires_python}
     assert PyPi.py_version_to_limit_python(metadata) == f"{exp_limit}"
 
 
@@ -126,6 +125,111 @@ def test_get_sha256_from_pypi_metadata():
             {"packagetype": "wheel", "digests": {"sha256": "1234sha256"}},
         ]
     }
-    with pytest.raises(ValueError) as err:
+    with pytest.raises(AttributeError) as err:
         PyPi.get_sha256_from_pypi_metadata(metadata)
     assert err.match("Hash information for sdist was not found on PyPi metadata.")
+
+
+def test_injection_distutils():
+    recipe = PyPi(name="hypothesis", version="5.5.1")
+    data = recipe._get_sdist_metadata()
+    assert data["install_requires"] == [
+        "attrs>=19.2.0",
+        "sortedcontainers>=2.1.0,<3.0.0",
+    ]
+    assert data["entry_points"] == {
+        "pytest11": ["hypothesispytest = hypothesis.extra.pytestplugin"]
+    }
+    assert data["version"] == "5.5.1"
+    assert data["name"] == "hypothesis"
+    assert not data.get("compilers")
+
+
+def test_injection_distutils_pytest():
+    recipe = PyPi(name="pytest", version="5.3.2")
+    data = recipe._get_sdist_metadata()
+    assert data["install_requires"] == [
+        "py>=1.5.0",
+        "packaging",
+        "attrs>=17.4.0",
+        "more-itertools>=4.0.0",
+        'atomicwrites>=1.0;sys_platform=="win32"',
+        'pathlib2>=2.2.0;python_version<"3.6"',
+        'colorama;sys_platform=="win32"',
+        "pluggy>=0.12,<1.0",
+        'importlib-metadata>=0.12;python_version<"3.8"',
+        "wcwidth",
+    ]
+    assert data["setup_requires"] == [
+        "setuptools>=40.0",
+        "setuptools_scm",
+    ]
+    assert not data.get("compilers")
+
+
+def test_injection_distutils_compiler_gsw():
+    recipe = PyPi(name="gsw", version="3.3.1")
+    data = recipe._get_sdist_metadata()
+    assert data.get("compilers") == ["c"]
+    assert data["packages"] == ["gsw"]
+
+
+def test_merge_pypi_sdist_metadata():
+    recipe = PyPi(name="gsw", version="3.3.1")
+    pypi_metadata = recipe._get_pypi_metadata()
+    sdist_metadata = recipe._get_sdist_metadata()
+    merged_data = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
+    assert merged_data["compilers"] == ["c"]
+    assert merged_data["setup_requires"] == ["numpy"]
+
+
+def test_update_requirements_with_pin():
+    req = {
+        "build": ["<{ compiler('c') }}"],
+        "host": ["python", "numpy"],
+        "run": ["python", "numpy"],
+    }
+    PyPi._update_requirements_with_pin(req)
+    assert req == {
+        "build": ["<{ compiler('c') }}"],
+        "host": ["python", "numpy"],
+        "run": ["python", "<{ pin_compatible('numpy') }}"],
+    }
+
+
+def test_get_compilers():
+    assert PyPi._get_compilers(["pybind11"], {}) == ["cxx"]
+    assert PyPi._get_compilers(["cython"], {}) == ["c"]
+    assert sorted(PyPi._get_compilers(["pybind11", "cython"], {})) == sorted(
+        ["cxx", "c"]
+    )
+    assert sorted(PyPi._get_compilers(["pybind11"], {"compilers": ["c"]})) == sorted(
+        ["cxx", "c"]
+    )
+
+
+def test_get_entry_points_from_sdist():
+    assert PyPi._get_entry_points_from_sdist({}) == []
+    assert PyPi._get_entry_points_from_sdist(
+        {"entry_points": {"console_scripts": ["console_scripts=entrypoints"]}}
+    ) == ["console_scripts=entrypoints"]
+    assert PyPi._get_entry_points_from_sdist(
+        {"entry_points": {"gui_scripts": ["gui_scripts=entrypoints"]}}
+    ) == ["gui_scripts=entrypoints"]
+
+    assert sorted(
+        PyPi._get_entry_points_from_sdist(
+            {
+                "entry_points": {
+                    "gui_scripts": ["gui_scripts=entrypoints"],
+                    "console_scripts": ["console_scripts=entrypoints"],
+                }
+            }
+        )
+    ) == sorted(["gui_scripts=entrypoints", "console_scripts=entrypoints"])
+
+
+def test_format_host_requirements():
+    assert sorted(
+        PyPi._format_host_requirements(["setuptools>=40.0", "pkg2"])
+    ) == sorted(["setuptools >=40.0", "pkg2"])
