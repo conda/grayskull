@@ -58,11 +58,12 @@ class PyPi(AbstractRecipeModel):
         shutil.unpack_archive(
             os.path.join(temp_folder, os.listdir(temp_folder)[0]), temp_folder
         )
-        with self._injection_distutils(temp_folder) as metadata:
+        with PyPi._injection_distutils(temp_folder) as metadata:
             return metadata
 
+    @staticmethod
     @contextmanager
-    def _injection_distutils(self, folder: str) -> dict:
+    def _injection_distutils(folder: str) -> dict:
         """This is a bit of "dark magic", please don't do it at home.
         It is injecting code in the distutils.core.setup and replacing the
         setup function by the inner function __fake_distutils_setup.
@@ -71,7 +72,7 @@ class PyPi(AbstractRecipeModel):
         This method is necessary because some information are missing from the
         pypi metadata and also for those packages which the pypi metadata is missing.
 
-        :pram folder: Path to the folder where the sdist package was extracted
+        :param folder: Path to the folder where the sdist package was extracted
         :yield: return the metadata from sdist
         """
         from distutils import core
@@ -89,7 +90,7 @@ class PyPi(AbstractRecipeModel):
         class _fake_build_ext_distutils(original_build_ext_distutils):
             def __init__(self, *args, **kwargs):
                 global data_dist
-                data_dist["c_compiler"] = True
+                data_dist["compilers"] = ["c"]
                 super(_fake_build_ext_distutils, self).__init__(*args, **kwargs)
 
         from setuptools.command import build_ext as setup_ext
@@ -99,7 +100,7 @@ class PyPi(AbstractRecipeModel):
         class _fake_build_ext_setuptools(original_build_ext_setuptools):
             def __init__(self, *args, **kwargs):
                 global data_dist
-                data_dist["c_compiler"] = True
+                data_dist["compilers"] = ["c"]
                 super(_fake_build_ext_setuptools, self).__init__(*args, **kwargs)
 
         def __fake_distutils_setup(*args, **kwargs):
@@ -127,9 +128,7 @@ class PyPi(AbstractRecipeModel):
                     data_dist["setup_requires"].remove("setuptools-scm")
 
             if kwargs.get("ext_modules", None):
-                data_dist["c_compiler"] = True
-            else:
-                data_dist["c_compiler"] = data_dist.get("c_compiler", False)
+                data_dist["compilers"] = ["c"]
             if data_dist.get("run_py", False):
                 del data_dist["run_py"]
                 return
@@ -140,9 +139,9 @@ class PyPi(AbstractRecipeModel):
             dist_ext.build_ext = _fake_build_ext_distutils
             setup_ext.build_ext = _fake_build_ext_setuptools
             path_setup = str(path_setup)
-            self.__run_setup_py(path_setup, data_dist)
+            PyPi.__run_setup_py(path_setup, data_dist)
             if not data_dist:
-                self.__run_setup_py(path_setup, data_dist, run_py=True)
+                PyPi.__run_setup_py(path_setup, data_dist, run_py=True)
             yield data_dist
         except Exception:
             yield data_dist
@@ -151,7 +150,8 @@ class PyPi(AbstractRecipeModel):
         setup_ext.build_ext = original_build_ext_setuptools
         os.chdir(old_dir)
 
-    def __run_setup_py(self, path_setup: str, data_dist: dict, run_py=False):
+    @staticmethod
+    def __run_setup_py(path_setup: str, data_dist: dict, run_py=False):
         original_path = sys.path
         pip_dir = os.path.join(os.path.dirname(str(path_setup)), "pip-dir")
         if not os.path.exists(pip_dir):
@@ -174,16 +174,15 @@ class PyPi(AbstractRecipeModel):
                 data_dist["setup_requires"] = []
             data_dist["setup_requires"].append(err.name)
             check_output(["pip", "install", err.name, f"--target={pip_dir}"])
-            self.__run_setup_py(path_setup, data_dist, run_py)
+            PyPi.__run_setup_py(path_setup, data_dist, run_py)
         except Exception:
             pass
         if os.path.exists(pip_dir):
             os.rmdir(pip_dir)
         sys.path = original_path
 
-    def _merge_pypi_sdist_metadata(
-        self, pypi_metadata: dict, sdist_metadata: dict
-    ) -> dict:
+    @staticmethod
+    def _merge_pypi_sdist_metadata(pypi_metadata: dict, sdist_metadata: dict) -> dict:
         """This method is responsible to merge two dictionaries and it will give
         priority to the pypi_metadata.
 
@@ -195,26 +194,17 @@ class PyPi(AbstractRecipeModel):
         def get_val(key):
             return pypi_metadata.get(key) or sdist_metadata.get(key)
 
-        requires_dist = self._merge_requires_dist(pypi_metadata, sdist_metadata)
-        c_compiler = False
-        cxx_compiler = False
-        for pkg in requires_dist:
-            pkg = PyPi.RE_DEPS_NAME.match(pkg).group(0)
-            if pkg.strip() in PyPi.PKG_NEEDS_C_COMPILER:
-                c_compiler = True
-            if pkg.strip() in PyPi.PKG_NEEDS_CXX_COMPILER:
-                cxx_compiler = True
+        requires_dist = PyPi._merge_requires_dist(pypi_metadata, sdist_metadata)
         return {
-            "author": sdist_metadata["author"],
+            "author": get_val("author"),
             "name": get_val("name"),
             "version": get_val("version"),
-            "source": pypi_metadata["source"],
-            "packages": sdist_metadata["packages"],
-            "home": sdist_metadata["home"],
-            "classifiers": sdist_metadata["classifiers"],
-            "c_compiler": c_compiler or sdist_metadata.get("c_compiler", False),
-            "cxx_compiler": cxx_compiler or sdist_metadata.get("cxx_compiler", False),
-            "entry_points": self._get_entry_points_from_sdist(sdist_metadata),
+            "source": pypi_metadata.get("source"),
+            "packages": get_val("packages"),
+            "home": get_val("home"),
+            "classifiers": get_val("classifiers"),
+            "compilers": PyPi._get_compilers(requires_dist, sdist_metadata),
+            "entry_points": PyPi._get_entry_points_from_sdist(sdist_metadata),
             "summary": get_val("summary"),
             "requires_python": get_val("requires_python"),
             "doc_url": get_val("doc_url"),
@@ -227,7 +217,19 @@ class PyPi(AbstractRecipeModel):
             "requires_dist": requires_dist,
         }
 
-    def _get_entry_points_from_sdist(self, sdist_metadata: dict) -> List:
+    @staticmethod
+    def _get_compilers(requires_dist: List, sdist_metadata: dict) -> List:
+        compilers = set(sdist_metadata.get("compilers", []))
+        for pkg in requires_dist:
+            pkg = PyPi.RE_DEPS_NAME.match(pkg).group(0)
+            if pkg.strip() in PyPi.PKG_NEEDS_C_COMPILER:
+                compilers.add("c")
+            if pkg.strip() in PyPi.PKG_NEEDS_CXX_COMPILER:
+                compilers.add("cxx")
+        return list(compilers)
+
+    @staticmethod
+    def _get_entry_points_from_sdist(sdist_metadata: dict) -> List:
         all_entry_points = sdist_metadata.get("entry_points", None)
         if all_entry_points and (
             all_entry_points.get("console_scripts")
@@ -238,14 +240,9 @@ class PyPi(AbstractRecipeModel):
             )
         return []
 
-    def _merge_requires_dist(self, pypi_metadata: dict, sdist_metadata: dict) -> List:
+    @staticmethod
+    def _merge_requires_dist(pypi_metadata: dict, sdist_metadata: dict) -> List:
         pypi_deps_name = []
-        if pypi_metadata.get("requires_dist"):
-            for dep in pypi_metadata.get("requires_dist", []):
-                if PyPi.RE_DEPS_NAME.match(dep):
-                    PyPi.RE_DEPS_NAME.match(dep).group(0).strip()
-                    sdist_metadata["cxx_compiler"] = True
-
         requires_dist = []
         if pypi_metadata.get("requires_dist"):
             requires_dist = pypi_metadata.get("requires_dist", [])
@@ -297,10 +294,10 @@ class PyPi(AbstractRecipeModel):
             version = self.get_var_content(self["package"]["version"].values[0])
 
         if version:
-            url_pypi = self.URL_PYPI_METADATA.format(pkg_name=f"{name}/{version}")
+            url_pypi = PyPi.URL_PYPI_METADATA.format(pkg_name=f"{name}/{version}")
         else:
             log.info(f"Version for {name} not specified.\nGetting the latest one.")
-            url_pypi = self.URL_PYPI_METADATA.format(pkg_name=name)
+            url_pypi = PyPi.URL_PYPI_METADATA.format(pkg_name=name)
 
         metadata = requests.get(url=url_pypi)
         if metadata.status_code != 200:
@@ -340,7 +337,8 @@ class PyPi(AbstractRecipeModel):
             "Hash information for sdist was not found on PyPi metadata."
         )
 
-    def __skip_pypi_requirement(self, list_extra: List) -> bool:
+    @staticmethod
+    def __skip_pypi_requirement(list_extra: List) -> bool:
         for extra in list_extra:
             if extra[0] == "extra" or extra[2] == "testing":
                 return True
@@ -353,15 +351,73 @@ class PyPi(AbstractRecipeModel):
         )
         if not requires_dist and not host_req:
             return {"host": sorted(["python", "pip"]), "run": ["python"]}
+
+        run_req = self._get_run_req_from_requires_dist(
+            metadata.get("requires_dist", [])
+        )
+
+        limit_python = metadata.get("requires_python", "")
+        build_req = [f"<{{ compiler('{c}') }}}}" for c in metadata.get("compilers", [])]
+        self._is_arch = self._is_arch or build_req
+
+        if limit_python or self._is_arch:
+            version_to_selector = PyPi.py_version_to_selector(metadata)
+            if version_to_selector:
+                self["build"]["skip"] = True
+                self["build"]["skip"].values[0].selector = version_to_selector
+            limit_python = ""
+        else:
+            limit_python = PyPi.py_version_to_limit_python(metadata)
+
+        limit_python = f" {limit_python}" if limit_python else ""
+
+        if "pip" not in host_req:
+            host_req += [f"python{limit_python}", "pip"]
+
+        run_req.insert(0, f"python{limit_python}")
+        result = {"build": sorted(build_req)} if build_req else {}
+        result.update({"host": sorted(host_req), "run": sorted(run_req)})
+        self._update_requirements_with_pin(result)
+        return result
+
+    @staticmethod
+    def _update_requirements_with_pin(requirements: dict):
+        """Get a dict with the `host`, `run` and `build` in it and replace
+        if necessary the run requirements with the appropriated pin.
+
+        :param requirements: Dict with the requirements in it
+        """
+
+        def is_compiler_present() -> bool:
+            if "build" not in requirements:
+                return False
+            re_compiler = re.compile(
+                r"^\s*[<{]\{\s*compiler\(['\"]\w+['\"]\)\s*\}\}\s*$", re.MULTILINE
+            )
+            for build in requirements["build"]:
+                if re_compiler.match(build):
+                    return True
+            return False
+
+        if not is_compiler_present():
+            return
+        for pkg in requirements["host"]:
+            pkg_name = PyPi.RE_DEPS_NAME.match(pkg).group(0)
+            if pkg_name in PyPi.PIN_PKG_COMPILER.keys():
+                if pkg_name in requirements["run"]:
+                    requirements["run"].remove(pkg_name)
+                requirements["run"].append(PyPi.PIN_PKG_COMPILER[pkg_name])
+
+    def _get_run_req_from_requires_dist(self, requires_dist: List) -> List:
         run_req = []
-        for req in metadata.get("requires_dist", []):
+        for req in requires_dist:
             list_raw_requirements = req.split(";")
             selector = ""
             if len(list_raw_requirements) > 1:
                 list_extra = PyPi._get_extra_from_requires_dist(
                     list_raw_requirements[1]
                 )
-                if self.__skip_pypi_requirement(list_extra):
+                if PyPi.__skip_pypi_requirement(list_extra):
                     continue
 
                 result_selector = self._get_all_selectors_pypi(list_extra)
@@ -375,46 +431,9 @@ class PyPi(AbstractRecipeModel):
                 list_raw_requirements[0]
             )
             run_req.append(f"{pkg_name} {version}{selector}".strip())
+        return run_req
 
-        limit_python = metadata.get("requires_python", "")
-        build_req = []
-        self._is_arch = (
-            self._is_arch or metadata["c_compiler"] or metadata["cxx_compiler"]
-        )
-        if limit_python or self._is_arch:
-            version_to_selector = PyPi.py_version_to_selector(metadata)
-            if version_to_selector:
-                self["build"]["skip"] = True
-                self["build"]["skip"].values[0].selector = version_to_selector
-            if metadata.get("c_compiler", False):
-                build_req.append("<{ compiler('c') }}")
-            if metadata.get("cxx_compiler", False):
-                build_req.append("<{ compiler('cxx') }}")
-            limit_python = ""
-        else:
-            limit_python = PyPi.py_version_to_limit_python(metadata)
-
-        limit_python = f" {limit_python}" if limit_python else ""
-
-        if "pip" not in host_req:
-            host_req += [f"python{limit_python}", "pip"]
-
-        run_req.insert(0, f"python{limit_python}")
-        result = {}
-        if build_req:
-            result["build"] = sorted(build_req)
-
-        for pkg in host_req:
-            pkg_name = PyPi.RE_DEPS_NAME.match(pkg).group(0)
-            if pkg_name in PyPi.PIN_PKG_COMPILER.keys():
-                if pkg_name in run_req:
-                    run_req.remove(pkg_name)
-                run_req.append(PyPi.PIN_PKG_COMPILER[pkg_name])
-
-        result.update({"host": sorted(host_req), "run": sorted(run_req)})
-        return result
-
-    def _get_all_selectors_pypi(self, list_extra):
+    def _get_all_selectors_pypi(self, list_extra: List):
         result_selector = []
         for extra in list_extra:
             self._is_arch = True

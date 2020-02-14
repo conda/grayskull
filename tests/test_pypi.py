@@ -142,7 +142,7 @@ def test_injection_distutils():
     }
     assert data["version"] == "5.5.1"
     assert data["name"] == "hypothesis"
-    assert not data["c_compiler"]
+    assert not data.get("compilers")
 
 
 def test_injection_distutils_pytest():
@@ -166,13 +166,13 @@ def test_injection_distutils_pytest():
         "python",
         "pip",
     ]
-    assert not data["c_compiler"]
+    assert not data.get("compilers")
 
 
 def test_injection_distutils_compiler_gsw():
     recipe = PyPi(name="gsw", version="3.3.1")
     data = recipe._get_sdist_metadata()
-    assert data["c_compiler"]
+    assert data.get("compilers") == ["c"]
     assert data["packages"] == ["gsw"]
 
 
@@ -180,7 +180,53 @@ def test_merge_pypi_sdist_metadata():
     recipe = PyPi(name="gsw", version="3.3.1")
     pypi_metadata = recipe._get_pypi_metadata()
     sdist_metadata = recipe._get_sdist_metadata()
-    merged_data = recipe._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
-    assert merged_data["c_compiler"]
+    merged_data = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
+    assert merged_data["compilers"] == ["c"]
     assert merged_data["requires_dist"] == ["numpy"]
     assert merged_data["setup_requires"] == ["numpy", "python", "pip"]
+
+
+def test_update_requirements_with_pin():
+    req = {
+        "build": ["<{ compiler('c') }}"],
+        "host": ["python", "numpy"],
+        "run": ["python", "numpy"],
+    }
+    PyPi._update_requirements_with_pin(req)
+    assert req == {
+        "build": ["<{ compiler('c') }}"],
+        "host": ["python", "numpy"],
+        "run": ["python", "<{ pin_compatible('numpy') }}"],
+    }
+
+
+def test_get_compilers():
+    assert PyPi._get_compilers(["pybind11"], {}) == ["cxx"]
+    assert PyPi._get_compilers(["cython"], {}) == ["c"]
+    assert sorted(PyPi._get_compilers(["pybind11", "cython"], {})) == sorted(
+        ["cxx", "c"]
+    )
+    assert sorted(PyPi._get_compilers(["pybind11"], {"compilers": ["c"]})) == sorted(
+        ["cxx", "c"]
+    )
+
+
+def test_get_entry_points_from_sdist():
+    assert PyPi._get_entry_points_from_sdist({}) == []
+    assert PyPi._get_entry_points_from_sdist(
+        {"entry_points": {"console_scripts": ["console_scripts=entrypoints"]}}
+    ) == ["console_scripts=entrypoints"]
+    assert PyPi._get_entry_points_from_sdist(
+        {"entry_points": {"gui_scripts": ["gui_scripts=entrypoints"]}}
+    ) == ["gui_scripts=entrypoints"]
+
+    assert sorted(
+        PyPi._get_entry_points_from_sdist(
+            {
+                "entry_points": {
+                    "gui_scripts": ["gui_scripts=entrypoints"],
+                    "console_scripts": ["console_scripts=entrypoints"],
+                }
+            }
+        )
+    ) == sorted(["gui_scripts=entrypoints", "console_scripts=entrypoints"])
