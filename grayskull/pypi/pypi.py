@@ -247,7 +247,7 @@ class PyPi(AbstractRecipeModel):
         all_deps = []
         if pypi_metadata.get("requires_dist"):
             all_deps = pypi_metadata.get("requires_dist", [])
-        if sdist_metadata.get("requires_dist"):
+        if sdist_metadata.get("install_requires"):
             all_deps += sdist_metadata.get("install_requires", [])
 
         for sdist_pkg in all_deps:
@@ -351,18 +351,16 @@ class PyPi(AbstractRecipeModel):
         return False
 
     def _extract_requirements(self, metadata: dict) -> dict:
-        requires_dist = metadata.get("requires_dist")
+        requires_dist = self._format_dependencies(metadata.get("requires_dist"))
         setup_requires = (
             metadata.get("setup_requires") if metadata.get("setup_requires") else []
         )
-        host_req = self._format_host_requirements(setup_requires)
+        host_req = self._format_dependencies(setup_requires)
 
         if not requires_dist and not host_req:
             return {"host": sorted(["python", "pip"]), "run": ["python"]}
 
-        run_req = self._get_run_req_from_requires_dist(
-            metadata.get("requires_dist", [])
-        )
+        run_req = self._get_run_req_from_requires_dist(requires_dist)
 
         limit_python = metadata.get("requires_python", "")
         build_req = [f"<{{ compiler('{c}') }}}}" for c in metadata.get("compilers", [])]
@@ -389,12 +387,12 @@ class PyPi(AbstractRecipeModel):
         return result
 
     @staticmethod
-    def _format_host_requirements(setup_requires: List) -> List:
-        host_req = []
+    def _format_dependencies(all_dependencies: List) -> List:
+        formated_dependencies = []
         re_deps = re.compile(
             r"^\s*([\.a-zA-Z0-9_-]+)\s*(.*)\s*$", re.MULTILINE | re.DOTALL
         )
-        for req in setup_requires:
+        for req in all_dependencies:
             match_req = re_deps.match(req)
             deps_name = req
             if match_req:
@@ -402,8 +400,8 @@ class PyPi(AbstractRecipeModel):
                 deps_name = match_req[0]
                 if len(match_req) > 1:
                     deps_name = " ".join(match_req)
-            host_req.append(deps_name.strip())
-        return host_req
+            formated_dependencies.append(deps_name.strip())
+        return formated_dependencies
 
     @staticmethod
     def _update_requirements_with_pin(requirements: dict):
@@ -497,7 +495,7 @@ class PyPi(AbstractRecipeModel):
         :param string_parse: requires_dist value from PyPi metadata
         :return: Name and version of a package
         """
-        pkg = re.match(r"^\s*([^\s]+)\s*(\(.*\))?\s*", string_parse, re.DOTALL)
+        pkg = re.match(r"^\s*([^\s]+)\s*([\(]*.*[\)]*)?\s*", string_parse, re.DOTALL)
         pkg_name = pkg.group(1).strip()
         version = ""
         if len(pkg.groups()) > 1 and pkg.group(2):
