@@ -242,15 +242,21 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _merge_requires_dist(pypi_metadata: dict, sdist_metadata: dict) -> List:
-        pypi_deps_name = []
+        pypi_deps_name = set()
         requires_dist = []
+        all_deps = []
         if pypi_metadata.get("requires_dist"):
-            requires_dist = pypi_metadata.get("requires_dist", [])
+            all_deps = pypi_metadata.get("requires_dist", [])
+        if sdist_metadata.get("requires_dist"):
+            all_deps += sdist_metadata.get("install_requires", [])
 
-        for sdist_pkg in sdist_metadata.get("install_requires", []):
+        for sdist_pkg in all_deps:
             match_deps = PyPi.RE_DEPS_NAME.match(sdist_pkg)
-            if match_deps and match_deps.group(0).strip() not in pypi_deps_name:
-                requires_dist.append(sdist_pkg)
+            if match_deps:
+                match_deps = match_deps.group(0).strip()
+                if match_deps not in pypi_deps_name:
+                    pypi_deps_name.add(match_deps)
+                    requires_dist.append(sdist_pkg)
         return requires_dist
 
     def refresh_section(self, section: str = ""):

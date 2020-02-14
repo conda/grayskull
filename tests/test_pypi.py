@@ -182,7 +182,6 @@ def test_merge_pypi_sdist_metadata():
     sdist_metadata = recipe._get_sdist_metadata()
     merged_data = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
     assert merged_data["compilers"] == ["c"]
-    assert merged_data["requires_dist"] == ["numpy"]
     assert merged_data["setup_requires"] == ["numpy", "python", "pip"]
 
 
