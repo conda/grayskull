@@ -9,7 +9,7 @@ from distutils import core
 from functools import lru_cache
 from pathlib import Path
 from subprocess import check_output
-from tempfile import mktemp
+from tempfile import mkdtemp
 from typing import Dict, List, Optional, Tuple, Union
 
 import requests
@@ -36,28 +36,24 @@ class PyPi(AbstractRecipeModel):
         super(PyPi, self).__init__(name=name, version=version)
         self["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
 
+    @staticmethod
+    def _download_sdist_pkg(sdist_url: str, dest: str):
+        response = requests.get(sdist_url, allow_redirects=True, stream=True)
+        with open(dest, "wb") as pkg_file:
+            for chunk_data in response.iter_content(chunk_size=1024 ** 2):
+                if chunk_data:
+                    pkg_file.write(chunk_data)
+
     @lru_cache(maxsize=10)
-    def _get_sdist_metadata(self, version: Optional[str] = None) -> dict:
+    def _get_sdist_metadata(self, sdist_url: str) -> dict:
         name = self.get_var_content(self["package"]["name"].values[0])
-        if not version and self["package"]["version"].values:
-            version = self.get_var_content(self["package"]["version"].values[0])
-        pkg = f"{name}=={version}" if version else name
-        temp_folder = mktemp(prefix=f"grayskull-{name}-")
-        check_output(
-            [
-                "pip",
-                "download",
-                pkg,
-                "--no-binary",
-                ":all:",
-                "--no-deps",
-                "-d",
-                str(temp_folder),
-            ]
-        )
-        shutil.unpack_archive(
-            os.path.join(temp_folder, os.listdir(temp_folder)[0]), temp_folder
-        )
+        temp_folder = mkdtemp(prefix=f"grayskull-{name}-")
+
+        pkg_name = sdist_url.split("/")[-1]
+        path_pkg = os.path.join(temp_folder, pkg_name)
+
+        self._download_sdist_pkg(sdist_url=sdist_url, dest=path_pkg)
+        shutil.unpack_archive(path_pkg, temp_folder)
         with PyPi._injection_distutils(temp_folder) as metadata:
             return metadata
 
@@ -247,7 +243,7 @@ class PyPi(AbstractRecipeModel):
         all_deps = []
         if pypi_metadata.get("requires_dist"):
             all_deps = pypi_metadata.get("requires_dist", [])
-        if sdist_metadata.get("requires_dist"):
+        if sdist_metadata.get("install_requires"):
             all_deps += sdist_metadata.get("install_requires", [])
 
         for sdist_pkg in all_deps:
@@ -273,7 +269,7 @@ class PyPi(AbstractRecipeModel):
     def _get_metadata(self) -> dict:
         name = self.get_var_content(self["package"]["name"].values[0])
         pypi_metada = self._get_pypi_metadata()
-        sdist_metada = self._get_sdist_metadata()
+        sdist_metada = self._get_sdist_metadata(sdist_url=pypi_metada["sdist_url"])
         metadata = self._merge_pypi_sdist_metadata(pypi_metada, sdist_metada)
         test_imports = (
             metadata.get("packages") if metadata.get("packages") else [name.lower()]
@@ -332,7 +328,13 @@ class PyPi(AbstractRecipeModel):
                 "{{ name }}-{{ version }}.tar.gz",
                 "sha256": PyPi.get_sha256_from_pypi_metadata(metadata),
             },
+            "sdist_url": self._get_sdist_url_from_pypi(metadata),
         }
+
+    def _get_sdist_url_from_pypi(self, metadata: dict) -> str:
+        for sdist_url in metadata["urls"]:
+            if sdist_url["packagetype"] == "sdist":
+                return sdist_url["url"]
 
     @staticmethod
     def get_sha256_from_pypi_metadata(pypi_metadata: dict) -> str:
@@ -351,24 +353,21 @@ class PyPi(AbstractRecipeModel):
         return False
 
     def _extract_requirements(self, metadata: dict) -> dict:
-        requires_dist = metadata.get("requires_dist")
+        requires_dist = self._format_dependencies(metadata.get("requires_dist"))
         setup_requires = (
             metadata.get("setup_requires") if metadata.get("setup_requires") else []
         )
-        host_req = self._format_host_requirements(setup_requires)
+        host_req = self._format_dependencies(setup_requires)
 
         if not requires_dist and not host_req:
             return {"host": sorted(["python", "pip"]), "run": ["python"]}
 
-        run_req = self._get_run_req_from_requires_dist(
-            metadata.get("requires_dist", [])
-        )
+        run_req = self._get_run_req_from_requires_dist(requires_dist)
 
-        limit_python = metadata.get("requires_python", "")
         build_req = [f"<{{ compiler('{c}') }}}}" for c in metadata.get("compilers", [])]
         self._is_arch = self._is_arch or build_req
 
-        if limit_python or self._is_arch:
+        if self._is_arch:
             version_to_selector = PyPi.py_version_to_selector(metadata)
             if version_to_selector:
                 self["build"]["skip"] = True
@@ -383,18 +382,25 @@ class PyPi(AbstractRecipeModel):
             host_req += [f"python{limit_python}", "pip"]
 
         run_req.insert(0, f"python{limit_python}")
-        result = {"build": sorted(build_req)} if build_req else {}
-        result.update({"host": sorted(host_req), "run": sorted(run_req)})
+        result = (
+            {"build": sorted(map(lambda x: x.lower(), build_req))} if build_req else {}
+        )
+        result.update(
+            {
+                "host": sorted(map(lambda x: x.lower(), host_req)),
+                "run": sorted(map(lambda x: x.lower(), run_req)),
+            }
+        )
         self._update_requirements_with_pin(result)
         return result
 
     @staticmethod
-    def _format_host_requirements(setup_requires: List) -> List:
-        host_req = []
+    def _format_dependencies(all_dependencies: List) -> List:
+        formated_dependencies = []
         re_deps = re.compile(
             r"^\s*([\.a-zA-Z0-9_-]+)\s*(.*)\s*$", re.MULTILINE | re.DOTALL
         )
-        for req in setup_requires:
+        for req in all_dependencies:
             match_req = re_deps.match(req)
             deps_name = req
             if match_req:
@@ -402,8 +408,8 @@ class PyPi(AbstractRecipeModel):
                 deps_name = match_req[0]
                 if len(match_req) > 1:
                     deps_name = " ".join(match_req)
-            host_req.append(deps_name.strip())
-        return host_req
+            formated_dependencies.append(deps_name.strip())
+        return formated_dependencies
 
     @staticmethod
     def _update_requirements_with_pin(requirements: dict):
@@ -497,7 +503,7 @@ class PyPi(AbstractRecipeModel):
         :param string_parse: requires_dist value from PyPi metadata
         :return: Name and version of a package
         """
-        pkg = re.match(r"^\s*([^\s]+)\s*(\(.*\))?\s*", string_parse, re.DOTALL)
+        pkg = re.match(r"^\s*([^\s]+)\s*([\(]*.*[\)]*)?\s*", string_parse, re.DOTALL)
         pkg_name = pkg.group(1).strip()
         version = ""
         if len(pkg.groups()) > 1 and pkg.group(2):
