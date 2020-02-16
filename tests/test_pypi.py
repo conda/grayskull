@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 
@@ -132,7 +133,9 @@ def test_get_sha256_from_pypi_metadata():
 
 def test_injection_distutils():
     recipe = PyPi(name="hypothesis", version="5.5.1")
-    data = recipe._get_sdist_metadata()
+    data = recipe._get_sdist_metadata(
+        "https://pypi.io/packages/source/h/hypothesis/hypothesis-5.5.1.tar.gz"
+    )
     assert data["install_requires"] == [
         "attrs>=19.2.0",
         "sortedcontainers>=2.1.0,<3.0.0",
@@ -147,7 +150,9 @@ def test_injection_distutils():
 
 def test_injection_distutils_pytest():
     recipe = PyPi(name="pytest", version="5.3.2")
-    data = recipe._get_sdist_metadata()
+    data = recipe._get_sdist_metadata(
+        "https://pypi.io/packages/source/p/pytest/pytest-5.3.2.tar.gz"
+    )
     assert data["install_requires"] == [
         "py>=1.5.0",
         "packaging",
@@ -172,7 +177,9 @@ def test_injection_distutils_pytest():
 
 def test_injection_distutils_compiler_gsw():
     recipe = PyPi(name="gsw", version="3.3.1")
-    data = recipe._get_sdist_metadata()
+    data = recipe._get_sdist_metadata(
+        "https://pypi.io/packages/source/g/gsw/gsw-3.3.1.tar.gz"
+    )
     assert data.get("compilers") == ["c"]
     assert data["packages"] == ["gsw"]
 
@@ -180,7 +187,7 @@ def test_injection_distutils_compiler_gsw():
 def test_merge_pypi_sdist_metadata():
     recipe = PyPi(name="gsw", version="3.3.1")
     pypi_metadata = recipe._get_pypi_metadata()
-    sdist_metadata = recipe._get_sdist_metadata()
+    sdist_metadata = recipe._get_sdist_metadata(pypi_metadata["sdist_url"])
     merged_data = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
     assert merged_data["compilers"] == ["c"]
     assert merged_data["setup_requires"] == ["numpy"]
@@ -252,4 +259,17 @@ def test_run_requirements_sdist():
 def test_format_host_requirements():
     assert sorted(PyPi._format_dependencies(["setuptools>=40.0", "pkg2"])) == sorted(
         ["setuptools >=40.0", "pkg2"]
+    )
+
+
+def test_download_pkg_sdist(tmpdir):
+    dest_pkg = str(tmpdir / "test-download-pkg")
+    PyPi._download_sdist_pkg(
+        "https://pypi.io/packages/source/p/pytest/pytest-5.3.5.tar.gz", dest_pkg
+    )
+    with open(dest_pkg, "rb") as pkg_file:
+        content = pkg_file.read()
+        pkg_sha256 = hashlib.sha256(content).hexdigest()
+    assert (
+        pkg_sha256 == "0d5fe9189a148acc3c3eb2ac8e1ac0742cb7618c084f3d228baaec0c254b318d"
     )
