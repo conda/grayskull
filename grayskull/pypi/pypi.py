@@ -366,7 +366,7 @@ class PyPi(AbstractRecipeModel):
         build_req = [f"<{{ compiler('{c}') }}}}" for c in metadata.get("compilers", [])]
         self._is_arch = self._is_arch or build_req
 
-        if limit_python or self._is_arch:
+        if self._is_arch:
             version_to_selector = PyPi.py_version_to_selector(metadata)
             if version_to_selector:
                 self["build"]["skip"] = True

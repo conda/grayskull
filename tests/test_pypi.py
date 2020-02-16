@@ -165,6 +165,9 @@ def test_injection_distutils_pytest():
         "setuptools_scm",
     ]
     assert not data.get("compilers")
+    assert recipe["build"]["skip"].values[0].value
+    assert recipe["build"]["skip"].values[0].selector == "py2k"
+    assert not recipe["build"]["noarch"]
 
 
 def test_injection_distutils_compiler_gsw():
@@ -227,6 +230,23 @@ def test_get_entry_points_from_sdist():
             }
         )
     ) == sorted(["gui_scripts=entrypoints", "console_scripts=entrypoints"])
+
+
+def test_build_noarch_skip():
+    recipe = PyPi(name="hypothesis", version="5.5.2")
+    assert recipe["build"]["noarch"].values[0] == "python"
+    assert not recipe["build"]["skip"].values
+
+
+def test_run_requirements_sdist():
+    recipe = PyPi(name="botocore", version="1.14.17")
+    assert recipe["requirements"]["run"].values == [
+        "docutils >=0.10,<0.16",
+        "jmespath >=0.7.1,<1.0.0",
+        "python",
+        "python-dateutil >=2.1,<3.0.0",
+        "urllib3 >=1.20,<1.26",
+    ]
 
 
 def test_format_host_requirements():
