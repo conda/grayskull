@@ -102,6 +102,7 @@ class PyPi(AbstractRecipeModel):
         #         super(_fake_build_ext_setuptools, self).__init__(*args, **kwargs)
 
         def __fake_distutils_setup(*args, **kwargs):
+            print("------FAKE DISTUTILS -----------------")
             data_dist["tests_require"] = kwargs.get("tests_require", [])
             data_dist["install_requires"] = kwargs.get("install_requires", [])
             if not data_dist.get("setup_requires"):
@@ -172,11 +173,13 @@ class PyPi(AbstractRecipeModel):
         PyPi._install_deps_if_necessary(path_setup, data_dist, pip_dir)
         try:
             if run_py:
+                print("------------- RUN PY TRU RUNNING --------------")
                 import runpy
 
                 data_dist["run_py"] = True
                 runpy.run_path(path_setup, run_name="__main__")
             else:
+                print(f"------------ RUN SETUP --target={pip_dir} --------")
                 core.run_setup(
                     path_setup, script_args=["install", f"--target={pip_dir}"]
                 )
@@ -210,7 +213,7 @@ class PyPi(AbstractRecipeModel):
             and dep_name.lower() != "setuptools"
         ):
             data_dist["setup_requires"].append(dep_name.lower())
-            print(f"------------ PIP INSTALL {dep_name} -----------------")
+        print(f"------------ PIP INSTALL {dep_name} -----------------")
         check_output(["pip", "install", dep_name, f"--target={pip_dir}"])
 
     @staticmethod
