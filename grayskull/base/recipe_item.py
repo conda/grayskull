@@ -27,6 +27,9 @@ class RecipeItem:
             val += f"  {comment.value}"
         return val
 
+    def __lt__(self, other: "RecipeItem") -> bool:
+        return self.value < other.value
+
     def __eq__(self, other: Union[str, int, "RecipeItem"]) -> bool:
         if isinstance(other, RecipeItem):
             return self.value == other.value and self.selector == other.selector

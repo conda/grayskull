@@ -15,8 +15,8 @@ class EmptyGray(AbstractRecipeModel):
 
 
 @fixture
-def data_recipes() -> str:
-    return os.path.join(os.path.dirname(__file__), "data", "recipes")
+def data_recipes(data_dir: str) -> str:
+    return os.path.join(data_dir, "recipes")
 
 
 def test_update_all_recipe(data_recipes):

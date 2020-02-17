@@ -105,6 +105,11 @@ class Section:
             return self.values[0] == other
         if isinstance(other, str):
             return self.section_name == other
+        if isinstance(other, list) and isinstance(other[0], str):
+            for pos, item in enumerate(self.values):
+                if item.value != other[pos]:
+                    return False
+            return True
         return other == self.values
 
     def __iter__(self) -> Iterator:

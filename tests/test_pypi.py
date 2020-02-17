@@ -190,7 +190,9 @@ def test_merge_pypi_sdist_metadata():
     sdist_metadata = recipe._get_sdist_metadata(pypi_metadata["sdist_url"])
     merged_data = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
     assert merged_data["compilers"] == ["c"]
-    assert merged_data["setup_requires"] == ["numpy"]
+    assert sorted(merged_data["setup_requires"]) == sorted(
+        ["numpy", "pip", "versioneer"]
+    )
 
 
 def test_update_requirements_with_pin():
@@ -272,4 +274,14 @@ def test_download_pkg_sdist(tmpdir):
         pkg_sha256 = hashlib.sha256(content).hexdigest()
     assert (
         pkg_sha256 == "0d5fe9189a148acc3c3eb2ac8e1ac0742cb7618c084f3d228baaec0c254b318d"
+    )
+
+
+def test_ciso_recipe():
+    recipe = PyPi(name="ciso", version="0.1.0")
+    assert sorted(recipe["requirements"]["host"]) == sorted(
+        ["cython", "numpy", "pip", "python", "versioneer"]
+    )
+    assert sorted(recipe["requirements"]["run"]) == sorted(
+        ["cython", "python", "<{ pin_compatible('numpy') }}"]
     )

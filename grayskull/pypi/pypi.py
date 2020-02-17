@@ -16,6 +16,7 @@ import requests
 from requests import HTTPError
 
 from grayskull.base.base_recipe import AbstractRecipeModel
+from grayskull.utils import get_vendored_dependencies
 
 log = logging.getLogger(__name__)
 PyVer = namedtuple("PyVer", ["major", "minor"])
@@ -104,7 +105,9 @@ class PyPi(AbstractRecipeModel):
             data_dist["install_requires"] = kwargs.get("install_requires", [])
             if not data_dist.get("setup_requires"):
                 data_dist["setup_requires"] = []
-            data_dist["setup_requires"] += kwargs.get("setup_requires", [])
+            data_dist["setup_requires"] += (
+                kwargs.get("setup_requires") if kwargs.get("setup_requires") else []
+            )
             data_dist["extras_require"] = kwargs.get("extras_require", [])
             data_dist["requires_python"] = kwargs.get("requires_python", None)
             data_dist["entry_points"] = kwargs.get("entry_points", None)
@@ -136,10 +139,10 @@ class PyPi(AbstractRecipeModel):
             setup_ext.build_ext = _fake_build_ext_setuptools
             path_setup = str(path_setup)
             PyPi.__run_setup_py(path_setup, data_dist)
-            if not data_dist:
+            if not data_dist or data_dist.get("install_requires", None) is None:
                 PyPi.__run_setup_py(path_setup, data_dist, run_py=True)
             yield data_dist
-        except Exception:
+        except Exception as err:  # noqa
             yield data_dist
         core.setup = setup_core_original
         dist_ext.build_ext = original_build_ext_distutils
@@ -155,6 +158,7 @@ class PyPi(AbstractRecipeModel):
         if os.path.dirname(path_setup) not in sys.path:
             sys.path.append(os.path.dirname(path_setup))
             sys.path.append(pip_dir)
+        PyPi._install_deps_if_necessary(path_setup, data_dist, pip_dir)
         try:
             if run_py:
                 import runpy
@@ -166,16 +170,33 @@ class PyPi(AbstractRecipeModel):
                     path_setup, script_args=["install", f"--target={pip_dir}"]
                 )
         except ModuleNotFoundError as err:
-            if not data_dist.get("setup_requires"):
-                data_dist["setup_requires"] = []
-            data_dist["setup_requires"].append(err.name)
-            check_output(["pip", "install", err.name, f"--target={pip_dir}"])
+            PyPi._pip_install_dep(data_dist, err.name, pip_dir)
             PyPi.__run_setup_py(path_setup, data_dist, run_py)
-        except Exception:
+        except Exception as err:  # noqa
             pass
         if os.path.exists(pip_dir):
-            os.rmdir(pip_dir)
+            shutil.rmtree(pip_dir)
         sys.path = original_path
+
+    @staticmethod
+    def _install_deps_if_necessary(setup_path: str, data_dist: dict, pip_dir: str):
+        all_setup_deps = get_vendored_dependencies(setup_path)
+        for dep in all_setup_deps:
+            PyPi._pip_install_dep(data_dist, dep, pip_dir)
+
+    @staticmethod
+    def _pip_install_dep(data_dist: dict, dep_name: str, pip_dir: str):
+        if not data_dist.get("setup_requires"):
+            data_dist["setup_requires"] = []
+        if dep_name == "pkg_resources":
+            dep_name = "setuptools"
+        if (
+            dep_name.lower() not in data_dist["setup_requires"]
+            and dep_name.lower() != "setuptools"
+        ):
+            data_dist["setup_requires"].append(dep_name.lower())
+        if dep_name != "setuptools":
+            check_output(["pip", "install", dep_name, f"--target={pip_dir}"])
 
     @staticmethod
     def _merge_pypi_sdist_metadata(pypi_metadata: dict, sdist_metadata: dict) -> dict:
@@ -266,6 +287,7 @@ class PyPi(AbstractRecipeModel):
         if not self._is_arch:
             self["build"]["noarch"] = "python"
 
+    @lru_cache(maxsize=10)
     def _get_metadata(self) -> dict:
         name = self.get_var_content(self["package"]["name"].values[0])
         pypi_metada = self._get_pypi_metadata()
@@ -365,7 +387,8 @@ class PyPi(AbstractRecipeModel):
         run_req = self._get_run_req_from_requires_dist(requires_dist)
 
         build_req = [f"<{{ compiler('{c}') }}}}" for c in metadata.get("compilers", [])]
-        self._is_arch = self._is_arch or build_req
+        if build_req:
+            self._is_arch = True
 
         if self._is_arch:
             version_to_selector = PyPi.py_version_to_selector(metadata)
