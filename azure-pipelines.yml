@@ -46,6 +46,7 @@ jobs:
       - bash: |
           source activate grayskull
           pytest tests \
+              -vv \
               -n auto \
               --color=yes \
               --cov=./ \
@@ -105,6 +106,7 @@ jobs:
       - bash: |
           source activate grayskull
           pytest tests \
+              -vv \
               -n auto \
               --color=yes \
               --cov=./ \
@@ -159,6 +161,7 @@ jobs:
       - script: |
           call activate grayskull
           pytest tests ^
+              -vv ^
               -n auto ^
               --color=yes ^
               --cov=./ ^
