@@ -5,6 +5,7 @@ import shutil
 import sys
 from collections import namedtuple
 from contextlib import contextmanager
+from copy import deepcopy
 from distutils import core
 from functools import lru_cache
 from pathlib import Path
@@ -150,6 +151,8 @@ class PyPi(AbstractRecipeModel):
                 PyPi.__run_setup_py(path_setup, data_dist, run_py=True)
             yield data_dist
         except Exception as err:  # noqa
+            print("---------- EXCEPTION INJECTION -----------")
+            print(err)
             yield data_dist
         core.setup = setup_core_original
         dist_ext.build_ext = original_build_ext_distutils
@@ -158,7 +161,8 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def __run_setup_py(path_setup: str, data_dist: dict, run_py=False):
-        original_path = sys.path
+        print("------------ RUN_SETUP_PY -----------------")
+        original_path = deepcopy(sys.path)
         pip_dir = os.path.join(os.path.dirname(str(path_setup)), "pip-dir")
         if not os.path.exists(pip_dir):
             os.mkdir(pip_dir)
@@ -180,6 +184,8 @@ class PyPi(AbstractRecipeModel):
             PyPi._pip_install_dep(data_dist, err.name, pip_dir)
             PyPi.__run_setup_py(path_setup, data_dist, run_py)
         except Exception as err:  # noqa
+            print("-------------- EXCEPTION RUN SETUP PY--------------------")
+            print(err)
             pass
         if os.path.exists(pip_dir):
             shutil.rmtree(pip_dir)
@@ -193,6 +199,8 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _pip_install_dep(data_dist: dict, dep_name: str, pip_dir: str):
+        print("------------ PIP INSTALL -----------------")
+        print(dep_name)
         if not data_dist.get("setup_requires"):
             data_dist["setup_requires"] = []
         if dep_name == "pkg_resources":
@@ -202,6 +210,7 @@ class PyPi(AbstractRecipeModel):
             and dep_name.lower() != "setuptools"
         ):
             data_dist["setup_requires"].append(dep_name.lower())
+            print(f"------------ PIP INSTALL {dep_name} -----------------")
         check_output(["pip", "install", dep_name, f"--target={pip_dir}"])
 
     @staticmethod
@@ -298,7 +307,13 @@ class PyPi(AbstractRecipeModel):
         name = self.get_var_content(self["package"]["name"].values[0])
         pypi_metadata = self._get_pypi_metadata()
         sdist_metadata = self._get_sdist_metadata(sdist_url=pypi_metadata["sdist_url"])
+        print("----------------- PYPI -----------")
+        print(pypi_metadata)
+        print("----------------- SDIST -----------")
+        print(sdist_metadata)
         metadata = self._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
+        print("----------------- MERGE METADATA -----------")
+        print(metadata)
         return {
             "package": {"name": name, "version": metadata["version"]},
             "requirements": self._extract_requirements(metadata),
