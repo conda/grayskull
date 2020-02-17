@@ -37,7 +37,8 @@ jobs:
       - bash: |
           source activate grayskull
           conda install --yes python=$PYTHON_VERSION $(grayskull_deps)
-          conda install --yes gcc_linux-64 gxx_linux-64 gfortran_linux-64
+          conda install --yes gcc_linux-64 gxx_linux-64 gfortran_linux-64 fortran-compiler
+          sudo apt update
           sudo apt-get install gfortran -y
           conda list
         displayName: Installing dependencies
@@ -64,7 +65,7 @@ jobs:
   - job:
     displayName: OSX
     pool:
-      vmImage: 'macOS-10.13'
+      vmImage: 'macOS-10.14'
     strategy:
       matrix:
         python38:
