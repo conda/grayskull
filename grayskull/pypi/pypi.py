@@ -85,21 +85,21 @@ class PyPi(AbstractRecipeModel):
 
         data_dist = {}
 
-        class _fake_build_ext_distutils(original_build_ext_distutils):
-            def __init__(self, *args, **kwargs):
-                global data_dist
-                data_dist["compilers"] = ["c"]
-                super(_fake_build_ext_distutils, self).__init__(*args, **kwargs)
+        # class _fake_build_ext_distutils(original_build_ext_distutils):
+        #     def __init__(self, *args, **kwargs):
+        #         global data_dist
+        #         data_dist["compilers"] = ["c"]
+        #         super(_fake_build_ext_distutils, self).__init__(*args, **kwargs)
 
-        from setuptools.command import build_ext as setup_ext
-
-        original_build_ext_setuptools = setup_ext.build_ext
-
-        class _fake_build_ext_setuptools(original_build_ext_setuptools):
-            def __init__(self, *args, **kwargs):
-                global data_dist
-                data_dist["compilers"] = ["c"]
-                super(_fake_build_ext_setuptools, self).__init__(*args, **kwargs)
+        # from setuptools.command import build_ext as setup_ext
+        #
+        # original_build_ext_setuptools = setup_ext.build_ext
+        #
+        # class _fake_build_ext_setuptools(original_build_ext_setuptools):
+        #     def __init__(self, *args, **kwargs):
+        #         global data_dist
+        #         data_dist["compilers"] = ["c"]
+        #         super(_fake_build_ext_setuptools, self).__init__(*args, **kwargs)
 
         def __fake_distutils_setup(*args, **kwargs):
             data_dist["tests_require"] = kwargs.get("tests_require", [])
@@ -143,8 +143,8 @@ class PyPi(AbstractRecipeModel):
 
         try:
             core.setup = __fake_distutils_setup
-            dist_ext.build_ext = _fake_build_ext_distutils
-            setup_ext.build_ext = _fake_build_ext_setuptools
+            # dist_ext.build_ext = _fake_build_ext_distutils
+            # setup_ext.build_ext = _fake_build_ext_setuptools
             path_setup = str(path_setup)
             PyPi.__run_setup_py(path_setup, data_dist)
             if not data_dist or data_dist.get("install_requires", None) is None:
@@ -156,7 +156,7 @@ class PyPi(AbstractRecipeModel):
             yield data_dist
         core.setup = setup_core_original
         dist_ext.build_ext = original_build_ext_distutils
-        setup_ext.build_ext = original_build_ext_setuptools
+        # setup_ext.build_ext = original_build_ext_setuptools
         os.chdir(old_dir)
 
     @staticmethod
