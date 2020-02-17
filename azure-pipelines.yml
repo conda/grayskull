@@ -37,6 +37,7 @@ jobs:
       - bash: |
           source activate grayskull
           conda install --yes python=$PYTHON_VERSION $(grayskull_deps)
+          conda install --yes gcc_linux-64 gxx_linux-64 gfortran_linux-64
           conda list
         displayName: Installing dependencies
 
@@ -95,6 +96,7 @@ jobs:
       - bash: |
           source activate grayskull
           conda install --yes python=$PYTHON_VERSION $(grayskull_deps)
+          conda install --yes clang_osx-64 clangxx_osx-64 gfortran_osx-64
           conda list
         displayName: Installing dependencies
 
