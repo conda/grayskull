@@ -126,7 +126,9 @@ class PyPi(AbstractRecipeModel):
                 if "setuptools-scm" in data_dist["setup_requires"]:
                     data_dist["setup_requires"].remove("setuptools-scm")
 
+            print("------EXT_MODULES---------")
             if kwargs.get("ext_modules", None):
+                print(kwargs.get("ext_modules"))
                 data_dist["compilers"] = ["c"]
                 if len(kwargs["ext_modules"]) > 0:
                     for ext_mod in kwargs["ext_modules"]:
