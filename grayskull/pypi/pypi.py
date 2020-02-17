@@ -128,6 +128,11 @@ class PyPi(AbstractRecipeModel):
 
             if kwargs.get("ext_modules", None):
                 data_dist["compilers"] = ["c"]
+                if len(kwargs["ext_modules"]) > 0:
+                    for ext_mod in kwargs["ext_modules"]:
+                        if ext_mod.has_f2py_sources():
+                            data_dist["compilers"].append("fortran")
+                            break
             if data_dist.get("run_py", False):
                 del data_dist["run_py"]
                 return
@@ -290,16 +295,13 @@ class PyPi(AbstractRecipeModel):
     @lru_cache(maxsize=10)
     def _get_metadata(self) -> dict:
         name = self.get_var_content(self["package"]["name"].values[0])
-        pypi_metada = self._get_pypi_metadata()
-        sdist_metada = self._get_sdist_metadata(sdist_url=pypi_metada["sdist_url"])
-        metadata = self._merge_pypi_sdist_metadata(pypi_metada, sdist_metada)
-        test_imports = (
-            metadata.get("packages") if metadata.get("packages") else [name.lower()]
-        )
+        pypi_metadata = self._get_pypi_metadata()
+        sdist_metadata = self._get_sdist_metadata(sdist_url=pypi_metadata["sdist_url"])
+        metadata = self._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
         return {
             "package": {"name": name, "version": metadata["version"]},
             "requirements": self._extract_requirements(metadata),
-            "test": {"imports": test_imports},
+            "test": {"imports": pypi_metadata["name"]},
             "about": {
                 "home": metadata.get("project_url"),
                 "summary": metadata.get("summary"),

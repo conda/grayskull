@@ -285,3 +285,15 @@ def test_ciso_recipe():
     assert sorted(recipe["requirements"]["run"]) == sorted(
         ["cython", "python", "<{ pin_compatible('numpy') }}"]
     )
+
+
+def test_pymc_recipe_fortran():
+    recipe = PyPi(name="pymc", version="2.3.6")
+    assert sorted(recipe["requirements"]["build"]) == sorted(
+        ["<{ compiler('c') }}", "<{ compiler('fortran') }}"]
+    )
+    assert sorted(recipe["requirements"]["host"]) == sorted(["numpy", "python", "pip"])
+    assert sorted(recipe["requirements"]["run"]) == sorted(
+        ["<{ pin_compatible('numpy') }}", "python"]
+    )
+    assert not recipe["build"]["noarch"]
