@@ -3,7 +3,7 @@ from functools import lru_cache
 from typing import List
 
 
-@lru_cache
+@lru_cache(maxsize=10)
 def get_std_modules() -> List:
     from stdlib_list import stdlib_list
 
