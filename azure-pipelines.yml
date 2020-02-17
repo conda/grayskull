@@ -1,7 +1,7 @@
 variables:
 - group: Codecov
 - name: grayskull_deps
-  value: pytest pytest-azurepipelines pytest-xdist pytest-cov requests ruamel.yaml codecov ruamel.yaml.jinja2 "coverage<5.0" stdlib-list pip setuptools
+  value: pytest pytest-azurepipelines pytest-xdist pytest-cov requests ruamel.yaml codecov ruamel.yaml.jinja2 "coverage<5.0" stdlib-list pip setuptools numpy
 
 jobs:
   - job:
