@@ -200,8 +200,7 @@ class PyPi(AbstractRecipeModel):
             and dep_name.lower() != "setuptools"
         ):
             data_dist["setup_requires"].append(dep_name.lower())
-        if dep_name != "setuptools":
-            check_output(["pip", "install", dep_name, f"--target={pip_dir}"])
+        check_output(["pip", "install", dep_name, f"--target={pip_dir}"])
 
     @staticmethod
     def _merge_pypi_sdist_metadata(pypi_metadata: dict, sdist_metadata: dict) -> dict:
