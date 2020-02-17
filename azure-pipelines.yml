@@ -38,6 +38,7 @@ jobs:
           source activate grayskull
           conda install --yes python=$PYTHON_VERSION $(grayskull_deps)
           conda install --yes gcc_linux-64 gxx_linux-64 gfortran_linux-64
+          sudo apt-get install gfortran -y
           conda list
         displayName: Installing dependencies
 
