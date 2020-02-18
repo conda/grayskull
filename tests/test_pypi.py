@@ -260,9 +260,12 @@ def test_run_requirements_sdist():
 
 
 def test_format_host_requirements():
-    assert sorted(PyPi._format_dependencies(["setuptools>=40.0", "pkg2"])) == sorted(
-        ["setuptools >=40.0", "pkg2"]
-    )
+    assert sorted(
+        PyPi._format_dependencies(["setuptools>=40.0", "pkg2"], "pkg1")
+    ) == sorted(["setuptools >=40.0", "pkg2"])
+    assert sorted(
+        PyPi._format_dependencies(["setuptools>=40.0", "pkg2"], "pkg2")
+    ) == sorted(["setuptools >=40.0"])
 
 
 def test_download_pkg_sdist(tmpdir):
