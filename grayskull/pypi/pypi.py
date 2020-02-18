@@ -85,24 +85,7 @@ class PyPi(AbstractRecipeModel):
 
         data_dist = {}
 
-        # class _fake_build_ext_distutils(original_build_ext_distutils):
-        #     def __init__(self, *args, **kwargs):
-        #         global data_dist
-        #         data_dist["compilers"] = ["c"]
-        #         super(_fake_build_ext_distutils, self).__init__(*args, **kwargs)
-
-        # from setuptools.command import build_ext as setup_ext
-        #
-        # original_build_ext_setuptools = setup_ext.build_ext
-        #
-        # class _fake_build_ext_setuptools(original_build_ext_setuptools):
-        #     def __init__(self, *args, **kwargs):
-        #         global data_dist
-        #         data_dist["compilers"] = ["c"]
-        #         super(_fake_build_ext_setuptools, self).__init__(*args, **kwargs)
-
         def __fake_distutils_setup(*args, **kwargs):
-            print("------FAKE DISTUTILS -----------------")
             data_dist["tests_require"] = kwargs.get("tests_require", [])
             data_dist["install_requires"] = kwargs.get("install_requires", [])
             if not data_dist.get("setup_requires"):
@@ -128,9 +111,7 @@ class PyPi(AbstractRecipeModel):
                 if "setuptools-scm" in data_dist["setup_requires"]:
                     data_dist["setup_requires"].remove("setuptools-scm")
 
-            print("------EXT_MODULES---------")
             if kwargs.get("ext_modules", None):
-                print(kwargs.get("ext_modules"))
                 data_dist["compilers"] = ["c"]
                 if len(kwargs["ext_modules"]) > 0:
                     for ext_mod in kwargs["ext_modules"]:
@@ -147,25 +128,19 @@ class PyPi(AbstractRecipeModel):
 
         try:
             core.setup = __fake_distutils_setup
-            # dist_ext.build_ext = _fake_build_ext_distutils
-            # setup_ext.build_ext = _fake_build_ext_setuptools
             path_setup = str(path_setup)
             PyPi.__run_setup_py(path_setup, data_dist)
             if not data_dist or not data_dist.get("install_requires", None):
                 PyPi.__run_setup_py(path_setup, data_dist, run_py=True)
             yield data_dist
         except Exception as err:  # noqa
-            print("---------- EXCEPTION INJECTION -----------")
-            print(err)
             yield data_dist
         core.setup = setup_core_original
         dist_ext.build_ext = original_build_ext_distutils
-        # setup_ext.build_ext = original_build_ext_setuptools
         os.chdir(old_dir)
 
     @staticmethod
     def __run_setup_py(path_setup: str, data_dist: dict, run_py=False):
-        print("------------ RUN_SETUP_PY -----------------")
         original_path = deepcopy(sys.path)
         pip_dir = os.path.join(os.path.dirname(str(path_setup)), "pip-dir")
         if not os.path.exists(pip_dir):
@@ -176,13 +151,11 @@ class PyPi(AbstractRecipeModel):
         PyPi._install_deps_if_necessary(path_setup, data_dist, pip_dir)
         try:
             if run_py:
-                print("------------- RUN PY TRU RUNNING --------------")
                 import runpy
 
                 data_dist["run_py"] = True
                 runpy.run_path(path_setup, run_name="__main__")
             else:
-                print(f"------------ RUN SETUP --target={pip_dir} --------")
                 core.run_setup(
                     path_setup, script_args=["install", f"--target={pip_dir}"]
                 )
@@ -190,8 +163,6 @@ class PyPi(AbstractRecipeModel):
             PyPi._pip_install_dep(data_dist, err.name, pip_dir)
             PyPi.__run_setup_py(path_setup, data_dist, run_py)
         except Exception as err:  # noqa
-            print("-------------- EXCEPTION RUN SETUP PY--------------------")
-            print(err)
             pass
         if os.path.exists(pip_dir):
             shutil.rmtree(pip_dir)
@@ -205,8 +176,6 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _pip_install_dep(data_dist: dict, dep_name: str, pip_dir: str):
-        print("------------ PIP INSTALL -----------------")
-        print(dep_name)
         if not data_dist.get("setup_requires"):
             data_dist["setup_requires"] = []
         if dep_name == "pkg_resources":
@@ -216,7 +185,6 @@ class PyPi(AbstractRecipeModel):
             and dep_name.lower() != "setuptools"
         ):
             data_dist["setup_requires"].append(dep_name.lower())
-        print(f"------------ PIP INSTALL {dep_name} -----------------")
         check_output(["pip", "install", dep_name, f"--target={pip_dir}"])
 
     @staticmethod
@@ -313,13 +281,7 @@ class PyPi(AbstractRecipeModel):
         name = self.get_var_content(self["package"]["name"].values[0])
         pypi_metadata = self._get_pypi_metadata()
         sdist_metadata = self._get_sdist_metadata(sdist_url=pypi_metadata["sdist_url"])
-        print("----------------- PYPI -----------")
-        print(pypi_metadata)
-        print("----------------- SDIST -----------")
-        print(sdist_metadata)
         metadata = self._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
-        print("----------------- MERGE METADATA -----------")
-        print(metadata)
         return {
             "package": {"name": name, "version": metadata["version"]},
             "requirements": self._extract_requirements(metadata),

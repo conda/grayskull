@@ -1,7 +1,6 @@
 import hashlib
 import json
 import os
-import sys
 
 import pytest
 
@@ -291,10 +290,6 @@ def test_ciso_recipe():
     )
 
 
-@pytest.mark.skipif(
-    "win" in sys.platform,
-    reason="Skipping on azure win because of the lack of fortran and c compilers",
-)
 def test_pymc_recipe_fortran():
     recipe = PyPi(name="pymc", version="2.3.6")
     assert sorted(recipe["requirements"]["build"]) == sorted(
