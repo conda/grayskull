@@ -80,6 +80,8 @@ class PyPi(AbstractRecipeModel):
         if "extras_require" in result:
             result["extras_require"] = get_full_list("extras_require")
         if "setup_requires" in result:
+            if "setuptools-scm" in result["setup_requires"]:
+                result["setup_requires"].remove("setuptools-scm")
             result["setup_requires"] = get_full_list("setup_requires")
         if "compilers" in result:
             result["compilers"] = get_full_list("compilers")
