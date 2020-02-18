@@ -1,7 +1,7 @@
 variables:
 - group: Codecov
 - name: grayskull_deps
-  value: pytest pytest-azurepipelines pytest-xdist pytest-cov requests ruamel.yaml codecov ruamel.yaml.jinja2 "coverage<5.0" stdlib-list
+  value: pytest pytest-azurepipelines pytest-xdist pytest-cov requests ruamel.yaml codecov ruamel.yaml.jinja2 "coverage<5.0" stdlib-list pip setuptools numpy
 
 jobs:
   - job:
@@ -37,13 +37,17 @@ jobs:
       - bash: |
           source activate grayskull
           conda install --yes python=$PYTHON_VERSION $(grayskull_deps)
+          conda install --yes gcc_linux-64 gxx_linux-64 gfortran_linux-64 fortran-compiler
+          sudo apt update
+          sudo apt-get install gfortran-8 -y
           conda list
         displayName: Installing dependencies
 
       - bash: |
           source activate grayskull
           pytest tests \
-              -n auto \
+              -vv \
+              -n 0 \
               --color=yes \
               --cov=./ \
               --cov-append \
@@ -62,7 +66,7 @@ jobs:
   - job:
     displayName: OSX
     pool:
-      vmImage: 'macOS-10.13'
+      vmImage: 'macOS-10.14'
     strategy:
       matrix:
         python38:
@@ -95,13 +99,15 @@ jobs:
       - bash: |
           source activate grayskull
           conda install --yes python=$PYTHON_VERSION $(grayskull_deps)
+          conda install --yes clang_osx-64 clangxx_osx-64 gfortran_osx-64
           conda list
         displayName: Installing dependencies
 
       - bash: |
           source activate grayskull
           pytest tests \
-              -n auto \
+              -vv \
+              -n 0 \
               --color=yes \
               --cov=./ \
               --cov-append \
@@ -155,7 +161,8 @@ jobs:
       - script: |
           call activate grayskull
           pytest tests ^
-              -n auto ^
+              -vv ^
+              -n 0 ^
               --color=yes ^
               --cov=./ ^
               --cov-append ^

@@ -5,6 +5,7 @@ import shutil
 import sys
 from collections import namedtuple
 from contextlib import contextmanager
+from copy import deepcopy
 from distutils import core
 from functools import lru_cache
 from pathlib import Path
@@ -84,22 +85,6 @@ class PyPi(AbstractRecipeModel):
 
         data_dist = {}
 
-        class _fake_build_ext_distutils(original_build_ext_distutils):
-            def __init__(self, *args, **kwargs):
-                global data_dist
-                data_dist["compilers"] = ["c"]
-                super(_fake_build_ext_distutils, self).__init__(*args, **kwargs)
-
-        from setuptools.command import build_ext as setup_ext
-
-        original_build_ext_setuptools = setup_ext.build_ext
-
-        class _fake_build_ext_setuptools(original_build_ext_setuptools):
-            def __init__(self, *args, **kwargs):
-                global data_dist
-                data_dist["compilers"] = ["c"]
-                super(_fake_build_ext_setuptools, self).__init__(*args, **kwargs)
-
         def __fake_distutils_setup(*args, **kwargs):
             data_dist["tests_require"] = kwargs.get("tests_require", [])
             data_dist["install_requires"] = kwargs.get("install_requires", [])
@@ -120,7 +105,7 @@ class PyPi(AbstractRecipeModel):
             data_dist["version"] = kwargs.get("version", None)
             data_dist["author"] = kwargs.get("author", None)
 
-            if "use_scm_version" in kwargs:
+            if "use_scm_version" in kwargs and kwargs["use_scm_version"]:
                 if "setuptools_scm" not in data_dist["setup_requires"]:
                     data_dist["setup_requires"] += ["setuptools_scm"]
                 if "setuptools-scm" in data_dist["setup_requires"]:
@@ -128,6 +113,14 @@ class PyPi(AbstractRecipeModel):
 
             if kwargs.get("ext_modules", None):
                 data_dist["compilers"] = ["c"]
+                if len(kwargs["ext_modules"]) > 0:
+                    for ext_mod in kwargs["ext_modules"]:
+                        if (
+                            hasattr(ext_mod, "has_f2py_sources")
+                            and ext_mod.has_f2py_sources()
+                        ):
+                            data_dist["compilers"].append("fortran")
+                            break
             if data_dist.get("run_py", False):
                 del data_dist["run_py"]
                 return
@@ -135,23 +128,20 @@ class PyPi(AbstractRecipeModel):
 
         try:
             core.setup = __fake_distutils_setup
-            dist_ext.build_ext = _fake_build_ext_distutils
-            setup_ext.build_ext = _fake_build_ext_setuptools
             path_setup = str(path_setup)
             PyPi.__run_setup_py(path_setup, data_dist)
-            if not data_dist or data_dist.get("install_requires", None) is None:
+            if not data_dist or not data_dist.get("install_requires", None):
                 PyPi.__run_setup_py(path_setup, data_dist, run_py=True)
             yield data_dist
         except Exception as err:  # noqa
             yield data_dist
         core.setup = setup_core_original
         dist_ext.build_ext = original_build_ext_distutils
-        setup_ext.build_ext = original_build_ext_setuptools
         os.chdir(old_dir)
 
     @staticmethod
     def __run_setup_py(path_setup: str, data_dist: dict, run_py=False):
-        original_path = sys.path
+        original_path = deepcopy(sys.path)
         pip_dir = os.path.join(os.path.dirname(str(path_setup)), "pip-dir")
         if not os.path.exists(pip_dir):
             os.mkdir(pip_dir)
@@ -195,8 +185,7 @@ class PyPi(AbstractRecipeModel):
             and dep_name.lower() != "setuptools"
         ):
             data_dist["setup_requires"].append(dep_name.lower())
-        if dep_name != "setuptools":
-            check_output(["pip", "install", dep_name, f"--target={pip_dir}"])
+        check_output(["pip", "install", dep_name, f"--target={pip_dir}"])
 
     @staticmethod
     def _merge_pypi_sdist_metadata(pypi_metadata: dict, sdist_metadata: dict) -> dict:
@@ -290,16 +279,13 @@ class PyPi(AbstractRecipeModel):
     @lru_cache(maxsize=10)
     def _get_metadata(self) -> dict:
         name = self.get_var_content(self["package"]["name"].values[0])
-        pypi_metada = self._get_pypi_metadata()
-        sdist_metada = self._get_sdist_metadata(sdist_url=pypi_metada["sdist_url"])
-        metadata = self._merge_pypi_sdist_metadata(pypi_metada, sdist_metada)
-        test_imports = (
-            metadata.get("packages") if metadata.get("packages") else [name.lower()]
-        )
+        pypi_metadata = self._get_pypi_metadata()
+        sdist_metadata = self._get_sdist_metadata(sdist_url=pypi_metadata["sdist_url"])
+        metadata = self._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
         return {
             "package": {"name": name, "version": metadata["version"]},
             "requirements": self._extract_requirements(metadata),
-            "test": {"imports": test_imports},
+            "test": {"imports": pypi_metadata["name"]},
             "about": {
                 "home": metadata.get("project_url"),
                 "summary": metadata.get("summary"),

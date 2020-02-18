@@ -153,22 +153,23 @@ def test_injection_distutils_pytest():
     data = recipe._get_sdist_metadata(
         "https://pypi.io/packages/source/p/pytest/pytest-5.3.2.tar.gz"
     )
-    assert data["install_requires"] == [
-        "py>=1.5.0",
-        "packaging",
-        "attrs>=17.4.0",
-        "more-itertools>=4.0.0",
-        'atomicwrites>=1.0;sys_platform=="win32"',
-        'pathlib2>=2.2.0;python_version<"3.6"',
-        'colorama;sys_platform=="win32"',
-        "pluggy>=0.12,<1.0",
-        'importlib-metadata>=0.12;python_version<"3.8"',
-        "wcwidth",
-    ]
-    assert data["setup_requires"] == [
-        "setuptools>=40.0",
-        "setuptools_scm",
-    ]
+    assert sorted(data["install_requires"]) == sorted(
+        [
+            "py>=1.5.0",
+            "packaging",
+            "attrs>=17.4.0",
+            "more-itertools>=4.0.0",
+            'atomicwrites>=1.0;sys_platform=="win32"',
+            'pathlib2>=2.2.0;python_version<"3.6"',
+            'colorama;sys_platform=="win32"',
+            "pluggy>=0.12,<1.0",
+            'importlib-metadata>=0.12;python_version<"3.8"',
+            "wcwidth",
+        ]
+    )
+    assert sorted(data["setup_requires"]) == sorted(
+        ["setuptools>=40.0", "setuptools_scm"]
+    )
     assert not data.get("compilers")
     assert recipe["build"]["skip"].values[0].value
     assert recipe["build"]["skip"].values[0].selector == "py2k"
@@ -249,13 +250,15 @@ def test_build_noarch_skip():
 
 def test_run_requirements_sdist():
     recipe = PyPi(name="botocore", version="1.14.17")
-    assert recipe["requirements"]["run"].values == [
-        "docutils >=0.10,<0.16",
-        "jmespath >=0.7.1,<1.0.0",
-        "python",
-        "python-dateutil >=2.1,<3.0.0",
-        "urllib3 >=1.20,<1.26",
-    ]
+    assert sorted(recipe["requirements"]["run"]) == sorted(
+        [
+            "docutils >=0.10,<0.16",
+            "jmespath >=0.7.1,<1.0.0",
+            "python",
+            "python-dateutil >=2.1,<3.0.0",
+            "urllib3 >=1.20,<1.26",
+        ]
+    )
 
 
 def test_format_host_requirements():
@@ -285,3 +288,15 @@ def test_ciso_recipe():
     assert sorted(recipe["requirements"]["run"]) == sorted(
         ["cython", "python", "<{ pin_compatible('numpy') }}"]
     )
+
+
+def test_pymc_recipe_fortran():
+    recipe = PyPi(name="pymc", version="2.3.6")
+    assert sorted(recipe["requirements"]["build"]) == sorted(
+        ["<{ compiler('c') }}", "<{ compiler('fortran') }}"]
+    )
+    assert sorted(recipe["requirements"]["host"]) == sorted(["numpy", "python", "pip"])
+    assert sorted(recipe["requirements"]["run"]) == sorted(
+        ["<{ pin_compatible('numpy') }}", "python"]
+    )
+    assert not recipe["build"]["noarch"]
