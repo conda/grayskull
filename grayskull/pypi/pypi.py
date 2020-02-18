@@ -91,9 +91,10 @@ class PyPi(AbstractRecipeModel):
     def _get_setup_cfg(source_path: str) -> dict:
         from setuptools.config import read_configuration
 
-        path_setup_cfg = list(Path(source_path).rglob("setup.cfg"))[0]
+        path_setup_cfg = list(Path(source_path).rglob("setup.cfg"))
         if not path_setup_cfg:
             return {}
+        path_setup_cfg = path_setup_cfg[0]
 
         setup_cfg = read_configuration(str(path_setup_cfg))
         setup_cfg = dict(setup_cfg)

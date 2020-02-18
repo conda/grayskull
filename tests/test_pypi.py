@@ -191,9 +191,7 @@ def test_merge_pypi_sdist_metadata():
     sdist_metadata = recipe._get_sdist_metadata(pypi_metadata["sdist_url"])
     merged_data = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
     assert merged_data["compilers"] == ["c"]
-    assert sorted(merged_data["setup_requires"]) == sorted(
-        ["numpy", "pip", "versioneer"]
-    )
+    assert sorted(merged_data["setup_requires"]) == sorted(["numpy"])
 
 
 def test_update_requirements_with_pin():
