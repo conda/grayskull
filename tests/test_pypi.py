@@ -318,3 +318,9 @@ def test_pytest_recipe_entry_points():
     assert sorted(recipe["build"]["entry_points"]) == sorted(
         ["pytest=pytest:main", "py.test=pytest:main"]
     )
+
+
+def test_cythongsl_recipe_build():
+    recipe = PyPi(name="cythongsl", version="0.2.2")
+    assert recipe["requirements"]["build"] == "<{ compiler('c') }}"
+    assert recipe["requirements"]["host"] == ["cython >= 0.16", "pip", "python"]

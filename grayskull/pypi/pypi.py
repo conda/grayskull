@@ -265,6 +265,7 @@ class PyPi(AbstractRecipeModel):
         compilers = set(sdist_metadata.get("compilers", []))
         for pkg in requires_dist:
             pkg = PyPi.RE_DEPS_NAME.match(pkg).group(0)
+            pkg = pkg.lower().strip()
             if pkg.strip() in PyPi.PKG_NEEDS_C_COMPILER:
                 compilers.add("c")
             if pkg.strip() in PyPi.PKG_NEEDS_CXX_COMPILER:
