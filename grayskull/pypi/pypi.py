@@ -74,14 +74,11 @@ class PyPi(AbstractRecipeModel):
         :yield: return the metadata from sdist
         """
         from distutils import core
-        from distutils.command import build_ext as dist_ext
 
         setup_core_original = core.setup
         old_dir = os.getcwd()
         path_setup = list(Path(folder).rglob("setup.py"))[0]
         os.chdir(os.path.dirname(str(path_setup)))
-
-        original_build_ext_distutils = dist_ext.build_ext
 
         data_dist = {}
 
@@ -136,7 +133,6 @@ class PyPi(AbstractRecipeModel):
         except Exception as err:  # noqa
             yield data_dist
         core.setup = setup_core_original
-        dist_ext.build_ext = original_build_ext_distutils
         os.chdir(old_dir)
 
     @staticmethod
@@ -285,7 +281,7 @@ class PyPi(AbstractRecipeModel):
         return {
             "package": {"name": name, "version": metadata["version"]},
             "requirements": self._extract_requirements(metadata),
-            "test": {"imports": pypi_metadata["name"]},
+            "test": {"imports": pypi_metadata["name"], "commands": "pip check"},
             "about": {
                 "home": metadata.get("project_url"),
                 "summary": metadata.get("summary"),
