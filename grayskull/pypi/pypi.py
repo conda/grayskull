@@ -57,9 +57,7 @@ class PyPi(AbstractRecipeModel):
         PyPi._download_sdist_pkg(sdist_url=sdist_url, dest=path_pkg)
         shutil.unpack_archive(path_pkg, temp_folder)
         with PyPi._injection_distutils(temp_folder) as metadata:
-            return PyPi._merge_sdist_metadata(
-                metadata, PyPi._get_setup_cfg(temp_folder)
-            )
+            return metadata
 
     @staticmethod
     def _merge_sdist_metadata(setup_py: dict, setup_cfg: dict) -> dict:
@@ -180,7 +178,7 @@ class PyPi(AbstractRecipeModel):
     @staticmethod
     def __run_setup_py(path_setup: str, data_dist: dict, run_py=False):
         original_path = deepcopy(sys.path)
-        pip_dir = os.path.join(os.path.dirname(str(path_setup)), "pip-dir")
+        pip_dir = mkdtemp(prefix="pip-dir-")
         if not os.path.exists(pip_dir):
             os.mkdir(pip_dir)
         if os.path.dirname(path_setup) not in sys.path:
@@ -202,6 +200,11 @@ class PyPi(AbstractRecipeModel):
             PyPi.__run_setup_py(path_setup, data_dist, run_py)
         except Exception as err:  # noqa
             pass
+        data_dist.update(
+            PyPi._merge_sdist_metadata(
+                data_dist, PyPi._get_setup_cfg(os.path.dirname(str(path_setup)))
+            )
+        )
         if os.path.exists(pip_dir):
             shutil.rmtree(pip_dir)
         sys.path = original_path
