@@ -1,6 +1,7 @@
 import hashlib
 import json
 import os
+import shutil
 
 import pytest
 
@@ -136,10 +137,9 @@ def test_injection_distutils():
     data = recipe._get_sdist_metadata(
         "https://pypi.io/packages/source/h/hypothesis/hypothesis-5.5.1.tar.gz"
     )
-    assert data["install_requires"] == [
-        "attrs>=19.2.0",
-        "sortedcontainers>=2.1.0,<3.0.0",
-    ]
+    assert sorted(data["install_requires"]) == sorted(
+        ["attrs>=19.2.0", "sortedcontainers>=2.1.0,<3.0.0"]
+    )
     assert data["entry_points"] == {
         "pytest11": ["hypothesispytest = hypothesis.extra.pytestplugin"]
     }
@@ -191,9 +191,7 @@ def test_merge_pypi_sdist_metadata():
     sdist_metadata = recipe._get_sdist_metadata(pypi_metadata["sdist_url"])
     merged_data = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
     assert merged_data["compilers"] == ["c"]
-    assert sorted(merged_data["setup_requires"]) == sorted(
-        ["numpy", "pip", "versioneer"]
-    )
+    assert sorted(merged_data["setup_requires"]) == sorted(["numpy"])
 
 
 def test_update_requirements_with_pin():
@@ -268,7 +266,8 @@ def test_format_host_requirements():
 
 
 def test_download_pkg_sdist(tmpdir):
-    dest_pkg = str(tmpdir / "test-download-pkg")
+    folder = tmpdir.mkdir("test-download-pkg")
+    dest_pkg = str(folder / "PYTEST-PKG.tar.gz")
     PyPi._download_sdist_pkg(
         "https://pypi.io/packages/source/p/pytest/pytest-5.3.5.tar.gz", dest_pkg
     )
@@ -278,6 +277,13 @@ def test_download_pkg_sdist(tmpdir):
     assert (
         pkg_sha256 == "0d5fe9189a148acc3c3eb2ac8e1ac0742cb7618c084f3d228baaec0c254b318d"
     )
+    shutil.unpack_archive(dest_pkg, str(folder))
+    setup_cfg = PyPi._get_setup_cfg(str(folder))
+    assert setup_cfg["name"] == "pytest"
+    assert setup_cfg["python_requires"] == ">=3.5"
+    assert setup_cfg["entry_points"] == {
+        "console_scripts": ["pytest=pytest:main", "py.test=pytest:main"]
+    }
 
 
 def test_ciso_recipe():
@@ -302,3 +308,10 @@ def test_pymc_recipe_fortran():
         ["<{ pin_compatible('numpy') }}", "python"]
     )
     assert not recipe["build"]["noarch"]
+
+
+def test_pytest_recipe_entry_points():
+    recipe = PyPi(name="pytest", version="5.3.5")
+    assert sorted(recipe["build"]["entry_points"]) == sorted(
+        ["pytest=pytest:main", "py.test=pytest:main"]
+    )

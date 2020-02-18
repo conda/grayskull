@@ -6,7 +6,7 @@ from grayskull.base.factory import GrayskullFactory
 
 
 @pytest.mark.parametrize(
-    "repo_type, pkg_name, version, obj_type", [("pypi", "pytest", "5.3.2", PyPI)]
+    "repo_type, pkg_name, version, obj_type", [("pypi", "requests", "2.22.0", PyPI)]
 )
 def test_factory(repo_type, pkg_name, version, obj_type):
     assert isinstance(

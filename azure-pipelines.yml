@@ -1,7 +1,7 @@
 variables:
 - group: Codecov
 - name: grayskull_deps
-  value: pytest pytest-azurepipelines pytest-xdist pytest-cov requests ruamel.yaml codecov ruamel.yaml.jinja2 "coverage<5.0" stdlib-list pip setuptools numpy
+  value: pytest pytest-azurepipelines pytest-xdist pytest-cov requests ruamel.yaml codecov ruamel.yaml.jinja2 "coverage<5.0" stdlib-list pip setuptools
 
 jobs:
   - job:
@@ -37,9 +37,7 @@ jobs:
       - bash: |
           source activate grayskull
           conda install --yes python=$PYTHON_VERSION $(grayskull_deps)
-          conda install --yes gcc_linux-64 gxx_linux-64 gfortran_linux-64 fortran-compiler
-          sudo apt update
-          sudo apt-get install gfortran-8 -y
+          conda install --yes gcc_linux-64 gxx_linux-64 gfortran_linux-64 fortran-compiler numpy
           conda list
         displayName: Installing dependencies
 
@@ -99,7 +97,7 @@ jobs:
       - bash: |
           source activate grayskull
           conda install --yes python=$PYTHON_VERSION $(grayskull_deps)
-          conda install --yes clang_osx-64 clangxx_osx-64 gfortran_osx-64
+          conda install --yes clang_osx-64 clangxx_osx-64 gfortran_osx-64 numpy
           conda list
         displayName: Installing dependencies
 

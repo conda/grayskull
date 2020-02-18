@@ -13,6 +13,7 @@ setup(
         "ruamel.yaml.jinja2",
         "stdlib-list",
         "pip",
+        "setuptools>=30.3.0",
     ],
     extras_require={"testing": ["pytest"]},
     url="https://github.com/marcelotrevisani/grayskull",

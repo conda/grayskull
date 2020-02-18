@@ -54,10 +54,58 @@ class PyPi(AbstractRecipeModel):
         pkg_name = sdist_url.split("/")[-1]
         path_pkg = os.path.join(temp_folder, pkg_name)
 
-        self._download_sdist_pkg(sdist_url=sdist_url, dest=path_pkg)
+        PyPi._download_sdist_pkg(sdist_url=sdist_url, dest=path_pkg)
         shutil.unpack_archive(path_pkg, temp_folder)
         with PyPi._injection_distutils(temp_folder) as metadata:
             return metadata
+
+    @staticmethod
+    def _merge_sdist_metadata(setup_py: dict, setup_cfg: dict) -> dict:
+        result = deepcopy(setup_py)
+        for key, value in setup_cfg.items():
+            if key not in result:
+                result[key] = value
+
+        def get_full_list(key: str) -> List:
+            if key not in setup_py:
+                return setup_cfg.get(key, [])
+            cfg_val = set(setup_cfg.get(key, []))
+            result_val = set(result.get(key, []))
+            return list(cfg_val.union(result_val))
+
+        if "install_requires" in result:
+            result["install_requires"] = get_full_list("install_requires")
+        if "extras_require" in result:
+            result["extras_require"] = get_full_list("extras_require")
+        if "setup_requires" in result:
+            if "setuptools-scm" in result["setup_requires"]:
+                result["setup_requires"].remove("setuptools-scm")
+            result["setup_requires"] = get_full_list("setup_requires")
+        if "compilers" in result:
+            result["compilers"] = get_full_list("compilers")
+        return result
+
+    @staticmethod
+    def _get_setup_cfg(source_path: str) -> dict:
+        from setuptools.config import read_configuration
+
+        path_setup_cfg = list(Path(source_path).rglob("setup.cfg"))
+        if not path_setup_cfg:
+            return {}
+        path_setup_cfg = path_setup_cfg[0]
+
+        setup_cfg = read_configuration(str(path_setup_cfg))
+        setup_cfg = dict(setup_cfg)
+        if setup_cfg.get("options", {}).get("python_requires"):
+            setup_cfg["options"]["python_requires"] = str(
+                setup_cfg["options"]["python_requires"]
+            )
+        result = {}
+        result.update(setup_cfg.get("options", {}))
+        result.update(setup_cfg.get("metadata", {}))
+        if result.get("build_ext"):
+            result["compilers"] = ["c"]
+        return result
 
     @staticmethod
     @contextmanager
@@ -83,24 +131,12 @@ class PyPi(AbstractRecipeModel):
         data_dist = {}
 
         def __fake_distutils_setup(*args, **kwargs):
-            data_dist["tests_require"] = kwargs.get("tests_require", [])
-            data_dist["install_requires"] = kwargs.get("install_requires", [])
+            data_dist.update(kwargs)
             if not data_dist.get("setup_requires"):
                 data_dist["setup_requires"] = []
             data_dist["setup_requires"] += (
                 kwargs.get("setup_requires") if kwargs.get("setup_requires") else []
             )
-            data_dist["extras_require"] = kwargs.get("extras_require", [])
-            data_dist["requires_python"] = kwargs.get("requires_python", None)
-            data_dist["entry_points"] = kwargs.get("entry_points", None)
-            data_dist["packages"] = kwargs.get("packages", [])
-            data_dist["summary"] = kwargs.get("description", None)
-            data_dist["home"] = kwargs.get("url", None)
-            data_dist["license"] = kwargs.get("license", None)
-            data_dist["name"] = kwargs.get("name", None)
-            data_dist["classifiers"] = kwargs.get("classifiers", None)
-            data_dist["version"] = kwargs.get("version", None)
-            data_dist["author"] = kwargs.get("author", None)
 
             if "use_scm_version" in kwargs and kwargs["use_scm_version"]:
                 if "setuptools_scm" not in data_dist["setup_requires"]:
@@ -138,7 +174,7 @@ class PyPi(AbstractRecipeModel):
     @staticmethod
     def __run_setup_py(path_setup: str, data_dist: dict, run_py=False):
         original_path = deepcopy(sys.path)
-        pip_dir = os.path.join(os.path.dirname(str(path_setup)), "pip-dir")
+        pip_dir = mkdtemp(prefix="pip-dir-")
         if not os.path.exists(pip_dir):
             os.mkdir(pip_dir)
         if os.path.dirname(path_setup) not in sys.path:
@@ -160,6 +196,11 @@ class PyPi(AbstractRecipeModel):
             PyPi.__run_setup_py(path_setup, data_dist, run_py)
         except Exception as err:  # noqa
             pass
+        data_dist.update(
+            PyPi._merge_sdist_metadata(
+                data_dist, PyPi._get_setup_cfg(os.path.dirname(str(path_setup)))
+            )
+        )
         if os.path.exists(pip_dir):
             shutil.rmtree(pip_dir)
         sys.path = original_path
@@ -280,6 +321,7 @@ class PyPi(AbstractRecipeModel):
         metadata = self._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
         return {
             "package": {"name": name, "version": metadata["version"]},
+            "build": {"entry_points": metadata.get("entry_points")},
             "requirements": self._extract_requirements(metadata),
             "test": {"imports": pypi_metadata["name"], "commands": "pip check"},
             "about": {
