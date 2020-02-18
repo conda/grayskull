@@ -137,10 +137,9 @@ def test_injection_distutils():
     data = recipe._get_sdist_metadata(
         "https://pypi.io/packages/source/h/hypothesis/hypothesis-5.5.1.tar.gz"
     )
-    assert data["install_requires"] == [
-        "attrs>=19.2.0",
-        "sortedcontainers>=2.1.0,<3.0.0",
-    ]
+    assert sorted(data["install_requires"]) == sorted(
+        ["attrs>=19.2.0", "sortedcontainers>=2.1.0,<3.0.0"]
+    )
     assert data["entry_points"] == {
         "pytest11": ["hypothesispytest = hypothesis.extra.pytestplugin"]
     }
