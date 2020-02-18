@@ -288,6 +288,8 @@ def test_ciso_recipe():
     assert sorted(recipe["requirements"]["run"]) == sorted(
         ["cython", "python", "<{ pin_compatible('numpy') }}"]
     )
+    assert recipe["test"]["commands"] == "pip check"
+    assert recipe["test"]["imports"] == "ciso"
 
 
 def test_pymc_recipe_fortran():
