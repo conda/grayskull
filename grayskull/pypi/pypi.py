@@ -399,11 +399,12 @@ class PyPi(AbstractRecipeModel):
         return False
 
     def _extract_requirements(self, metadata: dict) -> dict:
-        requires_dist = self._format_dependencies(metadata.get("requires_dist"))
+        name = metadata["name"]
+        requires_dist = self._format_dependencies(metadata.get("requires_dist"), name)
         setup_requires = (
             metadata.get("setup_requires") if metadata.get("setup_requires") else []
         )
-        host_req = self._format_dependencies(setup_requires)
+        host_req = self._format_dependencies(setup_requires, name)
 
         if not requires_dist and not host_req:
             return {"host": sorted(["python", "pip"]), "run": ["python"]}
@@ -442,7 +443,7 @@ class PyPi(AbstractRecipeModel):
         return result
 
     @staticmethod
-    def _format_dependencies(all_dependencies: List) -> List:
+    def _format_dependencies(all_dependencies: List, name: str) -> List:
         formated_dependencies = []
         re_deps = re.compile(
             r"^\s*([\.a-zA-Z0-9_-]+)\s*(.*)\s*$", re.MULTILINE | re.DOTALL
@@ -450,6 +451,8 @@ class PyPi(AbstractRecipeModel):
         for req in all_dependencies:
             match_req = re_deps.match(req)
             deps_name = req
+            if deps_name == name:
+                continue
             if match_req:
                 match_req = match_req.groups()
                 deps_name = match_req[0]
