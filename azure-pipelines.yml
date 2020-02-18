@@ -39,7 +39,7 @@ jobs:
           conda install --yes python=$PYTHON_VERSION $(grayskull_deps)
           conda install --yes gcc_linux-64 gxx_linux-64 gfortran_linux-64 fortran-compiler
           sudo apt update
-          sudo apt-get install gfortran -y
+          sudo apt-get install gfortran-8 -y
           conda list
         displayName: Installing dependencies
 
@@ -47,7 +47,7 @@ jobs:
           source activate grayskull
           pytest tests \
               -vv \
-              -n auto \
+              -n 0 \
               --color=yes \
               --cov=./ \
               --cov-append \
@@ -107,7 +107,7 @@ jobs:
           source activate grayskull
           pytest tests \
               -vv \
-              -n auto \
+              -n 0 \
               --color=yes \
               --cov=./ \
               --cov-append \
@@ -162,7 +162,7 @@ jobs:
           call activate grayskull
           pytest tests ^
               -vv ^
-              -n auto ^
+              -n 0 ^
               --color=yes ^
               --cov=./ ^
               --cov-append ^

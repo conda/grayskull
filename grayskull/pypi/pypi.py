@@ -122,7 +122,7 @@ class PyPi(AbstractRecipeModel):
             data_dist["version"] = kwargs.get("version", None)
             data_dist["author"] = kwargs.get("author", None)
 
-            if "use_scm_version" in kwargs:
+            if "use_scm_version" in kwargs and kwargs["use_scm_version"]:
                 if "setuptools_scm" not in data_dist["setup_requires"]:
                     data_dist["setup_requires"] += ["setuptools_scm"]
                 if "setuptools-scm" in data_dist["setup_requires"]:
@@ -134,7 +134,10 @@ class PyPi(AbstractRecipeModel):
                 data_dist["compilers"] = ["c"]
                 if len(kwargs["ext_modules"]) > 0:
                     for ext_mod in kwargs["ext_modules"]:
-                        if ext_mod.has_f2py_sources():
+                        if (
+                            hasattr(ext_mod, "has_f2py_sources")
+                            and ext_mod.has_f2py_sources()
+                        ):
                             data_dist["compilers"].append("fortran")
                             break
             if data_dist.get("run_py", False):
@@ -148,7 +151,7 @@ class PyPi(AbstractRecipeModel):
             # setup_ext.build_ext = _fake_build_ext_setuptools
             path_setup = str(path_setup)
             PyPi.__run_setup_py(path_setup, data_dist)
-            if not data_dist or data_dist.get("install_requires", None) is None:
+            if not data_dist or not data_dist.get("install_requires", None):
                 PyPi.__run_setup_py(path_setup, data_dist, run_py=True)
             yield data_dist
         except Exception as err:  # noqa
