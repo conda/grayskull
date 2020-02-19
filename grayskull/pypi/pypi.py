@@ -324,7 +324,10 @@ class PyPi(AbstractRecipeModel):
             "package": {"name": name, "version": metadata["version"]},
             "build": {"entry_points": metadata.get("entry_points")},
             "requirements": self._extract_requirements(metadata),
-            "test": {"imports": pypi_metadata["name"], "commands": "pip check"},
+            "test": {
+                "imports": pypi_metadata["name"].replace("-", "_"),
+                "commands": "pip check",
+            },
             "about": {
                 "home": metadata.get("project_url"),
                 "summary": metadata.get("summary"),
