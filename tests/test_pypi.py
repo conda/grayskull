@@ -54,11 +54,32 @@ def test_get_name_version_from_requires_dist():
 
 def test_get_extra_from_requires_dist():
     assert PyPi._get_extra_from_requires_dist(' python_version < "3.6"') == [
-        ("python_version", "<", "3.6", "", "",)
+        ("", "python_version", "<", "3.6", "", "",)
     ]
     assert PyPi._get_extra_from_requires_dist(
         " python_version < \"3.6\" ; extra =='test'"
-    ) == [("python_version", "<", "3.6", "", ""), ("extra", "==", "test", "", "")]
+    ) == [
+        ("", "python_version", "<", "3.6", "", ""),
+        ("", "extra", "==", "test", "", ""),
+    ]
+    assert PyPi._get_extra_from_requires_dist(
+        ' (sys_platform =="win32" and python_version =="2.7") and extra =="socks"'
+    ) == [
+        ("(", "sys_platform", "==", "win32", "", "and"),
+        ("", "python_version", "==", "2.7", ")", "and"),
+        ("", "extra", "==", "socks", "", ""),
+    ]
+
+
+def test_get_all_selectors_pypi():
+    recipe = PyPi(name="pytest", version="5.3.1")
+    assert recipe._get_all_selectors_pypi(
+        [
+            ("(", "sys_platform", "==", "win32", "", "and"),
+            ("", "python_version", "==", "2.7", ")", "and"),
+            ("", "extra", "==", "socks", "", ""),
+        ]
+    ) == ["(", "win", "and", "py==27", ")"]
 
 
 def test_get_selector():
@@ -330,3 +351,10 @@ def test_cythongsl_recipe_build():
     recipe = PyPi(name="cythongsl", version="0.2.2")
     assert recipe["requirements"]["build"] == "<{ compiler('c') }}"
     assert recipe["requirements"]["host"] == ["cython >=0.16", "pip", "python"]
+
+
+def test_requests_recipe_extra_deps():
+    recipe = PyPi(name="requests", version="2.22.0")
+    assert "win-inet-pton" not in recipe["requirements"]["run"]
+    assert recipe["build"]["noarch"]
+    assert not recipe["build"]["skip"]

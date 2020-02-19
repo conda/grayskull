@@ -398,7 +398,7 @@ class PyPi(AbstractRecipeModel):
     @staticmethod
     def __skip_pypi_requirement(list_extra: List) -> bool:
         for extra in list_extra:
-            if extra[0] == "extra" or extra[2] == "testing":
+            if extra[1] == "extra" or extra[3] == "testing":
                 return True
         return False
 
@@ -520,20 +520,23 @@ class PyPi(AbstractRecipeModel):
             run_req.append(f"{pkg_name} {version}{selector}".strip())
         return run_req
 
-    def _get_all_selectors_pypi(self, list_extra: List):
+    def _get_all_selectors_pypi(self, list_extra: List) -> List:
         result_selector = []
         for extra in list_extra:
             self._is_arch = True
             selector = PyPi._parse_extra_metadata_to_selector(
-                extra[0], extra[1], extra[2]
+                extra[1], extra[2], extra[3]
             )
             if selector:
+                if extra[0]:
+                    result_selector.append(extra[0])
                 result_selector.append(selector)
-                if len(result_selector) < len(list_extra):
-                    if extra[3]:
-                        result_selector.append(extra[3])
-                    elif extra[4]:
-                        result_selector.append(extra[4])
+                if extra[4]:
+                    result_selector.append(extra[4])
+                if extra[5]:
+                    result_selector.append(extra[5])
+        if result_selector[-1] in ["and", "or"]:
+            del result_selector[-1]
         return result_selector
 
     @staticmethod
@@ -545,10 +548,9 @@ class PyPi(AbstractRecipeModel):
         :return: return the option , operation and value of the extra metadata
         """
         return re.findall(
-            r"\s*([\.a-zA-Z0-9_-]+)\s*([!<>=]*)\s*[?:'\"]?([\.a-zA-Z0-9_-]+)\s*"
-            r"[?:'\"]?\s*[!<>=]*\s*[?:'\"]?(?:(and))?(?:(or))?\s*",
+            r"(?:(\())?\s*([\.a-zA-Z0-9-_]+)\s*([=!<>]+)\s*[\'\"]*"
+            r"([\.a-zA-Z0-9-_]+)[\'\"]*\s*(?:(\)))?\s*(?:(and|or))?",
             string_parse,
-            re.DOTALL,
         )
 
     @staticmethod
