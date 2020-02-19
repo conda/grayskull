@@ -449,6 +449,7 @@ class PyPi(AbstractRecipeModel):
         re_deps = re.compile(
             r"^\s*([\.a-zA-Z0-9_-]+)\s*(.*)\s*$", re.MULTILINE | re.DOTALL
         )
+        re_remove_space = re.compile(r"([<>!=]+)\s+")
         for req in all_dependencies:
             match_req = re_deps.match(req)
             deps_name = req
@@ -459,7 +460,8 @@ class PyPi(AbstractRecipeModel):
                 deps_name = match_req[0]
                 if len(match_req) > 1:
                     deps_name = " ".join(match_req)
-            formated_dependencies.append(deps_name.strip())
+            deps_name = re_remove_space.sub(r"\1", deps_name.strip())
+            formated_dependencies.append(deps_name)
         return formated_dependencies
 
     @staticmethod

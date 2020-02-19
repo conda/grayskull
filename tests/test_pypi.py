@@ -266,6 +266,9 @@ def test_format_host_requirements():
     assert sorted(
         PyPi._format_dependencies(["setuptools>=40.0", "pkg2"], "pkg2")
     ) == sorted(["setuptools >=40.0"])
+    assert sorted(PyPi._format_dependencies(["setuptools >= 40.0"], "pkg")) == sorted(
+        ["setuptools >=40.0"]
+    )
 
 
 def test_download_pkg_sdist(tmpdir):
@@ -323,4 +326,4 @@ def test_pytest_recipe_entry_points():
 def test_cythongsl_recipe_build():
     recipe = PyPi(name="cythongsl", version="0.2.2")
     assert recipe["requirements"]["build"] == "<{ compiler('c') }}"
-    assert recipe["requirements"]["host"] == ["cython >= 0.16", "pip", "python"]
+    assert recipe["requirements"]["host"] == ["cython >=0.16", "pip", "python"]
