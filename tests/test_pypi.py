@@ -18,7 +18,7 @@ def pypi_metadata():
 
 
 def test_extract_pypi_requirements(pypi_metadata):
-    recipe = PyPi(name="pytest")
+    recipe = PyPi(name="pytest", version="5.3.1")
     pypi_reqs = recipe._extract_requirements(pypi_metadata["info"])
     assert sorted(pypi_reqs["host"]) == sorted(["python", "pip"])
     assert sorted(pypi_reqs["run"]) == sorted(
@@ -56,6 +56,9 @@ def test_get_extra_from_requires_dist():
     assert PyPi._get_extra_from_requires_dist(' python_version < "3.6"') == [
         ("python_version", "<", "3.6", "", "",)
     ]
+    assert PyPi._get_extra_from_requires_dist(
+        " python_version < \"3.6\" ; extra =='test'"
+    ) == [("python_version", "<", "3.6", "", ""), ("extra", "==", "test", "", "")]
 
 
 def test_get_selector():

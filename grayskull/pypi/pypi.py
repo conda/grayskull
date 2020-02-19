@@ -542,8 +542,8 @@ class PyPi(AbstractRecipeModel):
         :return: return the option , operation and value of the extra metadata
         """
         return re.findall(
-            r"\s*(\w+)\s+(\W*)\s+[?:'\"]?([.a-zA-Z0-9_-]+)"
-            r"[?:'\"]?\s*\W*\s*(?:(and))?(?:(or))?\s*",
+            r"\s*([\.a-zA-Z0-9_-]+)\s*([!<>=]*)\s*[?:'\"]?([\.a-zA-Z0-9_-]+)\s*"
+            r"[?:'\"]?\s*[!<>=]*\s*[?:'\"]?(?:(and))?(?:(or))?\s*",
             string_parse,
             re.DOTALL,
         )
