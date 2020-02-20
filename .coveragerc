@@ -6,6 +6,9 @@ omit =
     docs/*
     .pytest_cache/*
     setup.py
+    _version.py
+    grayskull.egg-info/*
+    .github/*
 
 [paths]
 source = grayskull
