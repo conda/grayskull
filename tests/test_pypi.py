@@ -325,6 +325,7 @@ def test_ciso_recipe():
         ["cython", "python", "<{ pin_compatible('numpy') }}"]
     )
     assert recipe["test"]["commands"] == "pip check"
+    assert recipe["test"]["requires"] == "pip"
     assert recipe["test"]["imports"] == "ciso"
 
 
