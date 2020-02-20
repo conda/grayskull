@@ -1,10 +1,10 @@
-from subprocess import check_output
+import subprocess
 
 import requests
 
 
 def get_git_current_user_metadata() -> dict:
-    git_out = check_output(["git", "config", "user.name"])
+    git_out = subprocess.check_output(["git", "config", "user.name"])
     return requests.get(
         url="https://api.github.com/search/users", params={"q": git_out.strip()},
     ).json()

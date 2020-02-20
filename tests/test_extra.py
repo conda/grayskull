@@ -1,13 +1,9 @@
-import subprocess
-
 import grayskull
 from grayskull.base.extra import get_git_current_user, get_git_current_user_metadata
 
 
 def test_get_git_current_user_metadata(monkeypatch):
-    monkeypatch.setattr(
-        subprocess, "check_output", lambda x: "Marcelo Duarte Trevisani"
-    )
+    monkeypatch.setattr("subprocess.check_output", lambda x: "Marcelo Duarte Trevisani")
     json_git = get_git_current_user_metadata()
     assert json_git["items"][0]["login"] == "marcelotrevisani"
     assert json_git["items"][0]["type"] == "User"
