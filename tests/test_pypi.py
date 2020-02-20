@@ -351,6 +351,7 @@ def test_cythongsl_recipe_build():
     recipe = PyPi(name="cythongsl", version="0.2.2")
     assert recipe["requirements"]["build"] == "<{ compiler('c') }}"
     assert recipe["requirements"]["host"] == ["cython >=0.16", "pip", "python"]
+    assert not recipe["build"]["noarch"]
 
 
 def test_requests_recipe_extra_deps():
