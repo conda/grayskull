@@ -2,7 +2,7 @@
 source=grayskull
 omit =
     .cache/*
-    tests/*
+    */tests/*
     docs/*
     .pytest_cache/*
     setup.py
