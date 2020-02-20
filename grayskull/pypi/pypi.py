@@ -327,6 +327,7 @@ class PyPi(AbstractRecipeModel):
             "test": {
                 "imports": pypi_metadata["name"].replace("-", "_"),
                 "commands": "pip check",
+                "requires": "pip",
             },
             "about": {
                 "home": metadata.get("project_url"),
