@@ -293,6 +293,9 @@ def test_format_host_requirements():
     assert sorted(PyPi._format_dependencies(["setuptools >= 40.0"], "pkg")) == sorted(
         ["setuptools >=40.0"]
     )
+    assert sorted(
+        PyPi._format_dependencies(["setuptools_scm [toml] >=3.4.1"], "pkg")
+    ) == sorted(["setuptools_scm >=3.4.1"])
 
 
 def test_download_pkg_sdist(tmpdir):
@@ -360,3 +363,13 @@ def test_requests_recipe_extra_deps():
     assert "win-inet-pton" not in recipe["requirements"]["run"]
     assert recipe["build"]["noarch"]
     assert not recipe["build"]["skip"]
+
+
+def test_zipp_recipe_tags_on_deps():
+    recipe = PyPi(name="zipp", version="3.0.0")
+    assert recipe["build"]["noarch"]
+    assert recipe["requirements"]["host"] == [
+        "pip",
+        "python >=3.6",
+        "setuptools_scm >=3.4.1",
+    ]
