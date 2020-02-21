@@ -66,7 +66,7 @@ class Section:
             for recipe_item in self.values:
                 if recipe_item.value is None:
                     self.yaml_obj.pop(self.yaml_obj.index(recipe_item.value))
-            if len(self.values) == 1:
+            if len(self.yaml_obj) == 1:
                 val = self._get_parent()[self.section_name][0]
                 if self._get_parent()[self.section_name].ca.items:
                     comment_token = self.yaml_obj.ca.items.get(0)
@@ -81,12 +81,15 @@ class Section:
                 self._get_parent()[self.section_name] = val
 
     def __hash__(self) -> int:
-        return hash(str(self))
+        return hash(f"{self}-{[str(v) for v in self.values]}")
+
+    def __str__(self) -> str:
+        return self.section_name
 
     def __repr__(self) -> str:
         val = ""
         if isinstance(self.yaml_obj, (CommentedMap, dict)):
-            val = f"subsection={self.yaml_obj.keys()}"
+            val = f"subsection={list(self.yaml_obj.keys())}"
         elif self.yaml_obj is not None:
             val = f"items={self.yaml_obj}"
         if val:
@@ -102,12 +105,12 @@ class Section:
         if isinstance(other, Section):
             return other.yaml_obj == self.yaml_obj
         if len(self.values) == 1:
-            return self.values[0] == other
+            return self.values[0] == other or str(self.section_name) == str(other)
         if isinstance(other, str):
-            return self.section_name == other
+            return str(self.section_name) == str(other)
         if isinstance(other, list) and isinstance(other[0], str):
             for pos, item in enumerate(self.values):
-                if item.value != other[pos]:
+                if item.value != other[pos] and str(item.value) != other[pos]:
                     return False
             return True
         return other == self.values
