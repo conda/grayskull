@@ -46,3 +46,36 @@ def test_section_load():
     assert sec["subsection1"].section_name == "subsection1"
     assert sec["subsection1"]["subsection2"].section_name == "subsection2"
     assert sec["subsection1"]["subsection2"][0].value == "item"
+
+
+def test_repr():
+    commented_map = CommentedMap({"section1": {"subsection1": {"subsection2": "item"}}})
+    sec = Section("section1", commented_map)
+    assert repr(sec) == "Section(section_name=section1, subsection=['subsection1'])"
+
+
+def test_str():
+    commented_map = CommentedMap()
+    sec = Section("section1", commented_map)
+    assert str(sec) == "section1"
+
+
+def test_reduce_section():
+    commented_map = CommentedMap({})
+    sec = Section("section", commented_map)
+    sec.add_items(["item", None])
+    sec.values[0].selector = "# [win]"
+    assert sec.values == ["item", None]
+    assert sec._get_parent()[sec.section_name] == ["item", None]
+
+    sec.reduce_section()
+    assert sec._get_parent()[sec.section_name] == "item"
+    assert sec.values == ["item"]
+
+
+def test_hash():
+    commented_map = CommentedMap()
+    sec = Section("section1", commented_map)
+    assert hash(sec) == hash("section1-[]")
+    sec.add_item("item")
+    assert hash(sec) == hash("section1-['item']")
