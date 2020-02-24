@@ -9,3 +9,4 @@ def test_match_license():
 def test_short_license_id():
     assert get_short_license_id("MIT License") == "MIT"
     assert get_short_license_id("Expat") == "MIT"
+    assert get_short_license_id("GPL 2.0") == "GPL-2.0"
