@@ -19,6 +19,7 @@ setup(
         "pip",
         "setuptools>=30.3.0",
         "opensource",
+        "fuzzywuzzy",
     ],
     extras_require={"testing": ["pytest"]},
     url="https://github.com/marcelotrevisani/grayskull",
