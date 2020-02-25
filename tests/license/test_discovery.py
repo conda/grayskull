@@ -64,15 +64,17 @@ def test_get_api_github_url():
 
 
 def test_search_license_folder(pkg_pytest):
-    assert search_license_folder(os.path.dirname(pkg_pytest)) == os.path.join(
+    license_folder = search_license_folder(os.path.dirname(pkg_pytest))
+    assert license_folder.path == os.path.join(
         os.path.dirname(pkg_pytest), "pytest-5.3.5", "LICENSE"
     )
+    assert license_folder.name == "MIT"
 
 
 def test_search_license_repository(pkg_pytest):
-    assert search_license_repo(
-        "https://github.com/pytest-dev/pytest", "5.3.5"
-    ).endswith("LICENSE")
+    license_repo = search_license_repo("https://github.com/pytest-dev/pytest", "5.3.5")
+    assert license_repo.path.endswith("LICENSE")
+    assert license_repo.name == "MIT"
 
 
 def test_predict_license_type(license_pytest_path):

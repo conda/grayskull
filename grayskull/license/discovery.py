@@ -74,7 +74,7 @@ def search_license_file(
 ) -> Optional[ShortLicense]:
     license_sdist = search_license_folder(folder_path)
     if license_sdist:
-        return ShortLicense(None, license_sdist)
+        return license_sdist
 
     if not git_url:
         return None
@@ -85,7 +85,7 @@ def search_license_file(
 
     repo_license = search_license_repo(git_url, version)
     if repo_license:
-        return ShortLicense(None, repo_license)
+        return repo_license
     return None
 
 
@@ -119,18 +119,19 @@ def _get_api_github_url(github_url: str, version: Optional[str] = None) -> str:
     return f"{github_url}?ref={version}" if version else github_url
 
 
-def search_license_folder(path: Union[str, Path]) -> Optional[str]:
+def search_license_folder(path: Union[str, Path]) -> Optional[ShortLicense]:
     re_search = re.compile(
         r"(\bcopyright\b|\blicense[s]*\b|\bcopying\b|\bcopyleft\b)", re.IGNORECASE
     )
     for folder_path, _, filenames in os.walk(str(path)):
         for one_file in filenames:
             if re_search.match(one_file):
-                return os.path.join(folder_path, one_file)
+                lc_path = os.path.join(folder_path, one_file)
+                return ShortLicense(get_license_type(lc_path), lc_path)
     return None
 
 
-def search_license_repo(git_url: str, version: Optional[str]) -> Optional[str]:
+def search_license_repo(git_url: str, version: Optional[str]) -> Optional[ShortLicense]:
     git_url = re.sub(r"/$", ".git", git_url)
     git_url = git_url if git_url.endswith(".git") else f"{git_url}.git"
 
