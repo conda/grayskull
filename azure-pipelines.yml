@@ -153,6 +153,7 @@ jobs:
       - script: |
           call activate grayskull
           conda install --yes python=%PYTHON_VERSION% $(grayskull_deps)
+          conda install --yes pyopenssl
           conda list
         displayName: Installing dependencies
 
