@@ -17,6 +17,7 @@ import requests
 from requests import HTTPError
 
 from grayskull.base.base_recipe import AbstractRecipeModel
+from grayskull.license.discovery import ShortLicense, search_license_file
 from grayskull.utils import get_vendored_dependencies
 
 log = logging.getLogger(__name__)
@@ -57,6 +58,7 @@ class PyPi(AbstractRecipeModel):
         PyPi._download_sdist_pkg(sdist_url=sdist_url, dest=path_pkg)
         shutil.unpack_archive(path_pkg, temp_folder)
         with PyPi._injection_distutils(temp_folder) as metadata:
+            metadata["sdist_path"] = path_pkg
             return metadata
 
     @staticmethod
@@ -320,6 +322,10 @@ class PyPi(AbstractRecipeModel):
         pypi_metadata = self._get_pypi_metadata()
         sdist_metadata = self._get_sdist_metadata(sdist_url=pypi_metadata["sdist_url"])
         metadata = self._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
+        license_metadata = PyPi._discover_license(metadata)
+        license_file = "LICENSE"
+        if license_metadata.is_packaged:
+            license_file = license_metadata.path
         return {
             "package": {"name": name, "version": metadata["version"]},
             "build": {"entry_points": metadata.get("entry_points")},
@@ -334,10 +340,23 @@ class PyPi(AbstractRecipeModel):
                 "summary": metadata.get("summary"),
                 "doc_url": metadata.get("doc_url"),
                 "dev_url": metadata.get("dev_url"),
-                "license": metadata.get("license"),
+                "license": license_metadata.name,
+                "license_file": license_file,
             },
             "source": metadata.get("source", {}),
         }
+
+    @staticmethod
+    def _discover_license(metadata: dict) -> Optional[ShortLicense]:
+        git_url = metadata.get("dev_url", None)
+        if not git_url and "github.com/" in metadata.get("project_url"):
+            git_url = metadata.get("project_url")
+        return search_license_file(
+            metadata.get("sdist_metadata"),
+            git_url,
+            metadata.get("version"),
+            license_name_metadata=metadata.get("license"),
+        )
 
     @lru_cache(maxsize=10)
     def _get_pypi_metadata(self, version: Optional[str] = None) -> dict:
