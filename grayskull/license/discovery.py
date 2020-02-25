@@ -113,7 +113,7 @@ def search_license_api_github(
 ) -> Optional[ShortLicense]:
     github_url = _get_api_github_url(github_url, version)
 
-    response = requests.get(url=github_url)
+    response = requests.get(url=github_url, timeout=5)
     if response.status_code != 200:
         return None
 

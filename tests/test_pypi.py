@@ -1,7 +1,6 @@
 import hashlib
 import json
 import os
-import sys
 
 import pytest
 
@@ -156,11 +155,6 @@ def test_get_sha256_from_pypi_metadata():
     assert err.match("Hash information for sdist was not found on PyPi metadata.")
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"),
-    reason="Skipping tests for windows. For some reason those tests which need to acess"
-    "other servers are sensible on windows.",
-)
 def test_injection_distutils():
     recipe = PyPi(name="hypothesis", version="5.5.1")
     data = recipe._get_sdist_metadata(
@@ -177,11 +171,6 @@ def test_injection_distutils():
     assert not data.get("compilers")
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"),
-    reason="Skipping tests for windows. For some reason those tests which need to acess"
-    "other servers are sensible on windows.",
-)
 def test_injection_distutils_pytest():
     recipe = PyPi(name="pytest", version="5.3.2")
     data = recipe._get_sdist_metadata(
@@ -274,22 +263,12 @@ def test_get_entry_points_from_sdist():
     ) == sorted(["gui_scripts=entrypoints", "console_scripts=entrypoints"])
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"),
-    reason="Skipping tests for windows. For some reason those tests which need to acess"
-    "other servers are sensible on windows.",
-)
 def test_build_noarch_skip():
     recipe = PyPi(name="hypothesis", version="5.5.2")
     assert recipe["build"]["noarch"].values[0] == "python"
     assert not recipe["build"]["skip"].values
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"),
-    reason="Skipping tests for windows. For some reason those tests which need to acess"
-    "other servers are sensible on windows.",
-)
 def test_run_requirements_sdist():
     recipe = PyPi(name="botocore", version="1.14.17")
     assert sorted(recipe["requirements"]["run"]) == sorted(
@@ -358,11 +337,6 @@ def test_pymc_recipe_fortran():
     assert not recipe["build"]["noarch"]
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"),
-    reason="Skipping tests for windows. For some reason those tests which need to acess"
-    "other servers are sensible on windows.",
-)
 def test_pytest_recipe_entry_points():
     recipe = PyPi(name="pytest", version="5.3.5")
     assert sorted(recipe["build"]["entry_points"]) == sorted(
@@ -379,11 +353,6 @@ def test_cythongsl_recipe_build():
     assert not recipe["build"]["noarch"]
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"),
-    reason="Skipping tests for windows. For some reason those tests which need to acess"
-    "other servers are sensible on windows.",
-)
 def test_requests_recipe_extra_deps():
     recipe = PyPi(name="requests", version="2.22.0")
     assert "win-inet-pton" not in recipe["requirements"]["run"]

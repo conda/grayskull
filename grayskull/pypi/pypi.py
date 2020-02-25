@@ -41,7 +41,7 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _download_sdist_pkg(sdist_url: str, dest: str):
-        response = requests.get(sdist_url, allow_redirects=True, stream=True)
+        response = requests.get(sdist_url, allow_redirects=True, stream=True, timeout=5)
         with open(dest, "wb") as pkg_file:
             for chunk_data in response.iter_content(chunk_size=1024 ** 2):
                 if chunk_data:
@@ -383,7 +383,7 @@ class PyPi(AbstractRecipeModel):
             log.info(f"Version for {name} not specified.\nGetting the latest one.")
             url_pypi = PyPi.URL_PYPI_METADATA.format(pkg_name=name)
 
-        metadata = requests.get(url=url_pypi)
+        metadata = requests.get(url=url_pypi, timeout=5)
         if metadata.status_code != 200:
             raise HTTPError(
                 f"It was not possible to recover PyPi metadata for {name}.\n"
