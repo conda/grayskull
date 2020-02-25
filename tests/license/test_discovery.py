@@ -4,12 +4,18 @@ from pytest import fixture
 
 from grayskull.license.discovery import (
     _get_api_github_url,
+    get_license_type,
     get_short_license_id,
     match_license,
     search_license_api_github,
     search_license_folder,
     search_license_repo,
 )
+
+
+@fixture
+def license_pytest_path(data_dir) -> str:
+    return os.path.join(data_dir, "licenses", "pytest.txt")
 
 
 def test_match_license():
@@ -26,8 +32,8 @@ def test_short_license_id():
 
 
 @fixture
-def license_pytest_5_3_1(data_dir) -> str:
-    with open(os.path.join(data_dir, "licenses", "pytest.txt")) as f:
+def license_pytest_5_3_1(license_pytest_path) -> str:
+    with open(license_pytest_path) as f:
         return f.read()
 
 
@@ -63,3 +69,7 @@ def test_search_license_repository(pkg_pytest):
     assert search_license_repo(
         "https://github.com/pytest-dev/pytest", "5.3.5"
     ).endswith("LICENSE")
+
+
+def test_predict_license_type(license_pytest_path):
+    assert get_license_type(license_pytest_path) == "MIT"

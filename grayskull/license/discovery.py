@@ -2,6 +2,7 @@ import base64
 import os
 import re
 from collections import namedtuple
+from operator import itemgetter
 from pathlib import Path
 from subprocess import check_output
 from tempfile import mkdtemp
@@ -12,6 +13,8 @@ from fuzzywuzzy.fuzz import token_sort_ratio
 from opensource import OpenSourceAPI
 from opensource.licenses.wrapper import License
 from sphinx.util import requests
+
+from grayskull.license.data import get_all_licenses
 
 ShortLicense = namedtuple("ShortLicense", ["name", "path"])
 
@@ -142,3 +145,16 @@ def _get_git_cmd(git_url: str, version: str, dest) -> List[str]:
     if version:
         git_cmd += ["-b", version]
     return git_cmd + [git_url, str(dest)]
+
+
+def get_license_type(path_license: str) -> Optional[str]:
+    with open(path_license, "r") as license_file:
+        license_content = license_file.read()
+
+    all_licenses = get_all_licenses()
+    licenses_text = list(map(itemgetter(1), all_licenses))
+    best_match = process.extractOne(
+        license_content, licenses_text, scorer=token_sort_ratio
+    )
+    index_license = licenses_text.index(best_match[0])
+    return all_licenses[index_license][0]
