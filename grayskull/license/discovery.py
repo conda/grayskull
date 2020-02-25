@@ -9,10 +9,10 @@ from subprocess import check_output
 from tempfile import mkdtemp
 from typing import List, Optional, Union
 
+import opensource
 import requests
 from fuzzywuzzy import process
 from fuzzywuzzy.fuzz import token_sort_ratio
-from opensource import OpenSourceAPI
 from opensource.licenses.wrapper import License
 
 from grayskull.license.data import get_all_licenses  # noqa
@@ -26,17 +26,16 @@ class ShortLicense:
 
 
 def match_license(name: str) -> License:
-    os_api = OpenSourceAPI()
     name = name.strip()
     name = re.sub(r"\s*License\s*", "", name, re.IGNORECASE)
     try:
-        return os_api.get(name)
+        return opensource.licenses.get(name)
     except ValueError:
         pass
     best_match = process.extractOne(
-        name, _get_all_license_choice(os_api), scorer=token_sort_ratio
+        name, _get_all_license_choice(opensource.licenses), scorer=token_sort_ratio
     )
-    return _get_license(best_match[0], os_api)
+    return _get_license(best_match[0], opensource.licenses)
 
 
 def get_short_license_id(name: str) -> str:
@@ -47,7 +46,7 @@ def get_short_license_id(name: str) -> str:
     return obj_license.id
 
 
-def _get_license(name: str, os_api: OpenSourceAPI) -> License:
+def _get_license(name: str, os_api: opensource.OpenSourceAPI) -> License:
     try:
         return os_api.get(name)
     except ValueError:
@@ -67,7 +66,7 @@ def _get_all_names_from_api(api_license: License) -> list:
     return result + [l["name"] for l in api_license.other_names]
 
 
-def _get_all_license_choice(os_api: OpenSourceAPI) -> List:
+def _get_all_license_choice(os_api: opensource.OpenSourceAPI) -> List:
     all_choices = []
     for api_license in os_api.all():
         all_choices += _get_all_names_from_api(api_license)
