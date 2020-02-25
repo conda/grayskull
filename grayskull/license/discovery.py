@@ -9,11 +9,10 @@ from subprocess import check_output
 from tempfile import mkdtemp
 from typing import List, Optional, Union
 
-import opensource
 import requests
 from fuzzywuzzy import process
 from fuzzywuzzy.fuzz import token_sort_ratio
-from opensource.licenses.wrapper import License
+from requests import HTTPError
 
 from grayskull.license.data import get_all_licenses  # noqa
 
@@ -25,50 +24,55 @@ class ShortLicense:
     is_packaged: bool
 
 
-def match_license(name: str) -> License:
+@lru_cache(maxsize=10)
+def get_all_licenses_from_opensource() -> List:
+    response = requests.get(url="https://api.opensource.org/licenses", timeout=5)
+    if response.status_code != 200:
+        raise HTTPError(
+            f"It was not possible to communicate with opensource api.\n{response.text}"
+        )
+    return response.json()
+
+
+def match_license(name: str) -> dict:
+    all_licenses = get_all_licenses_from_opensource()
     name = name.strip()
     name = re.sub(r"\s*License\s*", "", name, re.IGNORECASE)
-    try:
-        return opensource.licenses.get(name)
-    except ValueError:
-        pass
+
     best_match = process.extractOne(
-        name, _get_all_license_choice(opensource.licenses), scorer=token_sort_ratio
+        name, _get_all_license_choice(all_licenses), scorer=token_sort_ratio
     )
-    return _get_license(best_match[0], opensource.licenses)
+    return _get_license(best_match[0], all_licenses)
 
 
 def get_short_license_id(name: str) -> str:
-    obj_license = match_license(name)
-    for identifier in obj_license.identifiers:
+    recipe_license = match_license(name)
+    for identifier in recipe_license["identifiers"]:
         if identifier["scheme"].lower() == "spdx":
             return identifier["identifier"]
-    return obj_license.id
+    return recipe_license["id"]
 
 
-def _get_license(name: str, os_api: opensource.OpenSourceAPI) -> License:
-    try:
-        return os_api.get(name)
-    except ValueError:
-        pass
-
-    for api_license in os_api.all():
-        if name in _get_all_names_from_api(api_license):
-            return api_license
+def _get_license(license_id: str, all_licenses: List) -> dict:
+    for one_license in all_licenses:
+        if license_id in _get_all_names_from_api(one_license):
+            return one_license
 
 
-def _get_all_names_from_api(api_license: License) -> list:
-    result = []
-    if api_license.name:
-        result.append(api_license.name)
-    if api_license.id:
-        result.append(api_license.id)
-    return result + [l["name"] for l in api_license.other_names]
+def _get_all_names_from_api(one_license: dict) -> List:
+    result = set()
+    if one_license["name"]:
+        result.add(one_license["name"])
+    if one_license["id"]:
+        result.add(one_license["id"])
+    result = result.union(set([i["identifier"] for i in one_license["identifiers"]]))
+    result = result.union(set([l["name"] for l in one_license["other_names"]]))
+    return list(result)
 
 
-def _get_all_license_choice(os_api: opensource.OpenSourceAPI) -> List:
+def _get_all_license_choice(all_licenses: List) -> List:
     all_choices = []
-    for api_license in os_api.all():
+    for api_license in all_licenses:
         all_choices += _get_all_names_from_api(api_license)
     return all_choices
 

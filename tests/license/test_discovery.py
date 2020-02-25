@@ -1,9 +1,14 @@
 import os
+from typing import List
 
 from pytest import fixture
 
 from grayskull.license.discovery import (
+    _get_all_license_choice,
+    _get_all_names_from_api,
     _get_api_github_url,
+    _get_license,
+    get_all_licenses_from_opensource,
     get_license_type,
     get_short_license_id,
     match_license,
@@ -18,9 +23,69 @@ def license_pytest_path(data_dir) -> str:
     return os.path.join(data_dir, "licenses", "pytest.txt")
 
 
+@fixture
+def opensource_license_mit() -> List:
+    return [
+        {
+            "id": "MIT",
+            "identifiers": [
+                {"identifier": "MIT", "scheme": "DEP5"},
+                {"identifier": "Expat", "scheme": "DEP5"},
+                {"identifier": "MIT", "scheme": "SPDX"},
+                {
+                    "identifier": "License :: OSI Approved :: MIT License",
+                    "scheme": "Trove",
+                },
+            ],
+            "links": [
+                {
+                    "note": "tl;dr legal",
+                    "url": "https://tldrlegal.com/license/mit-license",
+                },
+                {
+                    "note": "Wikipedia page",
+                    "url": "https://en.wikipedia.org/wiki/MIT_License",
+                },
+                {"note": "OSI Page", "url": "https://opensource.org/licenses/mit"},
+            ],
+            "name": "MIT/Expat License",
+            "other_names": [
+                {
+                    "name": "MIT",
+                    "note": "Because MIT has used many licenses for software, "
+                    "the Free Software Foundation considers MIT License"
+                    " ambiguous. The MIT License published on the OSI"
+                    " site is the same as the Expat License.",
+                },
+                {
+                    "name": "Expat",
+                    "note": "Because MIT has used many licenses for software,"
+                    " the Free Software Foundation considers MIT License"
+                    " ambiguous. The MIT License published on the OSI site"
+                    " is the same as the Expat License.",
+                },
+            ],
+            "superseded_by": None,
+            "keywords": ["osi-approved", "popular", "permissive"],
+            "text": [
+                {
+                    "media_type": "text/html",
+                    "title": "HTML",
+                    "url": "https://opensource.org/licenses/mit",
+                }
+            ],
+        }
+    ]
+
+
 def test_match_license():
-    assert match_license("MIT License").id == "MIT"
-    assert match_license("Expat").id == "MIT"
+    assert match_license("MIT License")["id"] == "MIT"
+    assert match_license("Expat")["id"] == "MIT"
+
+
+def test_get_all_licenses_from_opensource():
+    assert len(get_all_licenses_from_opensource()) >= 88
+    assert get_all_licenses_from_opensource()[0]["id"]
 
 
 def test_short_license_id():
@@ -29,6 +94,22 @@ def test_short_license_id():
     assert get_short_license_id("GPL 2.0") == "GPL-2.0"
     assert get_short_license_id("2-Clause BSD License") == "BSD-2-Clause"
     assert get_short_license_id("3-Clause BSD License") == "BSD-3-Clause"
+
+
+def test_get_license(opensource_license_mit):
+    assert _get_license("MIT", opensource_license_mit) == opensource_license_mit[0]
+
+
+def test_get_all_names_from_api(opensource_license_mit):
+    assert sorted(_get_all_names_from_api(opensource_license_mit[0])) == sorted(
+        ["Expat", "License :: OSI Approved :: MIT License", "MIT", "MIT/Expat License"]
+    )
+
+
+def test_get_all_license_choice(opensource_license_mit):
+    assert sorted(_get_all_license_choice(opensource_license_mit)) == sorted(
+        ["Expat", "License :: OSI Approved :: MIT License", "MIT", "MIT/Expat License"]
+    )
 
 
 @fixture

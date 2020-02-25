@@ -18,7 +18,6 @@ setup(
         "stdlib-list",
         "pip",
         "setuptools>=30.3.0",
-        "opensource",
         "fuzzywuzzy",
         "python-Levenshtein",
     ],
