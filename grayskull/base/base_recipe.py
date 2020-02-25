@@ -1,7 +1,9 @@
+import os
 import re
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from pathlib import Path
+from shutil import copyfile
 from typing import Any, List, Optional, Union
 
 from ruamel.yaml import YAML, CommentToken
@@ -49,6 +51,7 @@ class AbstractRecipeModel(ABC):
                 self.add_jinja_var("version", version)
                 self["package"]["version"] = "<{ version }}"
             self["build"]["number"] = 0
+            self.__files_copy: List = []
             self.update_all_recipe()
         super(AbstractRecipeModel, self).__init__()
 
@@ -56,6 +59,14 @@ class AbstractRecipeModel(ABC):
         name = self.get_var_content(self["package"]["name"].values[0])
         version = self.get_var_content(self["package"]["version"].values[0])
         return f"{self.__class__.__name__}(name={name}, version={version})"
+
+    @property
+    def files_to_copy(self) -> List:
+        return self.__files_copy
+
+    @files_to_copy.setter
+    def files_to_copy(self, path: str):
+        self.__files_copy.append(path)
 
     def get_var_content(self, item: RecipeItem) -> str:
         re_var = re.match(
@@ -168,10 +179,17 @@ class AbstractRecipeModel(ABC):
         if not recipe_dir.is_dir():
             recipe_dir.mkdir()
         recipe_path = recipe_dir / "meta.yaml"
+
         if not disable_extra:
             self._add_extra_section(mantainers)
+
         with recipe_path.open("w") as recipe:
             yaml.dump(self.get_clean_yaml(self._yaml), recipe)
+
+        for file_to_recipe in self.files_to_copy:
+            name = file_to_recipe.split(os.path.sep)[-1]
+            if os.path.isfile(file_to_recipe):
+                copyfile(file_to_recipe, os.path.join(recipe_dir, name))
 
     def _add_extra_section(self, maintainers: Optional[List] = None):
         if not self["extra"]:

@@ -17,6 +17,7 @@ import requests
 from requests import HTTPError
 
 from grayskull.base.base_recipe import AbstractRecipeModel
+from grayskull.license.discovery import ShortLicense, search_license_file
 from grayskull.utils import get_vendored_dependencies
 
 log = logging.getLogger(__name__)
@@ -40,23 +41,23 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _download_sdist_pkg(sdist_url: str, dest: str):
-        response = requests.get(sdist_url, allow_redirects=True, stream=True)
+        response = requests.get(sdist_url, allow_redirects=True, stream=True, timeout=5)
         with open(dest, "wb") as pkg_file:
             for chunk_data in response.iter_content(chunk_size=1024 ** 2):
                 if chunk_data:
                     pkg_file.write(chunk_data)
 
+    @staticmethod
     @lru_cache(maxsize=10)
-    def _get_sdist_metadata(self, sdist_url: str) -> dict:
-        name = self.get_var_content(self["package"]["name"].values[0])
+    def _get_sdist_metadata(sdist_url: str, name: str) -> dict:
         temp_folder = mkdtemp(prefix=f"grayskull-{name}-")
-
         pkg_name = sdist_url.split("/")[-1]
         path_pkg = os.path.join(temp_folder, pkg_name)
 
         PyPi._download_sdist_pkg(sdist_url=sdist_url, dest=path_pkg)
         shutil.unpack_archive(path_pkg, temp_folder)
         with PyPi._injection_distutils(temp_folder) as metadata:
+            metadata["sdist_path"] = temp_folder
             return metadata
 
     @staticmethod
@@ -258,6 +259,7 @@ class PyPi(AbstractRecipeModel):
             "project_url": get_val("project_url"),
             "extras_require": get_val("extras_require"),
             "requires_dist": requires_dist,
+            "sdist_path": get_val("sdist_path"),
         }
 
     @staticmethod
@@ -317,9 +319,26 @@ class PyPi(AbstractRecipeModel):
     @lru_cache(maxsize=10)
     def _get_metadata(self) -> dict:
         name = self.get_var_content(self["package"]["name"].values[0])
-        pypi_metadata = self._get_pypi_metadata()
-        sdist_metadata = self._get_sdist_metadata(sdist_url=pypi_metadata["sdist_url"])
-        metadata = self._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
+        version = ""
+        if self["package"]["version"].values:
+            version = self.get_var_content(self["package"]["version"].values[0])
+        pypi_metadata = self._get_pypi_metadata(name, version)
+        sdist_metadata = self._get_sdist_metadata(
+            sdist_url=pypi_metadata["sdist_url"], name=name
+        )
+        metadata = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
+        license_metadata = PyPi._discover_license(metadata)
+
+        license_file = "PLEASE_ADD_LICENSE_FILE"
+        license_name = "Other"
+        if license_metadata:
+            license_name = license_metadata.name
+            license_file = "LICENSE"
+            if license_metadata.is_packaged:
+                license_file = license_metadata.path
+            else:
+                self.files_to_copy.append(license_metadata.path)
+
         return {
             "package": {"name": name, "version": metadata["version"]},
             "build": {"entry_points": metadata.get("entry_points")},
@@ -334,25 +353,37 @@ class PyPi(AbstractRecipeModel):
                 "summary": metadata.get("summary"),
                 "doc_url": metadata.get("doc_url"),
                 "dev_url": metadata.get("dev_url"),
-                "license": metadata.get("license"),
+                "license": license_name,
+                "license_file": license_file,
             },
             "source": metadata.get("source", {}),
         }
 
+    @staticmethod
+    def _discover_license(metadata: dict) -> Optional[ShortLicense]:
+        git_url = metadata.get("dev_url", None)
+        if not git_url and "github.com/" in metadata.get("project_url"):
+            git_url = metadata.get("project_url")
+
+        short_license = search_license_file(
+            metadata.get("sdist_path"),
+            git_url,
+            metadata.get("version"),
+            license_name_metadata=metadata.get("license"),
+        )
+        if short_license:
+            return short_license
+
+    @staticmethod
     @lru_cache(maxsize=10)
-    def _get_pypi_metadata(self, version: Optional[str] = None) -> dict:
-        name = self.get_var_content(self["package"]["name"].values[0])
-
-        if not version and self["package"]["version"].values:
-            version = self.get_var_content(self["package"]["version"].values[0])
-
+    def _get_pypi_metadata(name, version: Optional[str] = None) -> dict:
         if version:
             url_pypi = PyPi.URL_PYPI_METADATA.format(pkg_name=f"{name}/{version}")
         else:
             log.info(f"Version for {name} not specified.\nGetting the latest one.")
             url_pypi = PyPi.URL_PYPI_METADATA.format(pkg_name=name)
 
-        metadata = requests.get(url=url_pypi)
+        metadata = requests.get(url=url_pypi, timeout=5)
         if metadata.status_code != 200:
             raise HTTPError(
                 f"It was not possible to recover PyPi metadata for {name}.\n"
@@ -379,10 +410,11 @@ class PyPi(AbstractRecipeModel):
                 "{{ name }}-{{ version }}.tar.gz",
                 "sha256": PyPi.get_sha256_from_pypi_metadata(metadata),
             },
-            "sdist_url": self._get_sdist_url_from_pypi(metadata),
+            "sdist_url": PyPi._get_sdist_url_from_pypi(metadata),
         }
 
-    def _get_sdist_url_from_pypi(self, metadata: dict) -> str:
+    @staticmethod
+    def _get_sdist_url_from_pypi(metadata: dict) -> str:
         for sdist_url in metadata["urls"]:
             if sdist_url["packagetype"] == "sdist":
                 return sdist_url["url"]
@@ -405,11 +437,11 @@ class PyPi(AbstractRecipeModel):
 
     def _extract_requirements(self, metadata: dict) -> dict:
         name = metadata["name"]
-        requires_dist = self._format_dependencies(metadata.get("requires_dist"), name)
+        requires_dist = PyPi._format_dependencies(metadata.get("requires_dist"), name)
         setup_requires = (
             metadata.get("setup_requires") if metadata.get("setup_requires") else []
         )
-        host_req = self._format_dependencies(setup_requires, name)
+        host_req = PyPi._format_dependencies(setup_requires, name)
 
         if not requires_dist and not host_req:
             return {"host": sorted(["python", "pip"]), "run": ["python"]}

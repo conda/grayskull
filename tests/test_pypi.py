@@ -1,7 +1,6 @@
 import hashlib
 import json
 import os
-import shutil
 
 import pytest
 
@@ -39,8 +38,7 @@ def test_extract_pypi_requirements(pypi_metadata):
 
 
 def test_get_pypi_metadata(pypi_metadata):
-    recipe = PyPi(name="pytest", version="5.3.1")
-    metadata = recipe._get_pypi_metadata()
+    metadata = PyPi._get_pypi_metadata(name="pytest", version="5.3.1")
     assert metadata["name"] == "pytest"
     assert metadata["version"] == "5.3.1"
 
@@ -157,9 +155,9 @@ def test_get_sha256_from_pypi_metadata():
 
 
 def test_injection_distutils():
-    recipe = PyPi(name="hypothesis", version="5.5.1")
-    data = recipe._get_sdist_metadata(
-        "https://pypi.io/packages/source/h/hypothesis/hypothesis-5.5.1.tar.gz"
+    data = PyPi._get_sdist_metadata(
+        "https://pypi.io/packages/source/h/hypothesis/hypothesis-5.5.1.tar.gz",
+        "hypothesis",
     )
     assert sorted(data["install_requires"]) == sorted(
         ["attrs>=19.2.0", "sortedcontainers>=2.1.0,<3.0.0"]
@@ -173,9 +171,8 @@ def test_injection_distutils():
 
 
 def test_injection_distutils_pytest():
-    recipe = PyPi(name="pytest", version="5.3.2")
-    data = recipe._get_sdist_metadata(
-        "https://pypi.io/packages/source/p/pytest/pytest-5.3.2.tar.gz"
+    data = PyPi._get_sdist_metadata(
+        "https://pypi.io/packages/source/p/pytest/pytest-5.3.2.tar.gz", "pytest"
     )
     assert sorted(data["install_requires"]) == sorted(
         [
@@ -195,24 +192,19 @@ def test_injection_distutils_pytest():
         ["setuptools>=40.0", "setuptools_scm"]
     )
     assert not data.get("compilers")
-    assert recipe["build"]["skip"].values[0].value
-    assert recipe["build"]["skip"].values[0].selector == "py2k"
-    assert not recipe["build"]["noarch"]
 
 
 def test_injection_distutils_compiler_gsw():
-    recipe = PyPi(name="gsw", version="3.3.1")
-    data = recipe._get_sdist_metadata(
-        "https://pypi.io/packages/source/g/gsw/gsw-3.3.1.tar.gz"
+    data = PyPi._get_sdist_metadata(
+        "https://pypi.io/packages/source/g/gsw/gsw-3.3.1.tar.gz", "gsw"
     )
     assert data.get("compilers") == ["c"]
     assert data["packages"] == ["gsw"]
 
 
 def test_merge_pypi_sdist_metadata():
-    recipe = PyPi(name="gsw", version="3.3.1")
-    pypi_metadata = recipe._get_pypi_metadata()
-    sdist_metadata = recipe._get_sdist_metadata(pypi_metadata["sdist_url"])
+    pypi_metadata = PyPi._get_pypi_metadata(name="gsw", version="3.3.1")
+    sdist_metadata = PyPi._get_sdist_metadata(pypi_metadata["sdist_url"], "gsw")
     merged_data = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
     assert merged_data["compilers"] == ["c"]
     assert sorted(merged_data["setup_requires"]) == sorted(["numpy"])
@@ -298,20 +290,14 @@ def test_format_host_requirements():
     ) == sorted(["setuptools_scm >=3.4.1"])
 
 
-def test_download_pkg_sdist(tmpdir):
-    folder = tmpdir.mkdir("test-download-pkg")
-    dest_pkg = str(folder / "PYTEST-PKG.tar.gz")
-    PyPi._download_sdist_pkg(
-        "https://pypi.io/packages/source/p/pytest/pytest-5.3.5.tar.gz", dest_pkg
-    )
-    with open(dest_pkg, "rb") as pkg_file:
+def test_download_pkg_sdist(pkg_pytest):
+    with open(pkg_pytest, "rb") as pkg_file:
         content = pkg_file.read()
         pkg_sha256 = hashlib.sha256(content).hexdigest()
     assert (
         pkg_sha256 == "0d5fe9189a148acc3c3eb2ac8e1ac0742cb7618c084f3d228baaec0c254b318d"
     )
-    shutil.unpack_archive(dest_pkg, str(folder))
-    setup_cfg = PyPi._get_setup_cfg(str(folder))
+    setup_cfg = PyPi._get_setup_cfg(os.path.dirname(pkg_pytest))
     assert setup_cfg["name"] == "pytest"
     assert setup_cfg["python_requires"] == ">=3.5"
     assert setup_cfg["entry_points"] == {
@@ -349,6 +335,11 @@ def test_pytest_recipe_entry_points():
     assert sorted(recipe["build"]["entry_points"]) == sorted(
         ["pytest=pytest:main", "py.test=pytest:main"]
     )
+    assert recipe["about"]["license"] == "MIT"
+    assert recipe["about"]["license_file"] == "LICENSE"
+    assert recipe["build"]["skip"].values[0].value
+    assert recipe["build"]["skip"].values[0].selector == "py2k"
+    assert not recipe["build"]["noarch"]
 
 
 def test_cythongsl_recipe_build():
