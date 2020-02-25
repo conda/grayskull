@@ -14,7 +14,7 @@ from opensource import OpenSourceAPI
 from opensource.licenses.wrapper import License
 from sphinx.util import requests
 
-from grayskull.license.data import get_all_licenses
+from grayskull.license.data import get_all_licenses  # noqa
 
 ShortLicense = namedtuple("ShortLicense", ["name", "path"])
 
