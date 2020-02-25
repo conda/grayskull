@@ -2,6 +2,7 @@ import base64
 import os
 import re
 from collections import namedtuple
+from functools import lru_cache
 from operator import itemgetter
 from pathlib import Path
 from subprocess import check_output
@@ -88,6 +89,7 @@ def search_license_file(
     return None
 
 
+@lru_cache(maxsize=13)
 def search_license_api_github(
     github_url: str, version: Optional[str] = None
 ) -> Optional[ShortLicense]:

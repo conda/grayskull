@@ -1,5 +1,6 @@
 import os
 
+import pytest
 from pytest import fixture
 
 from grayskull.license.discovery import (
@@ -37,6 +38,9 @@ def license_pytest_5_3_1(license_pytest_path) -> str:
         return f.read()
 
 
+@pytest.mark.xfail(
+    reason="It may fail because there's a limit of requests which can be made to github"
+)
 def test_search_license_api_github(license_pytest_5_3_1: str):
     license_api = search_license_api_github(
         "https://github.com/pytest-dev/pytest", "5.3.1"
