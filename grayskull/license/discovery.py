@@ -65,8 +65,8 @@ def _get_all_names_from_api(one_license: dict) -> List:
         result.add(one_license["name"])
     if one_license["id"]:
         result.add(one_license["id"])
-    result = result.union(set([i["identifier"] for i in one_license["identifiers"]]))
-    result = result.union(set([l["name"] for l in one_license["other_names"]]))
+    result = result.union({i["identifier"] for i in one_license["identifiers"]})
+    result = result.union({l["name"] for l in one_license["other_names"]})
     return list(result)
 
 
