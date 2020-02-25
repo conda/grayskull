@@ -20,6 +20,7 @@ setup(
         "setuptools>=30.3.0",
         "opensource",
         "fuzzywuzzy",
+        "python-Levenshtein",
     ],
     extras_require={"testing": ["pytest"]},
     url="https://github.com/marcelotrevisani/grayskull",

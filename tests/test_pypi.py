@@ -342,6 +342,8 @@ def test_pytest_recipe_entry_points():
     assert sorted(recipe["build"]["entry_points"]) == sorted(
         ["pytest=pytest:main", "py.test=pytest:main"]
     )
+    assert recipe["about"]["license"] == "MIT"
+    assert recipe["about"]["license_file"] == "LICENSE"
 
 
 def test_cythongsl_recipe_build():

@@ -58,7 +58,7 @@ class PyPi(AbstractRecipeModel):
         PyPi._download_sdist_pkg(sdist_url=sdist_url, dest=path_pkg)
         shutil.unpack_archive(path_pkg, temp_folder)
         with PyPi._injection_distutils(temp_folder) as metadata:
-            metadata["sdist_path"] = path_pkg
+            metadata["sdist_path"] = temp_folder
             return metadata
 
     @staticmethod
@@ -260,6 +260,7 @@ class PyPi(AbstractRecipeModel):
             "project_url": get_val("project_url"),
             "extras_require": get_val("extras_require"),
             "requires_dist": requires_dist,
+            "sdist_path": get_val("sdist_path"),
         }
 
     @staticmethod
@@ -323,9 +324,17 @@ class PyPi(AbstractRecipeModel):
         sdist_metadata = self._get_sdist_metadata(sdist_url=pypi_metadata["sdist_url"])
         metadata = self._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
         license_metadata = PyPi._discover_license(metadata)
-        license_file = "LICENSE"
-        if license_metadata.is_packaged:
-            license_file = license_metadata.path
+
+        license_file = "PLEASE_ADD_LICENSE_FILE"
+        license_name = "Other"
+        if license_metadata:
+            license_name = license_metadata.name
+            license_file = "LICENSE"
+            if license_metadata.is_packaged:
+                license_file = license_metadata.path
+            else:
+                self.files_to_copy.append(license_metadata.path)
+
         return {
             "package": {"name": name, "version": metadata["version"]},
             "build": {"entry_points": metadata.get("entry_points")},
@@ -340,7 +349,7 @@ class PyPi(AbstractRecipeModel):
                 "summary": metadata.get("summary"),
                 "doc_url": metadata.get("doc_url"),
                 "dev_url": metadata.get("dev_url"),
-                "license": license_metadata.name,
+                "license": license_name,
                 "license_file": license_file,
             },
             "source": metadata.get("source", {}),
@@ -351,12 +360,15 @@ class PyPi(AbstractRecipeModel):
         git_url = metadata.get("dev_url", None)
         if not git_url and "github.com/" in metadata.get("project_url"):
             git_url = metadata.get("project_url")
-        return search_license_file(
-            metadata.get("sdist_metadata"),
+
+        short_license = search_license_file(
+            metadata.get("sdist_path"),
             git_url,
             metadata.get("version"),
             license_name_metadata=metadata.get("license"),
         )
+        if short_license:
+            return short_license
 
     @lru_cache(maxsize=10)
     def _get_pypi_metadata(self, version: Optional[str] = None) -> dict:

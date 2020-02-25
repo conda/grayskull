@@ -9,11 +9,11 @@ from subprocess import check_output
 from tempfile import mkdtemp
 from typing import List, Optional, Union
 
+import requests
 from fuzzywuzzy import process
 from fuzzywuzzy.fuzz import token_sort_ratio
 from opensource import OpenSourceAPI
 from opensource.licenses.wrapper import License
-from sphinx.util import requests
 
 from grayskull.license.data import get_all_licenses  # noqa
 
@@ -80,14 +80,18 @@ def search_license_file(
     version: Optional[str] = None,
     license_name_metadata: Optional[str] = None,
 ) -> Optional[ShortLicense]:
-    license_name_metadata = get_short_license_id(license_name_metadata)
+    if license_name_metadata:
+        license_name_metadata = get_short_license_id(license_name_metadata)
 
     license_sdist = search_license_folder(folder_path, license_name_metadata)
     if license_sdist:
         license_sdist.is_packaged = True
-        license_sdist.path = os.path.relpath(license_sdist.path, folder_path).replace(
-            "\\", "/"
-        )
+        license_sdist.path = os.path.relpath(license_sdist.path, folder_path)
+        license_sdist.path = license_sdist.path.replace("\\", "/")
+
+        splited = license_sdist.path.split("/")
+        if len(splited) > 1:
+            license_sdist.path = "/".join(splited[1:])
         return license_sdist
 
     if not git_url:
