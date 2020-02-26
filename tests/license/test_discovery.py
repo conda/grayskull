@@ -102,13 +102,13 @@ def test_get_license(opensource_license_mit):
 
 def test_get_all_names_from_api(opensource_license_mit):
     assert sorted(_get_all_names_from_api(opensource_license_mit[0])) == sorted(
-        ["Expat", "License :: OSI Approved :: MIT License", "MIT", "MIT/Expat License"]
+        ["Expat", "MIT", "MIT/Expat License"]
     )
 
 
 def test_get_all_license_choice(opensource_license_mit):
     assert sorted(_get_all_license_choice(opensource_license_mit)) == sorted(
-        ["Expat", "License :: OSI Approved :: MIT License", "MIT", "MIT/Expat License"]
+        ["Expat", "MIT", "MIT/Expat License"]
     )
 
 

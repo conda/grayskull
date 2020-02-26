@@ -364,3 +364,7 @@ def test_zipp_recipe_tags_on_deps():
         "python >=3.6",
         "setuptools_scm >=3.4.1",
     ]
+
+
+def test_generic_py_ver_to():
+    assert PyPi._generic_py_ver_to({"requires_python": ">=3.5, <3.8"}) == ">=3.6,<3.8"

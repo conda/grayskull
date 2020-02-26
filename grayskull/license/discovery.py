@@ -37,11 +37,8 @@ def get_all_licenses_from_opensource() -> List:
 def match_license(name: str) -> dict:
     all_licenses = get_all_licenses_from_opensource()
     name = name.strip()
-    name = re.sub(r"\s*License\s*", "", name, re.IGNORECASE)
 
-    best_match = process.extractOne(
-        name, _get_all_license_choice(all_licenses), scorer=token_sort_ratio
-    )
+    best_match = process.extractOne(name, _get_all_license_choice(all_licenses))
     return _get_license(best_match[0], all_licenses)
 
 
@@ -65,7 +62,10 @@ def _get_all_names_from_api(one_license: dict) -> List:
         result.add(one_license["name"])
     if one_license["id"]:
         result.add(one_license["id"])
-    result = result.union({i["identifier"] for i in one_license["identifiers"]})
+    for lc in one_license["identifiers"]:
+        if lc["scheme"] == "spdx":
+            result.add(lc["identifier"])
+            break
     result = result.union({l["name"] for l in one_license["other_names"]})
     return list(result)
 
@@ -116,7 +116,7 @@ def search_license_api_github(
 ) -> Optional[ShortLicense]:
     github_url = _get_api_github_url(github_url, version)
 
-    response = requests.get(url=github_url, timeout=5)
+    response = requests.get(url=github_url, timeout=10)
     if response.status_code != 200:
         return None
 
