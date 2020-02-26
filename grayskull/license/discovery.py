@@ -98,7 +98,7 @@ def search_license_file(
         return license_sdist
 
     if not git_url:
-        return None
+        return license_name_metadata
 
     github_license = search_license_api_github(git_url, version, license_name_metadata)
     if github_license:
@@ -107,7 +107,7 @@ def search_license_file(
     repo_license = search_license_repo(git_url, version, license_name_metadata)
     if repo_license:
         return repo_license
-    return None
+    return license_name_metadata
 
 
 @lru_cache(maxsize=13)
