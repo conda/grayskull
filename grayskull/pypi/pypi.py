@@ -333,11 +333,12 @@ class PyPi(AbstractRecipeModel):
         license_name = "Other"
         if license_metadata:
             license_name = license_metadata.name
-            license_file = "LICENSE"
-            if license_metadata.is_packaged:
-                license_file = license_metadata.path
-            else:
-                self.files_to_copy.append(license_metadata.path)
+            if license_metadata.path:
+                license_file = "LICENSE"
+                if license_metadata.is_packaged:
+                    license_file = license_metadata.path
+                else:
+                    self.files_to_copy.append(license_metadata.path)
 
         return {
             "package": {"name": name, "version": metadata["version"]},
@@ -490,7 +491,7 @@ class PyPi(AbstractRecipeModel):
         for req in all_dependencies:
             match_req = re_deps.match(req)
             deps_name = req
-            if deps_name == name:
+            if deps_name.replace("-", "_") == name.replace("-", "_"):
                 continue
             if match_req:
                 match_req = match_req.groups()

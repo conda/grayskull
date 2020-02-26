@@ -20,7 +20,7 @@ from grayskull.license.data import get_all_licenses  # noqa
 @dataclass
 class ShortLicense:
     name: str
-    path: Union[str, Path]
+    path: Union[str, Path, None]
     is_packaged: bool
 
 
@@ -98,7 +98,7 @@ def search_license_file(
         return license_sdist
 
     if not git_url:
-        return license_name_metadata
+        return ShortLicense(license_name_metadata, None, False)
 
     github_license = search_license_api_github(git_url, version, license_name_metadata)
     if github_license:
@@ -107,7 +107,7 @@ def search_license_file(
     repo_license = search_license_repo(git_url, version, license_name_metadata)
     if repo_license:
         return repo_license
-    return license_name_metadata
+    return ShortLicense(license_name_metadata, None, False)
 
 
 @lru_cache(maxsize=13)
