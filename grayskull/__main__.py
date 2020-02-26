@@ -1,6 +1,11 @@
 import argparse
 
+import colorama
+from colorama import Fore
+
 from grayskull.base.factory import GrayskullFactory
+
+colorama.init()
 
 
 def main():
@@ -26,9 +31,9 @@ def main():
     )
 
     args = parser.parse_args()
-
+    print("\033[2J")
     if args.grayskull_power:
-        print("By the power of Grayskull...\nI have the power!")
+        print(f"{Fore.BLUE}By the power of Grayskull...\nI have the power!{Fore.RESET}")
 
     for pkg_name in args.packages:
         recipe = GrayskullFactory.create_recipe(
