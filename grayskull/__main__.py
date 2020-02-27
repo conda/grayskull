@@ -1,11 +1,15 @@
 import argparse
+import logging
+import os
 
 import colorama
-from colorama import Fore
+from colorama import Fore, Style
+from colorama.ansi import clear_screen
 
 from grayskull.base.factory import GrayskullFactory
 
 colorama.init(autoreset=True)
+logging.basicConfig(format="%(levelname)s:%(message)s")
 
 
 def main():
@@ -31,15 +35,30 @@ def main():
     )
 
     args = parser.parse_args()
-    print("\033[2J")
+    logging.debug(f"All arguments received: args: {args}")
+    print(Style.RESET_ALL)
+    print(clear_screen())
     if args.grayskull_power:
-        print(f"{Fore.BLUE}By the power of Grayskull...\nI have the power!")
+        print(
+            f"{Fore.BLUE}By the power of Grayskull...\n"
+            f"{Style.BRIGHT}I have the power!"
+        )
 
     for pkg_name in args.packages:
+        logging.debug(f"Starting grayskull for pkg: {pkg_name}")
+        print(
+            f"{Fore.GREEN}\n\n"
+            f"#### Initializing recipe for "
+            f"{Fore.BLUE}{pkg_name} ({args.repo_type[0]}) {Fore.GREEN}####\n"
+        )
         recipe = GrayskullFactory.create_recipe(
             args.repo_type[0], pkg_name, args.version
         )
         recipe.generate_recipe(args.output)
+        print(
+            f"\n{Fore.GREEN}#### Recipe generated on "
+            f"{os.path.realpath(args.output)} for {pkg_name} ####\n\n"
+        )
 
 
 if __name__ == "__main__":

@@ -14,7 +14,7 @@ from tempfile import mkdtemp
 from typing import Dict, List, Optional, Tuple, Union
 
 import requests
-from colorama import Fore
+from colorama import Fore, Style
 from progressbar import ProgressBar
 from requests import HTTPError
 
@@ -46,11 +46,13 @@ class PyPi(AbstractRecipeModel):
     def _download_sdist_pkg(sdist_url: str, dest: str):
         name = sdist_url.split("/")[-1]
         print(
-            f"{Fore.GREEN}Starting the download of the sdist package {Fore.BLUE}{name}."
+            f"{Fore.GREEN}Starting the download of the sdist package"
+            f" {Fore.BLUE}{Style.BRIGHT}{name}"
         )
-
+        log.debug(f"Downloading {name} sdist - {sdist_url}")
         response = requests.get(sdist_url, allow_redirects=True, stream=True, timeout=5)
         total_size = int(response.headers["Content-length"])
+
         with ProgressBar(
             widgets=WIDGET_BAR_DOWNLOAD, max_value=total_size, prefix=f"{name} "
         ) as bar, open(dest, "wb") as pkg_file:
@@ -67,7 +69,9 @@ class PyPi(AbstractRecipeModel):
         path_pkg = os.path.join(temp_folder, pkg_name)
 
         PyPi._download_sdist_pkg(sdist_url=sdist_url, dest=path_pkg)
+        log.debug(f"Unpacking {path_pkg} to {temp_folder}")
         shutil.unpack_archive(path_pkg, temp_folder)
+        print(f"{Fore.LIGHTBLACK_EX}Recovering information from setup.py")
         with PyPi._injection_distutils(temp_folder) as metadata:
             metadata["sdist_path"] = temp_folder
             return metadata
@@ -102,6 +106,8 @@ class PyPi(AbstractRecipeModel):
     def _get_setup_cfg(source_path: str) -> dict:
         from setuptools.config import read_configuration
 
+        log.debug(f"Started setup.cfg from {source_path}")
+        print(f"{Fore.LIGHTBLACK_EX}Recovering metadata from setup.cfg")
         path_setup_cfg = list(Path(source_path).rglob("setup.cfg"))
         if not path_setup_cfg:
             return {}
@@ -118,6 +124,7 @@ class PyPi(AbstractRecipeModel):
         result.update(setup_cfg.get("metadata", {}))
         if result.get("build_ext"):
             result["compilers"] = ["c"]
+        log.debug(f"Data recovered from setup.cfg: {result}")
         return result
 
     @staticmethod
@@ -152,6 +159,7 @@ class PyPi(AbstractRecipeModel):
             )
 
             if "use_scm_version" in kwargs and kwargs["use_scm_version"]:
+                log.debug("setuptools_scm found on setup.py")
                 if "setuptools_scm" not in data_dist["setup_requires"]:
                     data_dist["setup_requires"] += ["setuptools_scm"]
                 if "setuptools-scm" in data_dist["setup_requires"]:
@@ -167,6 +175,7 @@ class PyPi(AbstractRecipeModel):
                         ):
                             data_dist["compilers"].append("fortran")
                             break
+            log.debug(f"Injection distutils all arguments: {kwargs}")
             if data_dist.get("run_py", False):
                 del data_dist["run_py"]
                 return
@@ -175,11 +184,17 @@ class PyPi(AbstractRecipeModel):
         try:
             core.setup = __fake_distutils_setup
             path_setup = str(path_setup)
+            print(f"{Fore.LIGHTBLACK_EX}Executing injected distutils...")
             PyPi.__run_setup_py(path_setup, data_dist)
             if not data_dist or not data_dist.get("install_requires", None):
+                print(
+                    f"{Fore.LIGHTBLACK_EX}No data was recovered from setup.py."
+                    f" Forcing to execute the setup.py as script"
+                )
                 PyPi.__run_setup_py(path_setup, data_dist, run_py=True)
             yield data_dist
         except Exception as err:  # noqa
+            log.debug(f"Exception occurred when executing sdist injection: err {err}")
             yield data_dist
         core.setup = setup_core_original
         os.chdir(old_dir)
@@ -205,15 +220,21 @@ class PyPi(AbstractRecipeModel):
                     path_setup, script_args=["install", f"--target={pip_dir}"]
                 )
         except ModuleNotFoundError as err:
+            log.debug(
+                f"When executing setup.py did not find the module: {err.name}."
+                f" Exception: {err}"
+            )
             PyPi._pip_install_dep(data_dist, err.name, pip_dir)
             PyPi.__run_setup_py(path_setup, data_dist, run_py)
         except Exception as err:  # noqa
+            log.debug(f"Exception when executing setup.py as script: {err}")
             pass
         data_dist.update(
             PyPi._merge_sdist_metadata(
                 data_dist, PyPi._get_setup_cfg(os.path.dirname(str(path_setup)))
             )
         )
+        log.debug(f"Data recovered from setup.py: {data_dist}")
         if os.path.exists(pip_dir):
             shutil.rmtree(pip_dir)
         sys.path = original_path
@@ -339,6 +360,7 @@ class PyPi(AbstractRecipeModel):
             sdist_url=pypi_metadata["sdist_url"], name=name
         )
         metadata = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
+        log.debug(f"Data merged from pypi, setup.cfg and setup.py: {metadata}")
         license_metadata = PyPi._discover_license(metadata)
 
         license_file = "PLEASE_ADD_LICENSE_FILE"
@@ -351,11 +373,27 @@ class PyPi(AbstractRecipeModel):
                     license_file = license_metadata.path
                 else:
                     self.files_to_copy.append(license_metadata.path)
+        print(f"{Fore.LIGHTBLACK_EX}License type: {Fore.LIGHTMAGENTA_EX}{license_name}")
+        print(f"{Fore.LIGHTBLACK_EX}License file: {Fore.LIGHTMAGENTA_EX}{license_file}")
+
+        all_requirements = self._extract_requirements(metadata)
+
+        def print_req(name, list_req: List):
+            prefix_req = f"{Fore.LIGHTBLACK_EX}\n   - {Fore.LIGHTCYAN_EX}"
+            print(
+                f"{Fore.LIGHTBLACK_EX}{name} requirements:"
+                f"{prefix_req}{prefix_req.join(list_req)}"
+            )
+
+        if all_requirements.get("build"):
+            print_req("Build", all_requirements["build"])
+        print_req("Host", all_requirements["host"])
+        print_req("run", all_requirements["run"])
 
         return {
             "package": {"name": name, "version": metadata["version"]},
             "build": {"entry_points": metadata.get("entry_points")},
-            "requirements": self._extract_requirements(metadata),
+            "requirements": all_requirements,
             "test": {
                 "imports": pypi_metadata["name"].replace("-", "_"),
                 "commands": "pip check",
