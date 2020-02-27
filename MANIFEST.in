@@ -1,6 +1,6 @@
 include LICENSE
 include README.rst
-include grayskull/license/data/*
+recursive-include grayskull/license
 
 exclude .github
 exclude azure-pipelines.yml
