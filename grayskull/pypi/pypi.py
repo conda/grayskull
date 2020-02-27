@@ -373,6 +373,7 @@ class PyPi(AbstractRecipeModel):
                     license_file = license_metadata.path
                 else:
                     self.files_to_copy.append(license_metadata.path)
+
         print(f"{Fore.LIGHTBLACK_EX}License type: {Fore.LIGHTMAGENTA_EX}{license_name}")
         print(f"{Fore.LIGHTBLACK_EX}License file: {Fore.LIGHTMAGENTA_EX}{license_file}")
 
@@ -542,7 +543,7 @@ class PyPi(AbstractRecipeModel):
         for req in all_dependencies:
             match_req = re_deps.match(req)
             deps_name = req
-            if deps_name == name:
+            if deps_name.replace("-", "_") == name.replace("-", "_"):
                 continue
             if match_req:
                 match_req = match_req.groups()
@@ -696,11 +697,16 @@ class PyPi(AbstractRecipeModel):
                     else f">={py_ver.major}.{py_ver.minor}"
                 )
             elif any(all_py[pos:]) is False:
-                return (
-                    f"# [py>={py_ver.major}{py_ver.minor}]"
-                    if is_selector
-                    else f"<{py_ver.major}.{py_ver.minor}"
-                )
+                if is_selector:
+                    py2k = ""
+                    if not all_py[0]:
+                        py2k = " or py2k"
+                    return f"# [py>={py_ver.major}{py_ver.minor}{py2k}]"
+                else:
+                    py2 = ""
+                    if not all_py[0]:
+                        py2 = f">=3.6,"
+                    return f"{py2}<{py_ver.major}.{py_ver.minor}"
 
         all_selector = PyPi._get_multiple_selectors(
             py_ver_enabled, is_selector=is_selector
@@ -741,7 +747,7 @@ class PyPi(AbstractRecipeModel):
     def _get_multiple_selectors(selectors: Dict[PyVer, bool], is_selector=False):
         all_selector = []
         if selectors[PyVer(2, 7)] is False:
-            all_selector += ["py2k"] if is_selector else [">3.0"]
+            all_selector += ["py2k"] if is_selector else [">=3.6"]
         for py_ver, is_enabled in selectors.items():
             if py_ver == PyVer(2, 7) or is_enabled:
                 continue
