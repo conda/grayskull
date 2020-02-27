@@ -10,6 +10,7 @@ setup(
     },
     use_scm_version={"write_to": "grayskull/_version.py"},
     setup_requires=["setuptools-scm", "setuptools>=30.3.0"],
+    python_requires=">=3.7",
     install_requires=[
         "requests",
         "ruamel.yaml >=0.15.3",
