@@ -1,8 +1,8 @@
-from setuptools import setup
+from setuptools import find_packages, setup
 
 setup(
     name="grayskull",
-    packages=["grayskull", "grayskull.base", "grayskull.pypi"],
+    packages=find_packages(),
     entry_points={"console_scripts": ["grayskull = grayskull.__main__:main"]},
     use_scm_version={"write_to": "grayskull/_version.py"},
     setup_requires=["setuptools-scm", "setuptools>=30.3.0"],
