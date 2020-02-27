@@ -2,5 +2,12 @@ include LICENSE
 include README.rst
 include grayskull/license/data/*
 
+exclude .github
+exclude azure-pipelines.yml
+exclude .gitignore
+exclude .pre-commit-config.yaml
+exclude .flake8
+exclude .coveragerc
+exclude .isort.cfg
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
