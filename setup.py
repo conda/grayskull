@@ -6,7 +6,6 @@ setup(
     entry_points={
         "console_scripts": [
             "grayskull = grayskull.__main__:main",
-            "gs = grayskull.__main__:main",
         ]
     },
     use_scm_version={"write_to": "grayskull/_version.py"},
