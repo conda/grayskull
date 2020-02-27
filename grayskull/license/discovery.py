@@ -30,6 +30,10 @@ class ShortLicense:
 
 @lru_cache(maxsize=10)
 def get_all_licenses_from_opensource() -> List:
+    """Get all licenses available on opensource.org
+
+    :return: List with all licenses information on opensource.org
+    """
     response = requests.get(url="https://api.opensource.org/licenses", timeout=5)
     log.debug(
         f"Response from api.opensource. Status code:{response.status_code},"
@@ -44,6 +48,12 @@ def get_all_licenses_from_opensource() -> List:
 
 
 def match_license(name: str) -> dict:
+    """Match if the given license name matches any license present on
+    opensource.org
+
+    :param name: License name
+    :return: Information of the license matched
+    """
     all_licenses = get_all_licenses_from_opensource()
     name = name.strip()
 
@@ -54,6 +64,11 @@ def match_license(name: str) -> dict:
 
 
 def get_short_license_id(name: str) -> str:
+    """Get the spdx identifier for the given license name
+
+    :param name: License name
+    :return: short identifier (spdx) for the given license name
+    """
     recipe_license = match_license(name)
     for identifier in recipe_license["identifiers"]:
         if identifier["scheme"].lower() == "spdx":
@@ -62,12 +77,23 @@ def get_short_license_id(name: str) -> str:
 
 
 def _get_license(license_id: str, all_licenses: List) -> dict:
+    """Search for the license identification in all licenses received
+
+    :param license_id: license identification
+    :param all_licenses: List with all licenses
+    :return: Dict with the information of the license desired
+    """
     for one_license in all_licenses:
         if license_id in _get_all_names_from_api(one_license):
             return one_license
 
 
 def _get_all_names_from_api(one_license: dict) -> List:
+    """Get the names and other names which each license has.
+
+    :param one_license: License name
+    :return: List of all names which the given license is know of
+    """
     result = set()
     if one_license["name"]:
         result.add(one_license["name"])
@@ -82,6 +108,11 @@ def _get_all_names_from_api(one_license: dict) -> List:
 
 
 def _get_all_license_choice(all_licenses: List) -> List:
+    """Function responsible to get the whole licenses name
+
+    :param all_licenses: list with all licenses
+    :return: list with all names which each license may have
+    """
     all_choices = []
     for api_license in all_licenses:
         all_choices += _get_all_names_from_api(api_license)
@@ -94,6 +125,16 @@ def search_license_file(
     version: Optional[str] = None,
     license_name_metadata: Optional[str] = None,
 ) -> Optional[ShortLicense]:
+    """Search for the license file. First it will try to find it in the given
+    folder, after that it will search on the github api and for the last it will
+    clone the repository and it will search for the license there.
+
+    :param folder_path: Path where the sdist package was unpacked
+    :param git_url: URL for the Github repository
+    :param version: Package version
+    :param license_name_metadata: Default value for the license type
+    :return: ShortLicense with the information regarding the license
+    """
     if license_name_metadata:
         license_name_metadata = get_short_license_id(license_name_metadata)
 
@@ -125,6 +166,13 @@ def search_license_file(
 def search_license_api_github(
     github_url: str, version: Optional[str] = None, default: Optional[str] = "Other"
 ) -> Optional[ShortLicense]:
+    """Search for the license asking in the github api
+
+    :param github_url: GitHub URL
+    :param version: Package version
+    :param default: default license type
+    :return: License information
+    """
     github_url = _get_api_github_url(github_url, version)
     log.info(f"Github url: {github_url} - recovering license info")
     print(f"{Fore.LIGHTBLACK_EX}Recovering license information from github...")
@@ -144,6 +192,12 @@ def search_license_api_github(
 
 
 def _get_api_github_url(github_url: str, version: Optional[str] = None) -> str:
+    """Try to presume the github url
+
+    :param github_url: GitHub URL
+    :param version: package version
+    :return: GitHub URL
+    """
     github_url = re.sub(r"github.com", "api.github.com/repos", github_url)
     if github_url[-1] != "/":
         github_url += "/"
@@ -155,6 +209,12 @@ def _get_api_github_url(github_url: str, version: Optional[str] = None) -> str:
 def search_license_folder(
     path: Union[str, Path], default: Optional[str] = None
 ) -> Optional[ShortLicense]:
+    """Search for the license in the given folder
+
+    :param path: Sdist folder
+    :param default: Default value for the license type
+    :return: License information
+    """
     re_search = re.compile(
         r"(\bcopyright\b|\blicense[s]*\b|\bcopying\b|\bcopyleft\b)", re.IGNORECASE
     )
@@ -169,6 +229,13 @@ def search_license_folder(
 def search_license_repo(
     git_url: str, version: Optional[str], default: Optional[str] = None
 ) -> Optional[ShortLicense]:
+    """Search for the license file in the given github repository
+
+    :param git_url: GitHub URL
+    :param version: Package version
+    :param default: Default value for the license type
+    :return: License information
+    """
     git_url = re.sub(r"/$", ".git", git_url)
     git_url = git_url if git_url.endswith(".git") else f"{git_url}.git"
     print(f"{Fore.LIGHTBLACK_EX}Recovering license info from repository...")
@@ -185,6 +252,13 @@ def search_license_repo(
 
 
 def _get_git_cmd(git_url: str, version: str, dest) -> List[str]:
+    """Return the full git command to clone the repository
+
+    :param git_url: GitHub URL
+    :param version: Package version
+    :param dest: Folder destination
+    :return: git command to clone the repository
+    """
     git_cmd = ["git", "clone"]
     if version:
         git_cmd += ["-b", version]
@@ -192,6 +266,13 @@ def _get_git_cmd(git_url: str, version: str, dest) -> List[str]:
 
 
 def get_license_type(path_license: str, default: Optional[str] = None) -> Optional[str]:
+    """Function tries to match the license with one of the models present in
+    grayskull/license/data
+
+    :param path_license: Path to the license file
+    :param default: Default value for the license type
+    :return: License type
+    """
     with open(path_license, "r") as license_file:
         license_content = license_file.read()
     print(f"{Fore.LIGHTBLACK_EX}Matching license file with database from Grayskull...")

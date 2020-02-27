@@ -37,6 +37,11 @@ def get_all_modules_imported_script(script_file: str) -> set:
 
 
 def get_vendored_dependencies(script_file: str) -> List:
+    """Get all third part dependencies which are being in use in the setup.py
+
+    :param script_file: Path to the setup.py
+    :return: List with all vendored dependencies
+    """
     all_std_modules = get_std_modules()
     all_modules_used = get_all_modules_imported_script(script_file)
     vendored_modules = []

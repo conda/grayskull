@@ -44,6 +44,11 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _download_sdist_pkg(sdist_url: str, dest: str):
+        """Download the sdist package
+
+        :param sdist_url: sdist url
+        :param dest: Folder were the method will download the sdist
+        """
         name = sdist_url.split("/")[-1]
         print(
             f"{Fore.GREEN}Starting the download of the sdist package"
@@ -67,6 +72,13 @@ class PyPi(AbstractRecipeModel):
     @staticmethod
     @lru_cache(maxsize=10)
     def _get_sdist_metadata(sdist_url: str, name: str) -> dict:
+        """Method responsible to return the sdist metadata which is basically
+        the metadata present in setup.py and setup.cfg
+
+        :param sdist_url: URL to the sdist package
+        :param name: name of the package
+        :return: sdist metadata
+        """
         temp_folder = mkdtemp(prefix=f"grayskull-{name}-")
         pkg_name = sdist_url.split("/")[-1]
         path_pkg = os.path.join(temp_folder, pkg_name)
@@ -81,6 +93,13 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _merge_sdist_metadata(setup_py: dict, setup_cfg: dict) -> dict:
+        """This method will merge the metadata present in the setup.py and
+        setup.cfg. It is an auxiliary method.
+
+        :param setup_py: Metadata from setup.py
+        :param setup_cfg: Metadata from setup.cfg
+        :return: Return the merged data from setup.py and setup.cfg
+        """
         result = deepcopy(setup_py)
         for key, value in setup_cfg.items():
             if key not in result:
@@ -107,6 +126,12 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _get_setup_cfg(source_path: str) -> dict:
+        """Method responsible to extract the setup.cfg metadata
+
+        :param source_path: Path to the folder where is located the sdist
+         files unpacked
+        :return: Metadata of setup.cfg
+        """
         from setuptools.config import read_configuration
 
         log.debug(f"Started setup.cfg from {source_path}")
@@ -204,6 +229,13 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def __run_setup_py(path_setup: str, data_dist: dict, run_py=False):
+        """Method responsible to run the setup.py
+
+        :param path_setup: full path to the setup.py
+        :param data_dist: metadata
+        :param run_py: If it should run the setup.py with run_py, otherwise it will run
+        invoking the distutils directly
+        """
         original_path = deepcopy(sys.path)
         pip_dir = mkdtemp(prefix="pip-dir-")
         if not os.path.exists(pip_dir):
@@ -244,12 +276,24 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _install_deps_if_necessary(setup_path: str, data_dist: dict, pip_dir: str):
+        """Install missing dependencies to run the setup.py
+
+        :param setup_path: path to the setup.py
+        :param data_dist: metadata
+        :param pip_dir: path where the missing packages will be downloaded
+        """
         all_setup_deps = get_vendored_dependencies(setup_path)
         for dep in all_setup_deps:
             PyPi._pip_install_dep(data_dist, dep, pip_dir)
 
     @staticmethod
     def _pip_install_dep(data_dist: dict, dep_name: str, pip_dir: str):
+        """Install dependency using `pip`
+
+        :param data_dist: sdist metadata
+        :param dep_name: Package name which will be installed
+        :param pip_dir: Path to the folder where `pip` will let the packages
+        """
         if not data_dist.get("setup_requires"):
             data_dist["setup_requires"] = []
         if dep_name == "pkg_resources":
@@ -300,6 +344,12 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _get_compilers(requires_dist: List, sdist_metadata: dict) -> List:
+        """Return which compilers are necessary
+
+        :param requires_dist: Package requirements
+        :param sdist_metadata: sdist metadata
+        :return: List with all compilers found.
+        """
         compilers = set(sdist_metadata.get("compilers", []))
         for pkg in requires_dist:
             pkg = PyPi.RE_DEPS_NAME.match(pkg).group(0)
@@ -312,6 +362,11 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _get_entry_points_from_sdist(sdist_metadata: dict) -> List:
+        """Extract entry points from sdist metadata
+
+        :param sdist_metadata: sdist metadata
+        :return: list with all entry points
+        """
         all_entry_points = sdist_metadata.get("entry_points", None)
         if all_entry_points and (
             all_entry_points.get("console_scripts")
@@ -324,6 +379,12 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _merge_requires_dist(pypi_metadata: dict, sdist_metadata: dict) -> List:
+        """Merge requirements metadata from pypi and sdist.
+
+        :param pypi_metadata: pypi metadata
+        :param sdist_metadata: sdist metadata
+        :return: list with all requirements
+        """
         pypi_deps_name = set()
         requires_dist = []
         all_deps = []
@@ -342,6 +403,10 @@ class PyPi(AbstractRecipeModel):
         return requires_dist
 
     def refresh_section(self, section: str = ""):
+        """Update one specific section.
+
+        :param section: Section name
+        """
         metadata = self._get_metadata()
         if metadata.get(section):
             if section == "package":
@@ -354,6 +419,9 @@ class PyPi(AbstractRecipeModel):
 
     @lru_cache(maxsize=10)
     def _get_metadata(self) -> dict:
+        """Method responsible to get the whole metadata available. It will
+        merge metadata from multiple sources (pypi, setup.py, setup.cfg)
+        """
         name = self.get_var_content(self["package"]["name"].values[0])
         version = ""
         if self["package"]["version"].values:
@@ -416,6 +484,13 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _discover_license(metadata: dict) -> Optional[ShortLicense]:
+        """Based on the metadata this method will try to discover what is the
+        right license for the package
+
+        :param metadata: metadata
+        :return: Return an object which contains relevant informations regarding
+        the license.
+        """
         git_url = metadata.get("dev_url", None)
         if not git_url and "github.com/" in metadata.get("project_url"):
             git_url = metadata.get("project_url")
@@ -432,6 +507,13 @@ class PyPi(AbstractRecipeModel):
     @staticmethod
     @lru_cache(maxsize=10)
     def _get_pypi_metadata(name, version: Optional[str] = None) -> dict:
+        """Method responsible to communicate with the pypi api endpoints and
+        get the whole metadata available for the specified package and version.
+
+        :param name: Package name
+        :param version: Package version
+        :return: Pypi metadata
+        """
         print(f"{Fore.LIGHTBLACK_EX}Recovering metadata from pypi...")
         if version:
             url_pypi = PyPi.URL_PYPI_METADATA.format(pkg_name=f"{name}/{version}")
@@ -471,12 +553,22 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _get_sdist_url_from_pypi(metadata: dict) -> str:
+        """Return the sdist url looking for the pypi metadata
+
+        :param metadata: pypi metadata
+        :return: sdist url
+        """
         for sdist_url in metadata["urls"]:
             if sdist_url["packagetype"] == "sdist":
                 return sdist_url["url"]
 
     @staticmethod
     def get_sha256_from_pypi_metadata(pypi_metadata: dict) -> str:
+        """Get the sha256 from pypi metadata
+
+        :param pypi_metadata: pypi metadata
+        :return: sha256 value for the sdist package
+        """
         for pkg_info in pypi_metadata.get("urls"):
             if pkg_info.get("packagetype", "") == "sdist":
                 return pkg_info["digests"]["sha256"]
@@ -486,12 +578,22 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def __skip_pypi_requirement(list_extra: List) -> bool:
+        """Test if it should skip the requirement
+
+        :param list_extra: list with all extra requirements
+        :return: True if we should skip the requirement
+        """
         for extra in list_extra:
             if extra[1] == "extra" or extra[3] == "testing":
                 return True
         return False
 
     def _extract_requirements(self, metadata: dict) -> dict:
+        """Extract the requirements for `build`, `host` and `run`
+
+        :param metadata: all metadata
+        :return: all requirement section
+        """
         name = metadata["name"]
         requires_dist = PyPi._format_dependencies(metadata.get("requires_dist"), name)
         setup_requires = (
@@ -537,6 +639,13 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _format_dependencies(all_dependencies: List, name: str) -> List:
+        """Just format the given dependency to a string which is valid for the
+        recipe
+
+        :param all_dependencies: list of dependencies
+        :param name: package name
+        :return: list of dependencies formatted
+        """
         formated_dependencies = []
         re_deps = re.compile(
             r"^\s*([\.a-zA-Z0-9_-]+)\s*(.*)\s*$", re.MULTILINE | re.DOTALL
@@ -587,6 +696,12 @@ class PyPi(AbstractRecipeModel):
                 requirements["run"].append(PyPi.PIN_PKG_COMPILER[pkg_name])
 
     def _get_run_req_from_requires_dist(self, requires_dist: List) -> List:
+        """Get the run requirements looking for the `requires_dist` key
+        present in the metadata
+
+        :param requires_dist: List of requirements
+        :return:
+        """
         run_req = []
         for req in requires_dist:
             list_raw_requirements = req.split(";")
@@ -612,6 +727,11 @@ class PyPi(AbstractRecipeModel):
         return run_req
 
     def _get_all_selectors_pypi(self, list_extra: List) -> List:
+        """Get the selectors looking for the pypi data
+
+        :param list_extra: List of extra requirements from pypi
+        :return: List of extra requirements with the selectors
+        """
         result_selector = []
         for extra in list_extra:
             self._is_arch = True
@@ -711,7 +831,7 @@ class PyPi(AbstractRecipeModel):
                         py2 = f">=3.6,"
                     return f"{py2}<{py_ver.major}.{py_ver.minor}"
 
-        all_selector = PyPi._get_multiple_selectors(
+        all_selector = PyPi._get_py_multiple_selectors(
             py_ver_enabled, is_selector=is_selector
         )
         if all_selector:
@@ -734,6 +854,11 @@ class PyPi(AbstractRecipeModel):
     def _get_py_version_available(
         req_python: List[Tuple[str, str, str]]
     ) -> Dict[PyVer, bool]:
+        """Get the python version available given the requires python received
+
+        :param req_python: Requires python
+        :return: Dict of Python versions if it is enabled or disabled
+        """
         py_ver_enabled = {py_ver: True for py_ver in SUPPORTED_PY}
         for op, major, minor in req_python:
             if not minor:
@@ -747,7 +872,15 @@ class PyPi(AbstractRecipeModel):
         return py_ver_enabled
 
     @staticmethod
-    def _get_multiple_selectors(selectors: Dict[PyVer, bool], is_selector=False):
+    def _get_py_multiple_selectors(
+        selectors: Dict[PyVer, bool], is_selector=False
+    ) -> List:
+        """Get python selectors available.
+
+        :param selectors: Dict with the Python version and if it is selected
+        :param is_selector: if it needs to convert to selector or constrain python
+        :return: list with all selectors or constrained python
+        """
         all_selector = []
         if selectors[PyVer(2, 7)] is False:
             all_selector += ["py2k"] if is_selector else [">=3.6"]
@@ -765,6 +898,13 @@ class PyPi(AbstractRecipeModel):
     def _parse_extra_metadata_to_selector(
         option: str, operation: str, value: str
     ) -> str:
+        """Method tries to convert the extra metadata received into selectors
+
+        :param option: option (extra, python_version, sys_platform)
+        :param operation: (>, >=, <, <=, ==, !=)
+        :param value: value after the operation
+        :return: selector
+        """
         if option == "extra":
             return ""
         if option == "python_version":
