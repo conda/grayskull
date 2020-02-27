@@ -9,6 +9,7 @@ omit =
     _version.py
     grayskull.egg-info/*
     .github/*
+    grayskull/cli/__init__.py
 
 [paths]
 source = grayskull

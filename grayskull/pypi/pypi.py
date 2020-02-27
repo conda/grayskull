@@ -56,10 +56,13 @@ class PyPi(AbstractRecipeModel):
         with ProgressBar(
             widgets=WIDGET_BAR_DOWNLOAD, max_value=total_size, prefix=f"{name} "
         ) as bar, open(dest, "wb") as pkg_file:
-            for num, chunk_data in enumerate(response.iter_content()):
+            progress_val = 0
+            chunk_size = 512
+            for chunk_data in response.iter_content(chunk_size=chunk_size):
                 if chunk_data:
                     pkg_file.write(chunk_data)
-                    bar.update(num)
+                    progress_val += chunk_size
+                    bar.update(min(progress_val, total_size))
 
     @staticmethod
     @lru_cache(maxsize=10)
