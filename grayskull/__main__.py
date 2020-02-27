@@ -57,7 +57,7 @@ def main():
         recipe.generate_recipe(args.output)
         print(
             f"\n{Fore.GREEN}#### Recipe generated on "
-            f"{os.path.realpath(args.output)} for {pkg_name} ####\n\n"
+            f"{os.path.realpath(args.output)} for {pkg_name} ####\n"
         )
 
 

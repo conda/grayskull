@@ -428,6 +428,7 @@ class PyPi(AbstractRecipeModel):
     @staticmethod
     @lru_cache(maxsize=10)
     def _get_pypi_metadata(name, version: Optional[str] = None) -> dict:
+        print(f"{Fore.LIGHTBLACK_EX}Recovering metadata from pypi...")
         if version:
             url_pypi = PyPi.URL_PYPI_METADATA.format(pkg_name=f"{name}/{version}")
         else:
