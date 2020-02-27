@@ -6,6 +6,7 @@ setup(
     entry_points={"console_scripts": ["grayskull = grayskull.__main__:main"]},
     use_scm_version={"write_to": "grayskull/_version.py"},
     setup_requires=["setuptools-scm", "setuptools>=30.3.0"],
+    package_data={"": ["license/data/*", "license/data/*.*"]},
     python_requires=">=3.7",
     install_requires=[
         "requests",
