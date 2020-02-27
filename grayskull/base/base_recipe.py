@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 from abc import ABC, abstractmethod
@@ -176,6 +177,7 @@ class AbstractRecipeModel(ABC):
         recipe_dir = Path(folder_path) / self.get_var_content(
             self["package"]["name"].values[0]
         )
+        logging.debug(f"Generating recipe on folder: {recipe_dir}")
         if not recipe_dir.is_dir():
             recipe_dir.mkdir()
         recipe_path = recipe_dir / "meta.yaml"

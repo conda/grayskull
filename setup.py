@@ -20,6 +20,8 @@ setup(
         "setuptools>=30.3.0",
         "fuzzywuzzy",
         "python-Levenshtein",
+        "progressbar2",
+        "colorama",
     ],
     extras_require={"testing": ["pytest"]},
     url="https://github.com/marcelotrevisani/grayskull",

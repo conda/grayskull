@@ -1,4 +1,5 @@
 import base64
+import logging
 import os
 import re
 from dataclasses import dataclass
@@ -10,11 +11,14 @@ from tempfile import mkdtemp
 from typing import List, Optional, Union
 
 import requests
+from colorama import Fore
 from fuzzywuzzy import process
 from fuzzywuzzy.fuzz import token_sort_ratio
 from requests import HTTPError
 
 from grayskull.license.data import get_all_licenses  # noqa
+
+log = logging.getLogger(__name__)
 
 
 @dataclass
@@ -27,10 +31,15 @@ class ShortLicense:
 @lru_cache(maxsize=10)
 def get_all_licenses_from_opensource() -> List:
     response = requests.get(url="https://api.opensource.org/licenses", timeout=5)
+    log.debug(
+        f"Response from api.opensource. Status code:{response.status_code},"
+        f" response: {response}"
+    )
     if response.status_code != 200:
         raise HTTPError(
             f"It was not possible to communicate with opensource api.\n{response.text}"
         )
+    print(f"{Fore.LIGHTBLACK_EX}Recovering license info from opensource.org ...")
     return response.json()
 
 
@@ -39,6 +48,8 @@ def match_license(name: str) -> dict:
     name = name.strip()
 
     best_match = process.extractOne(name, _get_all_license_choice(all_licenses))
+    log.info(f"Best match for license {name} was {best_match}")
+
     return _get_license(best_match[0], all_licenses)
 
 
@@ -115,6 +126,8 @@ def search_license_api_github(
     github_url: str, version: Optional[str] = None, default: Optional[str] = "Other"
 ) -> Optional[ShortLicense]:
     github_url = _get_api_github_url(github_url, version)
+    log.info(f"Github url: {github_url} - recovering license info")
+    print(f"{Fore.LIGHTBLACK_EX}Recovering license information from github...")
 
     response = requests.get(url=github_url, timeout=10)
     if response.status_code != 200:
@@ -158,11 +171,15 @@ def search_license_repo(
 ) -> Optional[ShortLicense]:
     git_url = re.sub(r"/$", ".git", git_url)
     git_url = git_url if git_url.endswith(".git") else f"{git_url}.git"
-
+    print(f"{Fore.LIGHTBLACK_EX}Recovering license info from repository...")
     tmp_dir = mkdtemp(prefix="gs-clone-repo-")
     try:
         check_output(_get_git_cmd(git_url, version, tmp_dir))
-    except Exception as err:  # noqa
+    except Exception as err:
+        log.debug(
+            f"Exception occurred when gs was trying to clone the repository."
+            f" url: {git_url}, version: {version}. Exception: {err}"
+        )
         return None
     return search_license_folder(str(tmp_dir), default)
 
@@ -177,13 +194,15 @@ def _get_git_cmd(git_url: str, version: str, dest) -> List[str]:
 def get_license_type(path_license: str, default: Optional[str] = None) -> Optional[str]:
     with open(path_license, "r") as license_file:
         license_content = license_file.read()
-
+    print(f"{Fore.LIGHTBLACK_EX}Matching license file with database from Grayskull...")
     all_licenses = get_all_licenses()
     licenses_text = list(map(itemgetter(1), all_licenses))
     best_match = process.extractOne(
         license_content, licenses_text, scorer=token_sort_ratio
     )
+
     if default and best_match[1] < 76:
+        log.info(f"Match too low for recipe {best_match}, using the default {default}")
         return default
     index_license = licenses_text.index(best_match[0])
     return all_licenses[index_license][0]
