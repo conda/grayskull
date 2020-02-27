@@ -5,7 +5,7 @@ from colorama import Fore
 
 from grayskull.base.factory import GrayskullFactory
 
-colorama.init()
+colorama.init(autoreset=True)
 
 
 def main():
@@ -33,7 +33,7 @@ def main():
     args = parser.parse_args()
     print("\033[2J")
     if args.grayskull_power:
-        print(f"{Fore.BLUE}By the power of Grayskull...\nI have the power!{Fore.RESET}")
+        print(f"{Fore.BLUE}By the power of Grayskull...\nI have the power!")
 
     for pkg_name in args.packages:
         recipe = GrayskullFactory.create_recipe(

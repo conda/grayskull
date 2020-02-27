@@ -14,7 +14,7 @@ from tempfile import mkdtemp
 from typing import Dict, List, Optional, Tuple, Union
 
 import requests
-from colorama import Fore, Style
+from colorama import Fore
 from progressbar import ProgressBar
 from requests import HTTPError
 
@@ -46,8 +46,7 @@ class PyPi(AbstractRecipeModel):
     def _download_sdist_pkg(sdist_url: str, dest: str):
         name = sdist_url.split("/")[-1]
         print(
-            f"{Fore.GREEN}Starting the download of the sdist package {name}."
-            f"{Style.RESET_ALL}"
+            f"{Fore.GREEN}Starting the download of the sdist package {Fore.BLUE}{name}."
         )
 
         response = requests.get(sdist_url, allow_redirects=True, stream=True, timeout=5)
