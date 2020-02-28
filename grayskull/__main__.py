@@ -17,10 +17,17 @@ logging.basicConfig(format="%(levelname)s:%(message)s")
 
 def main():
     parser = argparse.ArgumentParser(description="Grayskull - Conda recipe generator")
-    sub_parser = parser.add_subparsers(help="Options to generate PyPI recipes")
-    pypi_cmds = sub_parser.add_parser("pypi", help="Generate recipes based on PyPI")
+    pypi_parser = parser.add_subparsers(help="Options to generate PyPI recipes")
+    pypi_cmds = pypi_parser.add_parser("pypi", help="Generate recipes based on PyPI")
     pypi_cmds.add_argument(
-        "pypi_packages", nargs="+", help="Specify the PyPI packages name.", default=""
+        "pypi_packages", nargs="+", help="Specify the PyPI packages name.", default=[]
+    )
+    pypi_cmds.add_argument(
+        "--maintainers",
+        "-m",
+        dest="maintainers",
+        nargs="+",
+        help="List of maintainers which will be added to the recipe.",
     )
     parser.add_argument(
         "--version",
@@ -28,18 +35,24 @@ def main():
         default=False,
         action="store_true",
         dest="version",
-        help="Grayskull version",
+        help="Print Grayskull version and exit",
     )
     parser.add_argument(
-        "--heman", "--shera", default=False, action="store_true", dest="grayskull_power"
+        "--heman",
+        "--shera",
+        default=False,
+        action="store_true",
+        dest="grayskull_power",
+        help=argparse.SUPPRESS,
     )
-    parser.add_argument(
+    pypi_cmds.add_argument(
         "--output",
         "-o",
         dest="output",
         default=".",
         help="Path to where the recipe will be created",
     )
+
     args = parser.parse_args()
 
     if args.version:
@@ -54,6 +67,7 @@ def main():
             f"{Fore.BLUE}By the power of Grayskull...\n"
             f"{Style.BRIGHT}I have the power!"
         )
+        sys.exit()
 
     for pkg_name in args.pypi_packages:
         logging.debug(f"Starting grayskull for pkg: {pkg_name}")
@@ -64,7 +78,7 @@ def main():
         )
         pkg_name, pkg_version = parse_pkg_name_version(pkg_name)
         recipe = GrayskullFactory.create_recipe("pypi", pkg_name, pkg_version)
-        recipe.generate_recipe(args.output)
+        recipe.generate_recipe(args.output, mantainers=args.maintainers)
         print(
             f"\n{Fore.GREEN}#### Recipe generated on "
             f"{os.path.realpath(args.output)} for {pkg_name} ####\n"
