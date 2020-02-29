@@ -16,6 +16,7 @@ def pypi_metadata():
         return json.load(f)
 
 
+@pytest.mark.forked
 def test_extract_pypi_requirements(pypi_metadata):
     recipe = PyPi(name="pytest", version="5.3.1")
     pypi_reqs = recipe._extract_requirements(pypi_metadata["info"])
@@ -69,6 +70,7 @@ def test_get_extra_from_requires_dist():
     ]
 
 
+@pytest.mark.forked
 def test_get_all_selectors_pypi():
     recipe = PyPi(name="pytest", version="5.3.1")
     assert recipe._get_all_selectors_pypi(
@@ -256,12 +258,14 @@ def test_get_entry_points_from_sdist():
     ) == sorted(["gui_scripts=entrypoints", "console_scripts=entrypoints"])
 
 
+@pytest.mark.forked
 def test_build_noarch_skip():
     recipe = PyPi(name="hypothesis", version="5.5.2")
     assert recipe["build"]["noarch"].values[0] == "python"
     assert not recipe["build"]["skip"].values
 
 
+@pytest.mark.forked
 def test_run_requirements_sdist():
     recipe = PyPi(name="botocore", version="1.14.17")
     assert sorted(recipe["requirements"]["run"]) == sorted(
@@ -305,6 +309,7 @@ def test_download_pkg_sdist(pkg_pytest):
     }
 
 
+@pytest.mark.forked
 def test_ciso_recipe():
     recipe = PyPi(name="ciso", version="0.1.0")
     assert sorted(recipe["requirements"]["host"]) == sorted(
@@ -318,6 +323,7 @@ def test_ciso_recipe():
     assert recipe["test"]["imports"] == "ciso"
 
 
+@pytest.mark.forked
 def test_pymc_recipe_fortran():
     recipe = PyPi(name="pymc", version="2.3.6")
     assert sorted(recipe["requirements"]["build"]) == sorted(
@@ -330,6 +336,7 @@ def test_pymc_recipe_fortran():
     assert not recipe["build"]["noarch"]
 
 
+@pytest.mark.forked
 def test_pytest_recipe_entry_points():
     recipe = PyPi(name="pytest", version="5.3.5")
     assert sorted(recipe["build"]["entry_points"]) == sorted(
@@ -342,6 +349,7 @@ def test_pytest_recipe_entry_points():
     assert not recipe["build"]["noarch"]
 
 
+@pytest.mark.forked
 def test_cythongsl_recipe_build():
     recipe = PyPi(name="cythongsl", version="0.2.2")
     assert recipe["requirements"]["build"] == "<{ compiler('c') }}"
@@ -349,6 +357,7 @@ def test_cythongsl_recipe_build():
     assert not recipe["build"]["noarch"]
 
 
+@pytest.mark.forked
 def test_requests_recipe_extra_deps():
     recipe = PyPi(name="requests", version="2.22.0")
     assert "win-inet-pton" not in recipe["requirements"]["run"]
@@ -356,6 +365,7 @@ def test_requests_recipe_extra_deps():
     assert not recipe["build"]["skip"]
 
 
+@pytest.mark.forked
 def test_zipp_recipe_tags_on_deps():
     recipe = PyPi(name="zipp", version="3.0.0")
     assert recipe["build"]["noarch"]
@@ -370,6 +380,7 @@ def test_generic_py_ver_to():
     assert PyPi._generic_py_ver_to({"requires_python": ">=3.5, <3.8"}) == ">=3.6,<3.8"
 
 
+@pytest.mark.forked
 def test_botocore_recipe_license_name():
     recipe = PyPi(name="botocore", version="1.15.8")
     assert recipe["about"]["license"] == "Apache-2.0"

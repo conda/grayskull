@@ -3,7 +3,7 @@ import os
 from setuptools import find_packages, setup
 
 if os.path.exists("README.md"):
-    with open("README.md", "r", "utf-8") as f:
+    with open("README.md", "r") as f:
         readme = f.read()
 else:
     readme = ""
@@ -37,10 +37,7 @@ setup(
     license="MIT",
     author="Marcelo Duarte Trevisani",
     author_email="marceloduartetrevisani@gmail.com",
-    description="Project to generate recipes for conda packages. "
-    "Skeletor's main goal is to conquer the mysterious fortress of"
-    " Castle Grayskull. If he succeeds, Skeletor would be able to conquer not"
-    " only Eternia, but the whole universe.",
+    description="Project to generate recipes for conda packages.",
     long_description_content_type="text/markdown",
     long_description=readme,
     project_urls={"Source": "https://github.com/marcelotrevisani/grayskull"},

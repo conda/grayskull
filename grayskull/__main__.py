@@ -15,7 +15,10 @@ colorama.init(autoreset=True)
 logging.basicConfig(format="%(levelname)s:%(message)s")
 
 
-def main():
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+
     parser = argparse.ArgumentParser(description="Grayskull - Conda recipe generator")
     pypi_parser = parser.add_subparsers(help="Options to generate PyPI recipes")
     pypi_cmds = pypi_parser.add_parser("pypi", help="Generate recipes based on PyPI")
@@ -53,11 +56,11 @@ def main():
         help="Path to where the recipe will be created",
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     if args.version:
         print(grayskull.__version__)
-        sys.exit()
+        return
 
     logging.debug(f"All arguments received: args: {args}")
     print(Style.RESET_ALL)
@@ -67,7 +70,7 @@ def main():
             f"{Fore.BLUE}By the power of Grayskull...\n"
             f"{Style.BRIGHT}I have the power!"
         )
-        sys.exit()
+        return
 
     for pkg_name in args.pypi_packages:
         logging.debug(f"Starting grayskull for pkg: {pkg_name}")
