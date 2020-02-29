@@ -7,6 +7,7 @@ from pathlib import Path
 from shutil import copyfile
 from typing import Any, List, Optional, Union
 
+from colorama import Fore
 from ruamel.yaml import YAML, CommentToken
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.error import CommentMark
@@ -197,6 +198,8 @@ class AbstractRecipeModel(ABC):
         if not self["extra"]:
             maintainers = maintainers if maintainers else [get_git_current_user()]
             self["extra"]["recipe-maintainers"].add_items(maintainers)
+        prefix = f"{Fore.LIGHTBLACK_EX}\n   - {Fore.LIGHTMAGENTA_EX}"
+        print(f"{Fore.LIGHTBLACK_EX}Maintainers:{prefix}{prefix.join(maintainers)}")
 
     def get_clean_yaml(self, recipe_yaml: CommentedMap) -> CommentedMap:
         result = self._clean_yaml(recipe_yaml)

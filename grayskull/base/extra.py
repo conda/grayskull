@@ -21,10 +21,6 @@ def get_git_current_user() -> str:
         github_search = get_git_current_user_metadata()
         if github_search["total_count"] == 1:
             login_github = github_search["items"][0]["login"]
-            print(
-                f"{Fore.LIGHTBLACK_EX}Using default recipe maintainer:"
-                f" {Fore.LIGHTMAGENTA_EX}{login_github}"
-            )
             return login_github
     except Exception as err:
         log.debug(
