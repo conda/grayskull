@@ -1,4 +1,4 @@
-name: Upload Python Package
+name: Upload Package to PyPI
 
 on:
   release:
@@ -19,7 +19,6 @@ jobs:
         pip install setuptools wheel twine
     - name: Build and publish on PyPI
       uses: pypa/gh-action-pypi-publish@master
-      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
       with:
         user: ${{ secrets.PYPI_USERNAME }}
         password: ${{ secrets.PYPI_PASSWORD }}
