@@ -10,7 +10,6 @@ def test_version(capsys):
     assert captured.out.strip() == grayskull.__version__
 
 
-@pytest.mark.forked
 def test_pypi_cmd(tmpdir):
     out_folder = tmpdir.mkdir("out")
     main(["pypi", "pytest=5.3.2", "-o", str(out_folder), "-m", "m1", "m2"])
