@@ -44,7 +44,7 @@ class AbstractRecipeModel(ABC):
                 self._yaml = yaml.load(yaml_file)
         else:
             self._yaml = yaml.load(
-                f'{{% set name = "{name}" %}}\n\n\n'
+                f'{{% set name = "{name}" %}}\n'
                 "package:\n    name: {{ name|lower }}\n"
             )
             for section in self.ALL_SECTIONS[1:]:
@@ -98,13 +98,13 @@ class AbstractRecipeModel(ABC):
         else:
             self._yaml.ca.comment = [None, []]
 
-        self._yaml.ca.comment[1] += [
+        self._yaml.ca.comment[1].append(
             CommentToken(
-                f'#% set {name} = "{value}" %}}\n\n\n',
+                f'#% set {name} = "{value}" %}}',
                 start_mark=CommentMark(0),
                 end_mark=CommentMark(0),
             )
-        ]
+        )
 
     def update_all_recipe(self):
         for section in self.ALL_SECTIONS:
@@ -208,8 +208,9 @@ class AbstractRecipeModel(ABC):
     def _add_new_lines_after_section(self, recipe_yaml: CommentedMap) -> CommentedMap:
         for section in recipe_yaml.keys():
             if section == "package":
-                continue
-            recipe_yaml.yaml_set_comment_before_after_key(section, "\n")
+                recipe_yaml.yaml_set_comment_before_after_key(section, "\n\n\n")
+            else:
+                recipe_yaml.yaml_set_comment_before_after_key(section, "\n")
         return recipe_yaml
 
     def _clean_yaml(self, recipe_yaml: CommentedMap):

@@ -340,6 +340,9 @@ def test_pytest_recipe_entry_points():
     assert recipe["build"]["skip"].values[0].value
     assert recipe["build"]["skip"].values[0].selector == "py2k"
     assert not recipe["build"]["noarch"]
+    assert sorted(recipe["test"]["commands"].values) == sorted(
+        ["py.test --help", "pytest --help", "pip check"]
+    )
 
 
 def test_cythongsl_recipe_build():
@@ -373,3 +376,12 @@ def test_generic_py_ver_to():
 def test_botocore_recipe_license_name():
     recipe = PyPi(name="botocore", version="1.15.8")
     assert recipe["about"]["license"] == "Apache-2.0"
+
+
+def test_get_test_entry_points():
+    assert PyPi._get_test_entry_points("grayskull = grayskull.__main__:main") == [
+        "grayskull --help"
+    ]
+    assert PyPi._get_test_entry_points(
+        ["pytest = py.test:main", "py.test = py.test:main"]
+    ) == ["pytest --help", "py.test --help"]
