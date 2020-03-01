@@ -59,7 +59,9 @@ class PyPi(AbstractRecipeModel):
         total_size = int(response.headers["Content-length"])
 
         with ProgressBar(
-            widgets=WIDGET_BAR_DOWNLOAD, max_value=total_size, prefix=f"{name} "
+            widgets=deepcopy(WIDGET_BAR_DOWNLOAD),
+            max_value=total_size,
+            prefix=f"{name} ",
         ) as bar, open(dest, "wb") as pkg_file:
             progress_val = 0
             chunk_size = 512
