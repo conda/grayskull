@@ -462,13 +462,15 @@ class PyPi(AbstractRecipeModel):
         print_req("Host", all_requirements["host"])
         print_req("run", all_requirements["run"])
 
+        test_entry_points = PyPi._get_test_entry_points(metadata.get("entry_points"))
+
         return {
             "package": {"name": name, "version": metadata["version"]},
             "build": {"entry_points": metadata.get("entry_points")},
             "requirements": all_requirements,
             "test": {
                 "imports": pypi_metadata["name"].replace("-", "_"),
-                "commands": "pip check",
+                "commands": ["pip check"] + test_entry_points,
                 "requires": "pip",
             },
             "about": {
@@ -481,6 +483,16 @@ class PyPi(AbstractRecipeModel):
             },
             "source": metadata.get("source", {}),
         }
+
+    @staticmethod
+    def _get_test_entry_points(entry_points: Union[List, str]) -> List:
+        if entry_points:
+            if isinstance(entry_points, str):
+                entry_points = [entry_points]
+        test_entry_points = [
+            f"{ep.split('=')[0].strip()} --help" for ep in entry_points
+        ]
+        return test_entry_points
 
     @staticmethod
     def _discover_license(metadata: dict) -> Optional[ShortLicense]:
