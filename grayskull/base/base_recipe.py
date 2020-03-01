@@ -100,7 +100,7 @@ class AbstractRecipeModel(ABC):
 
         self._yaml.ca.comment[1].append(
             CommentToken(
-                f'#% set {name} = "{value}" %}}\n',
+                f'#% set {name} = "{value}" %}}',
                 start_mark=CommentMark(0),
                 end_mark=CommentMark(0),
             )
