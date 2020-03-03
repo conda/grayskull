@@ -1,4 +1,3 @@
-import hashlib
 import json
 import os
 
@@ -288,21 +287,6 @@ def test_format_host_requirements():
     assert sorted(
         PyPi._format_dependencies(["setuptools_scm [toml] >=3.4.1"], "pkg")
     ) == sorted(["setuptools_scm >=3.4.1"])
-
-
-def test_download_pkg_sdist(pkg_pytest):
-    with open(pkg_pytest, "rb") as pkg_file:
-        content = pkg_file.read()
-        pkg_sha256 = hashlib.sha256(content).hexdigest()
-    assert (
-        pkg_sha256 == "0d5fe9189a148acc3c3eb2ac8e1ac0742cb7618c084f3d228baaec0c254b318d"
-    )
-    setup_cfg = PyPi._get_setup_cfg(os.path.dirname(pkg_pytest))
-    assert setup_cfg["name"] == "pytest"
-    assert setup_cfg["python_requires"] == ">=3.5"
-    assert setup_cfg["entry_points"] == {
-        "console_scripts": ["pytest=pytest:main", "py.test=pytest:main"]
-    }
 
 
 def test_ciso_recipe():

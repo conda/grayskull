@@ -14,14 +14,12 @@ from tempfile import mkdtemp
 from typing import Dict, List, Optional, Tuple, Union
 
 import requests
-from colorama import Fore, Style
-from progressbar import ProgressBar
+from colorama import Fore
 from requests import HTTPError
 
 from grayskull.base.base_recipe import AbstractRecipeModel
-from grayskull.cli import WIDGET_BAR_DOWNLOAD
+from grayskull.base.utils import download_pkg, get_vendored_dependencies
 from grayskull.license.discovery import ShortLicense, search_license_file
-from grayskull.utils import get_vendored_dependencies
 
 log = logging.getLogger(__name__)
 PyVer = namedtuple("PyVer", ["major", "minor"])
@@ -43,35 +41,6 @@ class PyPi(AbstractRecipeModel):
         self["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
 
     @staticmethod
-    def _download_sdist_pkg(sdist_url: str, dest: str):
-        """Download the sdist package
-
-        :param sdist_url: sdist url
-        :param dest: Folder were the method will download the sdist
-        """
-        name = sdist_url.split("/")[-1]
-        print(
-            f"{Fore.GREEN}Starting the download of the sdist package"
-            f" {Fore.BLUE}{Style.BRIGHT}{name}"
-        )
-        log.debug(f"Downloading {name} sdist - {sdist_url}")
-        response = requests.get(sdist_url, allow_redirects=True, stream=True, timeout=5)
-        total_size = int(response.headers["Content-length"])
-
-        with ProgressBar(
-            widgets=deepcopy(WIDGET_BAR_DOWNLOAD),
-            max_value=total_size,
-            prefix=f"{name} ",
-        ) as bar, open(dest, "wb") as pkg_file:
-            progress_val = 0
-            chunk_size = 512
-            for chunk_data in response.iter_content(chunk_size=chunk_size):
-                if chunk_data:
-                    pkg_file.write(chunk_data)
-                    progress_val += chunk_size
-                    bar.update(min(progress_val, total_size))
-
-    @staticmethod
     @lru_cache(maxsize=10)
     def _get_sdist_metadata(sdist_url: str, name: str) -> dict:
         """Method responsible to return the sdist metadata which is basically
@@ -85,7 +54,7 @@ class PyPi(AbstractRecipeModel):
         pkg_name = sdist_url.split("/")[-1]
         path_pkg = os.path.join(temp_folder, pkg_name)
 
-        PyPi._download_sdist_pkg(sdist_url=sdist_url, dest=path_pkg)
+        download_pkg(pkg_url=sdist_url, dest=path_pkg)
         log.debug(f"Unpacking {path_pkg} to {temp_folder}")
         shutil.unpack_archive(path_pkg, temp_folder)
         print(f"{Fore.LIGHTBLACK_EX}Recovering information from setup.py")
