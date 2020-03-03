@@ -1,4 +1,3 @@
-import hashlib
 import json
 import os
 
@@ -8,10 +7,8 @@ from grayskull.pypi import PyPi
 
 
 @pytest.fixture
-def pypi_metadata():
-    path_metadata = os.path.join(
-        os.path.dirname(__file__), "data", "pypi_pytest_metadata.json"
-    )
+def pypi_metadata(data_dir):
+    path_metadata = os.path.join(data_dir, "pypi_pytest_metadata.json")
     with open(path_metadata) as f:
         return json.load(f)
 
@@ -290,21 +287,6 @@ def test_format_host_requirements():
     ) == sorted(["setuptools_scm >=3.4.1"])
 
 
-def test_download_pkg_sdist(pkg_pytest):
-    with open(pkg_pytest, "rb") as pkg_file:
-        content = pkg_file.read()
-        pkg_sha256 = hashlib.sha256(content).hexdigest()
-    assert (
-        pkg_sha256 == "0d5fe9189a148acc3c3eb2ac8e1ac0742cb7618c084f3d228baaec0c254b318d"
-    )
-    setup_cfg = PyPi._get_setup_cfg(os.path.dirname(pkg_pytest))
-    assert setup_cfg["name"] == "pytest"
-    assert setup_cfg["python_requires"] == ">=3.5"
-    assert setup_cfg["entry_points"] == {
-        "console_scripts": ["pytest=pytest:main", "py.test=pytest:main"]
-    }
-
-
 def test_ciso_recipe():
     recipe = PyPi(name="ciso", version="0.1.0")
     assert sorted(recipe["requirements"]["host"]) == sorted(
@@ -385,3 +367,21 @@ def test_get_test_entry_points():
     assert PyPi._get_test_entry_points(
         ["pytest = py.test:main", "py.test = py.test:main"]
     ) == ["pytest --help", "py.test --help"]
+
+
+def test_load_recipe(data_dir):
+    recipe = PyPi(load_recipe=os.path.join(data_dir, "recipes", "empty_gray.yaml"))
+    assert recipe["build"]["number"].values[0].value == 1
+    assert recipe.recipe.get_var_content(recipe["package"]["name"].values[0]) == "pkg1"
+    assert (
+        recipe.recipe.get_var_content(recipe["package"]["version"].values[0]) == "1.0.0"
+    )
+    assert recipe["source"]["sha256"].values[0] == "sha256_foo"
+    assert recipe["source"]["url"].values[0] == "URL"
+    assert recipe["extra"]["recipe-maintainers"].values == ["marcelotrevisani"]
+
+
+def test_exception_init():
+    with pytest.raises(ValueError) as err:
+        PyPi()
+    err.match("Please specify the package name or the recipe to be loaded.")

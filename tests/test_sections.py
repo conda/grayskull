@@ -18,12 +18,17 @@ def test_add_subsection():
 
 def test_add_item():
     sec = Section("MAIN_SEC")
+    assert sec == Section("MAIN_SEC")
     sec.add_item("pkg1")
     sec.add_item("pkg2  # [win]")
     sec.add_item("pkg3")
+    assert "MAIN_SEC" == sec
     assert "pkg1" in sec
     assert "pkg2" in sec
+    assert "pkg2  # [win]" in sec
     assert "pkg3" in sec
+    assert "pkg4" not in sec
+    assert sec == sec
 
 
 def test_section_children():
@@ -37,6 +42,7 @@ def test_section_children():
     sec = Section("section1", parent_yaml=commented_map)
     assert sec.section_name == "section1"
     assert sec.values[0].section_name == "subsection1"
+    assert repr(sec) == "Section(section_name=section1, subsection=['subsection1'])"
 
 
 def test_section_load():
@@ -46,6 +52,9 @@ def test_section_load():
     assert sec["subsection1"].section_name == "subsection1"
     assert sec["subsection1"]["subsection2"].section_name == "subsection2"
     assert sec["subsection1"]["subsection2"][0].value == "item"
+    sec["subsection1"] = {"section3": "new_item"}
+    assert sec["subsection1"]["section3"].section_name == "section3"
+    assert sec["subsection1"]["section3"].values[0].value == "new_item"
 
 
 def test_repr():

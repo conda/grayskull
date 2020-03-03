@@ -1,6 +1,16 @@
 import ast
+import logging
+from copy import deepcopy
 from functools import lru_cache
 from typing import List
+
+import requests
+from colorama import Fore, Style
+from progressbar import ProgressBar
+
+from grayskull.cli import WIDGET_BAR_DOWNLOAD
+
+log = logging.getLogger(__name__)
 
 
 @lru_cache(maxsize=10)
@@ -50,3 +60,30 @@ def get_vendored_dependencies(script_file: str) -> List:
             continue
         vendored_modules.append(dep.lower())
     return vendored_modules
+
+
+def download_pkg(pkg_url: str, dest: str):
+    """Download the given url and add a progressbar for it.
+
+    :param pkg_url: package url
+    :param dest: Folder were the function will download the package
+    """
+    name = pkg_url.split("/")[-1]
+    print(
+        f"{Fore.GREEN}Starting the download of the sdist package"
+        f" {Fore.BLUE}{Style.BRIGHT}{name}"
+    )
+    log.debug(f"Downloading {name} sdist - {pkg_url}")
+    response = requests.get(pkg_url, allow_redirects=True, stream=True, timeout=5)
+    total_size = int(response.headers["Content-length"])
+
+    with ProgressBar(
+        widgets=deepcopy(WIDGET_BAR_DOWNLOAD), max_value=total_size, prefix=f"{name} ",
+    ) as bar, open(dest, "wb") as pkg_file:
+        progress_val = 0
+        chunk_size = 512
+        for chunk_data in response.iter_content(chunk_size=chunk_size):
+            if chunk_data:
+                pkg_file.write(chunk_data)
+                progress_val += chunk_size
+                bar.update(min(progress_val, total_size))

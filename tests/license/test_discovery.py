@@ -1,19 +1,22 @@
 import os
 from typing import List
+from unittest.mock import patch
 
 import pytest
 from pytest import fixture
 
 from grayskull.license.discovery import (
+    ShortLicense,
     _get_all_license_choice,
     _get_all_names_from_api,
     _get_api_github_url,
+    _get_git_cmd,
     _get_license,
     get_all_licenses_from_opensource,
     get_license_type,
     get_short_license_id,
     match_license,
-    search_license_api_github,
+    search_license_file,
     search_license_folder,
     search_license_repo,
 )
@@ -79,6 +82,13 @@ def opensource_license_mit() -> List:
     ]
 
 
+def test_short_license():
+    short_license = ShortLicense(name="name", path="path", is_packaged=True)
+    assert short_license.is_packaged
+    assert short_license.name == "name"
+    assert short_license.path == "path"
+
+
 def test_match_license():
     assert match_license("MIT License")["id"] == "MIT"
     assert match_license("Expat")["id"] == "MIT"
@@ -95,6 +105,56 @@ def test_short_license_id():
     assert get_short_license_id("GPL 2.0") == "GPL-2.0"
     assert get_short_license_id("2-Clause BSD License") == "BSD-2-Clause"
     assert get_short_license_id("3-Clause BSD License") == "BSD-3-Clause"
+
+
+def test_search_license_file(data_dir, tmpdir, monkeypatch):
+    li_folder = os.path.join(data_dir, "licenses")
+    short_license = search_license_file(
+        folder_path=li_folder, license_name_metadata="GPL 2.0"
+    )
+    assert short_license == ShortLicense("GPL-2.0", "LICENSE", True)
+
+    short_license = search_license_file(
+        folder_path=str(tmpdir.mkdir("foo")), license_name_metadata="GPL 2.0"
+    )
+    assert short_license == ShortLicense("GPL-2.0", None, False)
+
+    li_folder = tmpdir.mkdir("foobar")
+    short_license = search_license_file(
+        folder_path=str(li_folder),
+        git_url="https://github.com/marcelotrevisani/grayskull",
+    )
+    assert short_license.name == "MIT"
+    assert not short_license.is_packaged
+    assert short_license.path.endswith("LICENSE")
+
+
+@patch("grayskull.license.discovery.search_license_api_github")
+def test_search_license_file_repo(mock_api, tmpdir):
+    mock_api.return_value = None
+    li_folder = tmpdir.mkdir("foobar")
+    short_license = search_license_file(
+        folder_path=str(li_folder),
+        git_url="https://github.com/marcelotrevisani/grayskull",
+    )
+    assert short_license.name == "MIT"
+    assert not short_license.is_packaged
+    assert short_license.path.endswith("LICENSE")
+
+
+@patch("grayskull.license.discovery.search_license_api_github")
+@patch("grayskull.license.discovery.search_license_repo")
+def test_search_license_file_default(mock_api, mock_repo, tmpdir):
+    mock_api.return_value = None
+    mock_repo.return_value = None
+    li_folder = tmpdir.mkdir("foobar")
+    short_license = search_license_file(
+        folder_path=str(li_folder),
+        git_url="https://github.com/marcelotrevisani/grayskull",
+    )
+    assert short_license.name is None
+    assert not short_license.is_packaged
+    assert short_license.path is None
 
 
 def test_get_license(opensource_license_mit):
@@ -124,6 +184,8 @@ def license_pytest_5_3_1(license_pytest_path) -> str:
     " number of requisitions we can do to their api."
 )
 def test_search_license_api_github(license_pytest_5_3_1: str):
+    from grayskull.license.discovery import search_license_api_github
+
     license_api = search_license_api_github(
         "https://github.com/pytest-dev/pytest", "5.3.1"
     )
@@ -161,3 +223,14 @@ def test_search_license_repository(pkg_pytest):
 
 def test_predict_license_type(license_pytest_path):
     assert get_license_type(license_pytest_path) == "MIT"
+
+
+def test_get_git_cmd():
+    assert _get_git_cmd("GIT_URL", "version", "DEST") == [
+        "git",
+        "clone",
+        "-b",
+        "version",
+        "GIT_URL",
+        "DEST",
+    ]

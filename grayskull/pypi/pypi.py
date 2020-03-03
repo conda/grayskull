@@ -11,65 +11,56 @@ from functools import lru_cache
 from pathlib import Path
 from subprocess import check_output
 from tempfile import mkdtemp
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import requests
-from colorama import Fore, Style
-from progressbar import ProgressBar
+from colorama import Fore
 from requests import HTTPError
 
-from grayskull.base.base_recipe import AbstractRecipeModel
-from grayskull.cli import WIDGET_BAR_DOWNLOAD
+from grayskull.base.base_recipe import MetaRecipeModel, Recipe, update
+from grayskull.base.utils import download_pkg, get_vendored_dependencies
 from grayskull.license.discovery import ShortLicense, search_license_file
-from grayskull.utils import get_vendored_dependencies
 
 log = logging.getLogger(__name__)
 PyVer = namedtuple("PyVer", ["major", "minor"])
 SUPPORTED_PY = sorted([PyVer(2, 7), PyVer(3, 6), PyVer(3, 7), PyVer(3, 8)])
 
 
-class PyPi(AbstractRecipeModel):
+class PyPi(metaclass=MetaRecipeModel):
     URL_PYPI_METADATA = "https://pypi.org/pypi/{pkg_name}/json"
     PKG_NEEDS_C_COMPILER = ("cython",)
     PKG_NEEDS_CXX_COMPILER = ("pybind11",)
     RE_DEPS_NAME = re.compile(r"^\s*([\.a-zA-Z0-9_-]+)", re.MULTILINE)
     PIN_PKG_COMPILER = {"numpy": "<{ pin_compatible('numpy') }}"}
 
-    def __init__(self, name=None, version=None, force_setup=False):
-        self._force_setup = force_setup
-        self._setup_metadata = None
-        self._is_arch = False
-        super(PyPi, self).__init__(name=name, version=version)
-        self["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        version: Optional[str] = None,
+        load_recipe: Optional[str] = None,
+    ):
+        if name:
+            self._is_arch = False
+            self._recipe = Recipe(name=name, version=version)
+            self.update_all()
+            self._recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
+        elif load_recipe:
+            self._recipe = Recipe(load_recipe=load_recipe)
+            self._is_arch = "noarch" not in self._recipe["build"]
+        else:
+            raise ValueError(
+                f"Please specify the package name or the recipe to be loaded."
+            )
 
-    @staticmethod
-    def _download_sdist_pkg(sdist_url: str, dest: str):
-        """Download the sdist package
+    @property
+    def recipe(self) -> Recipe:
+        return self._recipe
 
-        :param sdist_url: sdist url
-        :param dest: Folder were the method will download the sdist
-        """
-        name = sdist_url.split("/")[-1]
-        print(
-            f"{Fore.GREEN}Starting the download of the sdist package"
-            f" {Fore.BLUE}{Style.BRIGHT}{name}"
-        )
-        log.debug(f"Downloading {name} sdist - {sdist_url}")
-        response = requests.get(sdist_url, allow_redirects=True, stream=True, timeout=5)
-        total_size = int(response.headers["Content-length"])
+    def __getattr__(self, item: str) -> Any:
+        return getattr(self.recipe, item, None)
 
-        with ProgressBar(
-            widgets=deepcopy(WIDGET_BAR_DOWNLOAD),
-            max_value=total_size,
-            prefix=f"{name} ",
-        ) as bar, open(dest, "wb") as pkg_file:
-            progress_val = 0
-            chunk_size = 512
-            for chunk_data in response.iter_content(chunk_size=chunk_size):
-                if chunk_data:
-                    pkg_file.write(chunk_data)
-                    progress_val += chunk_size
-                    bar.update(min(progress_val, total_size))
+    def __getitem__(self, item: str) -> Any:
+        return self.recipe[item]
 
     @staticmethod
     @lru_cache(maxsize=10)
@@ -85,7 +76,7 @@ class PyPi(AbstractRecipeModel):
         pkg_name = sdist_url.split("/")[-1]
         path_pkg = os.path.join(temp_folder, pkg_name)
 
-        PyPi._download_sdist_pkg(sdist_url=sdist_url, dest=path_pkg)
+        download_pkg(pkg_url=sdist_url, dest=path_pkg)
         log.debug(f"Unpacking {path_pkg} to {temp_folder}")
         shutil.unpack_archive(path_pkg, temp_folder)
         print(f"{Fore.LIGHTBLACK_EX}Recovering information from setup.py")
@@ -223,7 +214,7 @@ class PyPi(AbstractRecipeModel):
                 )
                 PyPi.__run_setup_py(path_setup, data_dist, run_py=True)
             yield data_dist
-        except Exception as err:  # noqa
+        except Exception as err:
             log.debug(f"Exception occurred when executing sdist injection: err {err}")
             yield data_dist
         core.setup = setup_core_original
@@ -263,9 +254,8 @@ class PyPi(AbstractRecipeModel):
             )
             PyPi._pip_install_dep(data_dist, err.name, pip_dir)
             PyPi.__run_setup_py(path_setup, data_dist, run_py)
-        except Exception as err:  # noqa
+        except Exception as err:
             log.debug(f"Exception when executing setup.py as script: {err}")
-            pass
         data_dist.update(
             PyPi._merge_sdist_metadata(
                 data_dist, PyPi._get_setup_cfg(os.path.dirname(str(path_setup)))
@@ -404,30 +394,38 @@ class PyPi(AbstractRecipeModel):
                     requires_dist.append(sdist_pkg)
         return requires_dist
 
-    def refresh_section(self, section: str = ""):
+    @update("package")
+    def _update_package(self):
+        metadata = self._get_metadata()
+        self._recipe.set_jinja_var("version", metadata["package"]["version"])
+        self._recipe["package"]["version"] = "<{ version }}"
+
+    @update(
+        "source", "build", "outputs", "requirements", "app", "test", "about", "extra"
+    )
+    def _update_sections(self, section: str):
         """Update one specific section.
 
         :param section: Section name
         """
         metadata = self._get_metadata()
-        if metadata.get(section):
-            if section == "package":
-                self.set_jinja_var("version", metadata["package"]["version"])
-                self["package"]["version"] = "<{ version }}"
-            else:
-                self.populate_metadata_from_dict(metadata.get(section), self[section])
+        self._recipe.populate_metadata_from_dict(
+            metadata.get(section), self._recipe[section]
+        )
         if not self._is_arch:
-            self["build"]["noarch"] = "python"
+            self._recipe["build"]["noarch"] = "python"
 
     @lru_cache(maxsize=10)
     def _get_metadata(self) -> dict:
         """Method responsible to get the whole metadata available. It will
         merge metadata from multiple sources (pypi, setup.py, setup.cfg)
         """
-        name = self.get_var_content(self["package"]["name"].values[0])
+        name = self._recipe.get_var_content(self["package"]["name"].values[0])
         version = ""
-        if self["package"]["version"].values:
-            version = self.get_var_content(self["package"]["version"].values[0])
+        if self._recipe["package"]["version"].values:
+            version = self._recipe.get_var_content(
+                self._recipe["package"]["version"].values[0]
+            )
         pypi_metadata = self._get_pypi_metadata(name, version)
         sdist_metadata = self._get_sdist_metadata(
             sdist_url=pypi_metadata["sdist_url"], name=name
@@ -445,7 +443,7 @@ class PyPi(AbstractRecipeModel):
                 if license_metadata.is_packaged:
                     license_file = license_metadata.path
                 else:
-                    self.files_to_copy.append(license_metadata.path)
+                    self._recipe.files_to_copy.append(license_metadata.path)
 
         print(f"{Fore.LIGHTBLACK_EX}License type: {Fore.LIGHTMAGENTA_EX}{license_name}")
         print(f"{Fore.LIGHTBLACK_EX}License file: {Fore.LIGHTMAGENTA_EX}{license_file}")
@@ -627,8 +625,8 @@ class PyPi(AbstractRecipeModel):
         if self._is_arch:
             version_to_selector = PyPi.py_version_to_selector(metadata)
             if version_to_selector:
-                self["build"]["skip"] = True
-                self["build"]["skip"].values[0].selector = version_to_selector
+                self._recipe["build"]["skip"] = True
+                self._recipe["build"]["skip"].values[0].selector = version_to_selector
             limit_python = ""
         else:
             limit_python = PyPi.py_version_to_limit_python(metadata)

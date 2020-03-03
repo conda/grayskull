@@ -1,11 +1,11 @@
+import inspect
 import logging
 import os
 import re
-from abc import ABC, abstractmethod
 from copy import deepcopy
 from pathlib import Path
 from shutil import copyfile
-from typing import Any, List, Optional, Union
+from typing import Any, Callable, List, Optional, Union
 
 from colorama import Fore
 from ruamel.yaml import YAML, CommentToken
@@ -19,9 +19,10 @@ from grayskull.base.section import Section
 yaml = YAML(typ="jinja2")
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.width = 600
+log = logging.getLogger(__name__)
 
 
-class AbstractRecipeModel(ABC):
+class Recipe:
     ALL_SECTIONS = (
         "package",
         "source",
@@ -38,7 +39,12 @@ class AbstractRecipeModel(ABC):
         re.IGNORECASE | re.MULTILINE,
     )
 
-    def __init__(self, name=None, version=None, load_recipe: str = ""):
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        version: Optional[str] = None,
+        load_recipe: Optional[str] = None,
+    ):
         if load_recipe:
             with open(load_recipe, "r") as yaml_file:
                 self._yaml = yaml.load(yaml_file)
@@ -54,8 +60,7 @@ class AbstractRecipeModel(ABC):
                 self["package"]["version"] = "<{ version }}"
             self["build"]["number"] = 0
             self.__files_copy: List = []
-            self.update_all_recipe()
-        super(AbstractRecipeModel, self).__init__()
+        super(Recipe, self).__init__()
 
     def __repr__(self) -> str:
         name = self.get_var_content(self["package"]["name"].values[0])
@@ -106,10 +111,6 @@ class AbstractRecipeModel(ABC):
             )
         )
 
-    def update_all_recipe(self):
-        for section in self.ALL_SECTIONS:
-            self.refresh_section(section)
-
     def get_jinja_var(self, key: str) -> str:
         if not self._yaml.ca.comment and not self._yaml.ca.comment[1]:
             raise ValueError(f"Key {key} does not exist")
@@ -123,7 +124,7 @@ class AbstractRecipeModel(ABC):
 
     def __find_commented_token_jinja_var(self, key: str) -> Optional[CommentToken]:
         for comment in self._yaml.ca.comment[1]:
-            match_jinja = AbstractRecipeModel.re_jinja_var.match(comment.value)
+            match_jinja = Recipe.re_jinja_var.match(comment.value)
             if match_jinja and match_jinja.groups()[0] == key:
                 return comment
         return None
@@ -137,10 +138,6 @@ class AbstractRecipeModel(ABC):
             comment.value = f"#% set {key} = {value} %}}"
         else:
             self.add_jinja_var(key, value)
-
-    @abstractmethod
-    def refresh_section(self, section: str = "", **kwargs):
-        pass
 
     @property
     def yaml_obj(self) -> CommentedMap:
@@ -244,3 +241,43 @@ class AbstractRecipeModel(ABC):
         else:
             section.add_item(metadata)
         return section
+
+
+def update(*args: List) -> Callable:
+    def decorator_func(method: Callable) -> Callable:
+        method.__gs_registry = args
+        return method
+
+    return decorator_func
+
+
+class MetaRecipeModel(type):
+    def __new__(cls, name, bases, dct):
+        recipe = super().__new__(cls, name, bases, dct)
+        recipe.update = MetaRecipeModel.update
+        recipe.update_all = MetaRecipeModel.update_all
+
+        registry = {}
+        attrs = dict(recipe.__dict__)
+        for key, val in attrs.items():
+            section_update = getattr(val, "__gs_registry", [])
+            if section_update:
+                for section in section_update:
+                    registry[section] = getattr(recipe, key)
+        recipe._registry_update = registry
+        return recipe
+
+    def update(cls, *args):
+        for section in args:
+            func_reg = cls._registry_update[section]
+            if "section" in inspect.signature(func_reg).parameters:
+                cls._registry_update[section](cls, section=section)
+            else:
+                cls._registry_update[section](cls)
+
+    def update_all(cls):
+        for section, func_reg in cls._registry_update.items():
+            if "section" in inspect.signature(func_reg).parameters:
+                func_reg(cls, section=section)
+            else:
+                func_reg(cls)

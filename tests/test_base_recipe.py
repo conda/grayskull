@@ -1,17 +1,28 @@
 import os
+from typing import Optional
 
 from pytest import fixture
 
-from grayskull.base.base_recipe import AbstractRecipeModel
+from grayskull.base.base_recipe import MetaRecipeModel, Recipe, update
 
 
-class EmptyGray(AbstractRecipeModel):
-    def refresh_section(self, section="", **kwargs):
-        if section == "source":
-            self["source"]["sha256"] = "sha256_foo"
-            self["source"]["url"] = "URL"
-        elif section == "build":
-            self["build"]["number"] = 1
+class EmptyGray(metaclass=MetaRecipeModel):
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        version: Optional[str] = None,
+        load_recipe: Optional[str] = None,
+    ):
+        self.recipe = Recipe(name=name, version=version, load_recipe=load_recipe)
+
+    @update("source")
+    def update_source(self):
+        self.recipe["source"]["sha256"] = "sha256_foo"
+        self.recipe["source"]["url"] = "URL"
+
+    @update("build")
+    def update_build(self):
+        self.recipe["build"]["number"] = 1
 
 
 @fixture
@@ -21,31 +32,31 @@ def data_recipes(data_dir: str) -> str:
 
 def test_update_all_recipe(data_recipes):
     recipe = EmptyGray(load_recipe=os.path.join(data_recipes, "simple_jinja_var.yaml"))
-    recipe.update_all_recipe()
-    assert recipe["build"]["number"] == 1
-    assert recipe["source"]["sha256"] == "sha256_foo"
-    assert recipe["source"]["url"] == "URL"
+    recipe.update_all()
+    assert recipe.recipe["build"]["number"] == 1
+    assert recipe.recipe["source"]["sha256"] == "sha256_foo"
+    assert recipe.recipe["source"]["url"] == "URL"
 
 
 def test_refresh_section(data_recipes):
     recipe = EmptyGray(load_recipe=os.path.join(data_recipes, "simple_jinja_var.yaml"))
-    assert "number" not in recipe["source"]
+    assert "number" not in recipe.recipe["source"]
 
-    recipe.refresh_section("build")
-    assert recipe["build"]["number"].values[0] == 1
-    assert "sha256" not in recipe["source"]
-    assert "url" not in recipe["source"]
+    recipe.update("build")
+    assert recipe.recipe["build"]["number"].values[0] == 1
+    assert "sha256" not in recipe.recipe["source"]
+    assert "url" not in recipe.recipe["source"]
 
-    recipe.refresh_section("source")
-    assert recipe["build"]["number"] == 1
-    assert recipe["source"]["sha256"] == "sha256_foo"
-    assert recipe["source"]["url"] == "URL"
+    recipe.update("source")
+    assert recipe.recipe["build"]["number"] == 1
+    assert recipe.recipe["source"]["sha256"] == "sha256_foo"
+    assert recipe.recipe["source"]["url"] == "URL"
 
 
 def test_generate_recipe(tmpdir, data_recipes):
     recipe = EmptyGray(name="pkg1", version="1.0.0")
-    recipe.update_all_recipe()
-    recipe.generate_recipe(tmpdir, mantainers=["marcelotrevisani"])
+    recipe.update_all()
+    recipe.recipe.generate_recipe(tmpdir, mantainers=["marcelotrevisani"])
 
     with open(tmpdir / "pkg1" / "meta.yaml") as recipe_file:
         generated_recipe = recipe_file.read()
@@ -56,42 +67,84 @@ def test_generate_recipe(tmpdir, data_recipes):
 
 def test_jinja_var(data_recipes):
     recipe = EmptyGray(load_recipe=os.path.join(data_recipes, "simple_jinja_var.yaml"))
-    assert recipe.get_jinja_var("name") == "foo_pkg-123.test"
-    assert recipe.get_jinja_var("version") == "1.2.4"
-    assert recipe["package"]["name"] == "<{ name|lower }}"
-    assert recipe["package"]["version"] == "<{ version }}"
+    assert recipe.recipe.get_jinja_var("name") == "foo_pkg-123.test"
+    assert recipe.recipe.get_jinja_var("version") == "1.2.4"
+    assert recipe.recipe["package"]["name"] == "<{ name|lower }}"
+    assert recipe.recipe["package"]["version"] == "<{ version }}"
 
-    recipe.set_jinja_var("version", "0.1.1")
-    assert recipe.get_jinja_var("version") == "0.1.1"
+    recipe.recipe.set_jinja_var("version", "0.1.1")
+    assert recipe.recipe.get_jinja_var("version") == "0.1.1"
 
-    recipe.add_jinja_var("foo", "bar")
-    assert recipe.get_jinja_var("foo") == "bar"
+    recipe.recipe.add_jinja_var("foo", "bar")
+    assert recipe.recipe.get_jinja_var("foo") == "bar"
 
-    recipe.set_jinja_var("bar", "foo")
-    assert recipe.get_jinja_var("bar") == "foo"
+    recipe.recipe.set_jinja_var("bar", "foo")
+    assert recipe.recipe.get_jinja_var("bar") == "foo"
 
 
 def test_set_default_values():
     recipe = EmptyGray(name="PkgName", version="1.0.0")
-    assert recipe.get_var_content(recipe["package"]["name"].values[0]) == "PkgName"
-    assert recipe["package"]["name"].values[0] == "<{ name|lower }}"
+    assert (
+        recipe.recipe.get_var_content(recipe.recipe["package"]["name"].values[0])
+        == "PkgName"
+    )
+    assert recipe.recipe["package"]["name"].values[0] == "<{ name|lower }}"
 
-    assert recipe["package"]["version"].values[0] == "<{ version }}"
-    assert recipe.get_var_content(recipe["package"]["version"].values[0]) == "1.0.0"
+    assert recipe.recipe["package"]["version"].values[0] == "<{ version }}"
+    assert (
+        recipe.recipe.get_var_content(recipe.recipe["package"]["version"].values[0])
+        == "1.0.0"
+    )
 
 
 def test_get_set_var_content():
     recipe = EmptyGray(name="PkgName", version="1.0.0")
-    assert recipe.get_var_content(recipe["package"]["name"].values[0]) == "PkgName"
-    assert recipe.get_var_content(recipe["package"]["version"].values[0]) == "1.0.0"
+    assert (
+        recipe.recipe.get_var_content(recipe.recipe["package"]["name"].values[0])
+        == "PkgName"
+    )
+    assert (
+        recipe.recipe.get_var_content(recipe.recipe["package"]["version"].values[0])
+        == "1.0.0"
+    )
 
-    recipe.set_var_content(recipe["package"]["version"].values[0], "2.1.3")
-    assert recipe.get_var_content(recipe["package"]["version"].values[0]) == "2.1.3"
-    assert recipe["package"]["version"].values[0] == "<{ version }}"
+    recipe.recipe.set_var_content(
+        recipe.recipe["package"]["version"].values[0], "2.1.3"
+    )
+    assert (
+        recipe.recipe.get_var_content(recipe.recipe["package"]["version"].values[0])
+        == "2.1.3"
+    )
+    assert recipe.recipe["package"]["version"].values[0] == "<{ version }}"
 
 
 def test_getitem():
     pkg = EmptyGray("pytest", "5.0.0")
-    assert pkg["build"].section_name == "build"
-    assert pkg["build"]["number"].section_name == "number"
-    assert pkg["build"]["number"][0] == 1
+    pkg.update_all()
+    assert pkg.recipe["build"].section_name == "build"
+    assert pkg.recipe["build"]["number"].section_name == "number"
+    assert pkg.recipe["build"]["number"][0] == 1
+
+
+class MetaFoo(metaclass=MetaRecipeModel):
+    def __init__(self):
+        self.update_req = []
+        super(MetaFoo, self).__init__()
+
+    @update("requirements", "build")
+    def update_requirements(self, section):
+        self.update_req.append(section)
+
+
+def test_meta_recipe_register():
+    meta_obj = MetaFoo()
+    assert not meta_obj.update_req
+    meta_obj.update("requirements")
+    assert meta_obj.update_req == ["requirements"]
+    meta_obj.update("build")
+    assert meta_obj.update_req == ["requirements", "build"]
+
+    meta_obj = MetaFoo()
+    assert not meta_obj.update_req
+    meta_obj.update_all()
+    assert sorted(meta_obj.update_req) == ["build", "requirements"]
