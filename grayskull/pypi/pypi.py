@@ -33,8 +33,7 @@ class PyPi(Recipe):
     RE_DEPS_NAME = re.compile(r"^\s*([\.a-zA-Z0-9_-]+)", re.MULTILINE)
     PIN_PKG_COMPILER = {"numpy": "<{ pin_compatible('numpy') }}"}
 
-    def __init__(self, name=None, version=None, force_setup=False):
-        self._force_setup = force_setup
+    def __init__(self, name=None, version=None):
         self._setup_metadata = None
         self._is_arch = False
         super(PyPi, self).__init__(name=name, version=version)
