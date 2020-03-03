@@ -2,10 +2,10 @@ import os
 
 from pytest import fixture
 
-from grayskull.base.base_recipe import AbstractRecipeModel
+from grayskull.base.base_recipe import MetaRecipeModel, Recipe, update
 
 
-class EmptyGray(AbstractRecipeModel):
+class EmptyGray(Recipe):
     def refresh_section(self, section="", **kwargs):
         if section == "source":
             self["source"]["sha256"] = "sha256_foo"
@@ -95,3 +95,25 @@ def test_getitem():
     assert pkg["build"].section_name == "build"
     assert pkg["build"]["number"].section_name == "number"
     assert pkg["build"]["number"][0] == 1
+
+
+class MetaFoo(metaclass=MetaRecipeModel):
+    def __init__(self):
+        self.update_req = False
+        super(MetaFoo, self).__init__()
+
+    @update("requirements")
+    def update_requirements(self):
+        self.update_req = True
+
+
+def test_meta_recipe_register():
+    meta_obj = MetaFoo()
+    assert not meta_obj.update_req
+    meta_obj.update("requirements")
+    assert meta_obj.update_req
+
+    meta_obj = MetaFoo()
+    assert not meta_obj.update_req
+    meta_obj.update_all()
+    assert meta_obj.update_req

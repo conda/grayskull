@@ -1,6 +1,6 @@
 import pytest
 
-from grayskull.base.base_recipe import AbstractRecipeModel
+from grayskull.base.base_recipe import Recipe
 from grayskull.base.factory import GrayskullFactory
 from grayskull.pypi import PyPi
 
@@ -12,5 +12,5 @@ def test_factory(repo_type, pkg_name, version, obj_type, monkeypatch):
     monkeypatch.setattr(PyPi, "__init__", lambda x, y, z: None)
     assert isinstance(
         GrayskullFactory.create_recipe(repo_type, pkg_name, version),
-        (AbstractRecipeModel, obj_type),
+        (Recipe, obj_type),
     )

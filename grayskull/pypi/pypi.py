@@ -17,7 +17,7 @@ import requests
 from colorama import Fore
 from requests import HTTPError
 
-from grayskull.base.base_recipe import AbstractRecipeModel
+from grayskull.base.base_recipe import Recipe
 from grayskull.base.utils import download_pkg, get_vendored_dependencies
 from grayskull.license.discovery import ShortLicense, search_license_file
 
@@ -26,7 +26,7 @@ PyVer = namedtuple("PyVer", ["major", "minor"])
 SUPPORTED_PY = sorted([PyVer(2, 7), PyVer(3, 6), PyVer(3, 7), PyVer(3, 8)])
 
 
-class PyPi(AbstractRecipeModel):
+class PyPi(Recipe):
     URL_PYPI_METADATA = "https://pypi.org/pypi/{pkg_name}/json"
     PKG_NEEDS_C_COMPILER = ("cython",)
     PKG_NEEDS_CXX_COMPILER = ("pybind11",)

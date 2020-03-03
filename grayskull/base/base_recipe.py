@@ -1,11 +1,10 @@
 import logging
 import os
 import re
-from abc import ABC, abstractmethod
 from copy import deepcopy
 from pathlib import Path
 from shutil import copyfile
-from typing import Any, List, Optional, Union
+from typing import Any, Callable, List, Optional, Union
 
 from colorama import Fore
 from ruamel.yaml import YAML, CommentToken
@@ -19,9 +18,10 @@ from grayskull.base.section import Section
 yaml = YAML(typ="jinja2")
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.width = 600
+log = logging.getLogger(__name__)
 
 
-class AbstractRecipeModel(ABC):
+class Recipe:
     ALL_SECTIONS = (
         "package",
         "source",
@@ -54,8 +54,7 @@ class AbstractRecipeModel(ABC):
                 self["package"]["version"] = "<{ version }}"
             self["build"]["number"] = 0
             self.__files_copy: List = []
-            self.update_all_recipe()
-        super(AbstractRecipeModel, self).__init__()
+        super(Recipe, self).__init__()
 
     def __repr__(self) -> str:
         name = self.get_var_content(self["package"]["name"].values[0])
@@ -106,10 +105,6 @@ class AbstractRecipeModel(ABC):
             )
         )
 
-    def update_all_recipe(self):
-        for section in self.ALL_SECTIONS:
-            self.refresh_section(section)
-
     def get_jinja_var(self, key: str) -> str:
         if not self._yaml.ca.comment and not self._yaml.ca.comment[1]:
             raise ValueError(f"Key {key} does not exist")
@@ -123,7 +118,7 @@ class AbstractRecipeModel(ABC):
 
     def __find_commented_token_jinja_var(self, key: str) -> Optional[CommentToken]:
         for comment in self._yaml.ca.comment[1]:
-            match_jinja = AbstractRecipeModel.re_jinja_var.match(comment.value)
+            match_jinja = Recipe.re_jinja_var.match(comment.value)
             if match_jinja and match_jinja.groups()[0] == key:
                 return comment
         return None
@@ -137,10 +132,6 @@ class AbstractRecipeModel(ABC):
             comment.value = f"#% set {key} = {value} %}}"
         else:
             self.add_jinja_var(key, value)
-
-    @abstractmethod
-    def refresh_section(self, section: str = "", **kwargs):
-        pass
 
     @property
     def yaml_obj(self) -> CommentedMap:
@@ -244,3 +235,35 @@ class AbstractRecipeModel(ABC):
         else:
             section.add_item(metadata)
         return section
+
+
+def update(section_name: str) -> Callable:
+    def decorator_func(method: Callable) -> Callable:
+        method.__gs_registry = section_name
+        return method
+
+    return decorator_func
+
+
+class MetaRecipeModel(type):
+    def __new__(cls, name, bases, dct):
+        recipe = super().__new__(cls, name, bases, dct)
+        setattr(recipe, MetaRecipeModel.update.__name__, MetaRecipeModel.update)
+        setattr(recipe, MetaRecipeModel.update_all.__name__, MetaRecipeModel.update_all)
+
+        registry = {}
+        attrs = dict(recipe.__dict__)
+        for key, val in attrs.items():
+            section_update = getattr(val, "__gs_registry", None)
+            if section_update is not None:
+                registry[section_update] = getattr(recipe, key)
+        recipe._registry_update = registry
+        return recipe
+
+    def update(cls, *args):
+        for section in args:
+            cls._registry_update[section](cls)
+
+    def update_all(cls):
+        for func_reg in cls._registry_update.values():
+            func_reg(cls)
