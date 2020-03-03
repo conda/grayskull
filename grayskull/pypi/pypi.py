@@ -45,7 +45,7 @@ class PyPi(metaclass=MetaRecipeModel):
             self.update_all()
             self._recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
         elif load_recipe:
-            self._recipe = Recipe(load_recipe)
+            self._recipe = Recipe(load_recipe=load_recipe)
             self._is_arch = "noarch" not in self._recipe["build"]
         else:
             raise ValueError(
