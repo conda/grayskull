@@ -135,13 +135,15 @@ class Section:
         return self.values[item]
 
     def __setitem__(self, key: str, value: Any):
-        if key not in self.yaml_obj:
+        if self.yaml_obj and key not in self.yaml_obj:
             self.add_subsection(key)
         if isinstance(value, (str, int)):
             self.yaml_obj[key] = CommentedSeq()
             self[key].add_item(value)
         elif isinstance(value, dict):
-            Section(key, self.yaml_obj)
+            section = Section(key, self.yaml_obj)
+            for key_sec, val_sec in value.items():
+                section[key_sec] = val_sec
 
     def add_subsection(self, section: Union[str, "Section"]):
         """Add a subsection to the current Section. If the current section has a
