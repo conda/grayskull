@@ -83,9 +83,9 @@ class Section:
     def __hash__(self) -> int:
         return hash(f"{self}-{[str(v) for v in self.values]}")
 
-    def __contains__(self, item: Union[str, "Section"]) -> bool:
+    def __contains__(self, item: Union[str, "Section", "RecipeItem"]) -> bool:
         for val in self.values:
-            if item == str(val):
+            if str(item) == str(val) or item == val:
                 return True
         return False
 

@@ -11,7 +11,7 @@ from functools import lru_cache
 from pathlib import Path
 from subprocess import check_output
 from tempfile import mkdtemp
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import requests
 from colorama import Fore
@@ -39,9 +39,10 @@ class PyPi(metaclass=MetaRecipeModel):
         version: Optional[str] = None,
         load_recipe: Optional[str] = None,
     ):
-        if not name:
+        if name:
             self._is_arch = False
             self._recipe = Recipe(name=name, version=version)
+            self.update_all()
             self._recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
         elif load_recipe:
             self._recipe = Recipe(load_recipe)
@@ -50,6 +51,16 @@ class PyPi(metaclass=MetaRecipeModel):
             raise ValueError(
                 f"Please specify the package name or the recipe to be loaded."
             )
+
+    @property
+    def recipe(self) -> Recipe:
+        return self._recipe
+
+    def __getattr__(self, item: str) -> Any:
+        return getattr(self.recipe, item, None)
+
+    def __getitem__(self, item: str) -> Any:
+        return self.recipe[item]
 
     @staticmethod
     @lru_cache(maxsize=10)
