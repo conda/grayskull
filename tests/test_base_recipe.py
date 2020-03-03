@@ -99,21 +99,23 @@ def test_getitem():
 
 class MetaFoo(metaclass=MetaRecipeModel):
     def __init__(self):
-        self.update_req = False
+        self.update_req = []
         super(MetaFoo, self).__init__()
 
-    @update("requirements")
-    def update_requirements(self):
-        self.update_req = True
+    @update("requirements", "build")
+    def update_requirements(self, section):
+        self.update_req.append(section)
 
 
 def test_meta_recipe_register():
     meta_obj = MetaFoo()
     assert not meta_obj.update_req
     meta_obj.update("requirements")
-    assert meta_obj.update_req
+    assert meta_obj.update_req == ["requirements"]
+    meta_obj.update("build")
+    assert meta_obj.update_req == ["requirements", "build"]
 
     meta_obj = MetaFoo()
     assert not meta_obj.update_req
     meta_obj.update_all()
-    assert meta_obj.update_req
+    assert sorted(meta_obj.update_req) == ["build", "requirements"]

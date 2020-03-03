@@ -1,3 +1,4 @@
+import inspect
 import logging
 import os
 import re
@@ -38,7 +39,12 @@ class Recipe:
         re.IGNORECASE | re.MULTILINE,
     )
 
-    def __init__(self, name=None, version=None, load_recipe: str = ""):
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        version: Optional[str] = None,
+        load_recipe: Optional[str] = None,
+    ):
         if load_recipe:
             with open(load_recipe, "r") as yaml_file:
                 self._yaml = yaml.load(yaml_file)
@@ -237,9 +243,9 @@ class Recipe:
         return section
 
 
-def update(section_name: str) -> Callable:
+def update(*args: List) -> Callable:
     def decorator_func(method: Callable) -> Callable:
-        method.__gs_registry = section_name
+        method.__gs_registry = args
         return method
 
     return decorator_func
@@ -254,16 +260,24 @@ class MetaRecipeModel(type):
         registry = {}
         attrs = dict(recipe.__dict__)
         for key, val in attrs.items():
-            section_update = getattr(val, "__gs_registry", None)
-            if section_update is not None:
-                registry[section_update] = getattr(recipe, key)
+            section_update = getattr(val, "__gs_registry", [])
+            if section_update:
+                for section in section_update:
+                    registry[section] = getattr(recipe, key)
         recipe._registry_update = registry
         return recipe
 
     def update(cls, *args):
         for section in args:
-            cls._registry_update[section](cls)
+            func_reg = cls._registry_update[section]
+            if "section" in inspect.signature(func_reg).parameters:
+                cls._registry_update[section](cls, section=section)
+            else:
+                cls._registry_update[section](cls)
 
     def update_all(cls):
-        for func_reg in cls._registry_update.values():
-            func_reg(cls)
+        for section, func_reg in cls._registry_update.items():
+            if "section" in inspect.signature(func_reg).parameters:
+                func_reg(cls, section=section)
+            else:
+                func_reg(cls)

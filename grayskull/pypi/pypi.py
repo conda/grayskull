@@ -17,7 +17,7 @@ import requests
 from colorama import Fore
 from requests import HTTPError
 
-from grayskull.base.base_recipe import Recipe
+from grayskull.base.base_recipe import MetaRecipeModel, Recipe, update
 from grayskull.base.utils import download_pkg, get_vendored_dependencies
 from grayskull.license.discovery import ShortLicense, search_license_file
 
@@ -26,18 +26,30 @@ PyVer = namedtuple("PyVer", ["major", "minor"])
 SUPPORTED_PY = sorted([PyVer(2, 7), PyVer(3, 6), PyVer(3, 7), PyVer(3, 8)])
 
 
-class PyPi(Recipe):
+class PyPi(metaclass=MetaRecipeModel):
     URL_PYPI_METADATA = "https://pypi.org/pypi/{pkg_name}/json"
     PKG_NEEDS_C_COMPILER = ("cython",)
     PKG_NEEDS_CXX_COMPILER = ("pybind11",)
     RE_DEPS_NAME = re.compile(r"^\s*([\.a-zA-Z0-9_-]+)", re.MULTILINE)
     PIN_PKG_COMPILER = {"numpy": "<{ pin_compatible('numpy') }}"}
 
-    def __init__(self, name=None, version=None):
-        self._setup_metadata = None
-        self._is_arch = False
-        super(PyPi, self).__init__(name=name, version=version)
-        self["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        version: Optional[str] = None,
+        load_recipe: Optional[str] = None,
+    ):
+        if not name:
+            self._is_arch = False
+            self._recipe = Recipe(name=name, version=version)
+            self._recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
+        elif load_recipe:
+            self._recipe = Recipe(load_recipe)
+            self._is_arch = "noarch" not in self._recipe["build"]
+        else:
+            raise ValueError(
+                f"Please specify the package name or the recipe to be loaded."
+            )
 
     @staticmethod
     @lru_cache(maxsize=10)
@@ -191,7 +203,7 @@ class PyPi(Recipe):
                 )
                 PyPi.__run_setup_py(path_setup, data_dist, run_py=True)
             yield data_dist
-        except Exception as err:  # noqa
+        except Exception as err:
             log.debug(f"Exception occurred when executing sdist injection: err {err}")
             yield data_dist
         core.setup = setup_core_original
@@ -371,30 +383,38 @@ class PyPi(Recipe):
                     requires_dist.append(sdist_pkg)
         return requires_dist
 
-    def refresh_section(self, section: str = ""):
+    @update("package")
+    def _update_package(self):
+        metadata = self._get_metadata()
+        self._recipe.set_jinja_var("version", metadata["package"]["version"])
+        self._recipe["package"]["version"] = "<{ version }}"
+
+    @update(
+        "source", "build", "outputs", "requirements", "app", "test", "about", "extra"
+    )
+    def _update_sections(self, section: str):
         """Update one specific section.
 
         :param section: Section name
         """
         metadata = self._get_metadata()
-        if metadata.get(section):
-            if section == "package":
-                self.set_jinja_var("version", metadata["package"]["version"])
-                self["package"]["version"] = "<{ version }}"
-            else:
-                self.populate_metadata_from_dict(metadata.get(section), self[section])
+        self._recipe.populate_metadata_from_dict(
+            metadata.get(section), self._recipe[section]
+        )
         if not self._is_arch:
-            self["build"]["noarch"] = "python"
+            self._recipe["build"]["noarch"] = "python"
 
     @lru_cache(maxsize=10)
     def _get_metadata(self) -> dict:
         """Method responsible to get the whole metadata available. It will
         merge metadata from multiple sources (pypi, setup.py, setup.cfg)
         """
-        name = self.get_var_content(self["package"]["name"].values[0])
+        name = self._recipe.get_var_content(self["package"]["name"].values[0])
         version = ""
-        if self["package"]["version"].values:
-            version = self.get_var_content(self["package"]["version"].values[0])
+        if self._recipe["package"]["version"].values:
+            version = self._recipe.get_var_content(
+                self._recipe["package"]["version"].values[0]
+            )
         pypi_metadata = self._get_pypi_metadata(name, version)
         sdist_metadata = self._get_sdist_metadata(
             sdist_url=pypi_metadata["sdist_url"], name=name
@@ -412,7 +432,7 @@ class PyPi(Recipe):
                 if license_metadata.is_packaged:
                     license_file = license_metadata.path
                 else:
-                    self.files_to_copy.append(license_metadata.path)
+                    self._recipe.files_to_copy.append(license_metadata.path)
 
         print(f"{Fore.LIGHTBLACK_EX}License type: {Fore.LIGHTMAGENTA_EX}{license_name}")
         print(f"{Fore.LIGHTBLACK_EX}License file: {Fore.LIGHTMAGENTA_EX}{license_file}")
@@ -594,8 +614,8 @@ class PyPi(Recipe):
         if self._is_arch:
             version_to_selector = PyPi.py_version_to_selector(metadata)
             if version_to_selector:
-                self["build"]["skip"] = True
-                self["build"]["skip"].values[0].selector = version_to_selector
+                self._recipe["build"]["skip"] = True
+                self._recipe["build"]["skip"].values[0].selector = version_to_selector
             limit_python = ""
         else:
             limit_python = PyPi.py_version_to_limit_python(metadata)

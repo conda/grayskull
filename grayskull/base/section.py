@@ -83,6 +83,12 @@ class Section:
     def __hash__(self) -> int:
         return hash(f"{self}-{[str(v) for v in self.values]}")
 
+    def __contains__(self, item: Union[str, "Section"]) -> bool:
+        for val in self.values:
+            if item == str(val):
+                return True
+        return False
+
     def __str__(self) -> str:
         return self.section_name
 
