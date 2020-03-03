@@ -248,8 +248,8 @@ def update(section_name: str) -> Callable:
 class MetaRecipeModel(type):
     def __new__(cls, name, bases, dct):
         recipe = super().__new__(cls, name, bases, dct)
-        setattr(recipe, MetaRecipeModel.update.__name__, MetaRecipeModel.update)
-        setattr(recipe, MetaRecipeModel.update_all.__name__, MetaRecipeModel.update_all)
+        recipe.update = MetaRecipeModel.update
+        recipe.update_all = MetaRecipeModel.update_all
 
         registry = {}
         attrs = dict(recipe.__dict__)
