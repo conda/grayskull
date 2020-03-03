@@ -251,7 +251,7 @@ def search_license_repo(
     return search_license_folder(str(tmp_dir), default)
 
 
-def _get_git_cmd(git_url: str, version: str, dest) -> List[str]:
+def _get_git_cmd(git_url: str, version: str, dest: str) -> List[str]:
     """Return the full git command to clone the repository
 
     :param git_url: GitHub URL

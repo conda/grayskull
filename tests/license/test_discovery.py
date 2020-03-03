@@ -5,9 +5,11 @@ import pytest
 from pytest import fixture
 
 from grayskull.license.discovery import (
+    ShortLicense,
     _get_all_license_choice,
     _get_all_names_from_api,
     _get_api_github_url,
+    _get_git_cmd,
     _get_license,
     get_all_licenses_from_opensource,
     get_license_type,
@@ -77,6 +79,13 @@ def opensource_license_mit() -> List:
             ],
         }
     ]
+
+
+def test_short_license():
+    short_license = ShortLicense(name="name", path="path", is_packaged=True)
+    assert short_license.is_packaged
+    assert short_license.name == "name"
+    assert short_license.path == "path"
 
 
 def test_match_license():
@@ -161,3 +170,14 @@ def test_search_license_repository(pkg_pytest):
 
 def test_predict_license_type(license_pytest_path):
     assert get_license_type(license_pytest_path) == "MIT"
+
+
+def test_get_git_cmd():
+    assert _get_git_cmd("GIT_URL", "version", "DEST") == [
+        "git",
+        "clone",
+        "-b",
+        "version",
+        "GIT_URL",
+        "DEST",
+    ]
