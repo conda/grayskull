@@ -8,6 +8,7 @@ from colorama import Fore, Style
 from colorama.ansi import clear_screen
 
 import grayskull
+from grayskull.base.base_recipe import Recipe
 from grayskull.base.factory import GrayskullFactory
 from grayskull.cli.parser import parse_pkg_name_version
 
@@ -20,8 +21,29 @@ def main(args=None):
         args = sys.argv[1:]
 
     parser = argparse.ArgumentParser(description="Grayskull - Conda recipe generator")
-    pypi_parser = parser.add_subparsers(help="Options to generate PyPI recipes")
-    pypi_cmds = pypi_parser.add_parser("pypi", help="Generate recipes based on PyPI")
+
+    repo_parser = parser.add_subparsers(help="Options to generate recipes")
+    pypi_cmds = repo_parser.add_parser("pypi", help="Generate recipes based on PyPI")
+
+    load_cmds = repo_parser.add_parser("load", help="Load recipes")
+    load_cmds.add_argument("recipes", help="Update sections", nargs="+", default=[])
+    load_cmds.add_argument(
+        "--update",
+        "-u",
+        help="Update sections",
+        nargs="+",
+        default=Recipe.ALL_SECTIONS,
+        dest="list_sections",
+    )
+    load_cmds.add_argument(
+        "--repository",
+        "--repo",
+        help="Repository type",
+        choices=("pypi",),
+        default="",
+        dest="repo_type",
+    )
+
     pypi_cmds.add_argument(
         "pypi_packages", nargs="+", help="Specify the PyPI packages name.", default=[]
     )
@@ -72,20 +94,38 @@ def main(args=None):
         )
         return
 
-    for pkg_name in args.pypi_packages:
-        logging.debug(f"Starting grayskull for pkg: {pkg_name}")
+    if hasattr(args, "pypi_packages"):
+        for pkg_name in args.pypi_packages:
+            logging.debug(f"Starting grayskull for pkg: {pkg_name}")
+            print(
+                f"{Fore.GREEN}\n\n"
+                f"#### Initializing recipe for "
+                f"{Fore.BLUE}{pkg_name} (pypi) {Fore.GREEN}####\n"
+            )
+            pkg_name, pkg_version = parse_pkg_name_version(pkg_name)
+            recipe = GrayskullFactory.create_recipe("pypi", pkg_name, pkg_version)
+            recipe.generate_recipe(args.output, mantainers=args.maintainers)
+            print(
+                f"\n{Fore.GREEN}#### Recipe generated on "
+                f"{os.path.realpath(args.output)} for {pkg_name} ####\n"
+            )
+            sys.exit()
+
+    sections_to_update = args.list_sections
+    for recipe in args.recipes:
         print(
             f"{Fore.GREEN}\n\n"
-            f"#### Initializing recipe for "
-            f"{Fore.BLUE}{pkg_name} (pypi) {Fore.GREEN}####\n"
+            f"#### Loading recipe {Fore.BLUE}{recipe}{Fore.GREEN} ####"
         )
-        pkg_name, pkg_version = parse_pkg_name_version(pkg_name)
-        recipe = GrayskullFactory.create_recipe("pypi", pkg_name, pkg_version)
-        recipe.generate_recipe(args.output, mantainers=args.maintainers)
-        print(
-            f"\n{Fore.GREEN}#### Recipe generated on "
-            f"{os.path.realpath(args.output)} for {pkg_name} ####\n"
-        )
+        recipe_loaded = GrayskullFactory.load_recipe(recipe, args.repo_type)
+        if isinstance(recipe_loaded, Recipe):
+            print(
+                f"{Fore.RED}It was not possible to guess the recipe type.\n"
+                f"Please specify it using the proper options (--pypi)."
+            )
+        recipe_loaded.update(*sections_to_update)
+        recipe_loaded.generate_recipe(recipe, disable_extra=True)
+        print(f"\n{Fore.GREEN}#### Recipe sections were updated ####\n")
 
 
 if __name__ == "__main__":

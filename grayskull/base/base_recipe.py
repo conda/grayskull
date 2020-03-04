@@ -45,10 +45,13 @@ class Recipe:
         version: Optional[str] = None,
         load_recipe: Optional[str] = None,
     ):
+        self.__files_copy: List = []
         if load_recipe:
             with open(load_recipe, "r") as yaml_file:
                 self._yaml = yaml.load(yaml_file)
+            self._is_loaded = True
         else:
+            self._is_loaded = False
             self._yaml = yaml.load(
                 f'{{% set name = "{name}" %}}\n'
                 "package:\n    name: {{ name|lower }}\n"
@@ -59,7 +62,6 @@ class Recipe:
                 self.add_jinja_var("version", version)
                 self["package"]["version"] = "<{ version }}"
             self["build"]["number"] = 0
-            self.__files_copy: List = []
         super(Recipe, self).__init__()
 
     def __repr__(self) -> str:
@@ -163,22 +165,27 @@ class Recipe:
 
     def generate_recipe(
         self,
-        folder_path: Union[str, Path] = ".",
+        path: Union[str, Path] = ".",
         mantainers: Optional[List] = None,
         disable_extra: bool = False,
     ):
         """Write the recipe in a location. It will create a folder with the
         package name and the recipe will be there.
 
-        :param folder_path: Path to the folder
+        :param path: Path to the folder
         """
-        recipe_dir = Path(folder_path) / self.get_var_content(
-            self["package"]["name"].values[0]
-        )
-        logging.debug(f"Generating recipe on folder: {recipe_dir}")
-        if not recipe_dir.is_dir():
-            recipe_dir.mkdir()
-        recipe_path = recipe_dir / "meta.yaml"
+        if os.path.isfile(path):
+            logging.debug(f"Saving recipe on: {path}")
+            recipe_path = Path(path)
+            recipe_dir = os.path.dirname(path)
+        else:
+            recipe_dir = Path(path) / self.get_var_content(
+                self["package"]["name"].values[0]
+            )
+            logging.debug(f"Generating recipe on folder: {recipe_dir}")
+            if not recipe_dir.is_dir():
+                recipe_dir.mkdir()
+            recipe_path = recipe_dir / "meta.yaml"
 
         if not disable_extra:
             self._add_extra_section(mantainers)
@@ -200,6 +207,8 @@ class Recipe:
 
     def get_clean_yaml(self, recipe_yaml: CommentedMap) -> CommentedMap:
         result = self._clean_yaml(recipe_yaml)
+        if self._is_loaded:
+            return result
         return self._add_new_lines_after_section(result)
 
     def _add_new_lines_after_section(self, recipe_yaml: CommentedMap) -> CommentedMap:
