@@ -262,9 +262,13 @@ def update(*args: List) -> Callable:
 
 class MetaRecipeModel(type):
     def __new__(cls, name, bases, dct):
+        dct["__getitem__"] = MetaRecipeModel.get_item
+        dct["__setitem__"] = MetaRecipeModel.set_item
+        dct[MetaRecipeModel.update.__name__] = MetaRecipeModel.update
+        dct[MetaRecipeModel.update_all.__name__] = MetaRecipeModel.update_all
+        dct["__init__"] = __init_metaclass__(dct.get("__init__"))
+        dct["recipe"] = property(lambda cls_recipe: cls_recipe._recipe)
         recipe = super().__new__(cls, name, bases, dct)
-        recipe.update = MetaRecipeModel.update
-        recipe.update_all = MetaRecipeModel.update_all
 
         registry = {}
         attrs = dict(recipe.__dict__)
@@ -290,3 +294,33 @@ class MetaRecipeModel(type):
                 func_reg(cls, section=section)
             else:
                 func_reg(cls)
+
+    def get_item(cls, item: str) -> Any:
+        return cls.recipe[item]
+
+    def set_item(cls, item: str, value: Any):
+        cls.recipe[item] = value
+
+
+def __init_metaclass__(method_init: Optional[Callable]):
+    def wrapper(
+        cls,
+        name: Optional[str] = None,
+        version: Optional[str] = None,
+        load_recipe: Union[str, Recipe] = None,
+        **kwargs,
+    ):
+        if isinstance(load_recipe, Recipe):
+            cls._recipe = load_recipe
+        else:
+            cls._recipe = Recipe(name, version, load_recipe)
+
+        if method_init:
+            method_init(
+                cls, name=name, version=version, load_recipe=load_recipe, **kwargs
+            )
+
+        if not load_recipe:
+            cls.update_all()
+
+    return wrapper

@@ -39,26 +39,17 @@ class PyPi(metaclass=MetaRecipeModel):
         version: Optional[str] = None,
         load_recipe: Union[None, str, Recipe] = None,
     ):
+        self._is_arch = "noarch" not in self._recipe["build"]
         if name:
-            self._is_arch = False
             self._recipe = Recipe(name=name, version=version)
             self.update_all()
             self._recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
         elif load_recipe:
-            if isinstance(load_recipe, Recipe):
-                self._recipe = load_recipe
-            else:
-                self._recipe = Recipe(load_recipe=load_recipe)
-            self._is_arch = "noarch" not in self._recipe["build"]
             url_pypi = PyPi.URL_PYPI_METADATA.format(pkg_name=name)
             metadata = requests.get(url=url_pypi, timeout=5).json()
             version = metadata["info"]["version"]
             self.recipe.set_var_content(
                 self.recipe["package"]["version"].values[0].value, version
-            )
-        else:
-            raise ValueError(
-                f"Please specify the package name or the recipe to be loaded."
             )
 
     @property
