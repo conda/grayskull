@@ -11,7 +11,7 @@ from functools import lru_cache
 from pathlib import Path
 from subprocess import check_output
 from tempfile import mkdtemp
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import requests
 from colorama import Fore
@@ -39,28 +39,16 @@ class PyPi(metaclass=MetaRecipeModel):
         version: Optional[str] = None,
         load_recipe: Union[None, str, Recipe] = None,
     ):
-        self._is_arch = "noarch" not in self._recipe["build"]
+        self._is_arch = "noarch" not in self.recipe["build"]
         if name:
-            self._recipe = Recipe(name=name, version=version)
-            self.update_all()
-            self._recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
+            self.recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
         elif load_recipe:
             url_pypi = PyPi.URL_PYPI_METADATA.format(pkg_name=name)
             metadata = requests.get(url=url_pypi, timeout=5).json()
-            version = metadata["info"]["version"]
+            version = version if version else metadata["info"]["version"]
             self.recipe.set_var_content(
-                self.recipe["package"]["version"].values[0].value, version
+                self.recipe["package"]["version"].values[0], version
             )
-
-    @property
-    def recipe(self) -> Recipe:
-        return self._recipe
-
-    def __getattr__(self, item: str) -> Any:
-        return getattr(self.recipe, item, None)
-
-    def __getitem__(self, item: str) -> Any:
-        return self.recipe[item]
 
     @staticmethod
     @lru_cache(maxsize=10)
@@ -397,8 +385,8 @@ class PyPi(metaclass=MetaRecipeModel):
     @update("package")
     def _update_package(self):
         metadata = self._get_metadata()
-        self._recipe.set_jinja_var("version", metadata["package"]["version"])
-        self._recipe["package"]["version"] = "<{ version }}"
+        self.recipe.set_jinja_var("version", metadata["package"]["version"])
+        self.recipe["package"]["version"] = "<{ version }}"
 
     @update(
         "source", "build", "outputs", "requirements", "app", "test", "about", "extra"
@@ -409,22 +397,22 @@ class PyPi(metaclass=MetaRecipeModel):
         :param section: Section name
         """
         metadata = self._get_metadata()
-        self._recipe.populate_metadata_from_dict(
-            metadata.get(section), self._recipe[section]
+        self.recipe.populate_metadata_from_dict(
+            metadata.get(section), self.recipe[section]
         )
         if not self._is_arch:
-            self._recipe["build"]["noarch"] = "python"
+            self.recipe["build"]["noarch"] = "python"
 
     @lru_cache(maxsize=10)
     def _get_metadata(self) -> dict:
         """Method responsible to get the whole metadata available. It will
         merge metadata from multiple sources (pypi, setup.py, setup.cfg)
         """
-        name = self._recipe.get_var_content(self["package"]["name"].values[0])
+        name = self.recipe.get_var_content(self["package"]["name"].values[0])
         version = ""
-        if self._recipe["package"]["version"].values:
-            version = self._recipe.get_var_content(
-                self._recipe["package"]["version"].values[0]
+        if self.recipe["package"]["version"].values:
+            version = self.recipe.get_var_content(
+                self.recipe["package"]["version"].values[0]
             )
         pypi_metadata = self._get_pypi_metadata(name, version)
         sdist_metadata = self._get_sdist_metadata(
@@ -443,7 +431,7 @@ class PyPi(metaclass=MetaRecipeModel):
                 if license_metadata.is_packaged:
                     license_file = license_metadata.path
                 else:
-                    self._recipe.files_to_copy.append(license_metadata.path)
+                    self.recipe.files_to_copy.append(license_metadata.path)
 
         print(f"{Fore.LIGHTBLACK_EX}License type: {Fore.LIGHTMAGENTA_EX}{license_name}")
         print(f"{Fore.LIGHTBLACK_EX}License file: {Fore.LIGHTMAGENTA_EX}{license_file}")
@@ -625,8 +613,8 @@ class PyPi(metaclass=MetaRecipeModel):
         if self._is_arch:
             version_to_selector = PyPi.py_version_to_selector(metadata)
             if version_to_selector:
-                self._recipe["build"]["skip"] = True
-                self._recipe["build"]["skip"].values[0].selector = version_to_selector
+                self.recipe["build"]["skip"] = True
+                self.recipe["build"]["skip"].values[0].selector = version_to_selector
             limit_python = ""
         else:
             limit_python = PyPi.py_version_to_limit_python(metadata)

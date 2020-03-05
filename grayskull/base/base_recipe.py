@@ -262,6 +262,7 @@ def update(*args: List) -> Callable:
 
 class MetaRecipeModel(type):
     def __new__(cls, name, bases, dct):
+        dct["__getattr__"] = MetaRecipeModel.get_attr
         dct["__getitem__"] = MetaRecipeModel.get_item
         dct["__setitem__"] = MetaRecipeModel.set_item
         dct[MetaRecipeModel.update.__name__] = MetaRecipeModel.update
@@ -290,6 +291,11 @@ class MetaRecipeModel(type):
 
     def update_all(cls):
         MetaRecipeModel.update(cls, *(cls._registry_update.keys()))
+
+    def get_attr(cls, item: str) -> Any:
+        if item in cls.recipe.ALL_SECTIONS:
+            return MetaRecipeModel.get_item(cls, item)
+        return getattr(cls, item)
 
     def get_item(cls, item: str) -> Any:
         return cls.recipe[item]
