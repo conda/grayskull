@@ -39,16 +39,13 @@ class PyPi(metaclass=MetaRecipeModel):
         version: Optional[str] = None,
         load_recipe: Union[None, str, Recipe] = None,
     ):
-        self._is_arch = "noarch" not in self.recipe["build"]
+        self._is_arch = False
         if name:
             self.recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
-        elif load_recipe:
-            url_pypi = PyPi.URL_PYPI_METADATA.format(pkg_name=name)
-            metadata = requests.get(url=url_pypi, timeout=5).json()
-            version = version if version else metadata["info"]["version"]
-            self.recipe.set_var_content(
-                self.recipe["package"]["version"].values[0], version
-            )
+        log.debug(
+            f"PyPi initializer - name={name}, version={version},"
+            f" load_recipe={load_recipe}"
+        )
 
     @staticmethod
     @lru_cache(maxsize=10)
@@ -400,7 +397,7 @@ class PyPi(metaclass=MetaRecipeModel):
         self.recipe.populate_metadata_from_dict(
             metadata.get(section), self.recipe[section]
         )
-        if not self._is_arch:
+        if not self._is_arch and "skip" not in self.recipe["build"]:
             self.recipe["build"]["noarch"] = "python"
 
     @lru_cache(maxsize=10)
@@ -609,6 +606,8 @@ class PyPi(metaclass=MetaRecipeModel):
         build_req = [f"<{{ compiler('{c}') }}}}" for c in metadata.get("compilers", [])]
         if build_req:
             self._is_arch = True
+        else:
+            self._is_arch = False
 
         if self._is_arch:
             version_to_selector = PyPi.py_version_to_selector(metadata)

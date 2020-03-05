@@ -16,7 +16,7 @@ def pypi_metadata(data_dir):
 def test_extract_pypi_requirements(pypi_metadata):
     recipe = PyPi(name="pytest", version="5.3.1")
     pypi_reqs = recipe._extract_requirements(pypi_metadata["info"])
-    assert sorted(pypi_reqs["host"]) == sorted(["python", "pip"])
+    assert sorted(pypi_reqs["host"]) == sorted(["python >=3.6", "pip"])
     assert sorted(pypi_reqs["run"]) == sorted(
         [
             "python",
@@ -337,8 +337,8 @@ def test_cythongsl_recipe_build():
 def test_requests_recipe_extra_deps():
     recipe = PyPi(name="requests", version="2.22.0")
     assert "win-inet-pton" not in recipe["requirements"]["run"]
-    assert recipe["build"]["noarch"]
     assert not recipe["build"]["skip"]
+    assert recipe["build"]["noarch"]
 
 
 def test_zipp_recipe_tags_on_deps():
@@ -379,9 +379,3 @@ def test_load_recipe(data_dir):
     assert recipe["source"]["sha256"].values[0] == "sha256_foo"
     assert recipe["source"]["url"].values[0] == "URL"
     assert recipe["extra"]["recipe-maintainers"].values == ["marcelotrevisani"]
-
-
-def test_exception_init():
-    with pytest.raises(ValueError) as err:
-        PyPi()
-    err.match("Please specify the package name or the recipe to be loaded.")
