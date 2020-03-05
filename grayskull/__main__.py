@@ -27,13 +27,17 @@ def main(args=None):
 
     load_cmds = repo_parser.add_parser("load", help="Load recipes")
     load_cmds.add_argument("recipes", help="Update sections", nargs="+", default=[])
+    default_sections = tuple(
+        section for section in Recipe.ALL_SECTIONS if section != "extra"
+    )
     load_cmds.add_argument(
         "--update",
         "-u",
         help="Update sections",
         nargs="+",
-        default=Recipe.ALL_SECTIONS,
+        default=default_sections,
         dest="list_sections",
+        choices=default_sections,
     )
     load_cmds.add_argument(
         "--repository",
