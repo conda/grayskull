@@ -289,11 +289,7 @@ class MetaRecipeModel(type):
                 cls._registry_update[section](cls)
 
     def update_all(cls):
-        for section, func_reg in cls._registry_update.items():
-            if "section" in inspect.signature(func_reg).parameters:
-                func_reg(cls, section=section)
-            else:
-                func_reg(cls)
+        MetaRecipeModel.update(cls, *(cls._registry_update.keys()))
 
     def get_item(cls, item: str) -> Any:
         return cls.recipe[item]
