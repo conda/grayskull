@@ -294,6 +294,8 @@ class MetaRecipeModel(type):
             func_reg = cls._registry_update[section]
             if cls.recipe.is_loaded:
                 cls.recipe.clear_section(section)
+            if section not in cls._registry_update:
+                continue
             if "section" in inspect.signature(func_reg).parameters:
                 cls._registry_update[section](cls, section=section)
             else:
