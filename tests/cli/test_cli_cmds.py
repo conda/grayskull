@@ -12,12 +12,16 @@ def test_version(capsys):
 
 def test_pypi_cmd(tmpdir):
     out_folder = tmpdir.mkdir("out")
-    main(["pypi", "pytest=5.3.2", "-o", str(out_folder), "-m", "m1", "m2"])
+    main(
+        ["pypi", "pytest=5.3.2", "-o", str(out_folder), "-m", "m1", "m2", "--download"]
+    )
     pytest_folder = out_folder / "pytest"
     assert pytest_folder.isdir()
 
     recipe_file = pytest_folder / "meta.yaml"
     assert recipe_file.isfile()
+    assert (pytest_folder / "pypi.json").isfile()
+    assert (pytest_folder / "pytest-5.3.2.tar.gz").isfile()
 
 
 @pytest.mark.parametrize("option", ["--heman", "--shera"])

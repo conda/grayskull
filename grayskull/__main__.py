@@ -26,6 +26,15 @@ def main(args=None):
         "pypi_packages", nargs="+", help="Specify the PyPI packages name.", default=[]
     )
     pypi_cmds.add_argument(
+        "--download",
+        "-d",
+        dest="download",
+        action="store_true",
+        default=False,
+        help="Download the sdist package and PyPI information in the same folder"
+        " the recipe is located.",
+    )
+    pypi_cmds.add_argument(
         "--maintainers",
         "-m",
         dest="maintainers",
@@ -80,7 +89,9 @@ def main(args=None):
             f"{Fore.BLUE}{pkg_name} (pypi) {Fore.GREEN}####\n"
         )
         pkg_name, pkg_version = parse_pkg_name_version(pkg_name)
-        recipe = GrayskullFactory.create_recipe("pypi", pkg_name, pkg_version)
+        recipe = GrayskullFactory.create_recipe(
+            "pypi", pkg_name, pkg_version, download=args.download
+        )
         recipe.generate_recipe(args.output, mantainers=args.maintainers)
         print(
             f"\n{Fore.GREEN}#### Recipe generated on "
