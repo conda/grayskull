@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import re
@@ -35,8 +36,13 @@ class PyPi(AbstractRecipeModel):
     RE_DEPS_NAME = re.compile(r"^\s*([\.a-zA-Z0-9_-]+)", re.MULTILINE)
     PIN_PKG_COMPILER = {"numpy": "<{ pin_compatible('numpy') }}"}
 
-    def __init__(self, name=None, version=None, force_setup=False):
-        self._force_setup = force_setup
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        version: Optional[str] = None,
+        download: bool = False,
+    ):
+        self._download = download
         self._setup_metadata = None
         self._is_arch = False
         super(PyPi, self).__init__(name=name, version=version)
@@ -71,9 +77,8 @@ class PyPi(AbstractRecipeModel):
                     progress_val += chunk_size
                     bar.update(min(progress_val, total_size))
 
-    @staticmethod
     @lru_cache(maxsize=10)
-    def _get_sdist_metadata(sdist_url: str, name: str) -> dict:
+    def _get_sdist_metadata(self, sdist_url: str, name: str) -> dict:
         """Method responsible to return the sdist metadata which is basically
         the metadata present in setup.py and setup.cfg
 
@@ -86,6 +91,8 @@ class PyPi(AbstractRecipeModel):
         path_pkg = os.path.join(temp_folder, pkg_name)
 
         PyPi._download_sdist_pkg(sdist_url=sdist_url, dest=path_pkg)
+        if self._download:
+            self.files_to_copy.append(path_pkg)
         log.debug(f"Unpacking {path_pkg} to {temp_folder}")
         shutil.unpack_archive(path_pkg, temp_folder)
         print(f"{Fore.LIGHTBLACK_EX}Recovering information from setup.py")
@@ -263,9 +270,8 @@ class PyPi(AbstractRecipeModel):
             )
             PyPi._pip_install_dep(data_dist, err.name, pip_dir)
             PyPi.__run_setup_py(path_setup, data_dist, run_py)
-        except Exception as err:  # noqa
+        except Exception as err:
             log.debug(f"Exception when executing setup.py as script: {err}")
-            pass
         data_dist.update(
             PyPi._merge_sdist_metadata(
                 data_dist, PyPi._get_setup_cfg(os.path.dirname(str(path_setup)))
@@ -518,9 +524,8 @@ class PyPi(AbstractRecipeModel):
         if short_license:
             return short_license
 
-    @staticmethod
     @lru_cache(maxsize=10)
-    def _get_pypi_metadata(name, version: Optional[str] = None) -> dict:
+    def _get_pypi_metadata(self, name, version: Optional[str] = None) -> dict:
         """Method responsible to communicate with the pypi api endpoints and
         get the whole metadata available for the specified package and version.
 
@@ -543,6 +548,13 @@ class PyPi(AbstractRecipeModel):
             )
 
         metadata = metadata.json()
+        if self._download:
+            download_file = os.path.join(
+                str(mkdtemp(f"grayskull-pypi-metadata-{name}-")), "pypi.json"
+            )
+            with open(download_file, "w") as f:
+                json.dump(metadata, f, indent=4)
+            self.files_to_copy.append(download_file)
         info = metadata["info"]
         project_urls = info.get("project_urls") if info.get("project_urls") else {}
         log.info(f"Package: {name}=={info['version']}")

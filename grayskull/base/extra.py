@@ -27,7 +27,6 @@ def get_git_current_user() -> str:
             f"Exception occurred when trying to recover user information from github."
             f" Exception: {err}"
         )
-        pass
     print(
         f"{Fore.LIGHTBLACK_EX}Using default recipe maintainer:"
         f" {Fore.LIGHTMAGENTA_EX}AddYourGitHubIdHere"
