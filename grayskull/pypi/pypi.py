@@ -270,9 +270,8 @@ class PyPi(AbstractRecipeModel):
             )
             PyPi._pip_install_dep(data_dist, err.name, pip_dir)
             PyPi.__run_setup_py(path_setup, data_dist, run_py)
-        except Exception as err:  # noqa
+        except Exception as err:
             log.debug(f"Exception when executing setup.py as script: {err}")
-            pass
         data_dist.update(
             PyPi._merge_sdist_metadata(
                 data_dist, PyPi._get_setup_cfg(os.path.dirname(str(path_setup)))
