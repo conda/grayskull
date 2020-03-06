@@ -170,3 +170,15 @@ class Section:
     def add_items(self, items: List):
         for item in items:
             self.add_item(item)
+
+    def clear(self):
+        for val in self:
+            if isinstance(val, RecipeItem):
+                self._get_parent()[self.section_name] = CommentedSeq()
+                break
+            elif isinstance(val, Section):
+                if (self.section_name == "package" and val.section_name == "name") or (
+                    self.section_name == "build" and val.section_name == "number"
+                ):
+                    continue
+                val.clear()

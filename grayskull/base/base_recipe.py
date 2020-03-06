@@ -64,6 +64,10 @@ class Recipe:
             self["build"]["number"] = 0
         super(Recipe, self).__init__()
 
+    @property
+    def is_loaded(self):
+        return self._is_loaded
+
     def __repr__(self) -> str:
         name = self.get_var_content(self["package"]["name"].values[0])
         version = self.get_var_content(self["package"]["version"].values[0])
@@ -154,10 +158,13 @@ class Recipe:
             raise KeyError(f"Section {item} not found.")
 
     def __setitem__(self, item: str, value: Any):
+        old_version = self.get_var_content(self["package"]["version"].values[0])
         if item in self.ALL_SECTIONS:
             self._yaml[item] = value
         else:
             raise KeyError(f"Section {item} not found.")
+        if old_version != self.get_var_content(self["package"]["version"].values[0]):
+            self.set_var_content(self["build"]["number"], 0)
 
     def __iter__(self) -> Section:
         for section in self.ALL_SECTIONS:
@@ -207,8 +214,6 @@ class Recipe:
 
     def get_clean_yaml(self, recipe_yaml: CommentedMap) -> CommentedMap:
         result = self._clean_yaml(recipe_yaml)
-        if self._is_loaded:
-            return result
         return self._add_new_lines_after_section(result)
 
     def _add_new_lines_after_section(self, recipe_yaml: CommentedMap) -> CommentedMap:
@@ -251,6 +256,9 @@ class Recipe:
             section.add_item(metadata)
         return section
 
+    def clear_section(self, section: str):
+        self[section].clear()
+
 
 def update(*args: List) -> Callable:
     def decorator_func(method: Callable) -> Callable:
@@ -284,6 +292,8 @@ class MetaRecipeModel(type):
     def update(cls, *args):
         for section in args:
             func_reg = cls._registry_update[section]
+            if cls.recipe.is_loaded:
+                cls.recipe.clear_section(section)
             if "section" in inspect.signature(func_reg).parameters:
                 cls._registry_update[section](cls, section=section)
             else:
@@ -295,7 +305,7 @@ class MetaRecipeModel(type):
     def get_attr(cls, item: str) -> Any:
         if item in cls.recipe.ALL_SECTIONS:
             return MetaRecipeModel.get_item(cls, item)
-        return getattr(cls, item)
+        return getattr(cls.recipe, item)
 
     def get_item(cls, item: str) -> Any:
         return cls.recipe[item]
@@ -316,12 +326,11 @@ def __init_metaclass__(method_init: Optional[Callable]):
             cls._recipe = load_recipe
         else:
             cls._recipe = Recipe(name, version, load_recipe)
-
+        cls._pkg_name = name
         if method_init:
             method_init(
                 cls, name=name, version=version, load_recipe=load_recipe, **kwargs
             )
-
         if not load_recipe:
             cls.update_all()
 

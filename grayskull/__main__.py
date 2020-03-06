@@ -136,7 +136,7 @@ def main(args=None):
         if isinstance(recipe_loaded, Recipe):
             print(
                 f"{Fore.RED}It was not possible to guess the recipe type.\n"
-                f"Please specify it using the proper options (--pypi)."
+                f"Please specify it using the proper options (--repo=pypi)."
             )
         recipe_loaded.update(*sections_to_update)
         recipe_loaded.generate_recipe(recipe, disable_extra=True)

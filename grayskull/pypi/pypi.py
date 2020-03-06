@@ -43,8 +43,6 @@ class PyPi(metaclass=MetaRecipeModel):
     ):
         self._download = download
         self._is_arch = False
-        if name:
-            self.recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
         log.debug(
             f"PyPi initializer - name={name}, version={version},"
             f" load_recipe={load_recipe}"
@@ -397,6 +395,8 @@ class PyPi(metaclass=MetaRecipeModel):
 
         :param section: Section name
         """
+        if section == "build":
+            self.recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
         metadata = self._get_metadata()
         self.recipe.populate_metadata_from_dict(
             metadata.get(section), self.recipe[section]
