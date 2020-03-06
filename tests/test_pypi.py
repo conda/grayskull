@@ -35,7 +35,8 @@ def test_extract_pypi_requirements(pypi_metadata):
 
 
 def test_get_pypi_metadata(pypi_metadata):
-    metadata = PyPi._get_pypi_metadata(name="pytest", version="5.3.1")
+    recipe = PyPi(name="pytest", version="5.3.1")
+    metadata = recipe._get_pypi_metadata(name="pytest", version="5.3.1")
     assert metadata["name"] == "pytest"
     assert metadata["version"] == "5.3.1"
 
@@ -152,7 +153,8 @@ def test_get_sha256_from_pypi_metadata():
 
 
 def test_injection_distutils():
-    data = PyPi._get_sdist_metadata(
+    recipe = PyPi(name="hypothesis", version="5.5.1")
+    data = recipe._get_sdist_metadata(
         "https://pypi.io/packages/source/h/hypothesis/hypothesis-5.5.1.tar.gz",
         "hypothesis",
     )
@@ -168,7 +170,8 @@ def test_injection_distutils():
 
 
 def test_injection_distutils_pytest():
-    data = PyPi._get_sdist_metadata(
+    recipe = PyPi(name="pytest", version="5.3.2")
+    data = recipe._get_sdist_metadata(
         "https://pypi.io/packages/source/p/pytest/pytest-5.3.2.tar.gz", "pytest"
     )
     assert sorted(data["install_requires"]) == sorted(
@@ -192,7 +195,8 @@ def test_injection_distutils_pytest():
 
 
 def test_injection_distutils_compiler_gsw():
-    data = PyPi._get_sdist_metadata(
+    recipe = PyPi(name="gsw", version="3.3.1")
+    data = recipe._get_sdist_metadata(
         "https://pypi.io/packages/source/g/gsw/gsw-3.3.1.tar.gz", "gsw"
     )
     assert data.get("compilers") == ["c"]
@@ -200,8 +204,9 @@ def test_injection_distutils_compiler_gsw():
 
 
 def test_merge_pypi_sdist_metadata():
-    pypi_metadata = PyPi._get_pypi_metadata(name="gsw", version="3.3.1")
-    sdist_metadata = PyPi._get_sdist_metadata(pypi_metadata["sdist_url"], "gsw")
+    recipe = PyPi(name="gsw", version="3.3.1")
+    pypi_metadata = recipe._get_pypi_metadata(name="gsw", version="3.3.1")
+    sdist_metadata = recipe._get_sdist_metadata(pypi_metadata["sdist_url"], "gsw")
     merged_data = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
     assert merged_data["compilers"] == ["c"]
     assert sorted(merged_data["setup_requires"]) == sorted(["numpy"])

@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import re
@@ -38,7 +39,9 @@ class PyPi(metaclass=MetaRecipeModel):
         name: Optional[str] = None,
         version: Optional[str] = None,
         load_recipe: Union[None, str, Recipe] = None,
+        download: bool = False,
     ):
+        self._download = download
         self._is_arch = False
         if name:
             self.recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
@@ -47,9 +50,8 @@ class PyPi(metaclass=MetaRecipeModel):
             f" load_recipe={load_recipe}"
         )
 
-    @staticmethod
     @lru_cache(maxsize=10)
-    def _get_sdist_metadata(sdist_url: str, name: str) -> dict:
+    def _get_sdist_metadata(self, sdist_url: str, name: str) -> dict:
         """Method responsible to return the sdist metadata which is basically
         the metadata present in setup.py and setup.cfg
 
@@ -62,6 +64,8 @@ class PyPi(metaclass=MetaRecipeModel):
         path_pkg = os.path.join(temp_folder, pkg_name)
 
         download_pkg(pkg_url=sdist_url, dest=path_pkg)
+        if self._download:
+            self.files_to_copy.append(path_pkg)
         log.debug(f"Unpacking {path_pkg} to {temp_folder}")
         shutil.unpack_archive(path_pkg, temp_folder)
         print(f"{Fore.LIGHTBLACK_EX}Recovering information from setup.py")
@@ -501,9 +505,8 @@ class PyPi(metaclass=MetaRecipeModel):
         if short_license:
             return short_license
 
-    @staticmethod
     @lru_cache(maxsize=10)
-    def _get_pypi_metadata(name, version: Optional[str] = None) -> dict:
+    def _get_pypi_metadata(self, name, version: Optional[str] = None) -> dict:
         """Method responsible to communicate with the pypi api endpoints and
         get the whole metadata available for the specified package and version.
 
@@ -526,6 +529,13 @@ class PyPi(metaclass=MetaRecipeModel):
             )
 
         metadata = metadata.json()
+        if self._download:
+            download_file = os.path.join(
+                str(mkdtemp(f"grayskull-pypi-metadata-{name}-")), "pypi.json"
+            )
+            with open(download_file, "w") as f:
+                json.dump(metadata, f, indent=4)
+            self.files_to_copy.append(download_file)
         info = metadata["info"]
         project_urls = info.get("project_urls") if info.get("project_urls") else {}
         log.info(f"Package: {name}=={info['version']}")
