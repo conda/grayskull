@@ -390,3 +390,7 @@ def test_get_test_entry_points():
     assert PyPi._get_test_entry_points(
         ["pytest = py.test:main", "py.test = py.test:main"]
     ) == ["pytest --help", "py.test --help"]
+
+
+def test_recipe_uvicorn_entry_points_str():
+    assert PyPi(name="uvicorn", version="0.11.3")
