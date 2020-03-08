@@ -119,7 +119,7 @@ class PyPi(AbstractRecipeModel):
                 return setup_cfg.get(key, [])
             cfg_val = set(setup_cfg.get(key, []))
             result_val = set(result.get(key, []))
-            return PyPi.__rm_duplicated_deps(cfg_val.union(result_val))
+            return list(cfg_val.union(result_val))
 
         if "install_requires" in result:
             result["install_requires"] = get_full_list("install_requires")
@@ -134,7 +134,11 @@ class PyPi(AbstractRecipeModel):
         return result
 
     @staticmethod
-    def __rm_duplicated_deps(all_requirements: Union[list, set]) -> list:
+    def __rm_duplicated_deps(
+        all_requirements: Union[list, set, None]
+    ) -> Optional[list]:
+        if not all_requirements:
+            return None
         new_value = []
         for dep in all_requirements:
             if (
@@ -355,11 +359,11 @@ class PyPi(AbstractRecipeModel):
             "doc_url": get_val("doc_url"),
             "dev_url": get_val("dev_url"),
             "license": get_val("license"),
-            "setup_requires": get_val("setup_requires"),
-            "extra_requires": get_val("extra_requires"),
+            "setup_requires": PyPi.__rm_duplicated_deps(get_val("setup_requires")),
+            "extra_requires": PyPi.__rm_duplicated_deps(get_val("extra_requires")),
             "project_url": get_val("project_url"),
-            "extras_require": get_val("extras_require"),
-            "requires_dist": requires_dist,
+            "extras_require": PyPi.__rm_duplicated_deps(get_val("extras_require")),
+            "requires_dist": PyPi.__rm_duplicated_deps(requires_dist),
             "sdist_path": get_val("sdist_path"),
         }
 
@@ -666,12 +670,22 @@ class PyPi(AbstractRecipeModel):
 
         run_req.insert(0, f"python{limit_python}")
         result = (
-            {"build": sorted(map(lambda x: x.lower(), build_req))} if build_req else {}
+            {
+                "build": PyPi.__rm_duplicated_deps(
+                    sorted(map(lambda x: x.lower(), build_req))
+                )
+            }
+            if build_req
+            else {}
         )
         result.update(
             {
-                "host": sorted(map(lambda x: x.lower(), host_req)),
-                "run": sorted(map(lambda x: x.lower(), run_req)),
+                "host": PyPi.__rm_duplicated_deps(
+                    sorted(map(lambda x: x.lower(), host_req))
+                ),
+                "run": PyPi.__rm_duplicated_deps(
+                    sorted(map(lambda x: x.lower(), run_req))
+                ),
             }
         )
         self._update_requirements_with_pin(result)
@@ -704,12 +718,6 @@ class PyPi(AbstractRecipeModel):
                     deps_name = " ".join(match_req)
             deps_name = re_remove_space.sub(r"\1", deps_name.strip())
             deps_name = re_remove_tags.sub(r"", deps_name.strip())
-            if (
-                deps_name in formated_dependencies
-                or deps_name.replace("-", "_") in formated_dependencies
-                or deps_name.replace("_", "-") in formated_dependencies
-            ):
-                continue
             formated_dependencies.append(deps_name)
         return formated_dependencies
 
