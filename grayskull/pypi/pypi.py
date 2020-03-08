@@ -131,6 +131,23 @@ class PyPi(AbstractRecipeModel):
                 result["setup_requires"].remove("setuptools-scm")
         if "compilers" in result:
             result["compilers"] = get_full_list("compilers")
+        return PyPi.__rm_duplicated_deps(result)
+
+    @staticmethod
+    def __rm_duplicated_deps(all_requirements: dict) -> dict:
+        result = {}
+        for section, values in all_requirements.items():
+            new_value = []
+            for dep in values:
+                if dep in new_value:
+                    continue
+                if (
+                    dep.replace("-", "_") in new_value
+                    or dep.replace("_", "-") in new_value
+                ):
+                    continue
+                new_value.append(dep)
+            result[section] = new_value
         return result
 
     @staticmethod
@@ -691,6 +708,12 @@ class PyPi(AbstractRecipeModel):
                     deps_name = " ".join(match_req)
             deps_name = re_remove_space.sub(r"\1", deps_name.strip())
             deps_name = re_remove_tags.sub(r"", deps_name.strip())
+            if (
+                deps_name in formated_dependencies
+                or deps_name.replace("-", "_") in formated_dependencies
+                or deps_name.replace("_", "-") in formated_dependencies
+            ):
+                continue
             formated_dependencies.append(deps_name)
         return formated_dependencies
 

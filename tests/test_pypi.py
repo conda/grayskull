@@ -401,3 +401,9 @@ def test_importlib_metadata_two_setuptools_scm():
     assert "setuptools_scm" in recipe["requirements"]["host"]
     assert "setuptools-scm" not in recipe["requirements"]["host"]
     assert recipe["about"]["license"] == "Apache-2.0"
+
+
+def test_keyring_host_appearing_twice():
+    recipe = PyPi(name="keyring", version="21.1.1")
+    assert "importlib-metadata" in recipe["requirements"]["run"]
+    assert "importlib_metadata" not in recipe["requirements"]["run"]
