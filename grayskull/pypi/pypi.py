@@ -119,7 +119,7 @@ class PyPi(AbstractRecipeModel):
                 return setup_cfg.get(key, [])
             cfg_val = set(setup_cfg.get(key, []))
             result_val = set(result.get(key, []))
-            return list(cfg_val.union(result_val))
+            return PyPi.__rm_duplicated_deps(cfg_val.union(result_val))
 
         if "install_requires" in result:
             result["install_requires"] = get_full_list("install_requires")
@@ -131,24 +131,20 @@ class PyPi(AbstractRecipeModel):
                 result["setup_requires"].remove("setuptools-scm")
         if "compilers" in result:
             result["compilers"] = get_full_list("compilers")
-        return PyPi.__rm_duplicated_deps(result)
+        return result
 
     @staticmethod
-    def __rm_duplicated_deps(all_requirements: dict) -> dict:
-        result = {}
-        for section, values in all_requirements.items():
-            new_value = []
-            for dep in values:
-                if dep in new_value:
-                    continue
-                if (
-                    dep.replace("-", "_") in new_value
-                    or dep.replace("_", "-") in new_value
-                ):
-                    continue
-                new_value.append(dep)
-            result[section] = new_value
-        return result
+    def __rm_duplicated_deps(all_requirements: Union[list, set]) -> list:
+        new_value = []
+        for dep in all_requirements:
+            if (
+                dep in new_value
+                or dep.replace("-", "_") in new_value
+                or dep.replace("_", "-") in new_value
+            ):
+                continue
+            new_value.append(dep)
+        return new_value
 
     @staticmethod
     def _get_setup_cfg(source_path: str) -> dict:
