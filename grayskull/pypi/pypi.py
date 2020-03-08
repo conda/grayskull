@@ -134,6 +134,23 @@ class PyPi(AbstractRecipeModel):
         return result
 
     @staticmethod
+    def __rm_duplicated_deps(
+        all_requirements: Union[list, set, None]
+    ) -> Optional[list]:
+        if not all_requirements:
+            return None
+        new_value = []
+        for dep in all_requirements:
+            if (
+                dep in new_value
+                or dep.replace("-", "_") in new_value
+                or dep.replace("_", "-") in new_value
+            ):
+                continue
+            new_value.append(dep)
+        return new_value
+
+    @staticmethod
     def _get_setup_cfg(source_path: str) -> dict:
         """Method responsible to extract the setup.cfg metadata
 
@@ -652,13 +669,22 @@ class PyPi(AbstractRecipeModel):
             host_req += [f"python{limit_python}", "pip"]
 
         run_req.insert(0, f"python{limit_python}")
-        result = (
-            {"build": sorted(map(lambda x: x.lower(), build_req))} if build_req else {}
-        )
+        result = {}
+        if build_req:
+            result = {
+                "build": PyPi.__rm_duplicated_deps(
+                    sorted(map(lambda x: x.lower(), build_req))
+                )
+            }
+
         result.update(
             {
-                "host": sorted(map(lambda x: x.lower(), host_req)),
-                "run": sorted(map(lambda x: x.lower(), run_req)),
+                "host": PyPi.__rm_duplicated_deps(
+                    sorted(map(lambda x: x.lower(), host_req))
+                ),
+                "run": PyPi.__rm_duplicated_deps(
+                    sorted(map(lambda x: x.lower(), run_req))
+                ),
             }
         )
         self._update_requirements_with_pin(result)
