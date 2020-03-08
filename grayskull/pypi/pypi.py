@@ -355,7 +355,8 @@ class PyPi(AbstractRecipeModel):
             "compilers": PyPi._get_compilers(requires_dist, sdist_metadata),
             "entry_points": PyPi._get_entry_points_from_sdist(sdist_metadata),
             "summary": get_val("summary"),
-            "requires_python": get_val("requires_python"),
+            "requires_python": pypi_metadata.get("requires_python")
+            or sdist_metadata.get("python_requires"),
             "doc_url": get_val("doc_url"),
             "dev_url": get_val("dev_url"),
             "license": get_val("license"),
@@ -645,7 +646,7 @@ class PyPi(AbstractRecipeModel):
         )
         host_req = PyPi._format_dependencies(setup_requires, name)
 
-        if not requires_dist and not host_req:
+        if not requires_dist and not host_req and not metadata.get("requires_python"):
             return {"host": sorted(["python", "pip"]), "run": ["python"]}
 
         run_req = self._get_run_req_from_requires_dist(requires_dist)
@@ -853,6 +854,10 @@ class PyPi(AbstractRecipeModel):
             return None
 
         py_ver_enabled = PyPi._get_py_version_available(req_python)
+        for py_ver in py_ver_enabled.keys():
+            if py_ver >= PyVer(3, 0):
+                small_py3_version = py_ver
+                break
         all_py = list(py_ver_enabled.values())
         if all(all_py):
             return None
@@ -860,12 +865,14 @@ class PyPi(AbstractRecipeModel):
             return (
                 "# [py2k]"
                 if is_selector
-                else f">={SUPPORTED_PY[1].major}.{SUPPORTED_PY[1].minor}"
+                else f">={small_py3_version.major}.{small_py3_version.minor}"
             )
         if py_ver_enabled.get(PyVer(2, 7)) and any(all_py[1:]) is False:
             return "# [py3k]" if is_selector else "<3.0"
 
-        for pos, py_ver in enumerate(SUPPORTED_PY[1:], 1):
+        for pos, py_ver in enumerate(py_ver_enabled):
+            if py_ver == PyVer(2, 7):
+                continue
             if all(all_py[pos:]) and any(all_py[:pos]) is False:
                 return (
                     f"# [py<{py_ver.major}{py_ver.minor}]"
@@ -881,7 +888,7 @@ class PyPi(AbstractRecipeModel):
                 else:
                     py2 = ""
                     if not all_py[0]:
-                        py2 = f">=3.6,"
+                        py2 = f">={small_py3_version.major}.{small_py3_version.minor},"
                     return f"{py2}<{py_ver.major}.{py_ver.minor}"
 
         all_selector = PyPi._get_py_multiple_selectors(
@@ -912,12 +919,21 @@ class PyPi(AbstractRecipeModel):
         :param req_python: Requires python
         :return: Dict of Python versions if it is enabled or disabled
         """
-        py_ver_enabled = {py_ver: True for py_ver in SUPPORTED_PY}
+        sup_python_ver = deepcopy(SUPPORTED_PY)
+        for _, major, minor in req_python:
+            if not minor:
+                minor = 0
+            new_py_ver = PyVer(int(major), int(minor))
+            if new_py_ver in sup_python_ver:
+                continue
+            sup_python_ver.append(new_py_ver)
+        sup_python_ver.sort()
+        py_ver_enabled = {py_ver: True for py_ver in sup_python_ver}
         for op, major, minor in req_python:
             if not minor:
                 minor = 0
-            for sup_py in SUPPORTED_PY:
-                if py_ver_enabled[sup_py] is False:
+            for sup_py, is_enabled in py_ver_enabled.items():
+                if is_enabled is False:
                     continue
                 py_ver_enabled[sup_py] = eval(
                     f"sup_py {op} PyVer(int({major}), int({minor}))"
