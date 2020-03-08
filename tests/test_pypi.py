@@ -400,3 +400,4 @@ def test_importlib_metadata_two_setuptools_scm():
     recipe = PyPi(name="importlib-metadata", version="1.5.0")
     assert "setuptools_scm" in recipe["requirements"]["host"]
     assert "setuptools-scm" not in recipe["requirements"]["host"]
+    assert recipe["about"]["license"] == "Apache-2.0"
