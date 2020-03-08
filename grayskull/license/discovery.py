@@ -275,6 +275,14 @@ def get_license_type(path_license: str, default: Optional[str] = None) -> Option
     """
     with open(path_license, "r") as license_file:
         license_content = license_file.read()
+    find_apache = re.findall(
+        r"apache\.org\/licenses\/LICENSE\-([0-9])\.([0-9])",
+        license_content,
+        re.IGNORECASE,
+    )
+    if find_apache:
+        lic_type = find_apache[0]
+        return f"Apache-{lic_type[0]}.{lic_type[1]}"
     print(f"{Fore.LIGHTBLACK_EX}Matching license file with database from Grayskull...")
     all_licenses = get_all_licenses()
     licenses_text = list(map(itemgetter(1), all_licenses))
