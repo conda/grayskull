@@ -100,7 +100,7 @@ def test_get_selector():
         ("<=3.7", ">=38"),
         ("<=3.7.1", ">=38"),
         ("<3.7", ">=37"),
-        (">2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*", "2k"),
+        (">2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*", "<36"),
         (">=2.7, !=3.6.*", "==36"),
         (">3.7", "<38"),
         (">2.7", "2k"),
@@ -116,7 +116,7 @@ def test_py_version_to_selector(requires_python, exp_selector):
 @pytest.mark.parametrize(
     "requires_python, exp_limit",
     [
-        (">=3.5", ">=3.6"),
+        (">=3.5", ">=3.5"),
         (">=3.6", ">=3.6"),
         (">=3.7", ">=3.7"),
         ("<=3.7", "<3.8"),
@@ -375,7 +375,7 @@ def test_zipp_recipe_tags_on_deps():
 
 
 def test_generic_py_ver_to():
-    assert PyPi._generic_py_ver_to({"requires_python": ">=3.5, <3.8"}) == ">=3.6,<3.8"
+    assert PyPi._generic_py_ver_to({"requires_python": ">=3.5, <3.8"}) == ">=3.5,<3.8"
 
 
 def test_botocore_recipe_license_name():
@@ -407,3 +407,10 @@ def test_keyring_host_appearing_twice():
     recipe = PyPi(name="keyring", version="21.1.1")
     assert "importlib-metadata" in recipe["requirements"]["run"]
     assert "importlib_metadata" not in recipe["requirements"]["run"]
+
+
+def test_python_requires_setup_py():
+    recipe = PyPi(name="pygments", version="2.6.1")
+    assert "noarch" in recipe["build"]
+    assert "python >=3.5" in recipe["requirements"]["host"]
+    assert "python >=3.5" in recipe["requirements"]["run"]
