@@ -854,10 +854,7 @@ class PyPi(AbstractRecipeModel):
             return None
 
         py_ver_enabled = PyPi._get_py_version_available(req_python)
-        for py_ver in py_ver_enabled.keys():
-            if py_ver >= PyVer(3, 0):
-                small_py3_version = py_ver
-                break
+        small_py3_version = get_small_py3_version(list(py_ver_enabled.keys()))
         all_py = list(py_ver_enabled.values())
         if all(all_py):
             return None
@@ -952,7 +949,11 @@ class PyPi(AbstractRecipeModel):
         """
         all_selector = []
         if selectors[PyVer(2, 7)] is False:
-            all_selector += ["py2k"] if is_selector else [">=3.6"]
+            all_selector += (
+                ["py2k"]
+                if is_selector
+                else get_small_py3_version(list(selectors.keys()))
+            )
         for py_ver, is_enabled in selectors.items():
             if py_ver == PyVer(2, 7) or is_enabled:
                 continue
@@ -983,3 +984,10 @@ class PyPi(AbstractRecipeModel):
         if option == "sys_platform":
             value = re.sub(r"[^a-zA-Z]+", "", value)
             return value.lower()
+
+
+def get_small_py3_version(list_py_ver: List[PyVer]) -> PyVer:
+    list_py_ver = sorted(list_py_ver)
+    for py_ver in list_py_ver:
+        if py_ver >= PyVer(3, 0):
+            return py_ver
