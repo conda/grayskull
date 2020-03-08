@@ -359,11 +359,11 @@ class PyPi(AbstractRecipeModel):
             "doc_url": get_val("doc_url"),
             "dev_url": get_val("dev_url"),
             "license": get_val("license"),
-            "setup_requires": PyPi.__rm_duplicated_deps(get_val("setup_requires")),
-            "extra_requires": PyPi.__rm_duplicated_deps(get_val("extra_requires")),
+            "setup_requires": get_val("setup_requires"),
+            "extra_requires": get_val("extra_requires"),
             "project_url": get_val("project_url"),
-            "extras_require": PyPi.__rm_duplicated_deps(get_val("extras_require")),
-            "requires_dist": PyPi.__rm_duplicated_deps(requires_dist),
+            "extras_require": get_val("extras_require"),
+            "requires_dist": requires_dist,
             "sdist_path": get_val("sdist_path"),
         }
 
@@ -669,15 +669,14 @@ class PyPi(AbstractRecipeModel):
             host_req += [f"python{limit_python}", "pip"]
 
         run_req.insert(0, f"python{limit_python}")
-        result = (
-            {
+        result = {}
+        if build_req:
+            result = {
                 "build": PyPi.__rm_duplicated_deps(
                     sorted(map(lambda x: x.lower(), build_req))
                 )
             }
-            if build_req
-            else {}
-        )
+
         result.update(
             {
                 "host": PyPi.__rm_duplicated_deps(
