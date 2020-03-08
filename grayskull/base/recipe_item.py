@@ -67,7 +67,7 @@ class RecipeItem:
 
     @value.setter
     def value(self, value: Union[str, int]):
-        column = 7
+        column = 8
         if isinstance(value, int):
             column += len(str(value))
             self.__yaml()[self.__pos] = value
@@ -80,7 +80,7 @@ class RecipeItem:
         selector = self._extract_selector(str(value))
         if selector:
             sel = f"[{selector}]"
-            self.__yaml().yaml_add_eol_comment(sel, self.__pos, column + len(sel))
+            self.__yaml().yaml_add_eol_comment(sel, self.__pos, column=column)
 
     @property
     def selector(self) -> Optional[str]:
