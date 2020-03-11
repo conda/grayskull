@@ -430,3 +430,8 @@ def test_get_test_imports():
     ]
     assert PyPi._get_test_imports({"packages": None}, default="pkg-mod") == ["pkg_mod"]
     assert PyPi._get_test_imports({"packages": "pkg"}, default="pkg-mod") == ["pkg"]
+
+
+def test_nbdime_license_type():
+    recipe = PyPi(name="nbdime", version="2.0.0")
+    assert recipe["about"]["license"] == "BSD-3-Clause"

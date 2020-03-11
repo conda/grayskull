@@ -13,7 +13,7 @@ from typing import List, Optional, Union
 import requests
 from colorama import Fore
 from fuzzywuzzy import process
-from fuzzywuzzy.fuzz import token_sort_ratio
+from fuzzywuzzy.fuzz import token_set_ratio, token_sort_ratio
 from requests import HTTPError
 
 from grayskull.license.data import get_all_licenses  # noqa
@@ -286,12 +286,18 @@ def get_license_type(path_license: str, default: Optional[str] = None) -> Option
     print(f"{Fore.LIGHTBLACK_EX}Matching license file with database from Grayskull...")
     all_licenses = get_all_licenses()
     licenses_text = list(map(itemgetter(1), all_licenses))
-    best_match = process.extractOne(
+    best_match = process.extractBests(
         license_content, licenses_text, scorer=token_sort_ratio
     )
 
-    if default and best_match[1] < 76:
+    if default and best_match[0][1] < 51:
         log.info(f"Match too low for recipe {best_match}, using the default {default}")
         return default
-    index_license = licenses_text.index(best_match[0])
+    higher_match = best_match[0]
+    equal_values = [val[0] for val in best_match if higher_match[1] == val[1]]
+    if len(equal_values) > 1:
+        higher_match = process.extractOne(
+            license_content, equal_values, scorer=token_set_ratio
+        )
+    index_license = licenses_text.index(higher_match[0])
     return all_licenses[index_license][0]
