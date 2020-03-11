@@ -350,7 +350,7 @@ class PyPi(AbstractRecipeModel):
             "version": get_val("version"),
             "source": pypi_metadata.get("source"),
             "packages": get_val("packages"),
-            "home": get_val("home"),
+            "url": get_val("url"),
             "classifiers": get_val("classifiers"),
             "compilers": PyPi._get_compilers(requires_dist, sdist_metadata),
             "entry_points": PyPi._get_entry_points_from_sdist(sdist_metadata),
@@ -490,13 +490,13 @@ class PyPi(AbstractRecipeModel):
         print_req("run", all_requirements["run"])
 
         test_entry_points = PyPi._get_test_entry_points(metadata.get("entry_points"))
-
+        test_imports = PyPi._get_test_imports(metadata, pypi_metadata["name"])
         return {
             "package": {"name": name, "version": metadata["version"]},
             "build": {"entry_points": metadata.get("entry_points")},
             "requirements": all_requirements,
             "test": {
-                "imports": pypi_metadata["name"].replace("-", "_"),
+                "imports": test_imports,
                 "commands": ["pip check"] + test_entry_points,
                 "requires": "pip",
             },
@@ -510,6 +510,17 @@ class PyPi(AbstractRecipeModel):
             },
             "source": metadata.get("source", {}),
         }
+
+    @staticmethod
+    def _get_test_imports(metadata: dict, default: Optional[str] = None) -> List:
+        if default:
+            default = default.replace("-", "_")
+        if "packages" not in metadata or not metadata["packages"]:
+            return [default]
+        meta_pkg = metadata["packages"]
+        if isinstance(meta_pkg, str):
+            meta_pkg = [metadata["packages"]]
+        return sorted(meta_pkg)[:2]
 
     @staticmethod
     def _get_test_entry_points(entry_points: Union[List, str]) -> List:
@@ -531,8 +542,10 @@ class PyPi(AbstractRecipeModel):
         the license.
         """
         git_url = metadata.get("dev_url", None)
-        if not git_url and "github.com/" in metadata.get("project_url"):
+        if not git_url and "github.com/" in metadata.get("project_url", ""):
             git_url = metadata.get("project_url")
+        if not git_url and "github.com/" in metadata.get("url", ""):
+            git_url = metadata.get("url")
 
         short_license = search_license_file(
             metadata.get("sdist_path"),
@@ -587,6 +600,7 @@ class PyPi(AbstractRecipeModel):
             "project_url": info.get("project_url"),
             "doc_url": info.get("docs_url"),
             "dev_url": project_urls.get("Source"),
+            "url": info.get("home_page"),
             "license": info.get("license"),
             "source": {
                 "url": "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/"
