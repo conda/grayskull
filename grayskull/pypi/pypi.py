@@ -350,7 +350,7 @@ class PyPi(AbstractRecipeModel):
             "version": get_val("version"),
             "source": pypi_metadata.get("source"),
             "packages": get_val("packages"),
-            "home": get_val("home"),
+            "url": get_val("url"),
             "classifiers": get_val("classifiers"),
             "compilers": PyPi._get_compilers(requires_dist, sdist_metadata),
             "entry_points": PyPi._get_entry_points_from_sdist(sdist_metadata),
@@ -544,8 +544,8 @@ class PyPi(AbstractRecipeModel):
         git_url = metadata.get("dev_url", None)
         if not git_url and "github.com/" in metadata.get("project_url", ""):
             git_url = metadata.get("project_url")
-        if not git_url and "github.com/" in metadata.get("home", ""):
-            git_url = metadata.get("home")
+        if not git_url and "github.com/" in metadata.get("url", ""):
+            git_url = metadata.get("url")
 
         short_license = search_license_file(
             metadata.get("sdist_path"),
@@ -600,7 +600,7 @@ class PyPi(AbstractRecipeModel):
             "project_url": info.get("project_url"),
             "doc_url": info.get("docs_url"),
             "dev_url": project_urls.get("Source"),
-            "home": info.get("home_page"),
+            "url": info.get("home_page"),
             "license": info.get("license"),
             "source": {
                 "url": "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/"
