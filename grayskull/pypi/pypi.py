@@ -490,13 +490,13 @@ class PyPi(AbstractRecipeModel):
         print_req("run", all_requirements["run"])
 
         test_entry_points = PyPi._get_test_entry_points(metadata.get("entry_points"))
-
+        test_imports = PyPi._get_test_imports(metadata, pypi_metadata["name"])
         return {
             "package": {"name": name, "version": metadata["version"]},
             "build": {"entry_points": metadata.get("entry_points")},
             "requirements": all_requirements,
             "test": {
-                "imports": pypi_metadata["name"].replace("-", "_"),
+                "imports": test_imports,
                 "commands": ["pip check"] + test_entry_points,
                 "requires": "pip",
             },
@@ -510,6 +510,17 @@ class PyPi(AbstractRecipeModel):
             },
             "source": metadata.get("source", {}),
         }
+
+    @staticmethod
+    def _get_test_imports(metadata: dict, default: Optional[str] = None) -> List:
+        if default:
+            default = default.replace("-", "_")
+        if "packages" not in metadata or not metadata["packages"]:
+            return [default]
+        meta_pkg = metadata["packages"]
+        if isinstance(meta_pkg, str):
+            meta_pkg = [metadata["packages"]]
+        return sorted(meta_pkg)[:2]
 
     @staticmethod
     def _get_test_entry_points(entry_points: Union[List, str]) -> List:

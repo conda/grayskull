@@ -421,3 +421,12 @@ def test_django_rest_framework_xml_license():
     assert recipe["about"]["license"] == "BSD-3-Clause"
     assert recipe["about"]["license_file"] == "LICENSE"
     assert recipe["test"]["imports"][0].value == "rest_framework_xml"
+
+
+def test_get_test_imports():
+    assert PyPi._get_test_imports({"packages": ["pkg", "pkg.mod1", "pkg.mod2"]}) == [
+        "pkg",
+        "pkg.mod1",
+    ]
+    assert PyPi._get_test_imports({"packages": None}, default="pkg-mod") == ["pkg_mod"]
+    assert PyPi._get_test_imports({"packages": "pkg"}, default="pkg-mod") == ["pkg"]
