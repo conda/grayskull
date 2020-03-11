@@ -314,7 +314,7 @@ def test_download_pkg_sdist(pkg_pytest):
 def test_ciso_recipe():
     recipe = PyPi(name="ciso", version="0.1.0")
     assert sorted(recipe["requirements"]["host"]) == sorted(
-        ["cython", "numpy", "pip", "python", "versioneer"]
+        ["cython", "numpy", "pip", "python"]
     )
     assert sorted(recipe["requirements"]["run"]) == sorted(
         ["cython", "python", "<{ pin_compatible('numpy') }}"]
@@ -437,3 +437,4 @@ def test_get_test_imports():
 def test_nbdime_license_type():
     recipe = PyPi(name="nbdime", version="2.0.0")
     assert recipe["about"]["license"] == "BSD-3-Clause"
+    assert "setupbase" not in recipe["requirements"]["host"]

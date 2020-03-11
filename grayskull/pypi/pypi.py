@@ -721,6 +721,7 @@ class PyPi(AbstractRecipeModel):
         re_remove_space = re.compile(r"([<>!=]+)\s+")
         re_remove_tags = re.compile(r"\s*(\[.*\])", re.DOTALL)
         for req in all_dependencies:
+
             match_req = re_deps.match(req)
             deps_name = req
             if deps_name.replace("-", "_") == name.replace("-", "_"):
