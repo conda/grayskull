@@ -1,6 +1,7 @@
 import hashlib
 import json
 import os
+import sys
 
 import pytest
 
@@ -416,6 +417,7 @@ def test_python_requires_setup_py():
     assert "python >=3.5" in recipe["requirements"]["run"]
 
 
+@pytest.mark.skipif(sys.platform.startswith("darwin"), reason="Skipping OSX test")
 def test_django_rest_framework_xml_license():
     recipe = PyPi(name="djangorestframework-xml", version="1.4.0")
     assert recipe["about"]["license"] == "BSD-3-Clause"
