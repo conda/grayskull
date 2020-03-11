@@ -1,6 +1,7 @@
 import hashlib
 import json
 import os
+import sys
 
 import pytest
 
@@ -416,6 +417,7 @@ def test_python_requires_setup_py():
     assert "python >=3.5" in recipe["requirements"]["run"]
 
 
+@pytest.mark.skipif(sys.platform.startswith("darwin"), reason="Skipping OSX test")
 def test_django_rest_framework_xml_license():
     recipe = PyPi(name="djangorestframework-xml", version="1.4.0")
     assert recipe["about"]["license"] == "BSD-3-Clause"
@@ -430,3 +432,8 @@ def test_get_test_imports():
     ]
     assert PyPi._get_test_imports({"packages": None}, default="pkg-mod") == ["pkg_mod"]
     assert PyPi._get_test_imports({"packages": "pkg"}, default="pkg-mod") == ["pkg"]
+
+
+def test_nbdime_license_type():
+    recipe = PyPi(name="nbdime", version="2.0.0")
+    assert recipe["about"]["license"] == "BSD-3-Clause"
