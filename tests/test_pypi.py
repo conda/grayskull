@@ -314,7 +314,7 @@ def test_download_pkg_sdist(pkg_pytest):
 def test_ciso_recipe():
     recipe = PyPi(name="ciso", version="0.1.0")
     assert sorted(recipe["requirements"]["host"]) == sorted(
-        ["cython", "numpy", "pip", "python", "versioneer"]
+        ["cython", "numpy", "pip", "python"]
     )
     assert sorted(recipe["requirements"]["run"]) == sorted(
         ["cython", "python", "<{ pin_compatible('numpy') }}"]
