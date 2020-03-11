@@ -437,3 +437,4 @@ def test_get_test_imports():
 def test_nbdime_license_type():
     recipe = PyPi(name="nbdime", version="2.0.0")
     assert recipe["about"]["license"] == "BSD-3-Clause"
+    assert "setupbase" not in recipe["requirements"]["host"]
