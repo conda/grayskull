@@ -414,3 +414,10 @@ def test_python_requires_setup_py():
     assert "noarch" in recipe["build"]
     assert "python >=3.5" in recipe["requirements"]["host"]
     assert "python >=3.5" in recipe["requirements"]["run"]
+
+
+def test_django_rest_framework_xml_license():
+    recipe = PyPi(name="djangorestframework-xml", version="1.4.0")
+    assert recipe["about"]["license"] == "BSD-3-Clause"
+    assert recipe["about"]["license_file"] == "LICENSE"
+    assert recipe["test"]["imports"][0].value == "rest_framework_xml"
