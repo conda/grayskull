@@ -328,7 +328,14 @@ class PyPi(AbstractRecipeModel):
             and dep_name.lower() != "setuptools"
         ):
             data_dist["setup_requires"].append(dep_name.lower())
-        check_output(["pip", "install", dep_name, f"--target={pip_dir}"])
+        try:
+            check_output(["pip", "install", dep_name, f"--target={pip_dir}"])
+        except Exception as err:
+            log.error(
+                f"It was not possible to install {dep_name}.\n"
+                f"Command: pip install {dep_name} --target={pip_dir}.\n"
+                f"Error: {err}"
+            )
 
     @staticmethod
     def _merge_pypi_sdist_metadata(pypi_metadata: dict, sdist_metadata: dict) -> dict:
@@ -415,19 +422,33 @@ class PyPi(AbstractRecipeModel):
         pypi_deps_name = set()
         requires_dist = []
         all_deps = []
-        if pypi_metadata.get("requires_dist"):
-            all_deps = pypi_metadata.get("requires_dist", [])
         if sdist_metadata.get("install_requires"):
             all_deps += sdist_metadata.get("install_requires", [])
+        if pypi_metadata.get("requires_dist"):
+            all_deps = pypi_metadata.get("requires_dist", [])
 
         for sdist_pkg in all_deps:
             match_deps = PyPi.RE_DEPS_NAME.match(sdist_pkg)
-            if match_deps:
-                match_deps = match_deps.group(0).strip()
-                if match_deps not in pypi_deps_name:
-                    pypi_deps_name.add(match_deps)
-                    requires_dist.append(sdist_pkg)
+            if not match_deps:
+                continue
+            match_deps = match_deps.group(0).strip()
+            pkg_name = PyPi._normalize_pkg_name(match_deps)
+            if pkg_name in pypi_deps_name:
+                continue
+
+            pypi_deps_name.add(pkg_name)
+            requires_dist.append(sdist_pkg.replace(match_deps, pkg_name))
         return requires_dist
+
+    @staticmethod
+    def _normalize_pkg_name(pkg_name: str) -> str:
+        if is_pkg_available(pkg_name):
+            return pkg_name
+        if is_pkg_available(pkg_name.replace("-", "_")):
+            return pkg_name.replace("-", "_")
+        elif is_pkg_available(pkg_name.replace("_", "-")):
+            return pkg_name.replace("_", "-")
+        return pkg_name
 
     def refresh_section(self, section: str = ""):
         """Update one specific section.
@@ -1006,3 +1027,10 @@ def get_small_py3_version(list_py_ver: List[PyVer]) -> PyVer:
     for py_ver in list_py_ver:
         if py_ver >= PyVer(3, 0):
             return py_ver
+
+
+def is_pkg_available(pkg_name: str, channel: str = "conda-forge") -> bool:
+    response = requests.get(
+        url=f"https://anaconda.org/{channel}/{pkg_name}/files", allow_redirects=False
+    )
+    return response.status_code == 200
