@@ -438,3 +438,26 @@ def test_nbdime_license_type():
     recipe = PyPi(name="nbdime", version="2.0.0")
     assert recipe["about"]["license"] == "BSD-3-Clause"
     assert "setupbase" not in recipe["requirements"]["host"]
+
+
+def test_normalize_pkg_name():
+    assert PyPi._normalize_pkg_name("mypy-extensions") == "mypy_extensions"
+    assert PyPi._normalize_pkg_name("mypy_extensions") == "mypy_extensions"
+    assert PyPi._normalize_pkg_name("pytest") == "pytest"
+
+
+def test_mypy_deps_normalization_and_entry_points():
+    recipe = PyPi(name="mypy", version="0.770")
+    assert "mypy_extensions <0.5.0,>=0.4.3" in recipe["requirements"]["run"]
+    assert "mypy-extensions <0.5.0,>=0.4.3" not in recipe["requirements"]["run"]
+    assert "typed-ast <1.5.0,>=1.4.0" in recipe["requirements"]["run"]
+    assert "typed_ast <1.5.0,>=1.4.0" not in recipe["requirements"]["run"]
+    assert "typing-extensions >=3.7.4" in recipe["requirements"]["run"]
+    assert "typing_extensions >=3.7.4" not in recipe["requirements"]["run"]
+
+    assert recipe["build"]["entry_points"].values == [
+        "mypy=mypy.__main__:console_entry",
+        "stubgen=mypy.stubgen:main",
+        "stubtest=mypy.stubtest:main",
+        "dmypy=mypy.dmypy.client:console_entry",
+    ]
