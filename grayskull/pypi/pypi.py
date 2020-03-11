@@ -600,7 +600,7 @@ class PyPi(AbstractRecipeModel):
             "project_url": info.get("project_url"),
             "doc_url": info.get("docs_url"),
             "dev_url": project_urls.get("Source"),
-            "home": info.get("home_page", ""),
+            "home": info.get("home_page"),
             "license": info.get("license"),
             "source": {
                 "url": "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/"
