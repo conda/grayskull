@@ -58,7 +58,8 @@ def get_vendored_dependencies(script_file: str) -> List:
 @lru_cache(maxsize=20)
 def get_local_modules(sdist_folder: str) -> List:
     result = []
-    for py_file in glob("*.py"):
+    for py_file in glob(f"{sdist_folder}/*.py"):
+        py_file = os.path.basename(py_file)
         if py_file == "setup.py":
             continue
         result.append(os.path.splitext(py_file)[0])
