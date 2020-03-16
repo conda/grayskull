@@ -10,7 +10,7 @@ from colorama.ansi import clear_screen
 import grayskull
 from grayskull.base.base_recipe import Recipe
 from grayskull.base.factory import GrayskullFactory
-from grayskull.cli.parser import parse_pkg_name_version
+from grayskull.cli.parser import parse_pkg_name_version, parse_pkg_path_version
 
 colorama.init(autoreset=True)
 logging.basicConfig(format="%(levelname)s:%(message)s")
@@ -107,7 +107,7 @@ def main(args=None):
         )
         return
 
-    if hasattr(args, "pypi_packages"):
+    if hasattr(args, "pypi_packages") and args.pypi_packages:
         for pkg_name in args.pypi_packages:
             logging.debug(f"Starting grayskull for pkg: {pkg_name}")
             print(
@@ -124,7 +124,7 @@ def main(args=None):
                 f"\n{Fore.GREEN}#### Recipe generated on "
                 f"{os.path.realpath(args.output)} for {pkg_name} ####\n"
             )
-            sys.exit()
+        return
 
     sections_to_update = args.list_sections
     for recipe in args.recipes:
@@ -132,14 +132,26 @@ def main(args=None):
             f"{Fore.GREEN}\n\n"
             f"#### Loading recipe {Fore.BLUE}{recipe}{Fore.GREEN} ####"
         )
-        recipe_loaded = GrayskullFactory.load_recipe(recipe, args.repo_type)
+        pkg_name, pkg_version = parse_pkg_path_version(recipe)
+        recipe_loaded = GrayskullFactory.load_recipe(pkg_name, args.repo_type)
         if isinstance(recipe_loaded, Recipe):
             print(
                 f"{Fore.RED}It was not possible to guess the recipe type.\n"
                 f"Please specify it using the proper options (--repo=pypi)."
             )
+        if pkg_version:
+            recipe_loaded.set_var_content(
+                recipe_loaded["package"]["version"].values[0], pkg_version
+            )
+        else:
+            recipe_loaded.set_var_content(
+                recipe_loaded["package"]["version"].values[0], ""
+            )
+        if "package" not in sections_to_update:
+            sections_to_update.insert(0, "source")
+            sections_to_update.insert(0, "package")
         recipe_loaded.update(*sections_to_update)
-        recipe_loaded.generate_recipe(recipe, disable_extra=True)
+        recipe_loaded.generate_recipe(pkg_name, disable_extra=True)
         print(f"\n{Fore.GREEN}#### Recipe sections were updated ####\n")
 
 

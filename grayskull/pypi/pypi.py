@@ -43,6 +43,7 @@ class PyPi(metaclass=MetaRecipeModel):
     ):
         self._download = download
         self._is_arch = False
+        self._metadata = None
         log.debug(
             f"PyPi initializer - name={name}, version={version},"
             f" load_recipe={load_recipe}"
@@ -423,13 +424,16 @@ class PyPi(metaclass=MetaRecipeModel):
 
     @update("package")
     def _update_package(self):
-        metadata = self._get_metadata()
+        version = None
+        if self.recipe["package"]["version"].values:
+            version = self.recipe.get_var_content(
+                self.recipe["package"]["version"].values[0]
+            )
+        metadata = self._get_metadata(version)
         self.recipe.set_jinja_var("version", metadata["package"]["version"])
         self.recipe["package"]["version"] = "<{ version }}"
 
-    @update(
-        "source", "build", "outputs", "requirements", "app", "test", "about", "extra"
-    )
+    @update("source", "build", "outputs", "requirements", "test", "about", "extra")
     def _update_sections(self, section: str):
         """Update one specific section.
 
@@ -437,7 +441,9 @@ class PyPi(metaclass=MetaRecipeModel):
         """
         if section == "build":
             self.recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
-        metadata = self._get_metadata()
+        metadata = self._get_metadata(
+            self.recipe.get_var_content(self.recipe["package"]["version"].values[0])
+        )
         self.recipe.populate_metadata_from_dict(
             metadata.get(section), self.recipe[section]
         )
@@ -445,16 +451,15 @@ class PyPi(metaclass=MetaRecipeModel):
             self.recipe["build"]["noarch"] = "python"
 
     @lru_cache(maxsize=10)
-    def _get_metadata(self) -> dict:
+    def _get_metadata(self, version: Optional[str] = "") -> dict:
         """Method responsible to get the whole metadata available. It will
         merge metadata from multiple sources (pypi, setup.py, setup.cfg)
         """
+        if self._metadata and self._metadata["package"]["version"] == version:
+            return self._metadata
+        if not version:
+            version = self.recipe.get_var_content(self["package"]["version"].values[0])
         name = self.recipe.get_var_content(self["package"]["name"].values[0])
-        version = ""
-        if self.recipe["package"]["version"].values:
-            version = self.recipe.get_var_content(
-                self.recipe["package"]["version"].values[0]
-            )
         pypi_metadata = self._get_pypi_metadata(name, version)
         sdist_metadata = self._get_sdist_metadata(
             sdist_url=pypi_metadata["sdist_url"], name=name
@@ -493,7 +498,7 @@ class PyPi(metaclass=MetaRecipeModel):
 
         test_entry_points = PyPi._get_test_entry_points(metadata.get("entry_points"))
         test_imports = PyPi._get_test_imports(metadata, pypi_metadata["name"])
-        return {
+        self._metadata = {
             "package": {"name": name, "version": metadata["version"]},
             "build": {"entry_points": metadata.get("entry_points")},
             "requirements": all_requirements,
@@ -512,6 +517,7 @@ class PyPi(metaclass=MetaRecipeModel):
             },
             "source": metadata.get("source", {}),
         }
+        return self._metadata
 
     @staticmethod
     def _get_test_imports(metadata: dict, default: Optional[str] = None) -> List:
@@ -670,8 +676,6 @@ class PyPi(metaclass=MetaRecipeModel):
         build_req = [f"<{{ compiler('{c}') }}}}" for c in metadata.get("compilers", [])]
         if build_req:
             self._is_arch = True
-        else:
-            self._is_arch = False
 
         if self._is_arch:
             version_to_selector = PyPi.py_version_to_selector(metadata)

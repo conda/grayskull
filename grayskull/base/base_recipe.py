@@ -217,6 +217,24 @@ class Recipe:
         return self._add_new_lines_after_section(result)
 
     def _add_new_lines_after_section(self, recipe_yaml: CommentedMap) -> CommentedMap:
+        if self.is_loaded:
+            if (
+                recipe_yaml.ca
+                and len(recipe_yaml.ca.comment) > 1
+                and recipe_yaml.ca.comment[1][-1].value
+            ):
+                find_new_line = re.match(
+                    r"\s+$", recipe_yaml.ca.comment[1][-1].value, re.MULTILINE
+                )
+                if find_new_line:
+                    recipe_yaml.ca.comment[1][-1].value = re.sub(
+                        r"\s+$", "\n\n\n", recipe_yaml.ca.comment[1][-1].value
+                    )
+                else:
+                    recipe_yaml.ca.comment[1][
+                        -1
+                    ].value = f"{recipe_yaml.ca.comment[1][-1].value}\n\n\n"
+            return recipe_yaml
         for section in recipe_yaml.keys():
             if section == "package":
                 recipe_yaml.yaml_set_comment_before_after_key(section, "\n\n\n")
@@ -289,10 +307,14 @@ class MetaRecipeModel(type):
         recipe._registry_update = registry
         return recipe
 
-    def update(cls, *args):
+    def update(cls, *args, version: Optional[str] = None):
+        if version:
+            cls.recipe.set_var_content(
+                cls.recipe["package"]["version"].values[0], version
+            )
         for section in args:
             func_reg = cls._registry_update[section]
-            if cls.recipe.is_loaded:
+            if cls.recipe[section].values and section != "package":
                 cls.recipe.clear_section(section)
             if section not in cls._registry_update:
                 continue

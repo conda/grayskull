@@ -387,16 +387,6 @@ def test_load_recipe(data_dir):
     assert recipe["extra"]["recipe-maintainers"].values == ["marcelotrevisani"]
 
 
-def test_exception_init():
-    with pytest.raises(ValueError) as err:
-        PyPi()
-    err.match("Please specify the package name or the recipe to be loaded.")
-
-
-def test_recipe_uvicorn_entry_points_str():
-    assert PyPi(name="uvicorn", version="0.11.3")
-
-
 def test_importlib_metadata_two_setuptools_scm():
     recipe = PyPi(name="importlib-metadata", version="1.5.0")
     assert "setuptools_scm" in recipe["requirements"]["host"]
@@ -461,3 +451,46 @@ def test_mypy_deps_normalization_and_entry_points():
         "stubtest=mypy.stubtest:main",
         "dmypy=mypy.dmypy.client:console_entry",
     ]
+
+
+def test_update_section_load_recipe():
+    recipe = PyPi(name="pysal", version="2.0.0")
+    assert recipe["requirements"]["host"] == ["pip", "python >=3.6"]
+    assert recipe["requirements"]["run"] == sorted(
+        [
+            "python >=3.6",
+            "descartes",
+            "matplotlib",
+            "palettable",
+            "pandas",
+            "scipy >=0.11",
+            "seaborn",
+        ]
+    )
+    assert recipe["build"]["noarch"] == "python"
+
+    recipe.update("requirements", version="2.2.0")
+    assert recipe["build"]["noarch"] == "python"
+    assert recipe["requirements"]["host"] == ["pip", "python >=3.7"]
+    assert recipe["requirements"]["run"] == sorted(
+        [
+            "esda >=2.2.1",
+            "giddy >=2.3.0",
+            "inequality >=1.0.0",
+            "libpysal >=4.2.2",
+            "mapclassify >=2.2.0",
+            "mgwr >=2.1.1",
+            "pointpats >=2.1.0",
+            "python >=3.7",
+            "python-dateutil <=2.8.0",
+            "segregation >=1.2.0",
+            "spaghetti >=1.4.1",
+            "spglm >=1.0.7",
+            "spint >=1.0.6",
+            "splot >=1.1.2",
+            "spreg >=1.0.4",
+            "spvcm >=0.3.0",
+            "tobler >=0.2.0",
+            "urllib3 <1.25",
+        ]
+    )
