@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 
 import pytest
 
@@ -295,7 +296,7 @@ def test_format_host_requirements():
 def test_ciso_recipe():
     recipe = PyPi(name="ciso", version="0.1.0")
     assert sorted(recipe["requirements"]["host"]) == sorted(
-        ["cython", "numpy", "pip", "python", "versioneer"]
+        ["cython", "numpy", "pip", "python"]
     )
     assert sorted(recipe["requirements"]["run"]) == sorted(
         ["cython", "python", "<{ pin_compatible('numpy') }}"]
@@ -357,7 +358,7 @@ def test_zipp_recipe_tags_on_deps():
 
 
 def test_generic_py_ver_to():
-    assert PyPi._generic_py_ver_to({"requires_python": ">=3.5, <3.8"}) == ">=3.6,<3.8"
+    assert PyPi._generic_py_ver_to({"requires_python": ">=3.5, <3.8"}) == ">=3.5,<3.8"
 
 
 def test_botocore_recipe_license_name():
@@ -390,3 +391,73 @@ def test_exception_init():
     with pytest.raises(ValueError) as err:
         PyPi()
     err.match("Please specify the package name or the recipe to be loaded.")
+
+
+def test_recipe_uvicorn_entry_points_str():
+    assert PyPi(name="uvicorn", version="0.11.3")
+
+
+def test_importlib_metadata_two_setuptools_scm():
+    recipe = PyPi(name="importlib-metadata", version="1.5.0")
+    assert "setuptools_scm" in recipe["requirements"]["host"]
+    assert "setuptools-scm" not in recipe["requirements"]["host"]
+    assert recipe["about"]["license"] == "Apache-2.0"
+
+
+def test_keyring_host_appearing_twice():
+    recipe = PyPi(name="keyring", version="21.1.1")
+    assert "importlib-metadata" in recipe["requirements"]["run"]
+    assert "importlib_metadata" not in recipe["requirements"]["run"]
+
+
+def test_python_requires_setup_py():
+    recipe = PyPi(name="pygments", version="2.6.1")
+    assert "noarch" in recipe["build"]
+    assert "python >=3.5" in recipe["requirements"]["host"]
+    assert "python >=3.5" in recipe["requirements"]["run"]
+
+
+@pytest.mark.skipif(sys.platform.startswith("darwin"), reason="Skipping OSX test")
+def test_django_rest_framework_xml_license():
+    recipe = PyPi(name="djangorestframework-xml", version="1.4.0")
+    assert recipe["about"]["license"] == "BSD-3-Clause"
+    assert recipe["about"]["license_file"] == "LICENSE"
+    assert recipe["test"]["imports"][0].value == "rest_framework_xml"
+
+
+def test_get_test_imports():
+    assert PyPi._get_test_imports({"packages": ["pkg", "pkg.mod1", "pkg.mod2"]}) == [
+        "pkg",
+        "pkg.mod1",
+    ]
+    assert PyPi._get_test_imports({"packages": None}, default="pkg-mod") == ["pkg_mod"]
+    assert PyPi._get_test_imports({"packages": "pkg"}, default="pkg-mod") == ["pkg"]
+
+
+def test_nbdime_license_type():
+    recipe = PyPi(name="nbdime", version="2.0.0")
+    assert recipe["about"]["license"] == "BSD-3-Clause"
+    assert "setupbase" not in recipe["requirements"]["host"]
+
+
+def test_normalize_pkg_name():
+    assert PyPi._normalize_pkg_name("mypy-extensions") == "mypy_extensions"
+    assert PyPi._normalize_pkg_name("mypy_extensions") == "mypy_extensions"
+    assert PyPi._normalize_pkg_name("pytest") == "pytest"
+
+
+def test_mypy_deps_normalization_and_entry_points():
+    recipe = PyPi(name="mypy", version="0.770")
+    assert "mypy_extensions <0.5.0,>=0.4.3" in recipe["requirements"]["run"]
+    assert "mypy-extensions <0.5.0,>=0.4.3" not in recipe["requirements"]["run"]
+    assert "typed-ast <1.5.0,>=1.4.0" in recipe["requirements"]["run"]
+    assert "typed_ast <1.5.0,>=1.4.0" not in recipe["requirements"]["run"]
+    assert "typing-extensions >=3.7.4" in recipe["requirements"]["run"]
+    assert "typing_extensions >=3.7.4" not in recipe["requirements"]["run"]
+
+    assert recipe["build"]["entry_points"].values == [
+        "mypy=mypy.__main__:console_entry",
+        "stubgen=mypy.stubgen:main",
+        "stubtest=mypy.stubtest:main",
+        "dmypy=mypy.dmypy.client:console_entry",
+    ]

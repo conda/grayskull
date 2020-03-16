@@ -1,7 +1,9 @@
 import ast
 import logging
+import os
 from copy import deepcopy
 from functools import lru_cache
+from glob import glob
 from typing import List
 
 import requests
@@ -54,9 +56,10 @@ def get_vendored_dependencies(script_file: str) -> List:
     """
     all_std_modules = get_std_modules()
     all_modules_used = get_all_modules_imported_script(script_file)
+    local_modules = get_local_modules(os.path.dirname(script_file))
     vendored_modules = []
     for dep in all_modules_used:
-        if dep in all_std_modules:
+        if dep in local_modules or dep in all_std_modules:
             continue
         vendored_modules.append(dep.lower())
     return vendored_modules
@@ -87,3 +90,14 @@ def download_pkg(pkg_url: str, dest: str):
                 pkg_file.write(chunk_data)
                 progress_val += chunk_size
                 bar.update(min(progress_val, total_size))
+
+
+@lru_cache(maxsize=20)
+def get_local_modules(sdist_folder: str) -> List:
+    result = []
+    for py_file in glob(f"{sdist_folder}/*.py"):
+        py_file = os.path.basename(py_file)
+        if py_file == "setup.py":
+            continue
+        result.append(os.path.splitext(py_file)[0])
+    return result
