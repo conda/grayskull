@@ -97,12 +97,29 @@ class PyPi(metaclass=MetaRecipeModel):
         if "extras_require" in result:
             result["extras_require"] = get_full_list("extras_require")
         if "setup_requires" in result:
+            result["setup_requires"] = get_full_list("setup_requires")
             if "setuptools-scm" in result["setup_requires"]:
                 result["setup_requires"].remove("setuptools-scm")
-            result["setup_requires"] = get_full_list("setup_requires")
         if "compilers" in result:
             result["compilers"] = get_full_list("compilers")
         return result
+
+    @staticmethod
+    def __rm_duplicated_deps(
+        all_requirements: Union[list, set, None]
+    ) -> Optional[list]:
+        if not all_requirements:
+            return None
+        new_value = []
+        for dep in all_requirements:
+            if (
+                dep in new_value
+                or dep.replace("-", "_") in new_value
+                or dep.replace("_", "-") in new_value
+            ):
+                continue
+            new_value.append(dep)
+        return new_value
 
     @staticmethod
     def _get_setup_cfg(source_path: str) -> dict:
@@ -282,7 +299,14 @@ class PyPi(metaclass=MetaRecipeModel):
             and dep_name.lower() != "setuptools"
         ):
             data_dist["setup_requires"].append(dep_name.lower())
-        check_output(["pip", "install", dep_name, f"--target={pip_dir}"])
+        try:
+            check_output(["pip", "install", dep_name, f"--target={pip_dir}"])
+        except Exception as err:
+            log.error(
+                f"It was not possible to install {dep_name}.\n"
+                f"Command: pip install {dep_name} --target={pip_dir}.\n"
+                f"Error: {err}"
+            )
 
     @staticmethod
     def _merge_pypi_sdist_metadata(pypi_metadata: dict, sdist_metadata: dict) -> dict:
@@ -304,12 +328,13 @@ class PyPi(metaclass=MetaRecipeModel):
             "version": get_val("version"),
             "source": pypi_metadata.get("source"),
             "packages": get_val("packages"),
-            "home": get_val("home"),
+            "url": get_val("url"),
             "classifiers": get_val("classifiers"),
             "compilers": PyPi._get_compilers(requires_dist, sdist_metadata),
             "entry_points": PyPi._get_entry_points_from_sdist(sdist_metadata),
             "summary": get_val("summary"),
-            "requires_python": get_val("requires_python"),
+            "requires_python": pypi_metadata.get("requires_python")
+            or sdist_metadata.get("python_requires"),
             "doc_url": get_val("doc_url"),
             "dev_url": get_val("dev_url"),
             "license": get_val("license"),
@@ -347,9 +372,10 @@ class PyPi(metaclass=MetaRecipeModel):
         :return: list with all entry points
         """
         all_entry_points = sdist_metadata.get("entry_points", None)
-        if all_entry_points and (
-            all_entry_points.get("console_scripts")
-            or all_entry_points.get("gui_scripts")
+        if isinstance(all_entry_points, str) or not all_entry_points:
+            return []
+        if all_entry_points.get("console_scripts") or all_entry_points.get(
+            "gui_scripts"
         ):
             return all_entry_points.get("console_scripts", []) + all_entry_points.get(
                 "gui_scripts", []
@@ -367,19 +393,33 @@ class PyPi(metaclass=MetaRecipeModel):
         pypi_deps_name = set()
         requires_dist = []
         all_deps = []
-        if pypi_metadata.get("requires_dist"):
-            all_deps = pypi_metadata.get("requires_dist", [])
         if sdist_metadata.get("install_requires"):
             all_deps += sdist_metadata.get("install_requires", [])
+        if pypi_metadata.get("requires_dist"):
+            all_deps = pypi_metadata.get("requires_dist", [])
 
         for sdist_pkg in all_deps:
             match_deps = PyPi.RE_DEPS_NAME.match(sdist_pkg)
-            if match_deps:
-                match_deps = match_deps.group(0).strip()
-                if match_deps not in pypi_deps_name:
-                    pypi_deps_name.add(match_deps)
-                    requires_dist.append(sdist_pkg)
+            if not match_deps:
+                continue
+            match_deps = match_deps.group(0).strip()
+            pkg_name = PyPi._normalize_pkg_name(match_deps)
+            if pkg_name in pypi_deps_name:
+                continue
+
+            pypi_deps_name.add(pkg_name)
+            requires_dist.append(sdist_pkg.replace(match_deps, pkg_name))
         return requires_dist
+
+    @staticmethod
+    def _normalize_pkg_name(pkg_name: str) -> str:
+        if is_pkg_available(pkg_name):
+            return pkg_name
+        if is_pkg_available(pkg_name.replace("-", "_")):
+            return pkg_name.replace("-", "_")
+        elif is_pkg_available(pkg_name.replace("_", "-")):
+            return pkg_name.replace("_", "-")
+        return pkg_name
 
     @update("package")
     def _update_package(self):
@@ -452,13 +492,13 @@ class PyPi(metaclass=MetaRecipeModel):
         print_req("run", all_requirements["run"])
 
         test_entry_points = PyPi._get_test_entry_points(metadata.get("entry_points"))
-
+        test_imports = PyPi._get_test_imports(metadata, pypi_metadata["name"])
         return {
             "package": {"name": name, "version": metadata["version"]},
             "build": {"entry_points": metadata.get("entry_points")},
             "requirements": all_requirements,
             "test": {
-                "imports": pypi_metadata["name"].replace("-", "_"),
+                "imports": test_imports,
                 "commands": ["pip check"] + test_entry_points,
                 "requires": "pip",
             },
@@ -472,6 +512,17 @@ class PyPi(metaclass=MetaRecipeModel):
             },
             "source": metadata.get("source", {}),
         }
+
+    @staticmethod
+    def _get_test_imports(metadata: dict, default: Optional[str] = None) -> List:
+        if default:
+            default = default.replace("-", "_")
+        if "packages" not in metadata or not metadata["packages"]:
+            return [default]
+        meta_pkg = metadata["packages"]
+        if isinstance(meta_pkg, str):
+            meta_pkg = [metadata["packages"]]
+        return sorted(meta_pkg)[:2]
 
     @staticmethod
     def _get_test_entry_points(entry_points: Union[List, str]) -> List:
@@ -493,8 +544,10 @@ class PyPi(metaclass=MetaRecipeModel):
         the license.
         """
         git_url = metadata.get("dev_url", None)
-        if not git_url and "github.com/" in metadata.get("project_url"):
+        if not git_url and "github.com/" in metadata.get("project_url", ""):
             git_url = metadata.get("project_url")
+        if not git_url and "github.com/" in metadata.get("url", ""):
+            git_url = metadata.get("url")
 
         short_license = search_license_file(
             metadata.get("sdist_path"),
@@ -549,6 +602,7 @@ class PyPi(metaclass=MetaRecipeModel):
             "project_url": info.get("project_url"),
             "doc_url": info.get("docs_url"),
             "dev_url": project_urls.get("Source"),
+            "url": info.get("home_page"),
             "license": info.get("license"),
             "source": {
                 "url": "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/"
@@ -608,7 +662,7 @@ class PyPi(metaclass=MetaRecipeModel):
         )
         host_req = PyPi._format_dependencies(setup_requires, name)
 
-        if not requires_dist and not host_req:
+        if not requires_dist and not host_req and not metadata.get("requires_python"):
             return {"host": sorted(["python", "pip"]), "run": ["python"]}
 
         run_req = self._get_run_req_from_requires_dist(requires_dist)
@@ -634,13 +688,22 @@ class PyPi(metaclass=MetaRecipeModel):
             host_req += [f"python{limit_python}", "pip"]
 
         run_req.insert(0, f"python{limit_python}")
-        result = (
-            {"build": sorted(map(lambda x: x.lower(), build_req))} if build_req else {}
-        )
+        result = {}
+        if build_req:
+            result = {
+                "build": PyPi.__rm_duplicated_deps(
+                    sorted(map(lambda x: x.lower(), build_req))
+                )
+            }
+
         result.update(
             {
-                "host": sorted(map(lambda x: x.lower(), host_req)),
-                "run": sorted(map(lambda x: x.lower(), run_req)),
+                "host": PyPi.__rm_duplicated_deps(
+                    sorted(map(lambda x: x.lower(), host_req))
+                ),
+                "run": PyPi.__rm_duplicated_deps(
+                    sorted(map(lambda x: x.lower(), run_req))
+                ),
             }
         )
         self._update_requirements_with_pin(result)
@@ -809,6 +872,7 @@ class PyPi(metaclass=MetaRecipeModel):
             return None
 
         py_ver_enabled = PyPi._get_py_version_available(req_python)
+        small_py3_version = get_small_py3_version(list(py_ver_enabled.keys()))
         all_py = list(py_ver_enabled.values())
         if all(all_py):
             return None
@@ -816,12 +880,14 @@ class PyPi(metaclass=MetaRecipeModel):
             return (
                 "# [py2k]"
                 if is_selector
-                else f">={SUPPORTED_PY[1].major}.{SUPPORTED_PY[1].minor}"
+                else f">={small_py3_version.major}.{small_py3_version.minor}"
             )
         if py_ver_enabled.get(PyVer(2, 7)) and any(all_py[1:]) is False:
             return "# [py3k]" if is_selector else "<3.0"
 
-        for pos, py_ver in enumerate(SUPPORTED_PY[1:], 1):
+        for pos, py_ver in enumerate(py_ver_enabled):
+            if py_ver == PyVer(2, 7):
+                continue
             if all(all_py[pos:]) and any(all_py[:pos]) is False:
                 return (
                     f"# [py<{py_ver.major}{py_ver.minor}]"
@@ -837,7 +903,7 @@ class PyPi(metaclass=MetaRecipeModel):
                 else:
                     py2 = ""
                     if not all_py[0]:
-                        py2 = f">=3.6,"
+                        py2 = f">={small_py3_version.major}.{small_py3_version.minor},"
                     return f"{py2}<{py_ver.major}.{py_ver.minor}"
 
         all_selector = PyPi._get_py_multiple_selectors(
@@ -868,12 +934,21 @@ class PyPi(metaclass=MetaRecipeModel):
         :param req_python: Requires python
         :return: Dict of Python versions if it is enabled or disabled
         """
-        py_ver_enabled = {py_ver: True for py_ver in SUPPORTED_PY}
+        sup_python_ver = deepcopy(SUPPORTED_PY)
+        for _, major, minor in req_python:
+            if not minor:
+                minor = 0
+            new_py_ver = PyVer(int(major), int(minor))
+            if new_py_ver in sup_python_ver:
+                continue
+            sup_python_ver.append(new_py_ver)
+        sup_python_ver.sort()
+        py_ver_enabled = {py_ver: True for py_ver in sup_python_ver}
         for op, major, minor in req_python:
             if not minor:
                 minor = 0
-            for sup_py in SUPPORTED_PY:
-                if py_ver_enabled[sup_py] is False:
+            for sup_py, is_enabled in py_ver_enabled.items():
+                if is_enabled is False:
                     continue
                 py_ver_enabled[sup_py] = eval(
                     f"sup_py {op} PyVer(int({major}), int({minor}))"
@@ -892,7 +967,11 @@ class PyPi(metaclass=MetaRecipeModel):
         """
         all_selector = []
         if selectors[PyVer(2, 7)] is False:
-            all_selector += ["py2k"] if is_selector else [">=3.6"]
+            all_selector += (
+                ["py2k"]
+                if is_selector
+                else get_small_py3_version(list(selectors.keys()))
+            )
         for py_ver, is_enabled in selectors.items():
             if py_ver == PyVer(2, 7) or is_enabled:
                 continue
@@ -923,3 +1002,17 @@ class PyPi(metaclass=MetaRecipeModel):
         if option == "sys_platform":
             value = re.sub(r"[^a-zA-Z]+", "", value)
             return value.lower()
+
+
+def get_small_py3_version(list_py_ver: List[PyVer]) -> PyVer:
+    list_py_ver = sorted(list_py_ver)
+    for py_ver in list_py_ver:
+        if py_ver >= PyVer(3, 0):
+            return py_ver
+
+
+def is_pkg_available(pkg_name: str, channel: str = "conda-forge") -> bool:
+    response = requests.get(
+        url=f"https://anaconda.org/{channel}/{pkg_name}/files", allow_redirects=False
+    )
+    return response.status_code == 200
