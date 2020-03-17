@@ -170,6 +170,12 @@ class Recipe:
         for section in self.ALL_SECTIONS:
             yield self[section]
 
+    def has_selectors(self) -> bool:
+        for section in self:
+            if section.has_selectors():
+                return True
+        return False
+
     def generate_recipe(
         self,
         path: Union[str, Path] = ".",
@@ -313,6 +319,8 @@ class MetaRecipeModel(type):
                 cls.recipe["package"]["version"].values[0], version
             )
         for section in args:
+            if section == "teardown":
+                continue
             func_reg = cls._registry_update[section]
             if cls.recipe[section].values and section != "package":
                 cls.recipe.clear_section(section)
@@ -322,6 +330,8 @@ class MetaRecipeModel(type):
                 cls._registry_update[section](cls, section=section)
             else:
                 cls._registry_update[section](cls)
+        if "teardown" in cls._registry_update.keys():
+            cls._registry_update["teardown"](cls)
 
     def update_all(cls):
         MetaRecipeModel.update(cls, *(cls._registry_update.keys()))

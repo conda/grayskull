@@ -19,6 +19,7 @@ from colorama import Fore
 from requests import HTTPError
 
 from grayskull.base.base_recipe import MetaRecipeModel, Recipe, update
+from grayskull.base.recipe_item import RecipeItem
 from grayskull.base.utils import download_pkg, get_vendored_dependencies
 from grayskull.license.discovery import ShortLicense, search_license_file
 
@@ -42,7 +43,6 @@ class PyPi(metaclass=MetaRecipeModel):
         download: bool = False,
     ):
         self._download = download
-        self._is_arch = False
         self._metadata = None
         log.debug(
             f"PyPi initializer - name={name}, version={version},"
@@ -433,22 +433,63 @@ class PyPi(metaclass=MetaRecipeModel):
         self.recipe.set_jinja_var("version", metadata["package"]["version"])
         self.recipe["package"]["version"] = "<{ version }}"
 
-    @update("source", "build", "outputs", "requirements", "test", "about", "extra")
+    @update("requirements")
+    def _update_requirements(self):
+        self._update_sections("requirements")
+
+    @update("build")
+    def _update_build(self, section: str):
+        self.recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
+        self._update_sections(section)
+
+    @update("teardown")
+    def _finish_update(self):
+        if self.recipe.has_selectors() or "build" in self.recipe["requirements"]:
+            py_dep = self._get_python_dep()
+            if py_dep is None:
+                return
+            py_host, py_run = py_dep
+            selector = PyPi.py_version_to_selector(py_host.value)
+            py_host.value = "python"
+            py_run.value = "python"
+
+            if selector:
+                self.recipe["build"].add_subsection("skip")
+                if self.recipe["build"]["skip"].values:
+                    self.recipe["build"]["skip"].values[0].value = True
+                else:
+                    self.recipe["build"]["skip"].add_item(True)
+                if self.recipe["build"]["skip"].values[0].selector:
+                    selector_val = self.recipe["build"]["skip"].values[0].selector
+                    selector = re.sub(r"\s*\]\s*$", f" or {selector}]", selector_val)
+                self.recipe["build"]["skip"].values[0].selector = selector
+        else:
+            self.recipe["build"]["noarch"] = "python"
+
+    @update("source", "outputs", "test", "about", "extra")
     def _update_sections(self, section: str):
         """Update one specific section.
 
         :param section: Section name
         """
-        if section == "build":
-            self.recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
         metadata = self._get_metadata(
             self.recipe.get_var_content(self.recipe["package"]["version"].values[0])
         )
         self.recipe.populate_metadata_from_dict(
             metadata.get(section), self.recipe[section]
         )
-        if not self._is_arch and "skip" not in self.recipe["build"]:
-            self.recipe["build"]["noarch"] = "python"
+
+    def _get_python_dep(self) -> Optional[Tuple[RecipeItem, RecipeItem]]:
+        for item in self.recipe["requirements"]["host"]:
+            if item.value.startswith("python "):
+                py_host = item
+                break
+        else:
+            return None
+        for item in self.recipe["requirements"]["run"]:
+            if item.value.startswith("python "):
+                return (py_host, item)
+        return None
 
     @lru_cache(maxsize=10)
     def _get_metadata(self, version: Optional[str] = "") -> dict:
@@ -674,18 +715,10 @@ class PyPi(metaclass=MetaRecipeModel):
         run_req = self._get_run_req_from_requires_dist(requires_dist)
 
         build_req = [f"<{{ compiler('{c}') }}}}" for c in metadata.get("compilers", [])]
-        if build_req:
-            self._is_arch = True
 
-        if self._is_arch:
-            version_to_selector = PyPi.py_version_to_selector(metadata)
-            if version_to_selector:
-                self.recipe["build"]["skip"] = True
-                self.recipe["build"]["skip"].values[0].selector = version_to_selector
-            limit_python = ""
-        else:
-            limit_python = PyPi.py_version_to_limit_python(metadata)
-
+        limit_python = PyPi.py_version_to_limit_python(
+            metadata.get("requires_python", "")
+        )
         limit_python = f" {limit_python}" if limit_python else ""
 
         if "pip" not in host_req:
@@ -810,7 +843,6 @@ class PyPi(metaclass=MetaRecipeModel):
         """
         result_selector = []
         for extra in list_extra:
-            self._is_arch = True
             selector = PyPi._parse_extra_metadata_to_selector(
                 extra[1], extra[2], extra[3]
             )
@@ -857,21 +889,19 @@ class PyPi(metaclass=MetaRecipeModel):
 
     @staticmethod
     def _generic_py_ver_to(
-        pypi_metadata: dict, is_selector: bool = False
+        python_requires: str, is_selector: bool = False
     ) -> Optional[str]:
         """Generic function which abstract the parse of the requires_python
         present in the PyPi metadata. Basically it can generate the selectors
         for Python or the constrained version if it is a `noarch: python` python package
 
-        :param pypi_metadata: PyPi metadata
+        :param python_requires: Python constrain
         :param is_selector:
         :return: return the constrained versions or the selectors
         """
-        if not pypi_metadata["requires_python"]:
+        if not python_requires:
             return None
-        req_python = re.findall(
-            r"([><=!]+)\s*(\d+)(?:\.(\d+))?", pypi_metadata["requires_python"],
-        )
+        req_python = re.findall(r"([><=!]+)\s*(\d+)(?:\.(\d+))?", python_requires,)
         if not req_python:
             return None
 
@@ -922,12 +952,12 @@ class PyPi(metaclass=MetaRecipeModel):
         return None
 
     @staticmethod
-    def py_version_to_limit_python(pypi_metadata: dict) -> Optional[str]:
-        return PyPi._generic_py_ver_to(pypi_metadata, is_selector=False)
+    def py_version_to_limit_python(python_requires: str) -> Optional[str]:
+        return PyPi._generic_py_ver_to(python_requires, is_selector=False)
 
     @staticmethod
-    def py_version_to_selector(pypi_metadata: dict) -> Optional[str]:
-        return PyPi._generic_py_ver_to(pypi_metadata, is_selector=True)
+    def py_version_to_selector(python_requires: str) -> Optional[str]:
+        return PyPi._generic_py_ver_to(python_requires, is_selector=True)
 
     @staticmethod
     def _get_py_version_available(

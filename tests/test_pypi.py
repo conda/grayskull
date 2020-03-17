@@ -17,10 +17,10 @@ def pypi_metadata(data_dir):
 def test_extract_pypi_requirements(pypi_metadata):
     recipe = PyPi(name="pytest", version="5.3.1")
     pypi_reqs = recipe._extract_requirements(pypi_metadata["info"])
-    assert sorted(pypi_reqs["host"]) == sorted(["python", "pip"])
+    assert sorted(pypi_reqs["host"]) == sorted(["python >=3.5", "pip"])
     assert sorted(pypi_reqs["run"]) == sorted(
         [
-            "python",
+            "python >=3.5",
             "py >=1.5.0",
             "packaging",
             "attrs >=17.4.0",
@@ -98,7 +98,7 @@ def test_get_selector():
         ("<=3.7", ">=38"),
         ("<=3.7.1", ">=38"),
         ("<3.7", ">=37"),
-        (">2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*", "2k"),
+        (">2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*", "<36"),
         (">=2.7, !=3.6.*", "==36"),
         (">3.7", "<38"),
         (">2.7", "2k"),
@@ -107,14 +107,13 @@ def test_get_selector():
     ],
 )
 def test_py_version_to_selector(requires_python, exp_selector):
-    metadata = {"requires_python": requires_python}
-    assert PyPi.py_version_to_selector(metadata) == f"# [py{exp_selector}]"
+    assert PyPi.py_version_to_selector(requires_python) == f"# [py{exp_selector}]"
 
 
 @pytest.mark.parametrize(
     "requires_python, exp_limit",
     [
-        (">=3.5", ">=3.6"),
+        (">=3.5", ">=3.5"),
         (">=3.6", ">=3.6"),
         (">=3.7", ">=3.7"),
         ("<=3.7", "<3.8"),
@@ -129,8 +128,7 @@ def test_py_version_to_selector(requires_python, exp_selector):
     ],
 )
 def test_py_version_to_limit_python(requires_python, exp_limit):
-    metadata = {"requires_python": requires_python}
-    assert PyPi.py_version_to_limit_python(metadata) == f"{exp_limit}"
+    assert PyPi.py_version_to_limit_python(requires_python) == f"{exp_limit}"
 
 
 def test_get_sha256_from_pypi_metadata():
@@ -262,7 +260,7 @@ def test_get_entry_points_from_sdist():
 def test_build_noarch_skip():
     recipe = PyPi(name="hypothesis", version="5.5.2")
     assert recipe["build"]["noarch"].values[0] == "python"
-    assert not recipe["build"]["skip"].values
+    assert "skip" not in recipe["build"]
 
 
 def test_run_requirements_sdist():
@@ -358,7 +356,7 @@ def test_zipp_recipe_tags_on_deps():
 
 
 def test_generic_py_ver_to():
-    assert PyPi._generic_py_ver_to({"requires_python": ">=3.5, <3.8"}) == ">=3.5,<3.8"
+    assert PyPi._generic_py_ver_to(">=3.5, <3.8") == ">=3.5,<3.8"
 
 
 def test_botocore_recipe_license_name():

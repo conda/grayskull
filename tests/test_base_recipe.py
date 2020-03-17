@@ -136,3 +136,18 @@ def test_meta_recipe_register():
     assert sorted(meta_obj.update_req) == ["build", "requirements"]
     meta_obj.update_all()
     assert sorted(meta_obj.update_req) == sorted(["build", "requirements"] * 2)
+
+
+def test_has_selectors():
+    recipe = EmptyGray(name="PkgName", version="1.0.0")
+    recipe["package"].add_item("foo  # [win]")
+    assert recipe.recipe.has_selectors()
+
+    recipe = EmptyGray(name="PkgName", version="1.0.0")
+    recipe["package"].add_item("foo")
+    assert not recipe.recipe.has_selectors()
+
+    recipe["outputs"].add_subsection("sec2")
+    recipe["outputs"]["sec2"].add_item("bar")
+    assert not recipe.recipe.has_selectors()
+    recipe["outputs"]["sec2"].add_item("foobar  # [unix]")
