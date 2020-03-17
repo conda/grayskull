@@ -12,6 +12,7 @@ class RecipeItem:
         self.__pos = position
         if position >= len(yaml):
             yaml.append(None)
+        if item is not None:
             self.value = item
 
     def __repr__(self) -> str:
@@ -75,18 +76,12 @@ class RecipeItem:
         return self.__yaml()[self.__pos]
 
     @value.setter
-    def value(self, value: Union[str, int]):
+    def value(self, value: Union[str, int, bool]):
         column = 8
-        if isinstance(value, int):
-            column += len(str(value))
-            self.__yaml()[self.__pos] = value
-        elif value:
-            self.__yaml()[self.__pos] = self._remove_selector(value)
-            column += len(str(self.__yaml()[self.__pos]))
-        else:
-            column += len(str(value))
-            self.__yaml()[self.__pos] = value
+        val_type = type(value)
         selector = self._extract_selector(str(value))
+        self.__yaml()[self.__pos] = val_type(self._remove_selector(str(value)).strip())
+        column += len(str(self.__yaml()[self.__pos]))
         if selector:
             sel = f"[{selector}]"
             self.__yaml().yaml_add_eol_comment(sel, self.__pos, column=column)
@@ -119,3 +114,8 @@ class RecipeItem:
             comment.value = f" # {sel}"
         else:
             self.__yaml().yaml_add_eol_comment(sel, self.__pos)
+
+    def has_selector(self) -> bool:
+        if self.selector.strip():
+            return True
+        return False

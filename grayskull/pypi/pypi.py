@@ -12,13 +12,14 @@ from functools import lru_cache
 from pathlib import Path
 from subprocess import check_output
 from tempfile import mkdtemp
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import requests
 from colorama import Fore
 from requests import HTTPError
 
 from grayskull.base.base_recipe import MetaRecipeModel, Recipe, update
+from grayskull.base.recipe_item import RecipeItem
 from grayskull.base.utils import download_pkg, get_vendored_dependencies
 from grayskull.license.discovery import ShortLicense, search_license_file
 
@@ -38,32 +39,15 @@ class PyPi(metaclass=MetaRecipeModel):
         self,
         name: Optional[str] = None,
         version: Optional[str] = None,
-        load_recipe: Optional[str] = None,
+        load_recipe: Union[None, str, Recipe] = None,
         download: bool = False,
     ):
         self._download = download
-        if name:
-            self._is_arch = False
-            self._recipe = Recipe(name=name, version=version)
-            self.update_all()
-            self._recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
-        elif load_recipe:
-            self._recipe = Recipe(load_recipe=load_recipe)
-            self._is_arch = "noarch" not in self._recipe["build"]
-        else:
-            raise ValueError(
-                f"Please specify the package name or the recipe to be loaded."
-            )
-
-    @property
-    def recipe(self) -> Recipe:
-        return self._recipe
-
-    def __getattr__(self, item: str) -> Any:
-        return getattr(self.recipe, item, None)
-
-    def __getitem__(self, item: str) -> Any:
-        return self.recipe[item]
+        self._metadata = None
+        log.debug(
+            f"PyPi initializer - name={name}, version={version},"
+            f" load_recipe={load_recipe}"
+        )
 
     @lru_cache(maxsize=10)
     def _get_sdist_metadata(self, sdist_url: str, name: str) -> dict:
@@ -440,36 +424,83 @@ class PyPi(metaclass=MetaRecipeModel):
 
     @update("package")
     def _update_package(self):
-        metadata = self._get_metadata()
-        self._recipe.set_jinja_var("version", metadata["package"]["version"])
-        self._recipe["package"]["version"] = "<{ version }}"
+        version = None
+        if self.recipe["package"]["version"].values:
+            version = self.recipe.get_var_content(
+                self.recipe["package"]["version"].values[0]
+            )
+        metadata = self._get_metadata(version)
+        self.recipe.set_jinja_var("version", metadata["package"]["version"])
+        self.recipe["package"]["version"] = "<{ version }}"
 
-    @update(
-        "source", "build", "outputs", "requirements", "app", "test", "about", "extra"
-    )
+    @update("requirements")
+    def _update_requirements(self):
+        self._update_sections("requirements")
+
+    @update("build")
+    def _update_build(self, section: str):
+        self.recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
+        self._update_sections(section)
+
+    @update("teardown")
+    def _finish_update(self):
+        if self.recipe.has_selectors() or "build" in self.recipe["requirements"]:
+            py_dep = self._get_python_dep()
+            if py_dep is None:
+                return
+            py_host, py_run = py_dep
+            selector = PyPi.py_version_to_selector(py_host.value)
+            py_host.value = "python"
+            py_run.value = "python"
+
+            if selector:
+                self.recipe["build"].add_subsection("skip")
+                if self.recipe["build"]["skip"].values:
+                    self.recipe["build"]["skip"].values[0].value = True
+                else:
+                    self.recipe["build"]["skip"].add_item(True)
+                if self.recipe["build"]["skip"].values[0].selector:
+                    selector_val = self.recipe["build"]["skip"].values[0].selector
+                    selector = re.sub(r"\s*\]\s*$", f" or {selector}]", selector_val)
+                self.recipe["build"]["skip"].values[0].selector = selector
+        else:
+            self.recipe["build"]["noarch"] = "python"
+
+    @update("source", "outputs", "test", "about", "extra")
     def _update_sections(self, section: str):
         """Update one specific section.
 
         :param section: Section name
         """
-        metadata = self._get_metadata()
-        self._recipe.populate_metadata_from_dict(
-            metadata.get(section), self._recipe[section]
+        metadata = self._get_metadata(
+            self.recipe.get_var_content(self.recipe["package"]["version"].values[0])
         )
-        if not self._is_arch:
-            self._recipe["build"]["noarch"] = "python"
+        self.recipe.populate_metadata_from_dict(
+            metadata.get(section), self.recipe[section]
+        )
+
+    def _get_python_dep(self) -> Optional[Tuple[RecipeItem, RecipeItem]]:
+        for item in self.recipe["requirements"]["host"]:
+            if item.value.startswith("python "):
+                py_host = item
+                break
+        else:
+            return None
+        for item in self.recipe["requirements"]["run"]:
+            if item.value.startswith("python "):
+                return (py_host, item)
+        return None
 
     @lru_cache(maxsize=10)
-    def _get_metadata(self) -> dict:
+    def _get_metadata(self, version: Optional[str] = "") -> dict:
         """Method responsible to get the whole metadata available. It will
         merge metadata from multiple sources (pypi, setup.py, setup.cfg)
         """
-        name = self._recipe.get_var_content(self["package"]["name"].values[0])
-        version = ""
-        if self._recipe["package"]["version"].values:
-            version = self._recipe.get_var_content(
-                self._recipe["package"]["version"].values[0]
-            )
+        if self._metadata and self._metadata["package"]["version"] == version:
+            return self._metadata
+        if not version:
+            version = self.recipe.get_var_content(self["package"]["version"].values[0])
+        name = self.recipe.get_var_content(self["package"]["name"].values[0])
         pypi_metadata = self._get_pypi_metadata(name, version)
         sdist_metadata = self._get_sdist_metadata(
             sdist_url=pypi_metadata["sdist_url"], name=name
@@ -487,7 +518,7 @@ class PyPi(metaclass=MetaRecipeModel):
                 if license_metadata.is_packaged:
                     license_file = license_metadata.path
                 else:
-                    self._recipe.files_to_copy.append(license_metadata.path)
+                    self.recipe.files_to_copy.append(license_metadata.path)
 
         print(f"{Fore.LIGHTBLACK_EX}License type: {Fore.LIGHTMAGENTA_EX}{license_name}")
         print(f"{Fore.LIGHTBLACK_EX}License file: {Fore.LIGHTMAGENTA_EX}{license_file}")
@@ -508,7 +539,7 @@ class PyPi(metaclass=MetaRecipeModel):
 
         test_entry_points = PyPi._get_test_entry_points(metadata.get("entry_points"))
         test_imports = PyPi._get_test_imports(metadata, pypi_metadata["name"])
-        return {
+        self._metadata = {
             "package": {"name": name, "version": metadata["version"]},
             "build": {"entry_points": metadata.get("entry_points")},
             "requirements": all_requirements,
@@ -527,6 +558,7 @@ class PyPi(metaclass=MetaRecipeModel):
             },
             "source": metadata.get("source", {}),
         }
+        return self._metadata
 
     @staticmethod
     def _get_test_imports(metadata: dict, default: Optional[str] = None) -> List:
@@ -683,18 +715,10 @@ class PyPi(metaclass=MetaRecipeModel):
         run_req = self._get_run_req_from_requires_dist(requires_dist)
 
         build_req = [f"<{{ compiler('{c}') }}}}" for c in metadata.get("compilers", [])]
-        if build_req:
-            self._is_arch = True
 
-        if self._is_arch:
-            version_to_selector = PyPi.py_version_to_selector(metadata)
-            if version_to_selector:
-                self._recipe["build"]["skip"] = True
-                self._recipe["build"]["skip"].values[0].selector = version_to_selector
-            limit_python = ""
-        else:
-            limit_python = PyPi.py_version_to_limit_python(metadata)
-
+        limit_python = PyPi.py_version_to_limit_python(
+            metadata.get("requires_python", "")
+        )
         limit_python = f" {limit_python}" if limit_python else ""
 
         if "pip" not in host_req:
@@ -819,7 +843,6 @@ class PyPi(metaclass=MetaRecipeModel):
         """
         result_selector = []
         for extra in list_extra:
-            self._is_arch = True
             selector = PyPi._parse_extra_metadata_to_selector(
                 extra[1], extra[2], extra[3]
             )
@@ -866,21 +889,19 @@ class PyPi(metaclass=MetaRecipeModel):
 
     @staticmethod
     def _generic_py_ver_to(
-        pypi_metadata: dict, is_selector: bool = False
+        python_requires: str, is_selector: bool = False
     ) -> Optional[str]:
         """Generic function which abstract the parse of the requires_python
         present in the PyPi metadata. Basically it can generate the selectors
         for Python or the constrained version if it is a `noarch: python` python package
 
-        :param pypi_metadata: PyPi metadata
+        :param python_requires: Python constrain
         :param is_selector:
         :return: return the constrained versions or the selectors
         """
-        if not pypi_metadata["requires_python"]:
+        if not python_requires:
             return None
-        req_python = re.findall(
-            r"([><=!]+)\s*(\d+)(?:\.(\d+))?", pypi_metadata["requires_python"],
-        )
+        req_python = re.findall(r"([><=!]+)\s*(\d+)(?:\.(\d+))?", python_requires,)
         if not req_python:
             return None
 
@@ -931,12 +952,12 @@ class PyPi(metaclass=MetaRecipeModel):
         return None
 
     @staticmethod
-    def py_version_to_limit_python(pypi_metadata: dict) -> Optional[str]:
-        return PyPi._generic_py_ver_to(pypi_metadata, is_selector=False)
+    def py_version_to_limit_python(python_requires: str) -> Optional[str]:
+        return PyPi._generic_py_ver_to(python_requires, is_selector=False)
 
     @staticmethod
-    def py_version_to_selector(pypi_metadata: dict) -> Optional[str]:
-        return PyPi._generic_py_ver_to(pypi_metadata, is_selector=True)
+    def py_version_to_selector(python_requires: str) -> Optional[str]:
+        return PyPi._generic_py_ver_to(python_requires, is_selector=True)
 
     @staticmethod
     def _get_py_version_available(

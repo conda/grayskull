@@ -2,7 +2,8 @@ pr:
   autoCancel: true
   branches:
     include:
-    - master
+      - master
+      - develop-*
 
 variables:
 - group: Codecov

@@ -1,23 +1,14 @@
 import os
-from typing import Optional
 
 from pytest import fixture
 
-from grayskull.base.base_recipe import MetaRecipeModel, Recipe, update
+from grayskull.base.base_recipe import MetaRecipeModel, update
 
 
 class EmptyGray(metaclass=MetaRecipeModel):
-    def __init__(
-        self,
-        name: Optional[str] = None,
-        version: Optional[str] = None,
-        load_recipe: Optional[str] = None,
-    ):
-        self.recipe = Recipe(name=name, version=version, load_recipe=load_recipe)
-
     @update("source")
     def update_source(self):
-        self.recipe["source"]["sha256"] = "sha256_foo"
+        self["source"]["sha256"] = "sha256_foo"
         self.recipe["source"]["url"] = "URL"
 
     @update("build")
@@ -35,7 +26,7 @@ def test_update_all_recipe(data_recipes):
     recipe.update_all()
     assert recipe.recipe["build"]["number"] == 1
     assert recipe.recipe["source"]["sha256"] == "sha256_foo"
-    assert recipe.recipe["source"]["url"] == "URL"
+    assert recipe["source"]["url"] == "URL"
 
 
 def test_refresh_section(data_recipes):
@@ -127,9 +118,8 @@ def test_getitem():
 
 
 class MetaFoo(metaclass=MetaRecipeModel):
-    def __init__(self):
+    def __init__(self, name, version, load_recipe):
         self.update_req = []
-        super(MetaFoo, self).__init__()
 
     @update("requirements", "build")
     def update_requirements(self, section):
@@ -138,13 +128,26 @@ class MetaFoo(metaclass=MetaRecipeModel):
 
 def test_meta_recipe_register():
     meta_obj = MetaFoo()
-    assert not meta_obj.update_req
-    meta_obj.update("requirements")
-    assert meta_obj.update_req == ["requirements"]
-    meta_obj.update("build")
     assert meta_obj.update_req == ["requirements", "build"]
+    meta_obj.update("build")
+    assert meta_obj.update_req == ["requirements", "build", "build"]
 
     meta_obj = MetaFoo()
-    assert not meta_obj.update_req
-    meta_obj.update_all()
     assert sorted(meta_obj.update_req) == ["build", "requirements"]
+    meta_obj.update_all()
+    assert sorted(meta_obj.update_req) == sorted(["build", "requirements"] * 2)
+
+
+def test_has_selectors():
+    recipe = EmptyGray(name="PkgName", version="1.0.0")
+    recipe["package"].add_item("foo  # [win]")
+    assert recipe.recipe.has_selectors()
+
+    recipe = EmptyGray(name="PkgName", version="1.0.0")
+    recipe["package"].add_item("foo")
+    assert not recipe.recipe.has_selectors()
+
+    recipe["outputs"].add_subsection("sec2")
+    recipe["outputs"]["sec2"].add_item("bar")
+    assert not recipe.recipe.has_selectors()
+    recipe["outputs"]["sec2"].add_item("foobar  # [unix]")

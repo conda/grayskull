@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from ruamel.yaml.comments import CommentedMap
 
 from grayskull.base.section import Section
@@ -28,7 +30,7 @@ def test_add_item():
     assert "pkg2  # [win]" in sec
     assert "pkg3" in sec
     assert "pkg4" not in sec
-    assert sec == sec
+    assert sec == deepcopy(sec)
 
 
 def test_section_children():
