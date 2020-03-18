@@ -324,6 +324,7 @@ def test_ciso_recipe():
     assert recipe["test"]["imports"] == "ciso"
 
 
+@pytest.mark.forked
 def test_pymc_recipe_fortran():
     recipe = PyPi(name="pymc", version="2.3.6")
     assert sorted(recipe["requirements"]["build"]) == sorted(

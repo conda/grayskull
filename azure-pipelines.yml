@@ -7,7 +7,7 @@ pr:
 variables:
 - group: Codecov
 - name: grayskull_deps
-  value: pytest pytest-azurepipelines pytest-xdist pytest-cov requests ruamel.yaml codecov ruamel.yaml.jinja2 "coverage<5.0" stdlib-list pip setuptools mock fuzzywuzzy git colorama progressbar2
+  value: pytest pytest-azurepipelines pytest-xdist pytest-cov pytest-forked requests ruamel.yaml codecov ruamel.yaml.jinja2 "coverage<5.0" stdlib-list pip setuptools mock fuzzywuzzy git colorama progressbar2
 
 jobs:
   - job:
