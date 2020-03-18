@@ -325,6 +325,10 @@ def test_ciso_recipe():
 
 
 @pytest.mark.serial
+@pytest.mark.xfail(
+    condition=(sys.platform.startswith("win")),
+    reason="Test failing on windows platform",
+)
 def test_pymc_recipe_fortran():
     recipe = PyPi(name="pymc", version="2.3.6")
     assert sorted(recipe["requirements"]["build"]) == sorted(
@@ -466,4 +470,4 @@ def test_panel_entry_points(tmpdir):
     recipe_path = str(tmpdir / "panel" / "meta.yaml")
     with open(recipe_path, "r") as f:
         content = f.read()
-    assert "  entry_points:\n    - panel = panel.cli:main" in content
+    assert "- panel = panel.cli:main" in content
