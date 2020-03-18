@@ -139,7 +139,7 @@ jobs:
           pytest tests \
               -vv \
               -n auto \
-              -m "not serial"
+              -m "not serial" \
               --color=yes \
               --cov=./ \
               --cov-append \

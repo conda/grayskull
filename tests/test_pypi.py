@@ -462,7 +462,6 @@ def test_mypy_deps_normalization_and_entry_points():
 
 def test_panel_entry_points(tmpdir):
     recipe = PyPi(name="panel", version="0.9.1")
-    assert recipe["build"]["entry_points"] == "panel = panel.cli:main"
     recipe.generate_recipe(folder_path=str(tmpdir))
     recipe_path = str(tmpdir / "panel" / "meta.yaml")
     with open(recipe_path, "r") as f:
