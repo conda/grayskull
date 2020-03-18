@@ -262,6 +262,8 @@ class Recipe:
 
     def __reduce_list(self, name, recipe: CommentedMap):
         for section in Section(name, recipe):
+            if section == "entry_points":
+                continue
             section.reduce_section()
 
     def populate_metadata_from_dict(self, metadata: Any, section: Section) -> Section:
