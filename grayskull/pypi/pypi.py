@@ -205,6 +205,8 @@ class PyPi(AbstractRecipeModel):
         data_dist = {}
 
         def __fake_distutils_setup(*args, **kwargs):
+            if not isinstance(kwargs, dict) or not kwargs:
+                return
             data_dist.update(kwargs)
             if not data_dist.get("setup_requires"):
                 data_dist["setup_requires"] = []
@@ -212,7 +214,7 @@ class PyPi(AbstractRecipeModel):
                 kwargs.get("setup_requires") if kwargs.get("setup_requires") else []
             )
 
-            if "use_scm_version" in kwargs and kwargs["use_scm_version"]:
+            if "use_scm_version" in data_dist and kwargs["use_scm_version"]:
                 log.debug("setuptools_scm found on setup.py")
                 if "setuptools_scm" not in data_dist["setup_requires"]:
                     data_dist["setup_requires"] += ["setuptools_scm"]
