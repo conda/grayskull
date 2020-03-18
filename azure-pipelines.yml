@@ -8,7 +8,7 @@ pr:
 variables:
 - group: Codecov
 - name: grayskull_deps
-  value: pytest pytest-azurepipelines pytest-xdist pytest-cov requests ruamel.yaml codecov ruamel.yaml.jinja2 "coverage<5.0" stdlib-list pip setuptools mock fuzzywuzzy git colorama progressbar2
+  value: pytest pytest-azurepipelines pytest-xdist pytest-cov pytest-forked requests ruamel.yaml codecov ruamel.yaml.jinja2 "coverage<5.0" stdlib-list pip setuptools mock fuzzywuzzy git colorama progressbar2
 
 jobs:
   - job:
@@ -53,16 +53,33 @@ jobs:
           pytest tests \
               -vv \
               -n 0 \
+              -m "serial" \
               --color=yes \
               --cov=./ \
               --cov-append \
-              --cov-report html:converage-html \
+              --cov-report html:coverage-serial-html \
+              --cov-report xml:coverage-serial.xml \
+              --test-run-title="Linux-py${PYTHON_VERSION}-Serial" \
+              --cov-config=$(Build.Repository.LocalPath)/.coveragerc \
+              --junit-xml=Linux-py${PYTHON_VERSION}-serial.xml \
+              --junit-prefix=Linux-py${PYTHON_VERSION}-serial
+        displayName: Running Serial Tests
+      - bash: |
+          source activate grayskull
+          pytest tests \
+              -vv \
+              -n auto \
+              -m "not serial" \
+              --color=yes \
+              --cov=./ \
+              --cov-append \
+              --cov-report html:coverage-html \
               --cov-report xml:coverage.xml \
               --test-run-title="Linux-py${PYTHON_VERSION}" \
               --cov-config=$(Build.Repository.LocalPath)/.coveragerc \
               --junit-xml=Linux-py${PYTHON_VERSION}.xml \
               --junit-prefix=Linux-py${PYTHON_VERSION}
-        displayName: Running Tests
+        displayName: Running Parallel Tests
       - bash: |
           source activate grayskull
           codecov --token=$(CODECOV_TOKEN)
@@ -113,6 +130,23 @@ jobs:
           pytest tests \
               -vv \
               -n 0 \
+              -m "serial" \
+              --color=yes \
+              --cov=./ \
+              --cov-append \
+              --cov-report html:converage-html-serial \
+              --cov-report xml:coverage.xml-serial \
+              --test-run-title="OSX-py${PYTHON_VERSION}-serial" \
+              --cov-config=$(Build.Repository.LocalPath)/.coveragerc \
+              --junit-xml=OSX-py${PYTHON_VERSION}-serial.xml \
+              --junit-prefix=OSX-py${PYTHON_VERSION}-serial
+        displayName: Running Serial Tests
+      - bash: |
+          source activate grayskull
+          pytest tests \
+              -vv \
+              -n auto \
+              -m "not serial" \
               --color=yes \
               --cov=./ \
               --cov-append \
@@ -122,7 +156,7 @@ jobs:
               --cov-config=$(Build.Repository.LocalPath)/.coveragerc \
               --junit-xml=OSX-py${PYTHON_VERSION}.xml \
               --junit-prefix=OSX-py${PYTHON_VERSION}
-        displayName: Running Tests
+        displayName: Running Parallel Tests
       - bash: |
           source activate grayskull
           codecov --token=$(CODECOV_TOKEN)
@@ -169,6 +203,22 @@ jobs:
           pytest tests ^
               -vv ^
               -n 0 ^
+              -m "serial" ^
+              --color=yes ^
+              --cov=./ ^
+              --cov-append ^
+              --cov-report xml:coverage-serial.xml ^
+              --test-run-title="OSX-py%PYTHON_VERSION%-serial" ^
+              --cov-config=$(Build.Repository.LocalPath)/.coveragerc ^
+              --junit-xml=OSX-py%PYTHON_VERSION%-serial.xml ^
+              --junit-prefix=OSX-py%PYTHON_VERSION%-serial
+        displayName: Running Serial tests
+      - script: |
+          call activate grayskull
+          pytest tests ^
+              -vv ^
+              -n auto ^
+              -m "not serial" ^
               --color=yes ^
               --cov=./ ^
               --cov-append ^
@@ -177,7 +227,7 @@ jobs:
               --cov-config=$(Build.Repository.LocalPath)/.coveragerc ^
               --junit-xml=OSX-py%PYTHON_VERSION%.xml ^
               --junit-prefix=OSX-py%PYTHON_VERSION%
-        displayName: Running tests
+        displayName: Running Parallel tests
 
       - script: |
           call activate grayskull
