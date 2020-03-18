@@ -51,7 +51,7 @@ jobs:
           source activate grayskull
           pytest tests \
               -vv \
-              -n 0 \
+              -n 4 \
               --color=yes \
               --cov=./ \
               --cov-append \
@@ -111,7 +111,7 @@ jobs:
           source activate grayskull
           pytest tests \
               -vv \
-              -n 0 \
+              -n 4 \
               --color=yes \
               --cov=./ \
               --cov-append \
@@ -167,7 +167,7 @@ jobs:
           call activate grayskull
           pytest tests ^
               -vv ^
-              -n 0 ^
+              -n 4 ^
               --color=yes ^
               --cov=./ ^
               --cov-append ^
