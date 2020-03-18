@@ -51,11 +51,25 @@ jobs:
           source activate grayskull
           pytest tests \
               -vv \
-              -n 4 \
+              -n 0 \
+              -m "serial" \
               --color=yes \
               --cov=./ \
               --cov-append \
-              --cov-report html:converage-html \
+              --cov-report html:coverage-serial-html \
+              --cov-report xml:coverage-serial.xml \
+              --test-run-title="Linux-py${PYTHON_VERSION}-Serial" \
+              --cov-config=$(Build.Repository.LocalPath)/.coveragerc \
+              --junit-xml=Linux-py${PYTHON_VERSION}-serial.xml \
+              --junit-prefix=Linux-py${PYTHON_VERSION}-serial
+          pytest tests \
+              -vv \
+              -n 4 \
+              -m "not serial" \
+              --color=yes \
+              --cov=./ \
+              --cov-append \
+              --cov-report html:coverage-html \
               --cov-report xml:coverage.xml \
               --test-run-title="Linux-py${PYTHON_VERSION}" \
               --cov-config=$(Build.Repository.LocalPath)/.coveragerc \
@@ -111,7 +125,21 @@ jobs:
           source activate grayskull
           pytest tests \
               -vv \
+              -n 0 \
+              -m "serial"
+              --color=yes \
+              --cov=./ \
+              --cov-append \
+              --cov-report html:converage-html-serial \
+              --cov-report xml:coverage.xml-serial \
+              --test-run-title="OSX-py${PYTHON_VERSION}-serial" \
+              --cov-config=$(Build.Repository.LocalPath)/.coveragerc \
+              --junit-xml=OSX-py${PYTHON_VERSION}-serial.xml \
+              --junit-prefix=OSX-py${PYTHON_VERSION}-serial
+          pytest tests \
+              -vv \
               -n 4 \
+              -m "not serial"
               --color=yes \
               --cov=./ \
               --cov-append \
@@ -167,7 +195,20 @@ jobs:
           call activate grayskull
           pytest tests ^
               -vv ^
+              -n 0 ^
+              -m "serial" ^
+              --color=yes ^
+              --cov=./ ^
+              --cov-append ^
+              --cov-report xml:coverage-serial.xml ^
+              --test-run-title="OSX-py%PYTHON_VERSION%-serial" ^
+              --cov-config=$(Build.Repository.LocalPath)/.coveragerc ^
+              --junit-xml=OSX-py%PYTHON_VERSION%-serial.xml ^
+              --junit-prefix=OSX-py%PYTHON_VERSION%-serial
+          pytest tests ^
+              -vv ^
               -n 4 ^
+              -m "not serial" ^
               --color=yes ^
               --cov=./ ^
               --cov-append ^
