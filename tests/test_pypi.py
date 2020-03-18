@@ -464,6 +464,9 @@ def test_mypy_deps_normalization_and_entry_points():
     ]
 
 
+@pytest.mark.skipif(
+    condition=sys.platform.startswith("win"), reason="Skipping test for win"
+)
 def test_panel_entry_points(tmpdir):
     recipe = PyPi(name="panel", version="0.9.1")
     recipe.generate_recipe(folder_path=str(tmpdir))
