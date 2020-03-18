@@ -64,7 +64,7 @@ jobs:
               --junit-prefix=Linux-py${PYTHON_VERSION}-serial
           pytest tests \
               -vv \
-              -n 4 \
+              -n auto \
               -m "not serial" \
               --color=yes \
               --cov=./ \
@@ -126,7 +126,7 @@ jobs:
           pytest tests \
               -vv \
               -n 0 \
-              -m "serial"
+              -m "serial" \
               --color=yes \
               --cov=./ \
               --cov-append \
@@ -138,7 +138,7 @@ jobs:
               --junit-prefix=OSX-py${PYTHON_VERSION}-serial
           pytest tests \
               -vv \
-              -n 4 \
+              -n auto \
               -m "not serial"
               --color=yes \
               --cov=./ \
@@ -207,7 +207,7 @@ jobs:
               --junit-prefix=OSX-py%PYTHON_VERSION%-serial
           pytest tests ^
               -vv ^
-              -n 4 ^
+              -n auto ^
               -m "not serial" ^
               --color=yes ^
               --cov=./ ^
