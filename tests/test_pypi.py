@@ -393,10 +393,6 @@ def test_get_test_entry_points():
     ) == ["pytest --help", "py.test --help"]
 
 
-def test_recipe_uvicorn_entry_points_str():
-    assert PyPi(name="uvicorn", version="0.11.3")
-
-
 def test_importlib_metadata_two_setuptools_scm():
     recipe = PyPi(name="importlib-metadata", version="1.5.0")
     assert "setuptools_scm" in recipe["requirements"]["host"]
@@ -461,3 +457,13 @@ def test_mypy_deps_normalization_and_entry_points():
         "stubtest=mypy.stubtest:main",
         "dmypy=mypy.dmypy.client:console_entry",
     ]
+
+
+def test_panel_entry_points(tmpdir):
+    recipe = PyPi(name="panel", version="0.9.1")
+    assert recipe["build"]["entry_points"] == "panel = panel.cli:main"
+    recipe.generate_recipe(folder_path=str(tmpdir))
+    recipe_path = str(tmpdir / "panel" / "meta.yaml")
+    with open(recipe_path, "r") as f:
+        content = f.read()
+    assert "  entry_points:\n    - panel = panel.cli:main" in content
