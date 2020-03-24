@@ -61,7 +61,16 @@ def match_license(name: str) -> dict:
     all_licenses = get_all_licenses_from_spdx()
     name = re.sub(r"\s+license\s*", "", name.strip(), flags=re.IGNORECASE)
 
-    best_match = process.extractOne(name, _get_all_license_choice(all_licenses))
+    best_match = process.extractBests(name, _get_all_license_choice(all_licenses))
+    first_option = best_match[0]
+    if best_match[0][1] != 100:
+        best_match = [l[0] for l in best_match if not l[0].endswith("-only")]
+        if best_match:
+            best_match = process.extractOne(name, best_match, scorer=token_sort_ratio)
+        else:
+            best_match = first_option
+    else:
+        best_match = first_option
     log.info(f"Best match for license {name} was {best_match}")
 
     return _get_license(best_match[0], all_licenses)
