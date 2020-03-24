@@ -29,33 +29,37 @@ class ShortLicense:
 
 
 @lru_cache(maxsize=10)
-def get_all_licenses_from_opensource() -> List:
-    """Get all licenses available on opensource.org
+def get_all_licenses_from_spdx() -> List:
+    """Get all licenses available on spdx.org
 
-    :return: List with all licenses information on opensource.org
+    :return: List with all licenses information on spdx.org
     """
-    response = requests.get(url="https://api.opensource.org/licenses", timeout=5)
+    response = requests.get(url="https://spdx.org/licenses/licenses.json", timeout=5)
     log.debug(
-        f"Response from api.opensource. Status code:{response.status_code},"
+        f"Response from spdx.org. Status code:{response.status_code},"
         f" response: {response}"
     )
     if response.status_code != 200:
         raise HTTPError(
-            f"It was not possible to communicate with opensource api.\n{response.text}"
+            f"It was not possible to communicate with spdx api.\n{response.text}"
         )
-    print(f"{Fore.LIGHTBLACK_EX}Recovering license info from opensource.org ...")
-    return response.json()
+    print(f"{Fore.LIGHTBLACK_EX}Recovering license info from spdx.org ...")
+    return [
+        l
+        for l in response.json()["licenses"]
+        if not l.get("isDeprecatedLicenseId", False)
+    ]
 
 
 def match_license(name: str) -> dict:
     """Match if the given license name matches any license present on
-    opensource.org
+    spdx.org
 
     :param name: License name
     :return: Information of the license matched
     """
-    all_licenses = get_all_licenses_from_opensource()
-    name = name.strip()
+    all_licenses = get_all_licenses_from_spdx()
+    name = re.sub(r"\s+license\s*", "", name.strip(), flags=re.IGNORECASE)
 
     best_match = process.extractOne(name, _get_all_license_choice(all_licenses))
     log.info(f"Best match for license {name} was {best_match}")
@@ -70,10 +74,7 @@ def get_short_license_id(name: str) -> str:
     :return: short identifier (spdx) for the given license name
     """
     recipe_license = match_license(name)
-    for identifier in recipe_license["identifiers"]:
-        if identifier["scheme"].lower() == "spdx":
-            return identifier["identifier"]
-    return recipe_license["id"]
+    return recipe_license["licenseId"]
 
 
 def _get_license(license_id: str, all_licenses: List) -> dict:
@@ -97,14 +98,35 @@ def _get_all_names_from_api(one_license: dict) -> List:
     result = set()
     if one_license["name"]:
         result.add(one_license["name"])
-    if one_license["id"]:
-        result.add(one_license["id"])
-    for lc in one_license["identifiers"]:
-        if lc["scheme"] == "spdx":
-            result.add(lc["identifier"])
-            break
-    result = result.union({l["name"] for l in one_license["other_names"]})
+    if one_license["licenseId"]:
+        result.add(one_license["licenseId"])
+    other_names = get_other_names_from_opensource(one_license["licenseId"])
+    result.update(other_names)
     return list(result)
+
+
+def get_other_names_from_opensource(license_spdx: str) -> List:
+    lic = get_opensource_license(license_spdx)
+    return [l["name"] for l in lic.get("other_names", [])]
+
+
+def get_opensource_license(license_spdx: str) -> dict:
+    opensource = get_opensource_license_data()
+    for lic in opensource:
+        if lic["id"] == license_spdx:
+            return lic
+        for _id in lic["identifiers"]:
+            if _id["scheme"].lower() == "spdx" and license_spdx == _id["identifier"]:
+                return lic
+    return {}
+
+
+@lru_cache(maxsize=10)
+def get_opensource_license_data() -> List:
+    response = requests.get(url=f"https://api.opensource.org/licenses/", timeout=5)
+    if response.status_code != 200:
+        return []
+    return response.json()
 
 
 def _get_all_license_choice(all_licenses: List) -> List:
