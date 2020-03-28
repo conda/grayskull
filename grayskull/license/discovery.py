@@ -12,8 +12,8 @@ from typing import List, Optional, Union
 
 import requests
 from colorama import Fore
-from fuzzywuzzy import process
-from fuzzywuzzy.fuzz import token_set_ratio, token_sort_ratio
+from rapidfuzz import process
+from rapidfuzz.fuzz import token_set_ratio, token_sort_ratio
 from requests import HTTPError
 
 from grayskull.license.data import get_all_licenses  # noqa
@@ -61,7 +61,7 @@ def match_license(name: str) -> dict:
     all_licenses = get_all_licenses_from_spdx()
     name = re.sub(r"\s+license\s*", "", name.strip(), flags=re.IGNORECASE)
 
-    best_matches = process.extractBests(name, _get_all_license_choice(all_licenses))
+    best_matches = process.extract(name, _get_all_license_choice(all_licenses))
     spdx_license = best_matches[0]
     if spdx_license[1] != 100:
         best_matches = [l[0] for l in best_matches if not l[0].endswith("-only")]
@@ -318,7 +318,7 @@ def get_license_type(path_license: str, default: Optional[str] = None) -> Option
     print(f"{Fore.LIGHTBLACK_EX}Matching license file with database from Grayskull...")
     all_licenses = get_all_licenses()
     licenses_text = list(map(itemgetter(1), all_licenses))
-    best_match = process.extractBests(
+    best_match = process.extract(
         license_content, licenses_text, scorer=token_sort_ratio
     )
 
