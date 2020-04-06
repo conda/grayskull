@@ -256,7 +256,9 @@ class PyPi(AbstractRecipeModel):
         os.chdir(old_dir)
 
     @staticmethod
-    def __run_setup_py(path_setup: str, data_dist: dict, run_py=False):
+    def __run_setup_py(
+        path_setup: str, data_dist: dict, run_py=False, deps_installed=None
+    ):
         """Method responsible to run the setup.py
 
         :param path_setup: full path to the setup.py
@@ -264,6 +266,7 @@ class PyPi(AbstractRecipeModel):
         :param run_py: If it should run the setup.py with run_py, otherwise it will run
         invoking the distutils directly
         """
+        deps_installed = deps_installed if deps_installed else []
         original_path = deepcopy(sys.path)
         pip_dir = mkdtemp(prefix="pip-dir-")
         if not os.path.exists(pip_dir):
@@ -287,8 +290,15 @@ class PyPi(AbstractRecipeModel):
                 f"When executing setup.py did not find the module: {err.name}."
                 f" Exception: {err}"
             )
-            PyPi._pip_install_dep(data_dist, err.name, pip_dir)
-            PyPi.__run_setup_py(path_setup, data_dist, run_py)
+            dep_install = err.name
+            if dep_install in deps_installed:
+                dep_install = dep_install.split(".")[0]
+            if dep_install not in deps_installed:
+                deps_installed.append(dep_install)
+                PyPi._pip_install_dep(data_dist, dep_install, pip_dir)
+                PyPi.__run_setup_py(
+                    path_setup, data_dist, run_py, deps_installed=deps_installed
+                )
         except Exception as err:
             log.debug(f"Exception when executing setup.py as script: {err}")
         data_dist.update(
@@ -325,11 +335,6 @@ class PyPi(AbstractRecipeModel):
             data_dist["setup_requires"] = []
         if dep_name == "pkg_resources":
             dep_name = "setuptools"
-        if (
-            dep_name.lower() not in data_dist["setup_requires"]
-            and dep_name.lower() != "setuptools"
-        ):
-            data_dist["setup_requires"].append(dep_name.lower())
         try:
             check_output(["pip", "install", dep_name, f"--target={pip_dir}"])
         except Exception as err:
@@ -338,6 +343,12 @@ class PyPi(AbstractRecipeModel):
                 f"Command: pip install {dep_name} --target={pip_dir}.\n"
                 f"Error: {err}"
             )
+        else:
+            if (
+                dep_name.lower() not in data_dist["setup_requires"]
+                and dep_name.lower() != "setuptools"
+            ):
+                data_dist["setup_requires"].append(dep_name.lower())
 
     @staticmethod
     def _merge_pypi_sdist_metadata(pypi_metadata: dict, sdist_metadata: dict) -> dict:
