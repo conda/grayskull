@@ -388,6 +388,10 @@ def test_botocore_recipe_license_name():
     recipe = PyPi(name="botocore", version="1.15.8")
     assert recipe["about"]["license"] == "Apache-2.0"
 
+def test_ipytest_recipe_license():
+    recipe = PyPi(name="ipytest", version="0.8.0")
+    assert recipe["about"]["license"] == "MIT"
+
 
 def test_get_test_entry_points():
     assert PyPi._get_test_entry_points("grayskull = grayskull.__main__:main") == [

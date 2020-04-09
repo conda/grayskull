@@ -578,7 +578,8 @@ class PyPi(AbstractRecipeModel):
         git_url = metadata.get("dev_url", None)
         if not git_url and "github.com/" in metadata.get("project_url", ""):
             git_url = metadata.get("project_url")
-        if not git_url and "github.com/" in metadata.get("url", ""):
+        # "url" is always present but sometimes set to None
+        if not git_url and "github.com/" in (metadata.get("url") or ""):
             git_url = metadata.get("url")
 
         short_license = search_license_file(
