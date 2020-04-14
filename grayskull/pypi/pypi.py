@@ -749,12 +749,13 @@ class PyPi(AbstractRecipeModel):
         :param name: package name
         :return: list of dependencies formatted
         """
-        formated_dependencies = []
+        formatted_dependencies = []
         re_deps = re.compile(
             r"^\s*([\.a-zA-Z0-9_-]+)\s*(.*)\s*$", re.MULTILINE | re.DOTALL
         )
         re_remove_space = re.compile(r"([<>!=]+)\s+")
         re_remove_tags = re.compile(r"\s*(\[.*\])", re.DOTALL)
+        re_remove_comments = re.compile(r"\s+#.*", re.DOTALL)
         for req in all_dependencies:
 
             match_req = re_deps.match(req)
@@ -768,8 +769,9 @@ class PyPi(AbstractRecipeModel):
                     deps_name = " ".join(match_req)
             deps_name = re_remove_space.sub(r"\1", deps_name.strip())
             deps_name = re_remove_tags.sub(r"", deps_name.strip())
-            formated_dependencies.append(deps_name)
-        return formated_dependencies
+            deps_name = re_remove_comments.sub("", deps_name)
+            formatted_dependencies.append(deps_name.strip())
+        return formatted_dependencies
 
     @staticmethod
     def _update_requirements_with_pin(requirements: dict):
