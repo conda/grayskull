@@ -479,3 +479,17 @@ def test_panel_entry_points(tmpdir):
     with open(recipe_path, "r") as f:
         content = f.read()
     assert "- panel = panel.cli:main" in content
+
+
+def test_deps_comments():
+    recipe = PyPi(name="kubernetes_asyncio", version="11.2.0")
+    assert recipe["requirements"]["run"] == [
+        "aiohttp >=2.3.10,<4.0.0",
+        "certifi >=14.05.14",
+        "python",
+        "python-dateutil >=2.5.3",
+        "pyyaml >=3.12",
+        "setuptools >=21.0.0",
+        "six >=1.9.0",
+        "urllib3 >=1.24.2",
+    ]
