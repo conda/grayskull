@@ -12,8 +12,8 @@ from typing import List, Optional, Union
 
 import requests
 from colorama import Fore
-from fuzzywuzzy import process
-from fuzzywuzzy.fuzz import token_set_ratio, token_sort_ratio
+from rapidfuzz import process
+from rapidfuzz.fuzz import token_set_ratio, token_sort_ratio
 from requests import HTTPError
 
 from grayskull.license.data import get_all_licenses  # noqa
@@ -61,14 +61,20 @@ def match_license(name: str) -> dict:
     all_licenses = get_all_licenses_from_spdx()
     name = re.sub(r"\s+license\s*", "", name.strip(), flags=re.IGNORECASE)
 
-    best_matches = process.extractBests(name, _get_all_license_choice(all_licenses))
+    best_matches = process.extract(name, _get_all_license_choice(all_licenses))
     spdx_license = best_matches[0]
     if spdx_license[1] != 100:
         best_matches = [l[0] for l in best_matches if not l[0].endswith("-only")]
+
         if best_matches:
-            spdx_license = process.extractOne(
-                name, best_matches, scorer=token_sort_ratio
-            )
+            best_matches = process.extract(name, best_matches, scorer=token_set_ratio)
+            spdx_license = best_matches[0]
+            best_matches = [l[0] for l in best_matches if l[1] >= spdx_license[1]]
+            if len(best_matches) > 1:
+                spdx_license = process.extractOne(
+                    name, best_matches, scorer=token_sort_ratio
+                )
+
     log.info(
         f"Best match for license {name} was {spdx_license}.\n"
         f"Best matches: {best_matches}"
@@ -318,15 +324,16 @@ def get_license_type(path_license: str, default: Optional[str] = None) -> Option
     print(f"{Fore.LIGHTBLACK_EX}Matching license file with database from Grayskull...")
     all_licenses = get_all_licenses()
     licenses_text = list(map(itemgetter(1), all_licenses))
-    best_match = process.extractBests(
+    best_match = process.extract(
         license_content, licenses_text, scorer=token_sort_ratio
     )
 
     if default and best_match[0][1] < 51:
         log.info(f"Match too low for recipe {best_match}, using the default {default}")
         return default
+
     higher_match = best_match[0]
-    equal_values = [val[0] for val in best_match if higher_match[1] == val[1]]
+    equal_values = [val[0] for val in best_match if val[1] > (higher_match[1] - 3)]
     if len(equal_values) > 1:
         higher_match = process.extractOne(
             license_content, equal_values, scorer=token_set_ratio
