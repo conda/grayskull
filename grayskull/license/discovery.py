@@ -221,7 +221,7 @@ def search_license_api_github(
 
     json_content = response.json()
     license_content = base64.b64decode(json_content["content"]).decode("utf-8")
-    file_path = os.path.join(mkdtemp(prefix="github-license-"), "LICENSE")
+    file_path = os.path.join(mkdtemp(prefix="github-license-"), json_content["name"])
     with open(file_path, "w") as f:
         f.write(license_content)
     return ShortLicense(
