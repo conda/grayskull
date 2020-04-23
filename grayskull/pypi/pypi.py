@@ -500,10 +500,10 @@ class PyPi(AbstractRecipeModel):
         if license_metadata:
             license_name = license_metadata.name
             if license_metadata.path:
-                license_file = "LICENSE"
                 if license_metadata.is_packaged:
                     license_file = license_metadata.path
                 else:
+                    license_file = os.path.basename(license_metadata.path)
                     self.files_to_copy.append(license_metadata.path)
 
         print(f"{Fore.LIGHTBLACK_EX}License type: {Fore.LIGHTMAGENTA_EX}{license_name}")

@@ -493,3 +493,8 @@ def test_deps_comments():
         "six >=1.9.0",
         "urllib3 >=1.24.2",
     ]
+
+
+def test_keep_filename_license():
+    recipe = PyPi(name="respx", version="0.10.1")
+    assert recipe["about"]["license_file"] == "LICENSE.md"
