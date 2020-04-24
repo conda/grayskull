@@ -413,15 +413,24 @@ class PyPi(AbstractRecipeModel):
         :param sdist_metadata: sdist metadata
         :return: list with all entry points
         """
-        all_entry_points = sdist_metadata.get("entry_points", None)
+        all_entry_points = sdist_metadata.get("entry_points", {})
         if isinstance(all_entry_points, str) or not all_entry_points:
             return []
         if all_entry_points.get("console_scripts") or all_entry_points.get(
             "gui_scripts"
         ):
-            return all_entry_points.get("console_scripts", []) + all_entry_points.get(
-                "gui_scripts", []
-            )
+            console_scripts = all_entry_points.get("console_scripts", [])
+            gui_scripts = all_entry_points.get("gui_scripts", [])
+            entry_points_result = []
+            if console_scripts:
+                if isinstance(console_scripts, str):
+                    console_scripts = [console_scripts]
+                entry_points_result += console_scripts
+            if gui_scripts:
+                if isinstance(gui_scripts, str):
+                    gui_scripts = [gui_scripts]
+                entry_points_result += gui_scripts
+            return entry_points_result
         return []
 
     @staticmethod
