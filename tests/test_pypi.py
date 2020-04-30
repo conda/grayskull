@@ -518,3 +518,14 @@ def test_deps_comments():
 def test_keep_filename_license():
     recipe = PyPi(name="respx", version="0.10.1")
     assert recipe["about"]["license_file"] == "LICENSE.md"
+
+
+def test_platform_system_selector():
+    assert (
+        PyPi._parse_extra_metadata_to_selector("platform_system", "==", "Windows")
+        == "win"
+    )
+    assert (
+        PyPi._parse_extra_metadata_to_selector("platform_system", "!=", "Windows")
+        == "not win"
+    )
