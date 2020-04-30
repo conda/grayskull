@@ -861,7 +861,7 @@ class PyPi(AbstractRecipeModel):
                     result_selector.append(extra[4])
                 if extra[5]:
                     result_selector.append(extra[5])
-        if result_selector[-1] in ["and", "or"]:
+        if result_selector and result_selector[-1] in ["and", "or"]:
             del result_selector[-1]
         return result_selector
 
@@ -1044,7 +1044,17 @@ class PyPi(AbstractRecipeModel):
             return f"py{operation}{value}"
         if option == "sys_platform":
             value = re.sub(r"[^a-zA-Z]+", "", value)
+            if operation == "!=":
+                return f"not {value.lower()}"
             return value.lower()
+        if option == "platform_system":
+            replace_val = {"windows": "win", "linux": "linux", "darwin": "osx"}
+            value_lower = value.lower().strip()
+            if value_lower in replace_val:
+                value_lower = replace_val[value_lower]
+            if operation == "!=":
+                return f"not {value_lower}"
+            return value_lower
 
 
 def get_small_py3_version(list_py_ver: List[PyVer]) -> PyVer:
