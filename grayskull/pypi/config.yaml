@@ -1,0 +1,23 @@
+tables:
+  import_name: pytables
+  conda_forge: pytables
+
+python-opencv:
+  import_name: cv2
+  conda_forge: opencv
+
+pyqt4:
+  import_name: pyqt4
+  conda_forge: pyqt
+  delimiter_min: "4.0.0"
+  delimiter_max: "5.0.0"
+
+pyqt5:
+  import_name: pyqt5
+  conda_forge: pyqt
+  delimiter_min: "5.0.0"
+  delimiter_max: "6.0.0"
+
+matplotlib:
+  import_name: matplotlib
+  conda-forge: matplotlib-base
