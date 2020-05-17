@@ -45,9 +45,9 @@ def get_all_licenses_from_spdx() -> List:
         )
     print(f"{Fore.LIGHTBLACK_EX}Recovering license info from spdx.org ...")
     return [
-        l
-        for l in response.json()["licenses"]
-        if not l.get("isDeprecatedLicenseId", False)
+        lic
+        for lic in response.json()["licenses"]
+        if not lic.get("isDeprecatedLicenseId", False)
     ]
 
 
@@ -64,12 +64,12 @@ def match_license(name: str) -> dict:
     best_matches = process.extract(name, _get_all_license_choice(all_licenses))
     spdx_license = best_matches[0]
     if spdx_license[1] != 100:
-        best_matches = [l[0] for l in best_matches if not l[0].endswith("-only")]
+        best_matches = [lic[0] for lic in best_matches if not lic[0].endswith("-only")]
 
         if best_matches:
             best_matches = process.extract(name, best_matches, scorer=token_set_ratio)
             spdx_license = best_matches[0]
-            best_matches = [l[0] for l in best_matches if l[1] >= spdx_license[1]]
+            best_matches = [lic[0] for lic in best_matches if lic[1] >= spdx_license[1]]
             if len(best_matches) > 1:
                 spdx_license = process.extractOne(
                     name, best_matches, scorer=token_sort_ratio
@@ -123,7 +123,7 @@ def _get_all_names_from_api(one_license: dict) -> List:
 
 def get_other_names_from_opensource(license_spdx: str) -> List:
     lic = get_opensource_license(license_spdx)
-    return [l["name"] for l in lic.get("other_names", [])]
+    return [_license["name"] for _license in lic.get("other_names", [])]
 
 
 def get_opensource_license(license_spdx: str) -> dict:
@@ -139,7 +139,7 @@ def get_opensource_license(license_spdx: str) -> dict:
 
 @lru_cache(maxsize=10)
 def get_opensource_license_data() -> List:
-    response = requests.get(url=f"https://api.opensource.org/licenses/", timeout=5)
+    response = requests.get(url="https://api.opensource.org/licenses/", timeout=5)
     if response.status_code != 200:
         return []
     return response.json()
