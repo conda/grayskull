@@ -20,6 +20,7 @@ from progressbar import ProgressBar
 from requests import HTTPError
 
 from grayskull.base.base_recipe import AbstractRecipeModel
+from grayskull.base.track_packages import solve_list_pkg_name
 from grayskull.cli import WIDGET_BAR_DOWNLOAD
 from grayskull.license.discovery import ShortLicense, search_license_file
 from grayskull.utils import get_vendored_dependencies
@@ -35,6 +36,7 @@ class PyPi(AbstractRecipeModel):
     PKG_NEEDS_CXX_COMPILER = ("pybind11",)
     RE_DEPS_NAME = re.compile(r"^\s*([\.a-zA-Z0-9_-]+)", re.MULTILINE)
     PIN_PKG_COMPILER = {"numpy": "<{ pin_compatible('numpy') }}"}
+    PYPI_CONFIG = Path(os.path.dirname(__file__)) / "config.yaml"
 
     def __init__(
         self,
@@ -249,7 +251,7 @@ class PyPi(AbstractRecipeModel):
                 )
                 PyPi.__run_setup_py(path_setup, data_dist, run_py=True)
             yield data_dist
-        except Exception as err:  # noqa
+        except Exception as err:
             log.debug(f"Exception occurred when executing sdist injection: err {err}")
             yield data_dist
         core.setup = setup_core_original
@@ -519,6 +521,12 @@ class PyPi(AbstractRecipeModel):
         print(f"{Fore.LIGHTBLACK_EX}License file: {Fore.LIGHTMAGENTA_EX}{license_file}")
 
         all_requirements = self._extract_requirements(metadata)
+        all_requirements["host"] = solve_list_pkg_name(
+            all_requirements["host"], self.PYPI_CONFIG
+        )
+        all_requirements["run"] = solve_list_pkg_name(
+            all_requirements["run"], self.PYPI_CONFIG
+        )
 
         def print_req(name, list_req: List):
             prefix_req = f"{Fore.LIGHTBLACK_EX}\n   - {Fore.LIGHTCYAN_EX}"
@@ -765,8 +773,8 @@ class PyPi(AbstractRecipeModel):
         re_remove_space = re.compile(r"([<>!=]+)\s+")
         re_remove_tags = re.compile(r"\s*(\[.*\])", re.DOTALL)
         re_remove_comments = re.compile(r"\s+#.*", re.DOTALL)
-        for req in all_dependencies:
 
+        for req in all_dependencies:
             match_req = re_deps.match(req)
             deps_name = req
             if deps_name.replace("-", "_") == name.replace("-", "_"):

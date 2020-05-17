@@ -1,0 +1,12 @@
+foo_pkg:
+  import_name: foo_import
+  conda_forge: foo_conda_forge
+  delimiter_min: "1.2.3"
+  delimiter_max: "2.1.0"
+
+bar_pkg:
+  import_name: bar_import
+  conda_forge: bar_conda_forge
+
+foo_bar:
+  conda_forge: foo_bar_cf
