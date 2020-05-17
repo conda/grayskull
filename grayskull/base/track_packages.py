@@ -48,7 +48,7 @@ def solve_pkg_name(pkg: str, config_file: Union[Path, str]) -> str:
     ).strip()
 
 
-@lru_cache
+@lru_cache(maxsize=5)
 def _get_track_info_from_file(config_file: Union[Path, str]) -> Dict:
     yaml = YAML()
     with open(config_file, "r", encoding="utf_8") as yaml_file:
