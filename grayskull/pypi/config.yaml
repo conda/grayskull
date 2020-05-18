@@ -20,4 +20,4 @@ pyqt5:
 
 matplotlib:
   import_name: matplotlib
-  conda-forge: matplotlib-base
+  conda_forge: matplotlib-base
