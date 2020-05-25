@@ -15,6 +15,7 @@ from ruamel.yaml.error import CommentMark
 from grayskull.base.extra import get_git_current_user
 from grayskull.base.recipe_item import RecipeItem
 from grayskull.base.section import Section
+from grayskull.cli.stdout import print_msg
 
 yaml = YAML(typ="jinja2")
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -199,7 +200,7 @@ class AbstractRecipeModel(ABC):
             maintainers = maintainers if maintainers else [get_git_current_user()]
             self["extra"]["recipe-maintainers"].add_items(maintainers)
         prefix = f"{Fore.LIGHTBLACK_EX}\n   - {Fore.LIGHTMAGENTA_EX}"
-        print(f"{Fore.LIGHTBLACK_EX}Maintainers:{prefix}{prefix.join(maintainers)}")
+        print_msg(f"{Fore.LIGHTBLACK_EX}Maintainers:{prefix}{prefix.join(maintainers)}")
 
     def get_clean_yaml(self, recipe_yaml: CommentedMap) -> CommentedMap:
         result = self._clean_yaml(recipe_yaml)
