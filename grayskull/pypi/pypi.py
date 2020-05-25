@@ -16,12 +16,11 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import requests
 from colorama import Fore, Style
-from progressbar import ProgressBar
 from requests import HTTPError
 
 from grayskull.base.base_recipe import AbstractRecipeModel
 from grayskull.base.track_packages import solve_list_pkg_name
-from grayskull.cli import WIDGET_BAR_DOWNLOAD
+from grayskull.cli.stdout import manage_progressbar, print_msg
 from grayskull.license.discovery import ShortLicense, search_license_file
 from grayskull.utils import get_vendored_dependencies
 
@@ -58,7 +57,7 @@ class PyPi(AbstractRecipeModel):
         :param dest: Folder were the method will download the sdist
         """
         name = sdist_url.split("/")[-1]
-        print(
+        print_msg(
             f"{Fore.GREEN}Starting the download of the sdist package"
             f" {Fore.BLUE}{Style.BRIGHT}{name}"
         )
@@ -66,11 +65,9 @@ class PyPi(AbstractRecipeModel):
         response = requests.get(sdist_url, allow_redirects=True, stream=True, timeout=5)
         total_size = int(response.headers["Content-length"])
 
-        with ProgressBar(
-            widgets=deepcopy(WIDGET_BAR_DOWNLOAD),
-            max_value=total_size,
-            prefix=f"{name} ",
-        ) as bar, open(dest, "wb") as pkg_file:
+        with manage_progressbar(max_value=total_size, prefix=f"{name} ") as bar, open(
+            dest, "wb"
+        ) as pkg_file:
             progress_val = 0
             chunk_size = 512
             for chunk_data in response.iter_content(chunk_size=chunk_size):
@@ -97,7 +94,7 @@ class PyPi(AbstractRecipeModel):
             self.files_to_copy.append(path_pkg)
         log.debug(f"Unpacking {path_pkg} to {temp_folder}")
         shutil.unpack_archive(path_pkg, temp_folder)
-        print(f"{Fore.LIGHTBLACK_EX}Recovering information from setup.py")
+        print_msg(f"{Fore.LIGHTBLACK_EX}Recovering information from setup.py")
         with PyPi._injection_distutils(temp_folder) as metadata:
             metadata["sdist_path"] = temp_folder
             return metadata
@@ -163,7 +160,7 @@ class PyPi(AbstractRecipeModel):
         from setuptools.config import read_configuration
 
         log.debug(f"Started setup.cfg from {source_path}")
-        print(f"{Fore.LIGHTBLACK_EX}Recovering metadata from setup.cfg")
+        print_msg(f"{Fore.LIGHTBLACK_EX}Recovering metadata from setup.cfg")
         path_setup_cfg = list(Path(source_path).rglob("setup.cfg"))
         if not path_setup_cfg:
             return {}
@@ -242,10 +239,10 @@ class PyPi(AbstractRecipeModel):
         try:
             core.setup = __fake_distutils_setup
             path_setup = str(path_setup)
-            print(f"{Fore.LIGHTBLACK_EX}Executing injected distutils...")
+            print_msg(f"{Fore.LIGHTBLACK_EX}Executing injected distutils...")
             PyPi.__run_setup_py(path_setup, data_dist)
             if not data_dist or not data_dist.get("install_requires", None):
-                print(
+                print_msg(
                     f"{Fore.LIGHTBLACK_EX}No data was recovered from setup.py."
                     f" Forcing to execute the setup.py as script"
                 )
@@ -517,8 +514,12 @@ class PyPi(AbstractRecipeModel):
                     license_file = os.path.basename(license_metadata.path)
                     self.files_to_copy.append(license_metadata.path)
 
-        print(f"{Fore.LIGHTBLACK_EX}License type: {Fore.LIGHTMAGENTA_EX}{license_name}")
-        print(f"{Fore.LIGHTBLACK_EX}License file: {Fore.LIGHTMAGENTA_EX}{license_file}")
+        print_msg(
+            f"{Fore.LIGHTBLACK_EX}License type: {Fore.LIGHTMAGENTA_EX}{license_name}"
+        )
+        print_msg(
+            f"{Fore.LIGHTBLACK_EX}License file: {Fore.LIGHTMAGENTA_EX}{license_file}"
+        )
 
         all_requirements = self._extract_requirements(metadata)
         all_requirements["host"] = solve_list_pkg_name(
@@ -530,7 +531,7 @@ class PyPi(AbstractRecipeModel):
 
         def print_req(name, list_req: List):
             prefix_req = f"{Fore.LIGHTBLACK_EX}\n   - {Fore.LIGHTCYAN_EX}"
-            print(
+            print_msg(
                 f"{Fore.LIGHTBLACK_EX}{name} requirements:"
                 f"{prefix_req}{prefix_req.join(list_req)}"
             )
@@ -617,7 +618,7 @@ class PyPi(AbstractRecipeModel):
         :param version: Package version
         :return: Pypi metadata
         """
-        print(f"{Fore.LIGHTBLACK_EX}Recovering metadata from pypi...")
+        print_msg(f"{Fore.LIGHTBLACK_EX}Recovering metadata from pypi...")
         if version:
             url_pypi = PyPi.URL_PYPI_METADATA.format(pkg_name=f"{name}/{version}")
         else:

@@ -9,7 +9,9 @@ from colorama.ansi import clear_screen
 
 import grayskull
 from grayskull.base.factory import GrayskullFactory
+from grayskull.cli import CLIConfig
 from grayskull.cli.parser import parse_pkg_name_version
+from grayskull.cli.stdout import print_msg
 
 colorama.init(autoreset=True)
 logging.basicConfig(format="%(levelname)s:%(message)s")
@@ -64,6 +66,13 @@ def main(args=None):
         default=".",
         help="Path to where the recipe will be created",
     )
+    pypi_cmds.add_argument(
+        "--stdout",
+        dest="stdout",
+        default=True,
+        help="Disable or enable stdout, if it is False, Grayskull"
+        " will disable the prints. Default is True",
+    )
 
     args = parser.parse_args(args)
 
@@ -72,8 +81,7 @@ def main(args=None):
         return
 
     logging.debug(f"All arguments received: args: {args}")
-    print(Style.RESET_ALL)
-    print(clear_screen())
+
     if args.grayskull_power:
         print(
             f"{Fore.BLUE}By the power of Grayskull...\n"
@@ -81,9 +89,14 @@ def main(args=None):
         )
         return
 
+    CLIConfig().stdout = args.stdout
+
+    print_msg(Style.RESET_ALL)
+    print_msg(clear_screen())
+
     for pkg_name in args.pypi_packages:
         logging.debug(f"Starting grayskull for pkg: {pkg_name}")
-        print(
+        print_msg(
             f"{Fore.GREEN}\n\n"
             f"#### Initializing recipe for "
             f"{Fore.BLUE}{pkg_name} (pypi) {Fore.GREEN}####\n"
@@ -93,7 +106,7 @@ def main(args=None):
             "pypi", pkg_name, pkg_version, download=args.download
         )
         recipe.generate_recipe(args.output, mantainers=args.maintainers)
-        print(
+        print_msg(
             f"\n{Fore.GREEN}#### Recipe generated on "
             f"{os.path.realpath(args.output)} for {pkg_name} ####\n"
         )

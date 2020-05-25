@@ -4,6 +4,8 @@ import subprocess
 import requests
 from colorama import Fore
 
+from grayskull.cli.stdout import print_msg
+
 log = logging.getLogger(__name__)
 
 
@@ -27,7 +29,7 @@ def get_git_current_user() -> str:
             f"Exception occurred when trying to recover user information from github."
             f" Exception: {err}"
         )
-    print(
+    print_msg(
         f"{Fore.LIGHTBLACK_EX}Using default recipe maintainer:"
         f" {Fore.LIGHTMAGENTA_EX}AddYourGitHubIdHere"
     )
