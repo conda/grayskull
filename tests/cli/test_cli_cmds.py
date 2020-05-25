@@ -29,3 +29,11 @@ def test_easter(capsys, option):
     main([option])
     captured = capsys.readouterr()
     assert "By the power of Grayskull..." in captured.out.strip()
+
+
+def test_grayskull_without_options(capsys):
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        main([])
+    assert pytest_wrapped_e.type == SystemExit
+    captured = capsys.readouterr()
+    assert "Grayskull - Conda recipe generator" in captured.out
