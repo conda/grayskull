@@ -20,7 +20,7 @@ jobs:
           python.version: '3.8'
         python37:
           python.version: '3.7'
-      maxParallel: 8
+      maxParallel: 12
 
     steps:
       - bash: |
@@ -87,7 +87,7 @@ jobs:
   - job:
     displayName: OSX
     pool:
-      vmImage: 'macOS-10.14'
+      vmImage: 'macOS-latest'
     strategy:
       matrix:
         python38:
@@ -164,7 +164,7 @@ jobs:
   - job:
     displayName: Windows
     pool:
-      vmImage: 'vs2017-win2016'
+      vmImage: 'windows-latest'
     strategy:
       matrix:
         python38:
