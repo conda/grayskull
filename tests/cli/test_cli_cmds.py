@@ -1,3 +1,5 @@
+import sys
+
 import pytest
 
 import grayskull
@@ -31,7 +33,8 @@ def test_easter(capsys, option):
     assert "By the power of Grayskull..." in captured.out.strip()
 
 
-def test_grayskull_without_options(capsys):
+def test_grayskull_without_options(capsys, monkeypatch):
+    monkeypatch.setattr(sys, "argv", ["foo"])
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         main([])
     assert pytest_wrapped_e.type == SystemExit
