@@ -18,8 +18,8 @@ logging.basicConfig(format="%(levelname)s:%(message)s")
 
 
 def main(args=None):
-    if args is None:
-        args = sys.argv[1:]
+    if not args:
+        args = sys.argv[1:] if sys.argv[1:] else ["--help"]
 
     parser = argparse.ArgumentParser(description="Grayskull - Conda recipe generator")
     pypi_parser = parser.add_subparsers(help="Options to generate PyPI recipes")
@@ -113,4 +113,4 @@ def main(args=None):
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
