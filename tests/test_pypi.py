@@ -529,3 +529,8 @@ def test_platform_system_selector():
         PyPi._parse_extra_metadata_to_selector("platform_system", "!=", "Windows")
         == "not win"
     )
+
+
+def test_tzdata_without_setup_py():
+    recipe = PyPi(name="tzdata", version="2020.1")
+    assert recipe["build"]["noarch"] == "python"
