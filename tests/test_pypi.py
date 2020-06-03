@@ -534,3 +534,4 @@ def test_platform_system_selector():
 def test_tzdata_without_setup_py():
     recipe = PyPi(name="tzdata", version="2020.1")
     assert recipe["build"]["noarch"] == "python"
+    assert recipe["about"]["home"] == "https://github.com/python/tzdata"

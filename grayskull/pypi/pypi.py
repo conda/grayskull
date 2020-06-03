@@ -553,7 +553,9 @@ class PyPi(AbstractRecipeModel):
                 "requires": "pip",
             },
             "about": {
-                "home": metadata.get("project_url"),
+                "home": metadata["url"]
+                if metadata.get("url")
+                else metadata.get("project_url"),
                 "summary": metadata.get("summary"),
                 "doc_url": metadata.get("doc_url"),
                 "dev_url": metadata.get("dev_url"),
