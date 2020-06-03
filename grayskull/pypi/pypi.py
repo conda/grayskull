@@ -198,7 +198,7 @@ class PyPi(AbstractRecipeModel):
 
         setup_core_original = core.setup
         old_dir = os.getcwd()
-        path_setup = list(Path(folder).rglob("setup.py"))[0]
+        path_setup = search_setup_root(folder)
         os.chdir(os.path.dirname(str(path_setup)))
 
         data_dist = {}
@@ -1078,3 +1078,15 @@ def is_pkg_available(pkg_name: str, channel: str = "conda-forge") -> bool:
         url=f"https://anaconda.org/{channel}/{pkg_name}/files", allow_redirects=False
     )
     return response.status_code == 200
+
+
+def search_setup_root(path_folder: Union[Path, str]) -> Path:
+    setup_py = list(Path(path_folder).rglob("setup.py"))
+    if setup_py:
+        return setup_py[0]
+    setup_cfg = list(Path(path_folder).rglob("setup.cfg"))
+    if setup_cfg:
+        return setup_cfg[0]
+    pyproject_toml = list(Path(path_folder).rglob("pyproject.toml"))
+    if pyproject_toml:
+        return pyproject_toml[0]
