@@ -21,9 +21,8 @@ def get_git_current_user_metadata() -> dict:
 def get_git_current_user() -> str:
     try:
         github_search = get_git_current_user_metadata()
-        if github_search["total_count"] == 1:
-            login_github = github_search["items"][0]["login"]
-            return login_github
+        if github_search["total_count"] >= 1:
+            return github_search["items"][0]["login"]
     except Exception as err:
         log.debug(
             f"Exception occurred when trying to recover user information from github."

@@ -9,6 +9,15 @@ def test_get_git_current_user_metadata(monkeypatch):
     assert json_git["items"][0]["type"] == "User"
 
 
+def test_get_git_current_with_multiple_users(monkeypatch):
+    monkeypatch.setattr(
+        grayskull.base.extra,
+        "get_git_current_user_metadata",
+        lambda: {"items": [{"login": "user1"}, {"login": "user2"}], "total_count": 2},
+    )
+    assert get_git_current_user() == "user1"
+
+
 def test_get_git_current_user(monkeypatch):
     monkeypatch.setattr(
         grayskull.base.extra,
