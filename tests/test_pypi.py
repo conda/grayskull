@@ -482,9 +482,9 @@ def test_normalize_pkg_name():
 
 def test_mypy_deps_normalization_and_entry_points():
     recipe = PyPi(name="mypy", version="0.770")
-    assert "mypy_extensions <0.5.0,>=0.4.3" in recipe["requirements"]["run"]
-    assert "mypy-extensions <0.5.0,>=0.4.3" not in recipe["requirements"]["run"]
-    assert "typed-ast <1.5.0,>=1.4.0" in recipe["requirements"]["run"]
+    assert "mypy_extensions >=0.4.3,<0.5.0" in recipe["requirements"]["run"]
+    assert "mypy-extensions >=0.4.3,<0.5.0" not in recipe["requirements"]["run"]
+    assert "typed-ast >=1.4.0,<1.5.0" in recipe["requirements"]["run"]
     assert "typed_ast <1.5.0,>=1.4.0" not in recipe["requirements"]["run"]
     assert "typing-extensions >=3.7.4" in recipe["requirements"]["run"]
     assert "typing_extensions >=3.7.4" not in recipe["requirements"]["run"]
