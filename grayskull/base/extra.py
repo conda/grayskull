@@ -29,7 +29,7 @@ def get_git_current_user() -> str:
             f" Exception: {err}"
         )
     print_msg(
-        f"{Fore.LIGHTBLACK_EX}Using default recipe maintainer:"
+        f"Using default recipe maintainer:"
         f" {Fore.LIGHTMAGENTA_EX}AddYourGitHubIdHere"
     )
     return "AddYourGitHubIdHere"
