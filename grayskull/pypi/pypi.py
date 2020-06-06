@@ -94,7 +94,7 @@ class PyPi(AbstractRecipeModel):
             self.files_to_copy.append(path_pkg)
         log.debug(f"Unpacking {path_pkg} to {temp_folder}")
         shutil.unpack_archive(path_pkg, temp_folder)
-        print_msg(f"{Fore.LIGHTBLACK_EX}Recovering information from setup.py")
+        print_msg("Recovering information from setup.py")
         with PyPi._injection_distutils(temp_folder) as metadata:
             metadata["sdist_path"] = temp_folder
             return metadata
@@ -160,7 +160,7 @@ class PyPi(AbstractRecipeModel):
         from setuptools.config import read_configuration
 
         log.debug(f"Started setup.cfg from {source_path}")
-        print_msg(f"{Fore.LIGHTBLACK_EX}Recovering metadata from setup.cfg")
+        print_msg("Recovering metadata from setup.cfg")
         path_setup_cfg = list(Path(source_path).rglob("setup.cfg"))
         if not path_setup_cfg:
             return {}
@@ -239,12 +239,12 @@ class PyPi(AbstractRecipeModel):
         try:
             core.setup = __fake_distutils_setup
             path_setup = str(path_setup)
-            print_msg(f"{Fore.LIGHTBLACK_EX}Executing injected distutils...")
+            print_msg("Executing injected distutils...")
             PyPi.__run_setup_py(path_setup, data_dist)
             if not data_dist or not data_dist.get("install_requires", None):
                 print_msg(
-                    f"{Fore.LIGHTBLACK_EX}No data was recovered from setup.py."
-                    f" Forcing to execute the setup.py as script"
+                    "No data was recovered from setup.py."
+                    " Forcing to execute the setup.py as script"
                 )
                 PyPi.__run_setup_py(path_setup, data_dist, run_py=True)
             yield data_dist
@@ -520,12 +520,8 @@ class PyPi(AbstractRecipeModel):
                     license_file = os.path.basename(license_metadata.path)
                     self.files_to_copy.append(license_metadata.path)
 
-        print_msg(
-            f"{Fore.LIGHTBLACK_EX}License type: {Fore.LIGHTMAGENTA_EX}{license_name}"
-        )
-        print_msg(
-            f"{Fore.LIGHTBLACK_EX}License file: {Fore.LIGHTMAGENTA_EX}{license_file}"
-        )
+        print_msg(f"License type: {Fore.LIGHTMAGENTA_EX}{license_name}")
+        print_msg(f"License file: {Fore.LIGHTMAGENTA_EX}{license_file}")
 
         all_requirements = self._extract_requirements(metadata)
         all_requirements["host"] = solve_list_pkg_name(
@@ -536,10 +532,9 @@ class PyPi(AbstractRecipeModel):
         )
 
         def print_req(name, list_req: List):
-            prefix_req = f"{Fore.LIGHTBLACK_EX}\n   - {Fore.LIGHTCYAN_EX}"
+            prefix_req = f"\n   - {Fore.LIGHTCYAN_EX}"
             print_msg(
-                f"{Fore.LIGHTBLACK_EX}{name} requirements:"
-                f"{prefix_req}{prefix_req.join(list_req)}"
+                f"{name} requirements:" f"{prefix_req}{prefix_req.join(list_req)}"
             )
 
         if all_requirements.get("build"):
@@ -626,7 +621,7 @@ class PyPi(AbstractRecipeModel):
         :param version: Package version
         :return: Pypi metadata
         """
-        print_msg(f"{Fore.LIGHTBLACK_EX}Recovering metadata from pypi...")
+        print_msg("Recovering metadata from pypi...")
         if version:
             url_pypi = PyPi.URL_PYPI_METADATA.format(pkg_name=f"{name}/{version}")
         else:

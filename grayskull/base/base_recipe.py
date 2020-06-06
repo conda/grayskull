@@ -199,8 +199,8 @@ class AbstractRecipeModel(ABC):
         if not self["extra"]:
             maintainers = maintainers if maintainers else [get_git_current_user()]
             self["extra"]["recipe-maintainers"].add_items(maintainers)
-        prefix = f"{Fore.LIGHTBLACK_EX}\n   - {Fore.LIGHTMAGENTA_EX}"
-        print_msg(f"{Fore.LIGHTBLACK_EX}Maintainers:{prefix}{prefix.join(maintainers)}")
+        prefix = f"\n   - {Fore.LIGHTMAGENTA_EX}"
+        print_msg(f"Maintainers:{prefix}{prefix.join(maintainers)}")
 
     def get_clean_yaml(self, recipe_yaml: CommentedMap) -> CommentedMap:
         result = self._clean_yaml(recipe_yaml)

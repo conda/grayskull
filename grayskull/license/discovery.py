@@ -11,7 +11,6 @@ from tempfile import mkdtemp
 from typing import List, Optional, Union
 
 import requests
-from colorama import Fore
 from rapidfuzz import process
 from rapidfuzz.fuzz import token_set_ratio, token_sort_ratio
 from requests import HTTPError
@@ -44,7 +43,7 @@ def get_all_licenses_from_spdx() -> List:
         raise HTTPError(
             f"It was not possible to communicate with spdx api.\n{response.text}"
         )
-    print_msg(f"{Fore.LIGHTBLACK_EX}Recovering license info from spdx.org ...")
+    print_msg("Recovering license info from spdx.org ...")
     return [
         lic
         for lic in response.json()["licenses"]
@@ -214,7 +213,7 @@ def search_license_api_github(
     """
     github_url = _get_api_github_url(github_url, version)
     log.info(f"Github url: {github_url} - recovering license info")
-    print_msg(f"{Fore.LIGHTBLACK_EX}Recovering license information from github...")
+    print_msg("Recovering license information from github...")
 
     response = requests.get(url=github_url, timeout=10)
     if response.status_code != 200:
@@ -277,7 +276,7 @@ def search_license_repo(
     """
     git_url = re.sub(r"/$", ".git", git_url)
     git_url = git_url if git_url.endswith(".git") else f"{git_url}.git"
-    print_msg(f"{Fore.LIGHTBLACK_EX}Recovering license info from repository...")
+    print_msg("Recovering license info from repository...")
     tmp_dir = mkdtemp(prefix="gs-clone-repo-")
     try:
         check_output(_get_git_cmd(git_url, version, tmp_dir))
@@ -322,9 +321,7 @@ def get_license_type(path_license: str, default: Optional[str] = None) -> Option
     if find_apache:
         lic_type = find_apache[0]
         return f"Apache-{lic_type[0]}.{lic_type[1]}"
-    print_msg(
-        f"{Fore.LIGHTBLACK_EX}Matching license file with database from Grayskull..."
-    )
+    print_msg("Matching license file with database from Grayskull...")
     all_licenses = get_all_licenses()
     licenses_text = list(map(itemgetter(1), all_licenses))
     best_match = process.extract(
