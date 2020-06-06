@@ -34,7 +34,8 @@ def track_package(pkg_name: str, config_file: Union[Path, str]) -> ConfigPkg:
 def solve_list_pkg_name(
     list_pkg: List[str], config_file: Union[Path, str]
 ) -> List[str]:
-    return [solve_pkg_name(pkg, config_file) for pkg in list_pkg]
+    re_norm = re.compile(r",\s+")
+    return [re_norm.sub(",", solve_pkg_name(pkg, config_file)) for pkg in list_pkg]
 
 
 def solve_pkg_name(pkg: str, config_file: Union[Path, str]) -> str:

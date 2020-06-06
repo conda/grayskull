@@ -4,7 +4,9 @@ import os
 import sys
 
 import pytest
+from colorama import Fore, Style
 
+from grayskull.cli import CLIConfig
 from grayskull.pypi import PyPi
 
 
@@ -383,11 +385,17 @@ def test_cythongsl_recipe_build():
     assert not recipe["build"]["noarch"]
 
 
-def test_requests_recipe_extra_deps():
+def test_requests_recipe_extra_deps(capsys):
+    CLIConfig().stdout = True
     recipe = PyPi(name="requests", version="2.22.0")
+    captured_stdout = capsys.readouterr()
     assert "win-inet-pton" not in recipe["requirements"]["run"]
     assert recipe["build"]["noarch"]
     assert not recipe["build"]["skip"]
+    assert (
+        f"Package {Style.BRIGHT}{Fore.LIGHTCYAN_EX}urllib3{Fore.RESET}:"
+        f" {Style.BRIGHT}{Fore.GREEN}Available" in captured_stdout.out
+    )
 
 
 def test_zipp_recipe_tags_on_deps():
@@ -474,9 +482,9 @@ def test_normalize_pkg_name():
 
 def test_mypy_deps_normalization_and_entry_points():
     recipe = PyPi(name="mypy", version="0.770")
-    assert "mypy_extensions <0.5.0,>=0.4.3" in recipe["requirements"]["run"]
-    assert "mypy-extensions <0.5.0,>=0.4.3" not in recipe["requirements"]["run"]
-    assert "typed-ast <1.5.0,>=1.4.0" in recipe["requirements"]["run"]
+    assert "mypy_extensions >=0.4.3,<0.5.0" in recipe["requirements"]["run"]
+    assert "mypy-extensions >=0.4.3,<0.5.0" not in recipe["requirements"]["run"]
+    assert "typed-ast >=1.4.0,<1.5.0" in recipe["requirements"]["run"]
     assert "typed_ast <1.5.0,>=1.4.0" not in recipe["requirements"]["run"]
     assert "typing-extensions >=3.7.4" in recipe["requirements"]["run"]
     assert "typing_extensions >=3.7.4" not in recipe["requirements"]["run"]

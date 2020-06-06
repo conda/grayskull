@@ -440,20 +440,26 @@ class PyPi(AbstractRecipeModel):
         :param sdist_metadata: sdist metadata
         :return: list with all requirements
         """
-        pypi_deps_name = set()
-        requires_dist = []
         all_deps = []
         if sdist_metadata.get("install_requires"):
             all_deps += sdist_metadata.get("install_requires", [])
         if pypi_metadata.get("requires_dist"):
-            all_deps = pypi_metadata.get("requires_dist", [])
+            all_deps += pypi_metadata.get("requires_dist", [])
 
+        re_search = re.compile(r";\s*extra")
+        all_deps = [pkg for pkg in all_deps if not re_search.search(pkg)]
+        current_pkg = pypi_metadata.get("name", "")
+
+        requires_dist = []
+        pypi_deps_name = set()
         for sdist_pkg in all_deps:
             match_deps = PyPi.RE_DEPS_NAME.match(sdist_pkg)
             if not match_deps:
                 continue
             match_deps = match_deps.group(0).strip()
             pkg_name = PyPi._normalize_pkg_name(match_deps)
+            if current_pkg and current_pkg == pkg_name:
+                continue
             if pkg_name in pypi_deps_name:
                 continue
 
@@ -1075,11 +1081,22 @@ def get_small_py3_version(list_py_ver: List[PyVer]) -> PyVer:
             return py_ver
 
 
+@lru_cache(maxsize=20)
 def is_pkg_available(pkg_name: str, channel: str = "conda-forge") -> bool:
     response = requests.get(
         url=f"https://anaconda.org/{channel}/{pkg_name}/files", allow_redirects=False
     )
-    return response.status_code == 200
+    status_response = response.status_code == 200
+    if status_response:
+        msg_pkg = f"{Style.BRIGHT}{Fore.GREEN}Available"
+    else:
+        msg_pkg = f"{Style.BRIGHT}{Fore.RED}NOT Available"
+    print_msg(
+        f" - Package {Style.BRIGHT}{Fore.LIGHTCYAN_EX}{pkg_name}{Fore.RESET}:"
+        f" {msg_pkg}"
+        f" {Fore.RESET}on {channel}"
+    )
+    return status_response
 
 
 def search_setup_root(path_folder: Union[Path, str]) -> Path:
