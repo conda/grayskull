@@ -21,3 +21,7 @@ pyqt5:
 matplotlib:
   import_name: matplotlib
   conda_forge: matplotlib-base
+  
+graphviz:
+  import_name: graphviz
+  conda_forge: python-graphviz
