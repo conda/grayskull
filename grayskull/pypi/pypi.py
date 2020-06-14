@@ -19,8 +19,14 @@ from colorama import Fore, Style
 from requests import HTTPError
 
 from grayskull.base.base_recipe import AbstractRecipeModel
+from grayskull.base.pkg_info import is_pkg_available
 from grayskull.base.track_packages import solve_list_pkg_name
-from grayskull.cli.stdout import manage_progressbar, print_msg
+from grayskull.cli.stdout import (
+    manage_progressbar,
+    print_msg,
+    print_requirements,
+    progressbar_with_status,
+)
 from grayskull.license.discovery import ShortLicense, search_license_file
 from grayskull.utils import get_vendored_dependencies
 
@@ -251,8 +257,9 @@ class PyPi(AbstractRecipeModel):
         except Exception as err:
             log.debug(f"Exception occurred when executing sdist injection: err {err}")
             yield data_dist
-        core.setup = setup_core_original
-        os.chdir(old_dir)
+        finally:
+            core.setup = setup_core_original
+            os.chdir(old_dir)
 
     @staticmethod
     def __run_setup_py(
@@ -452,19 +459,22 @@ class PyPi(AbstractRecipeModel):
 
         requires_dist = []
         pypi_deps_name = set()
-        for sdist_pkg in all_deps:
-            match_deps = PyPi.RE_DEPS_NAME.match(sdist_pkg)
-            if not match_deps:
-                continue
-            match_deps = match_deps.group(0).strip()
-            pkg_name = PyPi._normalize_pkg_name(match_deps)
-            if current_pkg and current_pkg == pkg_name:
-                continue
-            if pkg_name in pypi_deps_name:
-                continue
+        with progressbar_with_status(len(all_deps)) as bar:
+            for pos, sdist_pkg in enumerate(all_deps, 1):
+                match_deps = PyPi.RE_DEPS_NAME.match(sdist_pkg)
+                if not match_deps:
+                    bar.update(pos)
+                    continue
+                match_deps = match_deps.group(0).strip()
+                pkg_name = PyPi._normalize_pkg_name(match_deps)
+                bar.update(pos, pkg_name=pkg_name)
+                if current_pkg and current_pkg == pkg_name:
+                    continue
+                if pkg_name in pypi_deps_name:
+                    continue
 
-            pypi_deps_name.add(pkg_name)
-            requires_dist.append(sdist_pkg.replace(match_deps, pkg_name))
+                pypi_deps_name.add(pkg_name)
+                requires_dist.append(sdist_pkg.replace(match_deps, pkg_name))
         return requires_dist
 
     @staticmethod
@@ -530,17 +540,7 @@ class PyPi(AbstractRecipeModel):
         all_requirements["run"] = solve_list_pkg_name(
             all_requirements["run"], self.PYPI_CONFIG
         )
-
-        def print_req(name, list_req: List):
-            prefix_req = f"\n   - {Fore.LIGHTCYAN_EX}"
-            print_msg(
-                f"{name} requirements:" f"{prefix_req}{prefix_req.join(list_req)}"
-            )
-
-        if all_requirements.get("build"):
-            print_req("Build", all_requirements["build"])
-        print_req("Host", all_requirements["host"])
-        print_req("run", all_requirements["run"])
+        print_requirements(all_requirements)
 
         test_entry_points = PyPi._get_test_entry_points(metadata.get("entry_points"))
         test_imports = PyPi._get_test_imports(metadata, pypi_metadata["name"])
@@ -1074,24 +1074,6 @@ def get_small_py3_version(list_py_ver: List[PyVer]) -> PyVer:
     for py_ver in list_py_ver:
         if py_ver >= PyVer(3, 0):
             return py_ver
-
-
-@lru_cache(maxsize=20)
-def is_pkg_available(pkg_name: str, channel: str = "conda-forge") -> bool:
-    response = requests.get(
-        url=f"https://anaconda.org/{channel}/{pkg_name}/files", allow_redirects=False
-    )
-    status_response = response.status_code == 200
-    if status_response:
-        msg_pkg = f"{Style.BRIGHT}{Fore.GREEN}Available"
-    else:
-        msg_pkg = f"{Style.BRIGHT}{Fore.RED}NOT Available"
-    print_msg(
-        f" - Package {Style.BRIGHT}{Fore.LIGHTCYAN_EX}{pkg_name}{Fore.RESET}:"
-        f" {msg_pkg}"
-        f" {Fore.RESET}on {channel}"
-    )
-    return status_response
 
 
 def search_setup_root(path_folder: Union[Path, str]) -> Path:
