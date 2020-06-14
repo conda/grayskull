@@ -392,10 +392,7 @@ def test_requests_recipe_extra_deps(capsys):
     assert "win-inet-pton" not in recipe["requirements"]["run"]
     assert recipe["build"]["noarch"]
     assert not recipe["build"]["skip"]
-    assert (
-        f"Package {Style.BRIGHT}{Fore.LIGHTCYAN_EX}urllib3{Fore.RESET}:"
-        f" {Style.BRIGHT}{Fore.GREEN}Available" in captured_stdout.out
-    )
+    assert f"{Fore.GREEN}{Style.BRIGHT}python" in captured_stdout.out
 
 
 def test_zipp_recipe_tags_on_deps():
