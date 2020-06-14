@@ -73,6 +73,12 @@ def main(args=None):
         help="Disable or enable stdout, if it is False, Grayskull"
         " will disable the prints. Default is True",
     )
+    pypi_cmds.add_argument(
+        "--list-missing-deps",
+        default=False,
+        dest="list_missing_deps",
+        help="After the execution Grayskull will print all the missing dependencies.",
+    )
 
     args = parser.parse_args(args)
 
@@ -90,6 +96,7 @@ def main(args=None):
         return
 
     CLIConfig().stdout = args.stdout
+    CLIConfig().list_missing_deps = args.list_missing_deps
 
     print_msg(Style.RESET_ALL)
     print_msg(clear_screen())
