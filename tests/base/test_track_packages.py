@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 import pytest
@@ -17,7 +16,7 @@ from grayskull.base.track_packages import (
 
 @pytest.fixture
 def path_example() -> Path:
-    return Path(os.path.dirname(__file__)) / "data" / "track_package" / "example.yaml"
+    return Path(__file__).parent.parent / "data" / "track_package" / "example.yaml"
 
 
 def test_config_pkg():
