@@ -4,6 +4,7 @@ import os
 import re
 import shutil
 import sys
+import traceback
 from collections import namedtuple
 from contextlib import contextmanager
 from copy import deepcopy
@@ -248,8 +249,11 @@ class PyPi(AbstractRecipeModel):
                 )
                 PyPi.__run_setup_py(path_setup, data_dist, run_py=True)
             yield data_dist
-        except Exception as err:
-            log.debug(f"Exception occurred when executing sdist injection: err {err}")
+        except:  # noqa
+            log.debug(
+                "Exception occurred when executing sdist injection:"
+                f" {traceback.format_exc()}"
+            )
             yield data_dist
         core.setup = setup_core_original
         os.chdir(old_dir)
