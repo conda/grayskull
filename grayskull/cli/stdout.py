@@ -80,10 +80,13 @@ def print_requirements(all_requirements: Dict):
                 colour = Fore.GREEN
             elif search_result:
                 pkg_name, options = search_result.groups()
-                colour = Fore.GREEN if is_pkg_available(pkg_name) else Fore.RED
+                if is_pkg_available(pkg_name):
+                    colour = Fore.GREEN
+                else:
+                    all_missing_deps.add(pkg_name)
+                    colour = Fore.RED
             else:
                 continue
-            all_missing_deps.add(pkg_name)
             print_msg(f"  - {colour}{Style.BRIGHT}{pkg_name}{Style.RESET_ALL}{options}")
 
     if all_requirements.get("build"):

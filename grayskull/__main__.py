@@ -76,6 +76,7 @@ def main(args=None):
     pypi_cmds.add_argument(
         "--list-missing-deps",
         default=False,
+        action="store_true",
         dest="list_missing_deps",
         help="After the execution Grayskull will print all the missing dependencies.",
     )
