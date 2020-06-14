@@ -543,3 +543,9 @@ def test_tzdata_without_setup_py():
     recipe = PyPi(name="tzdata", version="2020.1")
     assert recipe["build"]["noarch"] == "python"
     assert recipe["about"]["home"] == "https://github.com/python/tzdata"
+
+
+def test_multiples_exit_setup():
+    """Bug fix #146"""
+    recipe = PyPi(name="pyproj", version="2.6.1")
+    assert recipe
