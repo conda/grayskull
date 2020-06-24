@@ -61,6 +61,11 @@ and inside of this folder it will generated the recipe (`meta.yaml`).
 ![Grayskull CLI](https://raw.githubusercontent.com/marcelotrevisani/grayskull/master/docs/images/cli_example_grayskull.gif)
 
 
+### Online Grayskull
+
+It is also possible to use Grayskull without any installation. You can go to this website [marcelotrevisani.com/grayskull](https://www.marcelotrevisani.com/grayskull) and inform the name and the version (optional) of the package and it will create the recipe for you.
+
+
 ## License
 Copyright Marcelo Duarte Trevisani and others, 2020-2021.
 
