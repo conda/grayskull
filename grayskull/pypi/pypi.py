@@ -14,6 +14,7 @@ from pathlib import Path
 from subprocess import check_output
 from tempfile import mkdtemp
 from typing import Dict, List, Optional, Tuple, Union
+from urllib.parse import urlparse
 
 import requests
 from colorama import Fore, Style
@@ -622,10 +623,13 @@ class PyPi(AbstractRecipeModel):
         the license.
         """
         git_url = metadata.get("dev_url", None)
-        if not git_url and "github.com/" in metadata.get("project_url", ""):
+        if (
+            not git_url
+            and "github.com" == urlparse(metadata.get("project_url", "")).netloc
+        ):
             git_url = metadata.get("project_url")
         # "url" is always present but sometimes set to None
-        if not git_url and "github.com/" in (metadata.get("url") or ""):
+        if not git_url and "github.com" == urlparse((metadata.get("url") or "")).netloc:
             git_url = metadata.get("url")
 
         short_license = search_license_file(
