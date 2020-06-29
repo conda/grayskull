@@ -5,7 +5,6 @@ from typing import Dict
 
 import progressbar
 from colorama import Fore, Style
-from progressbar import ProgressBar
 
 from grayskull.base.pkg_info import is_pkg_available
 from grayskull.cli import WIDGET_BAR_DOWNLOAD, CLIConfig
@@ -19,7 +18,7 @@ def print_msg(msg: str):
 @contextmanager
 def manage_progressbar(*, max_value: int, prefix: str):
     if CLIConfig().stdout:
-        with ProgressBar(
+        with progressbar.ProgressBar(
             widgets=deepcopy(WIDGET_BAR_DOWNLOAD), max_value=max_value, prefix=prefix,
         ) as bar:
             yield bar
@@ -35,7 +34,7 @@ def manage_progressbar(*, max_value: int, prefix: str):
 @contextmanager
 def progressbar_with_status(max_value: int):
     if CLIConfig().stdout:
-        with ProgressBar(
+        with progressbar.ProgressBar(
             widgets=[
                 " ",
                 progressbar.Percentage(),
