@@ -257,6 +257,8 @@ def search_license_folder(
         r"(\bcopyright\b|\blicense[s]*\b|\bcopying\b|\bcopyleft\b)", re.IGNORECASE
     )
     for folder_path, _, filenames in os.walk(str(path)):
+        if os.path.basename(folder_path).startswith("."):
+            continue
         for one_file in filenames:
             if re_search.match(one_file):
                 lc_path = os.path.join(folder_path, one_file)
