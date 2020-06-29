@@ -213,6 +213,24 @@ class PyPi(AbstractRecipeModel):
         def __fake_distutils_setup(*args, **kwargs):
             if not isinstance(kwargs, dict) or not kwargs:
                 return
+
+            def _fix_list_requirements(key_deps: str) -> List:
+                """Fix when dependencies have lists inside of another sequence"""
+                if not kwargs.get(key_deps):
+                    return kwargs.get(key_deps)
+                list_req = []
+                for val in kwargs.get(key_deps):
+                    if isinstance(val, (tuple, list)):
+                        list_req.extend(list(map(str, val)))
+                    else:
+                        list_req.append(str(val))
+                return list_req
+
+            if "setup_requires" in kwargs:
+                kwargs["setup_requires"] = _fix_list_requirements("setup_requires")
+            if "install_requires" in kwargs:
+                kwargs["install_requires"] = _fix_list_requirements("install_requires")
+
             data_dist.update(kwargs)
             if not data_dist.get("setup_requires"):
                 data_dist["setup_requires"] = []

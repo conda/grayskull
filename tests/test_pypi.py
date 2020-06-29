@@ -546,3 +546,20 @@ def test_multiples_exit_setup():
     """Bug fix #146"""
     recipe = PyPi(name="pyproj", version="2.6.1")
     assert recipe
+
+
+def test_sequence_inside_another_in_dependencies():
+    recipe = PyPi(name="unittest2", version="1.1.0")
+    assert recipe["requirements"]["host"] == [
+        "argparse",
+        "pip",
+        "python",
+        "six >=1.4",
+        "traceback2",
+    ]
+    assert recipe["requirements"]["run"] == [
+        "argparse",
+        "python",
+        "six >=1.4",
+        "traceback2",
+    ]
