@@ -3,8 +3,7 @@ import logging
 import os
 import sys
 
-import colorama
-from colorama import Fore, Style
+from colorama import Fore, Style, init
 from colorama.ansi import clear_screen
 
 import grayskull
@@ -13,7 +12,7 @@ from grayskull.cli import CLIConfig
 from grayskull.cli.parser import parse_pkg_name_version
 from grayskull.cli.stdout import print_msg
 
-colorama.init(autoreset=True)
+init(autoreset=True)
 logging.basicConfig(format="%(levelname)s:%(message)s")
 
 
