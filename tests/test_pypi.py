@@ -563,3 +563,8 @@ def test_sequence_inside_another_in_dependencies():
         "six >=1.4",
         "traceback2",
     ]
+
+
+def test_recipe_with_just_py_modules():
+    recipe = PyPi(name="python-markdown-math", version="0.7")
+    assert recipe["test"]["imports"] == "mdx_math"
