@@ -13,7 +13,6 @@ from typing import List, Optional, Union
 import requests
 from rapidfuzz import process
 from rapidfuzz.fuzz import token_set_ratio, token_sort_ratio
-from requests import HTTPError
 
 from grayskull.cli.stdout import print_msg
 from grayskull.license.data import get_all_licenses  # noqa
@@ -40,7 +39,7 @@ def get_all_licenses_from_spdx() -> List:
         f" response: {response}"
     )
     if response.status_code != 200:
-        raise HTTPError(
+        raise requests.HTTPError(
             f"It was not possible to communicate with spdx api.\n{response.text}"
         )
     print_msg("Recovering license info from spdx.org ...")
