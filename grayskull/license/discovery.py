@@ -40,7 +40,8 @@ def get_all_licenses_from_spdx() -> List:
     )
     if response.status_code != 200:
         raise requests.HTTPError(
-            f"It was not possible to communicate with spdx api.\n{response.text}"
+            "It was not possible to communicate with spdx api.\n"
+            f"{response.text}"
         )
     print_msg("Recovering license info from spdx.org ...")
     return [
