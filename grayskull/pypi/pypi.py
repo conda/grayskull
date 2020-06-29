@@ -392,12 +392,15 @@ class PyPi(AbstractRecipeModel):
             return pypi_metadata.get(key) or sdist_metadata.get(key)
 
         requires_dist = PyPi._merge_requires_dist(pypi_metadata, sdist_metadata)
+        all_packages_names = get_val("packages")
+        if not all_packages_names:
+            all_packages_names = get_val("py_modules")
         return {
             "author": get_val("author"),
             "name": get_val("name"),
             "version": get_val("version"),
             "source": pypi_metadata.get("source"),
-            "packages": get_val("packages"),
+            "packages": all_packages_names,
             "url": get_val("url"),
             "classifiers": get_val("classifiers"),
             "compilers": PyPi._get_compilers(requires_dist, sdist_metadata),
