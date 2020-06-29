@@ -18,7 +18,6 @@ from urllib.parse import urlparse
 
 import requests
 from colorama import Fore, Style
-from requests import HTTPError
 
 from grayskull.base.base_recipe import AbstractRecipeModel
 from grayskull.base.pkg_info import is_pkg_available
@@ -659,7 +658,7 @@ class PyPi(AbstractRecipeModel):
 
         metadata = requests.get(url=url_pypi, timeout=5)
         if metadata.status_code != 200:
-            raise HTTPError(
+            raise requests.HTTPError(
                 f"It was not possible to recover PyPi metadata for {name}.\n"
                 f"Error code: {metadata.status_code}"
             )
