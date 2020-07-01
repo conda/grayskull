@@ -12,7 +12,12 @@ else:
 setup(
     name="grayskull",
     packages=find_packages(),
-    entry_points={"console_scripts": ["grayskull = grayskull.__main__:main"]},
+    entry_points={
+        "console_scripts": [
+            "grayskull = grayskull.__main__:main",
+            "greyskull = grayskull.__main__:main",
+        ]
+    },
     use_scm_version={"write_to": "grayskull/_version.py"},
     setup_requires=["setuptools-scm", "setuptools>=30.3.0"],
     package_data={"": ["LICENSE", "license/data/*", "license/data/*.*"]},
