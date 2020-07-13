@@ -4,6 +4,8 @@
 
 [![codecov](https://codecov.io/gh/marcelotrevisani/grayskull/branch/master/graph/badge.svg)](https://codecov.io/gh/marcelotrevisani/grayskull) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) ![](https://img.shields.io/badge/python-3.7+-blue.svg) ![](https://img.shields.io/github/license/marcelotrevisani/grayskull.svg) [![PyPI version](https://badge.fury.io/py/grayskull.svg)](https://badge.fury.io/py/grayskull) [![Conda Version](https://img.shields.io/conda/vn/conda-forge/grayskull.svg)](https://anaconda.org/conda-forge/grayskull) [![Gitter](https://badges.gitter.im/conda_grayskull/community.svg)](https://gitter.im/conda_grayskull/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/marcelotrevisani/grayskull.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/marcelotrevisani/grayskull/context:python)
 
+[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/marcelo)
+
 -------------
 <span align="center">
     <br>
