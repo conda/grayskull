@@ -4,7 +4,6 @@ import os
 import re
 import shutil
 import sys
-import traceback
 from collections import namedtuple
 from contextlib import contextmanager
 from copy import deepcopy
@@ -273,10 +272,10 @@ class PyPi(AbstractRecipeModel):
                 )
                 PyPi.__run_setup_py(path_setup, data_dist, run_py=True)
             yield data_dist
-        except:  # noqa
+        except BaseException as err:
             log.debug(
                 "Exception occurred when executing sdist injection:"
-                f" {traceback.format_exc()}"
+                f" {err}"
             )
             yield data_dist
         finally:
