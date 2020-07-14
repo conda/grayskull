@@ -273,10 +273,7 @@ class PyPi(AbstractRecipeModel):
                 PyPi.__run_setup_py(path_setup, data_dist, run_py=True)
             yield data_dist
         except BaseException as err:
-            log.debug(
-                "Exception occurred when executing sdist injection:"
-                f" {err}"
-            )
+            log.debug("Exception occurred when executing sdist injection: {err}")
             yield data_dist
         finally:
             core.setup = setup_core_original
