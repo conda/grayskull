@@ -25,3 +25,7 @@ matplotlib:
 graphviz:
   import_name: graphviz
   conda_forge: python-graphviz
+  
+xxhash:
+  import_name: xxhash
+  conda_forge: py-xxhash
