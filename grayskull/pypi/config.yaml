@@ -28,4 +28,4 @@ graphviz:
   
 xxhash:
   import_name: xxhash
-  conda_forge: py-xxhash
+  conda_forge: python-xxhash
