@@ -69,6 +69,6 @@ It is also possible to use Grayskull without any installation. You can go to thi
 
 
 ## License
-Copyright Marcelo Duarte Trevisani and others, 2020-2021.
+Copyright Marcelo Duarte Trevisani and contributors, 2020-2021.
 
-Distributed under the terms of the MIT license, grayskull is free and open source software.
+Distributed under the terms of the Apache 2.0 license, grayskull is free and open source software.
