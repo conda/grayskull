@@ -5,6 +5,10 @@ tables:
 python-opencv:
   import_name: cv2
   conda_forge: opencv
+  
+opencv-python:
+  import_name: cv2
+  conda_forge: opencv
 
 pyqt4:
   import_name: pyqt4
