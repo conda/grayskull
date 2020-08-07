@@ -52,7 +52,7 @@ class PyPi(AbstractRecipeModel):
         self._download = download
         self._setup_metadata = None
         self._is_arch = False
-        super(PyPi, self).__init__(name=name, version=version)
+        super(PyPi, self).__init__(name=name, version=str(version) if version else None)
         self["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
 
     @staticmethod
