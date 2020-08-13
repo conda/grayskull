@@ -1,10 +1,14 @@
-tables:
-  import_name: pytables
-  conda_forge: pytables
+docker:
+  import_name: docker
+  conda_forge: docker-py
 
-python-opencv:
-  import_name: cv2
-  conda_forge: opencv
+graphviz:
+  import_name: graphviz
+  conda_forge: python-graphviz
+
+matplotlib:
+  import_name: matplotlib
+  conda_forge: matplotlib-base
 
 opencv-python:
   import_name: cv2
@@ -22,18 +26,14 @@ pyqt5:
   delimiter_min: "5.0.0"
   delimiter_max: "6.0.0"
 
-matplotlib:
-  import_name: matplotlib
-  conda_forge: matplotlib-base
+python-opencv:
+  import_name: cv2
+  conda_forge: opencv
 
-graphviz:
-  import_name: graphviz
-  conda_forge: python-graphviz
+tables:
+  import_name: pytables
+  conda_forge: pytables
 
 xxhash:
   import_name: xxhash
   conda_forge: python-xxhash
-
-docker:
-  import_name: docker
-  conda_forge: docker-py
