@@ -18,6 +18,8 @@ repos:
         args: [--remove]
     -   id: check-yaml
         exclude: tests
+    -   id: sort-simple-yaml
+        files: grayskull/pypi/config.yaml
     -   id: check-toml
     -   id: check-json
     -   id: check-merge-conflict
