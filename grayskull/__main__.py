@@ -3,6 +3,7 @@ import logging
 import os
 import sys
 
+import requests
 from colorama import Fore, Style, init
 from colorama.ansi import clear_screen
 
@@ -109,9 +110,15 @@ def main(args=None):
             f"{Fore.BLUE}{pkg_name} (pypi) {Fore.GREEN}####\n"
         )
         pkg_name, pkg_version = parse_pkg_name_version(pkg_name)
-        recipe = GrayskullFactory.create_recipe(
-            "pypi", pkg_name, pkg_version, download=args.download
-        )
+        try:
+            recipe = GrayskullFactory.create_recipe(
+                "pypi", pkg_name, pkg_version, download=args.download
+            )
+        except requests.exceptions.HTTPError as err:
+            print_msg(
+                f"{Fore.RED}Package seems to be missing on pypi.\nException: {err}\n\n"
+            )
+            continue
         recipe.generate_recipe(args.output, mantainers=args.maintainers)
         print_msg(
             f"\n{Fore.GREEN}#### Recipe generated on "
