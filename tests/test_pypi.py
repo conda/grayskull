@@ -568,3 +568,8 @@ def test_sequence_inside_another_in_dependencies():
 def test_recipe_with_just_py_modules():
     recipe = PyPi(name="python-markdown-math", version="0.7")
     assert recipe["test"]["imports"] == "mdx_math"
+
+
+def test_recipe_extension():
+    recipe = PyPi(name="azure-identity", version="1.3.1")
+    assert str(recipe["source"]["url"][0].value).endswith(".zip")
