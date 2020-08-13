@@ -684,11 +684,31 @@ class PyPi(AbstractRecipeModel):
             "license": info.get("license"),
             "source": {
                 "url": "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/"
-                "{{ name }}-{{ version }}.tar.gz",
+                f"{PyPi._get_url_filename(metadata)}",
                 "sha256": PyPi.get_sha256_from_pypi_metadata(metadata),
             },
             "sdist_url": PyPi._get_sdist_url_from_pypi(metadata),
         }
+
+    @staticmethod
+    def _get_url_filename(metadata: dict, default: Optional[str] = None) -> str:
+        """Method responsible to get the filename and right extension to add
+        to the pypi url
+
+        :param metadata: Dictionary with the all package metadata filled
+        :param default: default value for the package filename
+        :return: filename and extension to download the file on pypi
+        """
+        if default is None:
+            default = "{{ name }}-{{ version }}.tar.gz"
+        if "urls" not in metadata:
+            return default
+
+        for pkg_url in metadata["urls"]:
+            if pkg_url["packagetype"] == "sdist":
+                version = metadata["info"]["version"]
+                return pkg_url["filename"].replace(version, "{{ version }}")
+        return default
 
     @staticmethod
     def _get_sdist_url_from_pypi(metadata: dict) -> str:
