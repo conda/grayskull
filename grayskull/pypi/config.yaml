@@ -33,3 +33,7 @@ graphviz:
 xxhash:
   import_name: xxhash
   conda_forge: python-xxhash
+  
+docker:
+  import_name: docker
+  conda_forge: docker-py
