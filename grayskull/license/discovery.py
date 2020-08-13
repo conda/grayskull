@@ -288,6 +288,8 @@ def search_license_repo(
             f"Exception occurred when gs was trying to clone the repository."
             f" url: {git_url}, version: {version}. Exception: {err}"
         )
+        if not version.startswith("v"):
+            return search_license_repo(git_url, f"v{version}", default)
         return None
     return search_license_folder(str(tmp_dir), default)
 

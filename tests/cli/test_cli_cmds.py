@@ -51,3 +51,9 @@ def test_msg_missing_pkg_pypi(capsys):
         " for NOT_A_PACKAGE_123123123.\n"
         "Error code: 404" in captured.out
     )
+
+
+def test_license_discovery(tmpdir):
+    out_folder = tmpdir.mkdir("out-license")
+    main(["pypi", "httplib2shim=0.0.3", "-o", str(out_folder)])
+    assert (out_folder / "httplib2shim" / "LICENSE").exists()
