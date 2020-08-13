@@ -210,6 +210,8 @@ def search_license_api_github(
     :param default: default license type
     :return: License information
     """
+    if github_url.endswith("/"):
+        github_url = github_url[:-1]
     github_url = _get_api_github_url(github_url, version)
     log.info(f"Github url: {github_url} - recovering license info")
     print_msg("Recovering license information from github...")

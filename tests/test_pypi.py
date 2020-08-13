@@ -568,3 +568,34 @@ def test_sequence_inside_another_in_dependencies():
 def test_recipe_with_just_py_modules():
     recipe = PyPi(name="python-markdown-math", version="0.7")
     assert recipe["test"]["imports"] == "mdx_math"
+
+
+def test_recipe_extension():
+    recipe = PyPi(name="azure-identity", version="1.3.1")
+    assert (
+        recipe["source"]["url"][0].value
+        == "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/"
+        "azure-identity-{{ version }}.zip"
+    )
+
+
+def test_get_url_filename():
+    assert PyPi._get_url_filename({}) == "{{ name }}-{{ version }}.tar.gz"
+    assert PyPi._get_url_filename({}, "default") == "default"
+    assert (
+        PyPi._get_url_filename({"urls": [{"packagetype": "nothing"}]})
+        == "{{ name }}-{{ version }}.tar.gz"
+    )
+    assert (
+        PyPi._get_url_filename({"urls": [{"packagetype": "nothing"}]}, "default")
+        == "default"
+    )
+    assert (
+        PyPi._get_url_filename(
+            {
+                "info": {"version": "1.2.3"},
+                "urls": [{"packagetype": "sdist", "filename": "foo_file-1.2.3.zip"}],
+            }
+        )
+        == "foo_file-{{ version }}.zip"
+    )
