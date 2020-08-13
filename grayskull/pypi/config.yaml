@@ -5,7 +5,7 @@ tables:
 python-opencv:
   import_name: cv2
   conda_forge: opencv
-  
+
 opencv-python:
   import_name: cv2
   conda_forge: opencv
@@ -25,15 +25,15 @@ pyqt5:
 matplotlib:
   import_name: matplotlib
   conda_forge: matplotlib-base
-  
+
 graphviz:
   import_name: graphviz
   conda_forge: python-graphviz
-  
+
 xxhash:
   import_name: xxhash
   conda_forge: python-xxhash
-  
+
 docker:
   import_name: docker
   conda_forge: docker-py

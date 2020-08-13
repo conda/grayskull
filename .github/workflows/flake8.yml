@@ -33,12 +33,12 @@ jobs:
     - name: Install dependencies
       shell: pwsh
       run: |
-        conda install black flake8 flake8-builtins flake8-black flake8-bugbear flake8-comprehensions flake8-isort isort --yes
+        conda install pre-commit
     - name: Conda info
       shell: pwsh
       run: |
         conda info -a
         conda list
-    - name: Run flake8
+    - name: Run all checkers
       shell: pwsh
-      run: flake8 . --statistics
+      run: pre-commit run --all-files --verbose
