@@ -276,6 +276,16 @@ def test_get_entry_points_from_sdist():
         PyPi._get_entry_points_from_sdist(
             {
                 "entry_points": {
+                    "gui_scripts": None,
+                    "console_scripts": "console_scripts=entrypoints\nfoo=bar.main",
+                }
+            }
+        )
+    ) == sorted(["console_scripts=entrypoints", "foo=bar.main"])
+    assert sorted(
+        PyPi._get_entry_points_from_sdist(
+            {
+                "entry_points": {
                     "gui_scripts": "gui_scripts=entrypoints",
                     "console_scripts": None,
                 }
