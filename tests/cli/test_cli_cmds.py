@@ -40,3 +40,14 @@ def test_grayskull_without_options(capsys, monkeypatch):
     assert pytest_wrapped_e.type == SystemExit
     captured = capsys.readouterr()
     assert "Grayskull - Conda recipe generator" in captured.out
+
+
+def test_msg_missing_pkg_pypi(capsys):
+    main(["pypi", "NOT_A_PACKAGE_123123123"])
+    captured = capsys.readouterr()
+    assert (
+        "Package seems to be missing on pypi."
+        "\nException: It was not possible to recover PyPi metadata"
+        " for NOT_A_PACKAGE_123123123.\n"
+        "Error code: 404" in captured.out
+    )
