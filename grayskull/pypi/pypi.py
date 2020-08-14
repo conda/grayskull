@@ -1179,8 +1179,10 @@ def clean_deps_for_conda_forge(list_deps: List) -> List:
             continue
         match_del = match_del.groups()
         if not match_del[0]:
-            match_del[0] = "=="
-        current_py = PyVer(major=int(match_del[1][0]), minor=int(match_del[1][1:]))
+            match_del = ("==", match_del[1])
+        major = int(match_del[1][0])
+        minor = int(match_del[1][1:].replace("k", "0"))
+        current_py = PyVer(major=major, minor=minor)
         log.debug(f"Evaluating: {py_ver_min}{match_del}{current_py} -- {dependency}")
         if eval(f"py_ver_min{match_del[0]}current_py"):
             result_deps.append(dependency)

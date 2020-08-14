@@ -8,6 +8,7 @@ from colorama import Fore, Style
 
 from grayskull.cli import CLIConfig
 from grayskull.pypi import PyPi
+from grayskull.pypi.pypi import clean_deps_for_conda_forge
 
 
 @pytest.fixture
@@ -625,3 +626,12 @@ def test_get_url_filename():
         )
         == "foo_file-{{ version }}.zip"
     )
+
+
+def test_clean_deps_for_conda_forge():
+    assert clean_deps_for_conda_forge(["deps1", "deps2  # [py34]"]) == ["deps1"]
+    assert clean_deps_for_conda_forge(["deps1", "deps2  # [py<34]"]) == ["deps1"]
+    assert clean_deps_for_conda_forge(["deps1", "deps2  # [py<38]"]) == [
+        "deps1",
+        "deps2  # [py<38]",
+    ]
