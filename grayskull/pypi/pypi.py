@@ -33,6 +33,7 @@ from grayskull.utils import get_vendored_dependencies
 log = logging.getLogger(__name__)
 PyVer = namedtuple("PyVer", ["major", "minor"])
 SUPPORTED_PY = sorted([PyVer(2, 7), PyVer(3, 6), PyVer(3, 7), PyVer(3, 8)])
+CONDA_FORGE_STRICT = sorted([PyVer(3, 6), PyVer(3, 7), PyVer(3, 8)])
 
 
 class PyPi(AbstractRecipeModel):
@@ -48,8 +49,10 @@ class PyPi(AbstractRecipeModel):
         name: Optional[str] = None,
         version: Optional[str] = None,
         download: bool = False,
+        is_strict_cf: bool = False,
     ):
         self._download = download
+        self._is_strict_cf = is_strict_cf
         self._setup_metadata = None
         self._is_arch = False
         super(PyPi, self).__init__(name=name, version=str(version) if version else None)
@@ -564,6 +567,13 @@ class PyPi(AbstractRecipeModel):
         all_requirements["run"] = solve_list_pkg_name(
             all_requirements["run"], self.PYPI_CONFIG
         )
+        if self._is_strict_cf:
+            all_requirements["host"] = clean_deps_for_conda_forge(
+                all_requirements["host"]
+            )
+            all_requirements["run"] = clean_deps_for_conda_forge(
+                all_requirements["run"]
+            )
         print_requirements(all_requirements)
 
         test_entry_points = PyPi._get_test_entry_points(metadata.get("entry_points"))
@@ -773,13 +783,17 @@ class PyPi(AbstractRecipeModel):
             self._is_arch = True
 
         if self._is_arch:
-            version_to_selector = PyPi.py_version_to_selector(metadata)
+            version_to_selector = PyPi.py_version_to_selector(
+                metadata, is_strict_cf=self._is_strict_cf
+            )
             if version_to_selector:
                 self["build"]["skip"] = True
                 self["build"]["skip"].values[0].selector = version_to_selector
             limit_python = ""
         else:
-            limit_python = PyPi.py_version_to_limit_python(metadata)
+            limit_python = PyPi.py_version_to_limit_python(
+                metadata, is_strict_cf=self._is_strict_cf
+            )
 
         limit_python = f" {limit_python}" if limit_python else ""
 
@@ -955,7 +969,7 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _generic_py_ver_to(
-        pypi_metadata: dict, is_selector: bool = False
+        pypi_metadata: dict, is_selector: bool = False, is_strict_cf: bool = False
     ) -> Optional[str]:
         """Generic function which abstract the parse of the requires_python
         present in the PyPi metadata. Basically it can generate the selectors
@@ -973,17 +987,18 @@ class PyPi(AbstractRecipeModel):
         if not req_python:
             return None
 
-        py_ver_enabled = PyPi._get_py_version_available(req_python)
+        py_ver_enabled = PyPi._get_py_version_available(
+            req_python, is_strict_cf=is_strict_cf
+        )
         small_py3_version = get_small_py3_version(list(py_ver_enabled.keys()))
         all_py = list(py_ver_enabled.values())
         if all(all_py):
             return None
-        if all(all_py[1:]):
-            return (
-                "# [py2k]"
-                if is_selector
-                else f">={small_py3_version.major}.{small_py3_version.minor}"
-            )
+        if all(all_py if is_strict_cf else all_py[1:]):
+            if is_selector:
+                return None if is_strict_cf else "# [py2k]"
+            else:
+                return f">={small_py3_version.major}.{small_py3_version.minor}"
         if py_ver_enabled.get(PyVer(2, 7)) and any(all_py[1:]) is False:
             return "# [py3k]" if is_selector else "<3.0"
 
@@ -999,7 +1014,7 @@ class PyPi(AbstractRecipeModel):
             elif any(all_py[pos:]) is False:
                 if is_selector:
                     py2k = ""
-                    if not all_py[0]:
+                    if not is_strict_cf and not all_py[0]:
                         py2k = " or py2k"
                     return f"# [py>={py_ver.major}{py_ver.minor}{py2k}]"
                 else:
@@ -1009,7 +1024,7 @@ class PyPi(AbstractRecipeModel):
                     return f"{py2}<{py_ver.major}.{py_ver.minor}"
 
         all_selector = PyPi._get_py_multiple_selectors(
-            py_ver_enabled, is_selector=is_selector
+            py_ver_enabled, is_selector=is_selector, is_strict_cf=is_strict_cf
         )
         if all_selector:
             return (
@@ -1020,23 +1035,31 @@ class PyPi(AbstractRecipeModel):
         return None
 
     @staticmethod
-    def py_version_to_limit_python(pypi_metadata: dict) -> Optional[str]:
-        return PyPi._generic_py_ver_to(pypi_metadata, is_selector=False)
+    def py_version_to_limit_python(
+        pypi_metadata: dict, is_strict_cf: bool = False
+    ) -> Optional[str]:
+        return PyPi._generic_py_ver_to(
+            pypi_metadata, is_selector=False, is_strict_cf=is_strict_cf
+        )
 
     @staticmethod
-    def py_version_to_selector(pypi_metadata: dict) -> Optional[str]:
-        return PyPi._generic_py_ver_to(pypi_metadata, is_selector=True)
+    def py_version_to_selector(
+        pypi_metadata: dict, is_strict_cf: bool = False
+    ) -> Optional[str]:
+        return PyPi._generic_py_ver_to(
+            pypi_metadata, is_selector=True, is_strict_cf=is_strict_cf
+        )
 
     @staticmethod
     def _get_py_version_available(
-        req_python: List[Tuple[str, str, str]]
+        req_python: List[Tuple[str, str, str]], is_strict_cf: bool = False
     ) -> Dict[PyVer, bool]:
         """Get the python version available given the requires python received
 
         :param req_python: Requires python
         :return: Dict of Python versions if it is enabled or disabled
         """
-        sup_python_ver = deepcopy(SUPPORTED_PY)
+        sup_python_ver = deepcopy(CONDA_FORGE_STRICT if is_strict_cf else SUPPORTED_PY)
         for _, major, minor in req_python:
             if not minor:
                 minor = 0
@@ -1059,23 +1082,27 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _get_py_multiple_selectors(
-        selectors: Dict[PyVer, bool], is_selector=False
+        selectors: Dict[PyVer, bool],
+        is_selector: bool = False,
+        is_strict_cf: bool = False,
     ) -> List:
         """Get python selectors available.
 
         :param selectors: Dict with the Python version and if it is selected
         :param is_selector: if it needs to convert to selector or constrain python
+        :param is_strict_cf: Enable or disable to generate recipes specific
+         to conda-forge
         :return: list with all selectors or constrained python
         """
         all_selector = []
-        if selectors[PyVer(2, 7)] is False:
+        if not is_strict_cf and selectors[PyVer(2, 7)] is False:
             all_selector += (
                 ["py2k"]
                 if is_selector
                 else get_small_py3_version(list(selectors.keys()))
             )
         for py_ver, is_enabled in selectors.items():
-            if py_ver == PyVer(2, 7) or is_enabled:
+            if (not is_strict_cf and py_ver == PyVer(2, 7)) or is_enabled:
                 continue
             all_selector += (
                 [f"py=={py_ver.major}{py_ver.minor}"]
@@ -1133,3 +1160,30 @@ def search_setup_root(path_folder: Union[Path, str]) -> Path:
     pyproject_toml = list(Path(path_folder).rglob("pyproject.toml"))
     if pyproject_toml:
         return pyproject_toml[0]
+
+
+def clean_deps_for_conda_forge(list_deps: List) -> List:
+    """Remove dependencies which conda-forge is not supporting anymore.
+    For example Python 2.7, Python version less than 3.6
+
+    :param list_deps: List of dependencies
+    :return: New list of dependencies
+    """
+    py_ver_min = CONDA_FORGE_STRICT[0]
+    re_delimiter = re.compile(r"#\s+\[py\s*(?:([<>=!]+))?\s*(\d+)\]\s*$", re.DOTALL)
+    result_deps = []
+    for dependency in list_deps:
+        match_del = re_delimiter.search(dependency)
+        if match_del is None:
+            result_deps.append(dependency)
+            continue
+        match_del = match_del.groups()
+        if not match_del[0]:
+            match_del = ("==", match_del[1])
+        major = int(match_del[1][0])
+        minor = int(match_del[1][1:].replace("k", "0"))
+        current_py = PyVer(major=major, minor=minor)
+        log.debug(f"Evaluating: {py_ver_min}{match_del}{current_py} -- {dependency}")
+        if eval(f"py_ver_min{match_del[0]}current_py"):
+            result_deps.append(dependency)
+    return result_deps

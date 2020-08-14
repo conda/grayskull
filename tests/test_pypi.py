@@ -8,6 +8,7 @@ from colorama import Fore, Style
 
 from grayskull.cli import CLIConfig
 from grayskull.pypi import PyPi
+from grayskull.pypi.pypi import clean_deps_for_conda_forge
 
 
 @pytest.fixture
@@ -41,10 +42,11 @@ def test_extract_pypi_requirements(pypi_metadata):
 
 
 def test_get_pypi_metadata(pypi_metadata):
-    recipe = PyPi(name="pytest", version="5.3.1")
+    recipe = PyPi(name="pytest", version="5.3.1", is_strict_cf=True)
     metadata = recipe._get_pypi_metadata(name="pytest", version="5.3.1")
     assert metadata["name"] == "pytest"
     assert metadata["version"] == "5.3.1"
+    assert "pathlib2 >=2.2.0  # [py<36]" not in recipe["requirements"]["run"]
 
 
 def test_get_name_version_from_requires_dist():
@@ -95,47 +97,62 @@ def test_get_selector():
 
 
 @pytest.mark.parametrize(
-    "requires_python, exp_selector",
+    "requires_python, exp_selector, ex_cf",
     [
-        (">=3.5", "2k"),
-        (">=3.6", "2k"),
-        (">=3.7", "<37"),
-        ("<=3.7", ">=38"),
-        ("<=3.7.1", ">=38"),
-        ("<3.7", ">=37"),
-        (">2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*", "<36"),
-        (">=2.7, !=3.6.*", "==36"),
-        (">3.7", "<38"),
-        (">2.7", "2k"),
-        ("<3", "3k"),
-        ("!=3.7", "==37"),
+        (">=3.5", "2k", None),
+        (">=3.6", "2k", None),
+        (">=3.7", "<37", "<37"),
+        ("<=3.7", ">=38", ">=38"),
+        ("<=3.7.1", ">=38", ">=38"),
+        ("<3.7", ">=37", ">=37"),
+        (">2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*", "<36", "<36"),
+        (">=2.7, !=3.6.*", "==36", "==36"),
+        (">3.7", "<38", "<38"),
+        (">2.7", "2k", "<36"),
+        ("<3", "3k", "skip"),
+        ("!=3.7", "==37", "==37"),
     ],
 )
-def test_py_version_to_selector(requires_python, exp_selector):
+def test_py_version_to_selector(requires_python, exp_selector, ex_cf):
     metadata = {"requires_python": requires_python}
     assert PyPi.py_version_to_selector(metadata) == f"# [py{exp_selector}]"
 
+    if ex_cf != "skip":
+        expected = f"# [py{ex_cf}]" if ex_cf else None
+        result = PyPi.py_version_to_selector(metadata, is_strict_cf=True)
+        if isinstance(expected, str):
+            assert expected == result
+        else:
+            assert expected is result
+
 
 @pytest.mark.parametrize(
-    "requires_python, exp_limit",
+    "requires_python, exp_limit, ex_cf",
     [
-        (">=3.5", ">=3.5"),
-        (">=3.6", ">=3.6"),
-        (">=3.7", ">=3.7"),
-        ("<=3.7", "<3.8"),
-        ("<=3.7.1", "<3.8"),
-        ("<3.7", "<3.7"),
-        (">2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*", ">=3.6"),
-        (">=2.7, !=3.6.*", "!=3.6"),
-        (">3.7", ">=3.8"),
-        (">2.7", ">=3.6"),
-        ("<3", "<3.0"),
-        ("!=3.7", "!=3.7"),
+        (">=3.5", ">=3.5", None),
+        (">=3.6", ">=3.6", None),
+        (">=3.7", ">=3.7", ">=3.7"),
+        ("<=3.7", "<3.8", "<3.8"),
+        ("<=3.7.1", "<3.8", "<3.8"),
+        ("<3.7", "<3.7", "<3.7"),
+        (">2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*", ">=3.6", ">=3.6"),
+        (">=2.7, !=3.6.*", "!=3.6", "!=3.6"),
+        (">3.7", ">=3.8", ">=3.8"),
+        (">2.7", ">=3.6", ">=3.6"),
+        ("<3", "<3.0", "skip"),
+        ("!=3.7", "!=3.7", "!=3.7"),
     ],
 )
-def test_py_version_to_limit_python(requires_python, exp_limit):
+def test_py_version_to_limit_python(requires_python, exp_limit, ex_cf):
     metadata = {"requires_python": requires_python}
     assert PyPi.py_version_to_limit_python(metadata) == f"{exp_limit}"
+
+    if ex_cf != "skip":
+        result = PyPi.py_version_to_limit_python(metadata, is_strict_cf=True)
+        if isinstance(ex_cf, str):
+            assert ex_cf == result
+        else:
+            assert ex_cf is result
 
 
 def test_get_sha256_from_pypi_metadata():
@@ -609,3 +626,12 @@ def test_get_url_filename():
         )
         == "foo_file-{{ version }}.zip"
     )
+
+
+def test_clean_deps_for_conda_forge():
+    assert clean_deps_for_conda_forge(["deps1", "deps2  # [py34]"]) == ["deps1"]
+    assert clean_deps_for_conda_forge(["deps1", "deps2  # [py<34]"]) == ["deps1"]
+    assert clean_deps_for_conda_forge(["deps1", "deps2  # [py<38]"]) == [
+        "deps1",
+        "deps2  # [py<38]",
+    ]
