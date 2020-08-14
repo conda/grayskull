@@ -41,10 +41,11 @@ def test_extract_pypi_requirements(pypi_metadata):
 
 
 def test_get_pypi_metadata(pypi_metadata):
-    recipe = PyPi(name="pytest", version="5.3.1")
+    recipe = PyPi(name="pytest", version="5.3.1", is_strict_cf=True)
     metadata = recipe._get_pypi_metadata(name="pytest", version="5.3.1")
     assert metadata["name"] == "pytest"
     assert metadata["version"] == "5.3.1"
+    assert "pathlib2 >=2.2.0  # [py<36]" not in recipe["requirements"]["run"]
 
 
 def test_get_name_version_from_requires_dist():

@@ -567,6 +567,13 @@ class PyPi(AbstractRecipeModel):
         all_requirements["run"] = solve_list_pkg_name(
             all_requirements["run"], self.PYPI_CONFIG
         )
+        if self._is_strict_cf:
+            all_requirements["host"] = clean_deps_for_conda_forge(
+                all_requirements["host"]
+            )
+            all_requirements["run"] = clean_deps_for_conda_forge(
+                all_requirements["run"]
+            )
         print_requirements(all_requirements)
 
         test_entry_points = PyPi._get_test_entry_points(metadata.get("entry_points"))
@@ -1153,3 +1160,28 @@ def search_setup_root(path_folder: Union[Path, str]) -> Path:
     pyproject_toml = list(Path(path_folder).rglob("pyproject.toml"))
     if pyproject_toml:
         return pyproject_toml[0]
+
+
+def clean_deps_for_conda_forge(list_deps: List) -> List:
+    """Remove dependencies which conda-forge is not supporting anymore.
+    For example Python 2.7, Python version less than 3.6
+
+    :param list_deps: List of dependencies
+    :return: New list of dependencies
+    """
+    py_ver_min = CONDA_FORGE_STRICT[0]
+    re_delimiter = re.compile(r"#\s+\[py\s*(?:([<>=!]+))?\s*(\d+)\]\s*$", re.DOTALL)
+    result_deps = []
+    for dependency in list_deps:
+        match_del = re_delimiter.search(dependency)
+        if match_del is None:
+            result_deps.append(dependency)
+            continue
+        match_del = match_del.groups()
+        if not match_del[0]:
+            match_del[0] = "=="
+        current_py = PyVer(major=int(match_del[1][0]), minor=int(match_del[1][1:]))
+        log.debug(f"Evaluating: {py_ver_min}{match_del}{current_py} -- {dependency}")
+        if eval(f"py_ver_min{match_del[0]}current_py"):
+            result_deps.append(dependency)
+    return result_deps
