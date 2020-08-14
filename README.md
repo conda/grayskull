@@ -11,7 +11,7 @@
     <br>
     <img src="https://comicvine1.cbsistatic.com/uploads/original/4/49448/2661756-castle_grayskull.jpg" align="center" />
     <br>
-    <i>"Skeleto<strike>n</strike>r's main goal is to conquer the mysterious fortress of Castle Grayskull, from which He-Man draws his powers. If he succeeds, Skeletor would be able to conquer not only Eternia, but the whole universe."</i> Adapted from <a href=https://en.wikipedia.org/wiki/Skeletor>Wikipedia</a>
+    <i>"Skeleto<strike>n</strike>r's main goal is to conquer the mysterious fortress of Castle Grayskull, from which He-Man draws his powers. If he succeeds, Skeletor would be able to conquer not only Eternia, but the whole universe."</i> </br>Adapted from <a href=https://en.wikipedia.org/wiki/Skeletor>Wikipedia</a>
 </span>
 
 
