@@ -620,12 +620,6 @@ class PyPi(AbstractRecipeModel):
         :return: Return an object which contains relevant informations regarding
         the license.
         """
-
-        def add_git_ext(url: str) -> str:
-            if url and not str(url).endswith(".git"):
-                url = f"{url}.git"
-            return url
-
         git_url = metadata.get("dev_url", None)
         if (
             not git_url
@@ -636,7 +630,6 @@ class PyPi(AbstractRecipeModel):
         if not git_url and "github.com" == urlparse((metadata.get("url") or "")).netloc:
             git_url = metadata.get("url")
 
-        git_url = add_git_ext(git_url)
         short_license = search_license_file(
             metadata.get("sdist_path"),
             git_url,
