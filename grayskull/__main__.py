@@ -80,6 +80,13 @@ def main(args=None):
         dest="list_missing_deps",
         help="After the execution Grayskull will print all the missing dependencies.",
     )
+    pypi_cmds.add_argument(
+        "--strict-conda-forge",
+        default=False,
+        action="store_true",
+        dest="is_strict_conda_forge",
+        help="It will generate the recipes strict for the conda-forge channel.",
+    )
 
     args = parser.parse_args(args)
 
@@ -112,7 +119,11 @@ def main(args=None):
         pkg_name, pkg_version = parse_pkg_name_version(pkg_name)
         try:
             recipe = GrayskullFactory.create_recipe(
-                "pypi", pkg_name, pkg_version, download=args.download
+                "pypi",
+                pkg_name,
+                pkg_version,
+                download=args.download,
+                is_strict_cf=args.is_strict_conda_forge,
             )
         except requests.exceptions.HTTPError as err:
             print_msg(

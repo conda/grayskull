@@ -95,47 +95,62 @@ def test_get_selector():
 
 
 @pytest.mark.parametrize(
-    "requires_python, exp_selector",
+    "requires_python, exp_selector, ex_cf",
     [
-        (">=3.5", "2k"),
-        (">=3.6", "2k"),
-        (">=3.7", "<37"),
-        ("<=3.7", ">=38"),
-        ("<=3.7.1", ">=38"),
-        ("<3.7", ">=37"),
-        (">2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*", "<36"),
-        (">=2.7, !=3.6.*", "==36"),
-        (">3.7", "<38"),
-        (">2.7", "2k"),
-        ("<3", "3k"),
-        ("!=3.7", "==37"),
+        (">=3.5", "2k", None),
+        (">=3.6", "2k", None),
+        (">=3.7", "<37", "<37"),
+        ("<=3.7", ">=38", ">=38"),
+        ("<=3.7.1", ">=38", ">=38"),
+        ("<3.7", ">=37", ">=37"),
+        (">2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*", "<36", "<36"),
+        (">=2.7, !=3.6.*", "==36", "==36"),
+        (">3.7", "<38", "<38"),
+        (">2.7", "2k", "<36"),
+        ("<3", "3k", "skip"),
+        ("!=3.7", "==37", "==37"),
     ],
 )
-def test_py_version_to_selector(requires_python, exp_selector):
+def test_py_version_to_selector(requires_python, exp_selector, ex_cf):
     metadata = {"requires_python": requires_python}
     assert PyPi.py_version_to_selector(metadata) == f"# [py{exp_selector}]"
 
+    if ex_cf != "skip":
+        expected = f"# [py{ex_cf}]" if ex_cf else None
+        result = PyPi.py_version_to_selector(metadata, is_strict_cf=True)
+        if isinstance(expected, str):
+            assert expected == result
+        else:
+            assert expected is result
+
 
 @pytest.mark.parametrize(
-    "requires_python, exp_limit",
+    "requires_python, exp_limit, ex_cf",
     [
-        (">=3.5", ">=3.5"),
-        (">=3.6", ">=3.6"),
-        (">=3.7", ">=3.7"),
-        ("<=3.7", "<3.8"),
-        ("<=3.7.1", "<3.8"),
-        ("<3.7", "<3.7"),
-        (">2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*", ">=3.6"),
-        (">=2.7, !=3.6.*", "!=3.6"),
-        (">3.7", ">=3.8"),
-        (">2.7", ">=3.6"),
-        ("<3", "<3.0"),
-        ("!=3.7", "!=3.7"),
+        (">=3.5", ">=3.5", None),
+        (">=3.6", ">=3.6", None),
+        (">=3.7", ">=3.7", ">=3.7"),
+        ("<=3.7", "<3.8", "<3.8"),
+        ("<=3.7.1", "<3.8", "<3.8"),
+        ("<3.7", "<3.7", "<3.7"),
+        (">2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*", ">=3.6", ">=3.6"),
+        (">=2.7, !=3.6.*", "!=3.6", "!=3.6"),
+        (">3.7", ">=3.8", ">=3.8"),
+        (">2.7", ">=3.6", ">=3.6"),
+        ("<3", "<3.0", "skip"),
+        ("!=3.7", "!=3.7", "!=3.7"),
     ],
 )
-def test_py_version_to_limit_python(requires_python, exp_limit):
+def test_py_version_to_limit_python(requires_python, exp_limit, ex_cf):
     metadata = {"requires_python": requires_python}
     assert PyPi.py_version_to_limit_python(metadata) == f"{exp_limit}"
+
+    if ex_cf != "skip":
+        result = PyPi.py_version_to_limit_python(metadata, is_strict_cf=True)
+        if isinstance(ex_cf, str):
+            assert ex_cf == result
+        else:
+            assert ex_cf is result
 
 
 def test_get_sha256_from_pypi_metadata():
