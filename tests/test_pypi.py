@@ -226,6 +226,16 @@ def test_injection_distutils_compiler_gsw():
     assert data["packages"] == ["gsw"]
 
 
+def test_injection_distutils_setup_reqs_ensure_list():
+    pkg_name, pkg_ver = "pyinstaller-hooks-contrib", "2020.7"
+    recipe = PyPi(name=pkg_name, version=pkg_ver)
+    data = recipe._get_sdist_metadata(
+        f"https://pypi.io/packages/source/p/{pkg_name}/{pkg_name}-{pkg_ver}.tar.gz",
+        pkg_name,
+    )
+    assert data.get("setup_requires") == ["setuptools >= 30.3.0"]
+
+
 def test_merge_pypi_sdist_metadata():
     recipe = PyPi(name="gsw", version="3.3.1")
     pypi_metadata = recipe._get_pypi_metadata(name="gsw", version="3.3.1")
