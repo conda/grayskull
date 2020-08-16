@@ -218,10 +218,13 @@ class PyPi(AbstractRecipeModel):
 
             def _fix_list_requirements(key_deps: str) -> List:
                 """Fix when dependencies have lists inside of another sequence"""
-                if not kwargs.get(key_deps):
-                    return kwargs.get(key_deps)
+                val_deps = kwargs.get(key_deps)
+                if not val_deps:
+                    return val_deps
                 list_req = []
-                for val in kwargs.get(key_deps):
+                if isinstance(val_deps, str):
+                    val_deps = [val_deps]
+                for val in val_deps:
                     if isinstance(val, (tuple, list)):
                         list_req.extend(list(map(str, val)))
                     else:
