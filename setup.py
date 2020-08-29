@@ -25,7 +25,7 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         "requests",
-        "ruamel.yaml >=0.15.3",
+        "ruamel.yaml >=0.16.10",
         "ruamel.yaml.jinja2",
         "stdlib-list",
         "pip",
