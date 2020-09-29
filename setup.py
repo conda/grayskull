@@ -31,7 +31,7 @@ setup(
         "pip",
         "setuptools >=30.3.0",
         "rapidfuzz >=0.7.6",
-        "progressbar2",
+        "progressbar2 >=3.53.0",
         "colorama",
     ],
     extras_require={
