@@ -1,10 +1,8 @@
 # Grayskull
 -------------
-[![Build Status](https://dev.azure.com/marceloduartetrevisani/Grayskull/_apis/build/status/Tests?branchName=master)](https://dev.azure.com/marceloduartetrevisani/Grayskull/_build/latest?definitionId=4&branchName=master) ![flake8](https://github.com/marcelotrevisani/grayskull/workflows/flake8/badge.svg?branch=master) ![Deployment (PyPI)](https://github.com/marcelotrevisani/grayskull/workflows/Upload%20Package%20to%20PyPI/badge.svg)
+[![Build Status](https://dev.azure.com/conda-incubator/Grayskull/_apis/build/status/Tests?branchName=master)](https://dev.azure.com/conda-incubator/Grayskull/_build/latest?definitionId=4&branchName=master) ![flake8](https://github.com/conda-incubator/grayskull/workflows/flake8/badge.svg?branch=master) ![Deployment (PyPI)](https://github.com/conda-incubator/grayskull/workflows/Upload%20Package%20to%20PyPI/badge.svg)
 
-[![codecov](https://codecov.io/gh/marcelotrevisani/grayskull/branch/master/graph/badge.svg)](https://codecov.io/gh/marcelotrevisani/grayskull) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) ![](https://img.shields.io/badge/python-3.7+-blue.svg) ![](https://img.shields.io/github/license/marcelotrevisani/grayskull.svg) [![PyPI version](https://badge.fury.io/py/grayskull.svg)](https://badge.fury.io/py/grayskull) [![Conda Version](https://img.shields.io/conda/vn/conda-forge/grayskull.svg)](https://anaconda.org/conda-forge/grayskull) [![Gitter](https://badges.gitter.im/conda_grayskull/community.svg)](https://gitter.im/conda_grayskull/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/marcelotrevisani/grayskull.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/marcelotrevisani/grayskull/context:python)
-
-[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/marcelo)
+[![codecov](https://codecov.io/gh/conda-incubator/grayskull/branch/master/graph/badge.svg)](https://codecov.io/gh/conda-incubator/grayskull) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) ![](https://img.shields.io/badge/python-3.7+-blue.svg) ![](https://img.shields.io/github/license/conda-incubator/grayskull.svg) [![PyPI version](https://badge.fury.io/py/grayskull.svg)](https://badge.fury.io/py/grayskull) [![Conda Version](https://img.shields.io/conda/vn/conda-forge/grayskull.svg)](https://anaconda.org/conda-forge/grayskull) [![Gitter](https://badges.gitter.im/conda_grayskull/community.svg)](https://gitter.im/conda_grayskull/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/conda-incubator/grayskull.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/conda-incubator/grayskull/context:python)
 
 -------------
 <span align="center">
@@ -40,7 +38,7 @@ conda install -c conda-forge grayskull
 
 It is also possible to clone this repo and install it using `pip`:
 ```bash
-git clone https://github.com/marcelotrevisani/grayskull.git
+git clone https://github.com/conda-incubator/grayskull.git
 cd grayskull
 pip install -e .
 ```
@@ -60,7 +58,7 @@ and inside of this folder it will generated the recipe (`meta.yaml`).
 
 * Example with `pytest` (`grayskull pypi pytest`):
 
-![Grayskull CLI](https://raw.githubusercontent.com/marcelotrevisani/grayskull/master/docs/images/cli_example_grayskull.gif)
+![Grayskull CLI](https://raw.githubusercontent.com/conda-incubator/grayskull/master/docs/images/cli_example_grayskull.gif)
 
 
 ### Online Grayskull
