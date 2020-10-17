@@ -25,9 +25,7 @@ jobs:
         auto-update-conda: true
         python-version: ${{ matrix.py_ver }}
         mamba-version: "*"
-        channels: conda-forge,defaults
-        channel-priority: true
-        environment-file: environment.yml
+        environment-file: environment.yaml
         activate-environment: gs
     - name: Conda info
       shell: bash -l {0}
