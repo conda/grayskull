@@ -1,0 +1,23 @@
+name: gs
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - pytest
+  - pytest-cov
+  - pytest-xdist
+  - pytest-forked
+  - requests
+  - ruamel.yaml>=0.16.10
+  - ruamel.yaml.jinja2
+  - stdlib-list
+  - pip
+  - setuptools>=30.3.0
+  - rapidfuzz>=0.7.6
+  - progreebar2>=3.53.0
+  - colorama
+  - mock
+  - pytest-console-scripts
+  - numpy
+  - compilers
+  - fortran-compiler
