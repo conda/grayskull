@@ -1,0 +1,77 @@
+name: Tests
+
+on:
+  push:
+   branches:
+     - master
+  pull_request:
+    branches:
+     - "*"
+
+jobs:
+  run:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        py_ver: ["3.7", "3.8"]
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON: ${{ matrix.py_ver }}
+    steps:
+    - uses: actions/checkout@master
+    - uses: conda-incubator/setup-miniconda@v1
+      with:
+        auto-update-conda: true
+        python-version: ${{ matrix.py_ver }}
+        mamba-version: "*"
+        channels: conda-forge,defaults
+        channel-priority: true
+        environment-file: environment.yml
+        activate-environment: gs
+    - name: Conda info
+      shell: bash -l {0}
+      run: |
+        conda info --all
+        conda list
+
+    - name: Running serial tests
+      shell: bash -l {0}
+      run: |
+        pytest  tests \
+                -vv \
+                -n 0 \
+                -m "serial" \
+                --color=yes \
+                --cov=./ \
+                --cov-append \
+                --cov-report html:coverage-serial-html \
+                --cov-report xml:coverage-serial.xml \
+                --cov-config=.coveragerc \
+                --junit-xml=Linux-py${{ matrix.py_ver }}-serial.xml \
+                --junit-prefix=Linux-py${{ matrix.py_ver }}-serial
+
+    - name: Running parallel tests
+        shell: bash -l {0}
+        run: |
+          pytest  tests \
+                  -vv \
+                  -n 0 \
+                  -m "not serial" \
+                  --color=yes \
+                  --cov=./ \
+                  --cov-append \
+                  --cov-report html:coverage-parallel-html \
+                  --cov-report xml:coverage-parallel.xml \
+                  --cov-config=.coveragerc \
+                  --junit-xml=Linux-py${{ matrix.py_ver }}-parallel.xml \
+                  --junit-prefix=Linux-py${{ matrix.py_ver }}-parallel
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./coverage-serial.xml,./coverage-parallel.xml
+        directory: .
+        flags: unittests
+        fail_ci_if_error: true
+        path_to_write_report: ./coverage/codecov_report.gz
