@@ -1,7 +1,4 @@
 name: gs
-channels:
-  - conda-forge
-  - defaults
 dependencies:
   - pytest
   - pytest-cov

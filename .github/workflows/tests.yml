@@ -24,7 +24,6 @@ jobs:
       with:
         auto-update-conda: true
         python-version: ${{ matrix.py_ver }}
-        mamba-version: "*"
         environment-file: environment.yaml
         activate-environment: gs
     - name: Conda info
