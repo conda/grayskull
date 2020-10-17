@@ -90,9 +90,9 @@ class AbstractRecipeModel(ABC):
         else:
             item.value = value
 
-    def add_jinja_var(self, name: str, value: Any, quote: bool=True):
+    def add_jinja_var(self, name: str, value: Any, quote: bool = True):
         if quote:
-            value = f"\"{value}\""
+            value = f'"{value}"'
         if self._yaml.ca.comment:
             if self._yaml.ca.comment[1]:
                 self._yaml.ca.comment[1][-1].value = re.sub(
@@ -103,7 +103,7 @@ class AbstractRecipeModel(ABC):
 
         self._yaml.ca.comment[1].append(
             CommentToken(
-                f'#% set {name} = {value} %}}',
+                f"#% set {name} = {value} %}}",
                 start_mark=CommentMark(0),
                 end_mark=CommentMark(0),
             )
@@ -137,7 +137,7 @@ class AbstractRecipeModel(ABC):
             return
         comment = self.__find_commented_token_jinja_var(key)
         if comment:
-            comment.value = f"#% set {key} = \"{value}\" %}}"
+            comment.value = f'#% set {key} = "{value}" %}}'
         else:
             self.add_jinja_var(key, value, quote=True)
 

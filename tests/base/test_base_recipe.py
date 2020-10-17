@@ -71,7 +71,7 @@ def test_jinja_var(data_recipes):
     assert recipe.get_jinja_var("bar") == "foo"
 
     recipe.set_jinja_var("foobar", "value")
-    assert recipe.get_jinja_var("foobar") == "\"foo\""
+    assert recipe.get_jinja_var("foobar") == '"foo"'
 
 
 def test_set_default_values():
