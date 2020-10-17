@@ -14,7 +14,7 @@ dependencies:
   - pip
   - setuptools>=30.3.0
   - rapidfuzz>=0.7.6
-  - progreebar2>=3.53.0
+  - progressbar2>=3.53.0
   - colorama
   - mock
   - pytest-console-scripts
