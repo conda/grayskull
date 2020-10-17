@@ -70,9 +70,6 @@ def test_jinja_var(data_recipes):
     recipe.set_jinja_var("bar", "foo")
     assert recipe.get_jinja_var("bar") == "foo"
 
-    recipe.set_jinja_var("foobar", "value")
-    assert recipe.get_jinja_var("foobar") == '"foo"'
-
 
 def test_set_default_values():
     recipe = EmptyGray(name="PkgName", version="1.0.0")
