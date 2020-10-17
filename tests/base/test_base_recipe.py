@@ -70,7 +70,7 @@ def test_jinja_var(data_recipes):
     recipe.set_jinja_var("bar", "foo")
     assert recipe.get_jinja_var("bar") == "foo"
 
-    recipe.set_jinja_var("foobar", "value")
+    recipe.set_jinja_var("foobar", "value", quote=True)
     assert recipe.get_jinja_var("foobar") == "\"foo\""
 
 
