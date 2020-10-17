@@ -51,7 +51,7 @@ class AbstractRecipeModel(ABC):
             for section in self.ALL_SECTIONS[1:]:
                 Section(section, self._yaml)
             if version:
-                self.add_jinja_var("version", version)
+                self.add_jinja_var("version", version, quote=True)
                 self["package"]["version"] = "<{ version }}"
             self["build"]["number"] = 0
             self.__files_copy: List = []
@@ -90,7 +90,9 @@ class AbstractRecipeModel(ABC):
         else:
             item.value = value
 
-    def add_jinja_var(self, name: str, value: Any):
+    def add_jinja_var(self, name: str, value: Any, quote: bool = True):
+        if quote:
+            value = f'"{value}"'
         if self._yaml.ca.comment:
             if self._yaml.ca.comment[1]:
                 self._yaml.ca.comment[1][-1].value = re.sub(
@@ -101,7 +103,7 @@ class AbstractRecipeModel(ABC):
 
         self._yaml.ca.comment[1].append(
             CommentToken(
-                f'#% set {name} = "{value}" %}}',
+                f"#% set {name} = {value} %}}",
                 start_mark=CommentMark(0),
                 end_mark=CommentMark(0),
             )
@@ -131,13 +133,13 @@ class AbstractRecipeModel(ABC):
 
     def set_jinja_var(self, key: str, value: Any):
         if not self._yaml.ca.comment and not self._yaml.ca.comment[1]:
-            self.add_jinja_var(key, value)
+            self.add_jinja_var(key, value, quote=True)
             return
         comment = self.__find_commented_token_jinja_var(key)
         if comment:
-            comment.value = f"#% set {key} = {value} %}}"
+            comment.value = f'#% set {key} = "{value}" %}}'
         else:
-            self.add_jinja_var(key, value)
+            self.add_jinja_var(key, value, quote=True)
 
     @abstractmethod
     def refresh_section(self, section: str = "", **kwargs):
