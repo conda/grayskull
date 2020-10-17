@@ -49,20 +49,20 @@ jobs:
                 --junit-prefix=Linux-py${{ matrix.py_ver }}-serial
 
     - name: Running parallel tests
-        shell: bash -l {0}
-        run: |
-          pytest  tests \
-                  -vv \
-                  -n 0 \
-                  -m "not serial" \
-                  --color=yes \
-                  --cov=./ \
-                  --cov-append \
-                  --cov-report html:coverage-parallel-html \
-                  --cov-report xml:coverage-parallel.xml \
-                  --cov-config=.coveragerc \
-                  --junit-xml=Linux-py${{ matrix.py_ver }}-parallel.xml \
-                  --junit-prefix=Linux-py${{ matrix.py_ver }}-parallel
+      shell: bash -l {0}
+      run: |
+        pytest  tests \
+                -vv \
+                -n 0 \
+                -m "not serial" \
+                --color=yes \
+                --cov=./ \
+                --cov-append \
+                --cov-report html:coverage-parallel-html \
+                --cov-report xml:coverage-parallel.xml \
+                --cov-config=.coveragerc \
+                --junit-xml=Linux-py${{ matrix.py_ver }}-parallel.xml \
+                --junit-prefix=Linux-py${{ matrix.py_ver }}-parallel
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
@@ -71,4 +71,3 @@ jobs:
         directory: .
         flags: unittests
         fail_ci_if_error: true
-        path_to_write_report: ./coverage/codecov_report.gz
