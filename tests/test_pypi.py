@@ -645,3 +645,8 @@ def test_clean_deps_for_conda_forge():
         "deps1",
         "deps2  # [py<38]",
     ]
+
+
+def test_empty_entry_points():
+    recipe = PyPi(name="modulegraph", version="0.18")
+    assert recipe["build"]["entry_points"] == "modulegraph = modulegraph.__main__:main"
