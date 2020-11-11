@@ -4,7 +4,9 @@ import os
 import sys
 
 import requests
+
 from colorama import Fore, Style, init
+
 from colorama.ansi import clear_screen
 
 import grayskull
@@ -27,15 +29,7 @@ def main(args=None):
     pypi_cmds.add_argument(
         "pypi_packages", nargs="+", help="Specify the PyPI packages name.", default=[]
     )
-    pypi_cmds.add_argument(
-        "--download",
-        "-d",
-        dest="download",
-        action="store_true",
-        default=False,
-        help="Download the sdist package and PyPI information in the same folder"
-        " the recipe is located.",
-    )
+    pypi_cmds.add_argument(        "--download",        "-d",        dest="download",        action="store_true",        default=False,        help="Download the sdist package and PyPI information in the same folder"        " the recipe is located.",    )
     pypi_cmds.add_argument(
         "--maintainers",
         "-m",
@@ -59,9 +53,7 @@ def main(args=None):
         dest="grayskull_power",
         help=argparse.SUPPRESS,
     )
-    pypi_cmds.add_argument(
-        "--output",
-        "-o",
+    pypi_cmds.add_argument(        "--output",        "-o",
         dest="output",
         default=".",
         help="Path to where the recipe will be created",
@@ -135,6 +127,8 @@ def main(args=None):
             f"\n{Fore.GREEN}#### Recipe generated on "
             f"{os.path.realpath(args.output)} for {pkg_name} ####\n"
         )
+
+        print("HOOOKS YEAH!")
 
 
 if __name__ == "__main__":
