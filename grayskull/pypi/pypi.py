@@ -367,7 +367,14 @@ class PyPi(AbstractRecipeModel):
             dep_name = "setuptools"
         try:
             check_output(
-                [sys.executable, "-m", "pip", "install", dep_name, f"--target={pip_dir}"]
+                [
+                    sys.executable,
+                    "-m",
+                    "pip",
+                    "install",
+                    dep_name,
+                    f"--target={pip_dir}",
+                ]
             )
         except Exception as err:
             log.error(
