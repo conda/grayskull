@@ -20,7 +20,7 @@ jobs:
       PYTHON: ${{ matrix.py_ver }}
     steps:
     - uses: actions/checkout@master
-    - uses: conda-incubator/setup-miniconda@v1
+    - uses: conda-incubator/setup-miniconda@v2
       with:
         auto-update-conda: true
         python-version: ${{ matrix.py_ver }}
