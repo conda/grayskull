@@ -366,7 +366,16 @@ class PyPi(AbstractRecipeModel):
         if dep_name == "pkg_resources":
             dep_name = "setuptools"
         try:
-            check_output(["pip", "install", dep_name, f"--target={pip_dir}"])
+            check_output(
+                [
+                    sys.executable,
+                    "-m",
+                    "pip",
+                    "install",
+                    dep_name,
+                    f"--target={pip_dir}",
+                ]
+            )
         except Exception as err:
             log.error(
                 f"It was not possible to install {dep_name}.\n"
