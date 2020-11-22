@@ -69,4 +69,3 @@ jobs:
         files: ./coverage-serial.xml,./coverage-parallel.xml
         directory: .
         flags: unittests
-        fail_ci_if_error: true
