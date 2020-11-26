@@ -314,6 +314,10 @@ sagemaker_mxnet_training:
   conda_forge: sagemaker_mxnet_container
   import_name: sagemaker_mxnet_container
 
+setuptools_scm:
+  conda_forge: setuptools-scm
+  import_name: setuptools_scm
+
 sounddevice:
   conda_forge: python-sounddevice
   import_name: sounddevice
