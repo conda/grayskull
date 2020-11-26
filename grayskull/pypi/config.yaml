@@ -146,6 +146,10 @@ hdfs:
   conda_forge: python-hdfs
   import_name: hdfs
 
+htcondor:
+  conda_forge: python-htcondor
+  import_name: htcondor
+
 iam_units:
   conda_forge: iam-units
   import_name: iam_units
@@ -313,6 +317,10 @@ sagemaker_inference:
 sagemaker_mxnet_training:
   conda_forge: sagemaker_mxnet_container
   import_name: sagemaker_mxnet_container
+
+setuptools_scm:
+  conda_forge: setuptools-scm
+  import_name: setuptools_scm
 
 sounddevice:
   conda_forge: python-sounddevice

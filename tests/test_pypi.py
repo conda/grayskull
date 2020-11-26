@@ -438,7 +438,7 @@ def test_zipp_recipe_tags_on_deps():
     assert recipe["requirements"]["host"] == [
         "pip",
         "python >=3.6",
-        "setuptools_scm >=3.4.1",
+        "setuptools-scm >=3.4.1",
     ]
 
 
@@ -467,8 +467,8 @@ def test_get_test_entry_points():
 
 def test_importlib_metadata_two_setuptools_scm():
     recipe = PyPi(name="importlib-metadata", version="1.5.0")
-    assert "setuptools_scm" in recipe["requirements"]["host"]
-    assert "setuptools-scm" not in recipe["requirements"]["host"]
+    assert "setuptools-scm" in recipe["requirements"]["host"]
+    assert "setuptools_scm" not in recipe["requirements"]["host"]
     assert recipe["about"]["license"] == "Apache-2.0"
 
 
