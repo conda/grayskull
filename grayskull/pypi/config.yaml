@@ -146,6 +146,10 @@ hdfs:
   conda_forge: python-hdfs
   import_name: hdfs
 
+htcondor:
+  conda_forge: python-htcondor
+  import_name: htcondor
+
 iam_units:
   conda_forge: iam-units
   import_name: iam_units
