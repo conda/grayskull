@@ -114,6 +114,10 @@ extract-msg:
   conda_forge: msg-extractor
   import_name: extract_msg
 
+fastjsonschema:
+  conda_forge: python-fastjsonschema
+  import_name: fastjsonschema
+
 flake8_nb:
   conda_forge: flake8-nb
   import_name: flake8_nb
