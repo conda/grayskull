@@ -1,12 +1,13 @@
 from abc import ABC
 from typing import Union
 
-from grayskull.pypi import PyPi
+from grayskull.pypi import PyPi, Whl
 
 
 class GrayskullFactory(ABC):
     REGISTERED_CLASS = {
         "pypi": PyPi,
+        "whl": Whl,
     }
 
     @staticmethod

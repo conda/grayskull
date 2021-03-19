@@ -24,8 +24,40 @@ def main(args=None):
     parser = argparse.ArgumentParser(description="Grayskull - Conda recipe generator")
     pypi_parser = parser.add_subparsers(help="Options to generate PyPI recipes")
     pypi_cmds = pypi_parser.add_parser("pypi", help="Generate recipes based on PyPI")
+    pypi_whl_cmds = pypi_parser.add_parser("whl", help="Generate recipes based on PyPI Wheels")
     pypi_cmds.add_argument(
         "pypi_packages", nargs="+", help="Specify the PyPI packages name.", default=[]
+    )
+    pypi_whl_cmds.add_argument(
+        "pypi_whl_packages", nargs="+", help="Specify the PyPI packages (Wheels) name.", default=[]
+    )
+    pypi_whl_cmds.add_argument(
+        "--stdout",
+        dest="stdout",
+        default=True,
+        help="Disable or enable stdout, if it is False, Grayskull"
+        " will disable the prints. Default is True",
+    )
+    pypi_whl_cmds.add_argument(
+        "--list-missing-deps",
+        default=False,
+        action="store_true",
+        dest="list_missing_deps",
+        help="After the execution Grayskull will print all the missing dependencies.",
+    )
+    pypi_whl_cmds.add_argument(
+        "--maintainers",
+        "-m",
+        dest="maintainers",
+        nargs="+",
+        help="List of maintainers which will be added to the recipe.",
+    )
+    pypi_whl_cmds.add_argument(
+        "--output",
+        "-o",
+        dest="output",
+        default=".",
+        help="Path to where the recipe will be created",
     )
     pypi_cmds.add_argument(
         "--download",
@@ -109,33 +141,59 @@ def main(args=None):
     print_msg(Style.RESET_ALL)
     print_msg(clear_screen())
 
-    for pkg_name in args.pypi_packages:
-        logging.debug(f"Starting grayskull for pkg: {pkg_name}")
-        print_msg(
-            f"{Fore.GREEN}\n\n"
-            f"#### Initializing recipe for "
-            f"{Fore.BLUE}{pkg_name} (pypi) {Fore.GREEN}####\n"
-        )
-        pkg_name, pkg_version = parse_pkg_name_version(pkg_name)
-        try:
-            recipe = GrayskullFactory.create_recipe(
-                "pypi",
-                pkg_name,
-                pkg_version,
-                download=args.download,
-                is_strict_cf=args.is_strict_conda_forge,
-            )
-        except requests.exceptions.HTTPError as err:
+    if hasattr(args, 'pypi_packages'):
+        for pkg_name in args.pypi_packages:
+            logging.debug(f"Starting grayskull for pkg: {pkg_name}")
             print_msg(
-                f"{Fore.RED}Package seems to be missing on pypi.\nException: {err}\n\n"
+                f"{Fore.GREEN}\n\n"
+                f"#### Initializing recipe for "
+                f"{Fore.BLUE}{pkg_name} (pypi) {Fore.GREEN}####\n"
             )
-            continue
-        recipe.generate_recipe(args.output, mantainers=args.maintainers)
-        print_msg(
-            f"\n{Fore.GREEN}#### Recipe generated on "
-            f"{os.path.realpath(args.output)} for {pkg_name} ####\n"
-        )
+            pkg_name, pkg_version = parse_pkg_name_version(pkg_name)
+            try:
+                recipe = GrayskullFactory.create_recipe(
+                    "pypi",
+                    pkg_name,
+                    pkg_version,
+                    download=args.download,
+                    is_strict_cf=args.is_strict_conda_forge,
+                )
+            except requests.exceptions.HTTPError as err:
+                print_msg(
+                    f"{Fore.RED}Package seems to be missing on pypi.\nException: {err}\n\n"
+                )
+                continue
+            recipe.generate_recipe(args.output, mantainers=args.maintainers)
+            print_msg(
+                f"\n{Fore.GREEN}#### Recipe generated on "
+                f"{os.path.realpath(args.output)} for {pkg_name} ####\n"
+            )
 
+    if hasattr(args, 'pypi_whl_packages'):
+        for pkg_name in args.pypi_whl_packages:
+            logging.debug(f"Starting grayskull for pkg: {pkg_name}")
+            print_msg(
+                f"{Fore.GREEN}\n\n"
+                f"#### Initializing recipe for "
+                f"{Fore.BLUE}{pkg_name} (whl) {Fore.GREEN}####\n"
+            )
+            pkg_name, pkg_version = parse_pkg_name_version(pkg_name)
+            try:
+                recipe = GrayskullFactory.create_recipe(
+                    "whl",
+                    pkg_name,
+                    pkg_version,
+                )
+            except requests.exceptions.HTTPError as err:
+                print_msg(
+                    f"{Fore.RED}Package Wheel seems to be missing on pypi.\nException: {err}\n\n"
+                )
+                continue
+            recipe.generate_recipe(args.output, mantainers=args.maintainers)
+            print_msg(
+                f"\n{Fore.GREEN}#### Recipe generated on "
+                f"{os.path.realpath(args.output)} for {pkg_name} ####\n"
+            )
 
 if __name__ == "__main__":
     main(sys.argv[1:])

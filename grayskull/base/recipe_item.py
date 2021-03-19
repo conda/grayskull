@@ -3,7 +3,7 @@ import weakref
 from typing import Any, Optional, Union
 
 from ruamel.yaml import CommentToken
-from ruamel.yaml.comments import CommentedSeq
+from ruamel.yaml.comments import CommentedSeq, CommentedMap
 
 
 class RecipeItem:
@@ -75,11 +75,20 @@ class RecipeItem:
         return self.__yaml()[self.__pos]
 
     @value.setter
-    def value(self, value: Union[str, int]):
+    def value(self, value: Union[str, int, dict]):
         column = 8
         if isinstance(value, int):
             column += len(str(value))
             self.__yaml()[self.__pos] = value
+        elif isinstance(value, dict):
+            self.__yaml()[self.__pos] = CommentedMap()
+            for k, v in value.items():
+                selector = self._extract_selector(str(v))
+                self.__yaml()[self.__pos][k] = self._remove_selector(v)
+                column += len(str(self.__yaml()[self.__pos][k]))
+                if selector:
+                    sel = f"[{selector}]"
+                    self.__yaml()[self.__pos].yaml_add_eol_comment(sel, k)
         elif value:
             self.__yaml()[self.__pos] = self._remove_selector(value)
             column += len(str(self.__yaml()[self.__pos]))

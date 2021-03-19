@@ -150,7 +150,7 @@ class Section:
             self._get_parent()[section.section_name] = section.yaml_obj
         return Section(section, parent_yaml=self.yaml_obj)
 
-    def add_item(self, item: Union[str, int]):
+    def add_item(self, item: Union[str, int, dict]):
         """Add a new item to the current section
 
         :param item: Receive the value for the current item
