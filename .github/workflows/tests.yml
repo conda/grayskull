@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        py_ver: ["3.7", "3.8"]
+        py_ver: ["3.7", "3.8", "3.9"]
     env:
       OS: ${{ matrix.os }}
       PYTHON: ${{ matrix.py_ver }}
