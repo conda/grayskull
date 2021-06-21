@@ -55,8 +55,14 @@ class PyPi(AbstractRecipeModel):
         self._is_strict_cf = is_strict_cf
         self._setup_metadata = None
         self._is_arch = False
+        name = self._canonicalize_name(name)
         super(PyPi, self).__init__(name=name, version=str(version) if version else None)
         self["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
+
+    @staticmethod
+    def _canonicalize_name(name:str ):
+        """replace all underscores with hyphens in package name"""
+        return name.replace("_","-") 
 
     @staticmethod
     def _download_sdist_pkg(sdist_url: str, dest: str):
