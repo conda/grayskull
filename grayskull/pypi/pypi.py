@@ -785,6 +785,7 @@ class PyPi(AbstractRecipeModel):
         :return: all requirement section
         """
         name = metadata["name"]
+        self.set_jinja_var("name", name)
         requires_dist = PyPi._format_dependencies(metadata.get("requires_dist"), name)
         setup_requires = (
             metadata.get("setup_requires") if metadata.get("setup_requires") else []
