@@ -1,0 +1,41 @@
+{% set name = "slack_sdk" %}{% set version = "3.7.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/slack_sdk-{{ version }}.tar.gz
+  sha256: f0bf3e38ac393eba7fe1a99191b0e72f710860c6d2edc1271606fcfc08bea2e1
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+  run:
+    - python >=3.6
+
+test:
+  imports:
+    - slack
+    - slack.rtm
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/slackapi/python-slack-sdk
+  summary: The Slack API Platform SDK for Python
+  license: MIT
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - ForgottenProgramme
