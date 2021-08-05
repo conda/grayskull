@@ -389,8 +389,7 @@ class PyPi(AbstractRecipeModel):
             ):
                 data_dist["setup_requires"].append(dep_name.lower())
 
-    @staticmethod
-    def _merge_pypi_sdist_metadata(pypi_metadata: dict, sdist_metadata: dict) -> dict:
+    def _merge_pypi_sdist_metadata(self, pypi_metadata: dict, sdist_metadata: dict) -> dict:
         """This method is responsible to merge two dictionaries and it will give
         priority to the pypi_metadata.
 
@@ -401,6 +400,9 @@ class PyPi(AbstractRecipeModel):
 
         def get_val(key):
             return pypi_metadata.get(key) or sdist_metadata.get(key)
+
+        if get_val("scripts"):
+            self._is_arch = True 
 
         requires_dist = PyPi._merge_requires_dist(pypi_metadata, sdist_metadata)
         all_packages_names = get_val("packages")
