@@ -556,7 +556,7 @@ class PyPi(AbstractRecipeModel):
         sdist_metadata = self._get_sdist_metadata(
             sdist_url=pypi_metadata["sdist_url"], name=name
         )
-        metadata = self.PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
+        metadata = self._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
         log.debug(f"Data merged from pypi, setup.cfg and setup.py: {metadata}")
         license_metadata = PyPi._discover_license(metadata)
 
