@@ -197,8 +197,9 @@ class PyPi(AbstractRecipeModel):
         setup function by the inner function __fake_distutils_setup.
         This method is a contextmanager, after leaving the context it will return
         with the normal implementation of the distutils.core.setup.
-        This method is necessary because some information are missing from the
-        pypi metadata and also for those packages which the pypi metadata is missing.
+        This method is necessary for two reasons:
+        -pypi metadata for some packages might be absent from the pypi API.
+        -pypi metadata, when present, might be missing some information.
 
         :param folder: Path to the folder where the sdist package was extracted
         :yield: return the metadata from sdist
