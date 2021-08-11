@@ -650,3 +650,14 @@ def test_clean_deps_for_conda_forge():
 def test_empty_entry_points():
     recipe = PyPi(name="modulegraph", version="0.18")
     assert recipe["build"]["entry_points"] == "modulegraph = modulegraph.__main__:main"
+
+
+def test_noarch_metadata():
+    recipe = PyPi(name="policy_sentry", version="0.11.16")
+    assert recipe["build"]["noarch"] == "python"
+
+
+def test_arch_metadata():
+    recipe = PyPi(name="remove_dagmc_tags", version="0.0.5")
+    assert "noarch" not in recipe["build"]
+
