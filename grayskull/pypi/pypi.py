@@ -560,7 +560,7 @@ class PyPi(AbstractRecipeModel):
         log.debug(f"Data merged from pypi, setup.cfg and setup.py: {metadata}")
         if metadata.get("scripts") is not None:
             self._is_arch = True
-            print_msg(f"{Fore.RED}scripts detected. Marking package as non-noarch.")
+            print_msg(f"{Fore.YELLOW}scripts detected. Marking package as non-noarch.")
 
         license_metadata = PyPi._discover_license(metadata)
 
