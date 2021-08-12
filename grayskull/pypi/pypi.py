@@ -417,6 +417,7 @@ class PyPi(AbstractRecipeModel):
             "classifiers": get_val("classifiers"),
             "compilers": PyPi._get_compilers(requires_dist, sdist_metadata),
             "entry_points": PyPi._get_entry_points_from_sdist(sdist_metadata),
+            "scripts": get_val("scripts"),
             "summary": get_val("summary"),
             "requires_python": pypi_metadata.get("requires_python")
             or sdist_metadata.get("python_requires"),
@@ -557,6 +558,12 @@ class PyPi(AbstractRecipeModel):
         )
         metadata = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
         log.debug(f"Data merged from pypi, setup.cfg and setup.py: {metadata}")
+        if metadata.get("scripts") is not None:
+            self._is_arch = True
+            print_msg(
+                f"{Fore.YELLOW}scripts detected. Package not eligible for noarch."
+            )
+
         license_metadata = PyPi._discover_license(metadata)
 
         license_file = "PLEASE_ADD_LICENSE_FILE"
