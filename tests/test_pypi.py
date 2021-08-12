@@ -58,7 +58,14 @@ def test_get_name_version_from_requires_dist():
 
 def test_get_extra_from_requires_dist():
     assert PyPi._get_extra_from_requires_dist(' python_version < "3.6"') == [
-        ("", "python_version", "<", "3.6", "", "",)
+        (
+            "",
+            "python_version",
+            "<",
+            "3.6",
+            "",
+            "",
+        )
     ]
     assert PyPi._get_extra_from_requires_dist(
         " python_version < \"3.6\" ; extra =='test'"
@@ -77,13 +84,16 @@ def test_get_extra_from_requires_dist():
 
 def test_get_all_selectors_pypi():
     recipe = PyPi(name="pytest", version="5.3.1")
-    assert recipe._get_all_selectors_pypi(
-        [
-            ("(", "sys_platform", "==", "win32", "", "and"),
-            ("", "python_version", "==", "2.7", ")", "and"),
-            ("", "extra", "==", "socks", "", ""),
-        ]
-    ) == ["(", "win", "and", "py==27", ")"]
+    assert (
+        recipe._get_all_selectors_pypi(
+            [
+                ("(", "sys_platform", "==", "win32", "", "and"),
+                ("", "python_version", "==", "2.7", ")", "and"),
+                ("", "extra", "==", "socks", "", ""),
+            ]
+        )
+        == ["(", "win", "and", "py==27", ")"]
+    )
 
 
 def test_get_selector():
@@ -279,46 +289,58 @@ def test_get_entry_points_from_sdist():
         {"entry_points": {"gui_scripts": ["gui_scripts=entrypoints"]}}
     ) == ["gui_scripts=entrypoints"]
 
-    assert sorted(
-        PyPi._get_entry_points_from_sdist(
-            {
-                "entry_points": {
-                    "gui_scripts": ["gui_scripts=entrypoints"],
-                    "console_scripts": ["console_scripts=entrypoints"],
+    assert (
+        sorted(
+            PyPi._get_entry_points_from_sdist(
+                {
+                    "entry_points": {
+                        "gui_scripts": ["gui_scripts=entrypoints"],
+                        "console_scripts": ["console_scripts=entrypoints"],
+                    }
                 }
-            }
+            )
         )
-    ) == sorted(["gui_scripts=entrypoints", "console_scripts=entrypoints"])
-    assert sorted(
-        PyPi._get_entry_points_from_sdist(
-            {
-                "entry_points": {
-                    "gui_scripts": None,
-                    "console_scripts": "console_scripts=entrypoints",
+        == sorted(["gui_scripts=entrypoints", "console_scripts=entrypoints"])
+    )
+    assert (
+        sorted(
+            PyPi._get_entry_points_from_sdist(
+                {
+                    "entry_points": {
+                        "gui_scripts": None,
+                        "console_scripts": "console_scripts=entrypoints",
+                    }
                 }
-            }
+            )
         )
-    ) == sorted(["console_scripts=entrypoints"])
-    assert sorted(
-        PyPi._get_entry_points_from_sdist(
-            {
-                "entry_points": {
-                    "gui_scripts": None,
-                    "console_scripts": "console_scripts=entrypoints\nfoo=bar.main",
+        == sorted(["console_scripts=entrypoints"])
+    )
+    assert (
+        sorted(
+            PyPi._get_entry_points_from_sdist(
+                {
+                    "entry_points": {
+                        "gui_scripts": None,
+                        "console_scripts": "console_scripts=entrypoints\nfoo=bar.main",
+                    }
                 }
-            }
+            )
         )
-    ) == sorted(["console_scripts=entrypoints", "foo=bar.main"])
-    assert sorted(
-        PyPi._get_entry_points_from_sdist(
-            {
-                "entry_points": {
-                    "gui_scripts": "gui_scripts=entrypoints",
-                    "console_scripts": None,
+        == sorted(["console_scripts=entrypoints", "foo=bar.main"])
+    )
+    assert (
+        sorted(
+            PyPi._get_entry_points_from_sdist(
+                {
+                    "entry_points": {
+                        "gui_scripts": "gui_scripts=entrypoints",
+                        "console_scripts": None,
+                    }
                 }
-            }
+            )
         )
-    ) == sorted(["gui_scripts=entrypoints"])
+        == sorted(["gui_scripts=entrypoints"])
+    )
 
 
 def test_build_noarch_skip():
@@ -660,4 +682,3 @@ def test_noarch_metadata():
 def test_arch_metadata():
     recipe = PyPi(name="remove_dagmc_tags", version="0.0.5")
     assert "noarch" not in recipe["build"]
-
