@@ -19,9 +19,7 @@ def print_msg(msg: str):
 def manage_progressbar(*, max_value: int, prefix: str):
     if CLIConfig().stdout:
         with progressbar.ProgressBar(
-            widgets=deepcopy(WIDGET_BAR_DOWNLOAD),
-            max_value=max_value,
-            prefix=prefix,
+            widgets=deepcopy(WIDGET_BAR_DOWNLOAD), max_value=max_value, prefix=prefix,
         ) as bar:
             yield bar
     else:

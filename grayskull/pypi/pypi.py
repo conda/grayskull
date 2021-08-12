@@ -1000,8 +1000,7 @@ class PyPi(AbstractRecipeModel):
         if not pypi_metadata["requires_python"]:
             return None
         req_python = re.findall(
-            r"([><=!]+)\s*(\d+)(?:\.(\d+))?",
-            pypi_metadata["requires_python"],
+            r"([><=!]+)\s*(\d+)(?:\.(\d+))?", pypi_metadata["requires_python"],
         )
         if not req_python:
             return None
