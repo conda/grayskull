@@ -552,10 +552,18 @@ class PyPi(AbstractRecipeModel):
         version = ""
         if self["package"]["version"].values:
             version = self.get_var_content(self["package"]["version"].values[0])
-        pypi_metadata = self._get_pypi_metadata(name, version)
-        sdist_metadata = self._get_sdist_metadata(
-            sdist_url=pypi_metadata["sdist_url"], name=name
-        )
+
+        if name.startswith(("http://", "https://")):
+            sdist_url = name + "/archive/master/tar.gz"
+            name = name.split("/")[-1]
+            sdist_metadata = self._get_sdist_metadata(sdist_url = sdist_url, name = name)
+
+        else:
+            pypi_metadata = self._get_pypi_metadata(name, version)
+            sdist_metadata = self._get_sdist_metadata(
+                sdist_url=pypi_metadata["sdist_url"], name=name
+            )
+
         metadata = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
         log.debug(f"Data merged from pypi, setup.cfg and setup.py: {metadata}")
         if metadata.get("scripts") is not None:
