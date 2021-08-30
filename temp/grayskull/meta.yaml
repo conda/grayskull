@@ -1,0 +1,46 @@
+{% set name = "http://www.github.com/conda-incubator/grayskull" %}
+{% set version = "1.0.0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python >=3.6
+    - setuptools >=30.3.0
+    - setuptools-scm
+  run:
+    - beautifulsoup4
+    - click
+    - python >=3.6
+    - pyyaml
+    - requests
+    - schema
+
+test:
+  imports:
+    - grayskull
+    - grayskull.base
+  commands:
+    - pip check
+    - console_scripts --help
+  requires:
+    - pip
+
+about:
+  home: https://github.com/conda-incubator/grayskull
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - ForgottenProgramme

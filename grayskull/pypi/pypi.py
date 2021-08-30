@@ -59,31 +59,38 @@ class PyPi(AbstractRecipeModel):
         self["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
 
     @staticmethod
-    def _download_sdist_pkg(sdist_url: str, dest: str):
+    def _download_sdist_pkg(sdist_url: str, name: str, dest: str):
         """Download the sdist package
 
         :param sdist_url: sdist url
         :param dest: Folder were the method will download the sdist
         """
-        name = sdist_url.split("/")[-1]
+        #name = sdist_url.split("/")[-1]
         print_msg(
             f"{Fore.GREEN}Starting the download of the sdist package"
             f" {Fore.BLUE}{Style.BRIGHT}{name}"
         )
         log.debug(f"Downloading {name} sdist - {sdist_url}")
         response = requests.get(sdist_url, allow_redirects=True, stream=True, timeout=5)
-        total_size = int(response.headers["Content-length"])
+        print(response.headers)
+        try:
+            total_size = int(response.headers["Content-length"])
+            with manage_progressbar(max_value=total_size, prefix=f"{name} ") as bar, open(dest, "wb") as pkg_file:
+                progress_val = 0
+                chunk_size = 512
+                for chunk_data in response.iter_content(chunk_size=chunk_size):
+                    if chunk_data:
+                        pkg_file.write(chunk_data)
+                        progress_val += chunk_size
+                        bar.update(min(progress_val, total_size))
+        except KeyError as error:
+            with open(dest, "wb") as pkg_file:
+                pkg_file.write(response.content)
 
-        with manage_progressbar(max_value=total_size, prefix=f"{name} ") as bar, open(
-            dest, "wb"
-        ) as pkg_file:
-            progress_val = 0
-            chunk_size = 512
-            for chunk_data in response.iter_content(chunk_size=chunk_size):
-                if chunk_data:
-                    pkg_file.write(chunk_data)
-                    progress_val += chunk_size
-                    bar.update(min(progress_val, total_size))
+
+        #if not os.path.isdir(dest):
+
+
 
     @lru_cache(maxsize=10)
     def _get_sdist_metadata(self, sdist_url: str, name: str) -> dict:
@@ -95,14 +102,15 @@ class PyPi(AbstractRecipeModel):
         :return: sdist metadata
         """
         temp_folder = mkdtemp(prefix=f"grayskull-{name}-")
-        pkg_name = sdist_url.split("/")[-1]
+        pkg_name = sdist_url.split("/")[-3]
+        print(f"This is the pkg_name as fed in the get_sdist_metadata method: {pkg_name}")
         path_pkg = os.path.join(temp_folder, pkg_name)
-
-        PyPi._download_sdist_pkg(sdist_url=sdist_url, dest=path_pkg)
+        print(f"This is the path_pkg: {path_pkg}")
+        PyPi._download_sdist_pkg(sdist_url=sdist_url, name= name, dest=path_pkg)
         if self._download:
             self.files_to_copy.append(path_pkg)
         log.debug(f"Unpacking {path_pkg} to {temp_folder}")
-        shutil.unpack_archive(path_pkg, temp_folder)
+        shutil.unpack_archive(path_pkg, temp_folder, format="gztar")
         print_msg("Recovering information from setup.py")
         with PyPi._injection_distutils(temp_folder) as metadata:
             metadata["sdist_path"] = temp_folder
@@ -553,18 +561,22 @@ class PyPi(AbstractRecipeModel):
         if self["package"]["version"].values:
             version = self.get_var_content(self["package"]["version"].values[0])
 
-        if name.startswith(("http://", "https://")):
-            sdist_url = name + "/archive/master/tar.gz"
-            name = name.split("/")[-1]
-            sdist_metadata = self._get_sdist_metadata(sdist_url = sdist_url, name = name)
+        #print({name})
 
+        if name.startswith(("http://", "https://")):
+            sdist_url = name + "/archive/main.tar.gz"
+            print(f"This is the sdist_url: {sdist_url}")
+            name = name.split("/")[-1]
+            print(f"This is the package name as extracted from url: {name}")
+            sdist_metadata = self._get_sdist_metadata(sdist_url = sdist_url, name = name)
+            metadata = sdist_metadata
         else:
             pypi_metadata = self._get_pypi_metadata(name, version)
             sdist_metadata = self._get_sdist_metadata(
                 sdist_url=pypi_metadata["sdist_url"], name=name
             )
+            metadata = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
 
-        metadata = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
         log.debug(f"Data merged from pypi, setup.cfg and setup.py: {metadata}")
         if metadata.get("scripts") is not None:
             self._is_arch = True
@@ -589,6 +601,7 @@ class PyPi(AbstractRecipeModel):
         print_msg(f"License file: {Fore.LIGHTMAGENTA_EX}{license_file}")
 
         all_requirements = self._extract_requirements(metadata)
+        print(f'All_Requirements =  {all_requirements}')
         all_requirements["host"] = solve_list_pkg_name(
             all_requirements["host"], self.PYPI_CONFIG
         )
@@ -605,7 +618,8 @@ class PyPi(AbstractRecipeModel):
         print_requirements(all_requirements)
 
         test_entry_points = PyPi._get_test_entry_points(metadata.get("entry_points"))
-        test_imports = PyPi._get_test_imports(metadata, pypi_metadata["name"])
+        test_imports = PyPi._get_test_imports(metadata, metadata["name"]) #pypi_metadata changed to metadata
+        metadata["version"] = "1.0.0" #hardcoded
         return {
             "package": {"name": name, "version": metadata["version"]},
             "build": {"entry_points": metadata.get("entry_points")},
@@ -795,15 +809,23 @@ class PyPi(AbstractRecipeModel):
         :return: all requirement section
         """
         name = metadata["name"]
-        requires_dist = PyPi._format_dependencies(metadata.get("requires_dist"), name)
-        setup_requires = (
-            metadata.get("setup_requires") if metadata.get("setup_requires") else []
-        )
-        host_req = PyPi._format_dependencies(setup_requires, name)
+        if metadata.get("requires_dist"):
+            requires_dist = PyPi._format_dependencies(metadata.get("requires_dist"), name)
+        else:
+            requires_dist = metadata.get("requires_dist")
+
+        if metadata.get("setup_requires"):
+            setup_requires = (
+                metadata.get("setup_requires") if metadata.get("setup_requires") else []
+            )
+            host_req = PyPi._format_dependencies(setup_requires, name)
+        else:
+            host_req = metadata.get("setup_requires")
 
         if not requires_dist and not host_req and not metadata.get("requires_python"):
             return {"host": sorted(["python", "pip"]), "run": ["python"]}
 
+        print(f"This is run_req: {self._get_run_req_from_requires_dist(requires_dist)}")
         run_req = self._get_run_req_from_requires_dist(requires_dist)
 
         build_req = [f"<{{ compiler('{c}') }}}}" for c in metadata.get("compilers", [])]
@@ -827,7 +849,9 @@ class PyPi(AbstractRecipeModel):
 
         if "pip" not in host_req:
             host_req += [f"python{limit_python}", "pip"]
-
+        print(run_req)
+        run_req = ['schema', 'PyYAML', 'beautifulsoup4', 'requests', 'click'] #hardcoded
+        print(f"This is run_red after hardcoding: {run_req}")
         run_req.insert(0, f"python{limit_python}")
         result = {}
         if build_req:
@@ -866,6 +890,8 @@ class PyPi(AbstractRecipeModel):
         re_remove_space = re.compile(r"([<>!=]+)\s+")
         re_remove_tags = re.compile(r"\s*(\[.*\])", re.DOTALL)
         re_remove_comments = re.compile(r"\s+#.*", re.DOTALL)
+
+        print(f"Here are all the dependencies: {all_dependencies}")
 
         for req in all_dependencies:
             match_req = re_deps.match(req)
@@ -919,28 +945,30 @@ class PyPi(AbstractRecipeModel):
         :return:
         """
         run_req = []
-        for req in requires_dist:
-            list_raw_requirements = req.split(";")
-            selector = ""
-            if len(list_raw_requirements) > 1:
-                list_extra = PyPi._get_extra_from_requires_dist(
-                    list_raw_requirements[1]
+        print(f"This is requires_dist: {requires_dist}")
+        if requires_dist:
+            for req in requires_dist:
+                list_raw_requirements = req.split(";")
+                selector = ""
+                if len(list_raw_requirements) > 1:
+                    list_extra = PyPi._get_extra_from_requires_dist(
+                        list_raw_requirements[1]
+                    )
+                    if PyPi.__skip_pypi_requirement(list_extra):
+                        continue
+
+                    result_selector = self._get_all_selectors_pypi(list_extra)
+
+                    if result_selector:
+                        selector = " ".join(result_selector)
+                        selector = f"  # [{selector}]"
+                    else:
+                        selector = ""
+                pkg_name, version = PyPi._get_name_version_from_requires_dist(
+                    list_raw_requirements[0]
                 )
-                if PyPi.__skip_pypi_requirement(list_extra):
-                    continue
-
-                result_selector = self._get_all_selectors_pypi(list_extra)
-
-                if result_selector:
-                    selector = " ".join(result_selector)
-                    selector = f"  # [{selector}]"
-                else:
-                    selector = ""
-            pkg_name, version = PyPi._get_name_version_from_requires_dist(
-                list_raw_requirements[0]
-            )
-            run_req.append(f"{pkg_name} {version}{selector}".strip())
-        return run_req
+                run_req.append(f"{pkg_name} {version}{selector}".strip())
+            return run_req
 
     def _get_all_selectors_pypi(self, list_extra: List) -> List:
         """Get the selectors looking for the pypi data
@@ -997,7 +1025,7 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _generic_py_ver_to(
-        pypi_metadata: dict, is_selector: bool = False, is_strict_cf: bool = False
+        metadata: dict, is_selector: bool = False, is_strict_cf: bool = False
     ) -> Optional[str]:
         """Generic function which abstract the parse of the requires_python
         present in the PyPi metadata. Basically it can generate the selectors
@@ -1007,13 +1035,20 @@ class PyPi(AbstractRecipeModel):
         :param is_selector:
         :return: return the constrained versions or the selectors
         """
-        if not pypi_metadata["requires_python"]:
+        try:
+            requires__python= metadata["requires_python"]
+        except KeyError as err:
+            metadata["requires_python"] = ">=3.6" #hardcoding it for testing
+
+        print(f'requires_python = {metadata["requires_python"]}')
+        if not metadata["requires_python"]:
             return None
         req_python = re.findall(
-            r"([><=!]+)\s*(\d+)(?:\.(\d+))?", pypi_metadata["requires_python"],
+            r"([><=!]+)\s*(\d+)(?:\.(\d+))?", metadata["requires_python"],
         )
         if not req_python:
             return None
+        print(req_python)
 
         py_ver_enabled = PyPi._get_py_version_available(
             req_python, is_strict_cf=is_strict_cf
