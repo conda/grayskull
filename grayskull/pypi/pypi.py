@@ -59,6 +59,16 @@ class PyPi(AbstractRecipeModel):
         self["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
 
     @staticmethod
+    def _generate_git_archive_tarball_url(git_url: str) -> str:
+        """This method takes a github repository url and returns the archive
+        tarball url for that repository.
+        :param git_url: github repository url
+        :return: github repository archive tarball url
+        """
+        archive_tarball_url = git_url + "/archive/main.tar.gz"
+        return archive_tarball_url
+
+    @staticmethod
     def _download_sdist_pkg(sdist_url: str, name: str, dest: str):
         """Download the sdist package
 
@@ -72,25 +82,21 @@ class PyPi(AbstractRecipeModel):
         )
         log.debug(f"Downloading {name} sdist - {sdist_url}")
         response = requests.get(sdist_url, allow_redirects=True, stream=True, timeout=5)
-        print(response.headers)
-        try:
+        if (response.headers["Content-length"]):
             total_size = int(response.headers["Content-length"])
-            with manage_progressbar(max_value=total_size, prefix=f"{name} ") as bar, open(dest, "wb") as pkg_file:
-                progress_val = 0
-                chunk_size = 512
-                for chunk_data in response.iter_content(chunk_size=chunk_size):
-                    if chunk_data:
-                        pkg_file.write(chunk_data)
-                        progress_val += chunk_size
-                        bar.update(min(progress_val, total_size))
-        except KeyError as error:
-            with open(dest, "wb") as pkg_file:
-                pkg_file.write(response.content)
+        else:
+            total_size = 0
 
-
-        #if not os.path.isdir(dest):
-
-
+        with manage_progressbar(max_value=total_size, prefix=f"{name} ") as bar, open(
+            dest, "wb"
+        ) as pkg_file:
+            progress_val = 0
+            chunk_size = 512
+            for chunk_data in response.iter_content(chunk_size=chunk_size):
+                if chunk_data:
+                    pkg_file.write(chunk_data)
+                    progress_val += chunk_size
+                    bar.update(min(progress_val, total_size))
 
     @lru_cache(maxsize=10)
     def _get_sdist_metadata(self, sdist_url: str, name: str) -> dict:
