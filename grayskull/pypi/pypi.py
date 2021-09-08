@@ -82,11 +82,7 @@ class PyPi(AbstractRecipeModel):
         )
         log.debug(f"Downloading {name} sdist - {sdist_url}")
         response = requests.get(sdist_url, allow_redirects=True, stream=True, timeout=5)
-        if (response.headers["Content-length"]):
-            total_size = int(response.headers["Content-length"])
-        else:
-            total_size = 0
-
+        total_size = response.headers.get("Content-length", 0)
         with manage_progressbar(max_value=total_size, prefix=f"{name} ") as bar, open(
             dest, "wb"
         ) as pkg_file:
@@ -102,13 +98,12 @@ class PyPi(AbstractRecipeModel):
     def _get_sdist_metadata(self, sdist_url: str, name: str) -> dict:
         """Method responsible to return the sdist metadata which is basically
         the metadata present in setup.py and setup.cfg
-
         :param sdist_url: URL to the sdist package
         :param name: name of the package
         :return: sdist metadata
         """
         temp_folder = mkdtemp(prefix=f"grayskull-{name}-")
-        pkg_name = sdist_url.split("/")[-3]
+        pkg_name = sdist_url.split("/")[-3] #hardcoded, changed -1 to -3
         print(f"This is the pkg_name as fed in the get_sdist_metadata method: {pkg_name}")
         path_pkg = os.path.join(temp_folder, pkg_name)
         print(f"This is the path_pkg: {path_pkg}")
@@ -567,10 +562,8 @@ class PyPi(AbstractRecipeModel):
         if self["package"]["version"].values:
             version = self.get_var_content(self["package"]["version"].values[0])
 
-        #print({name})
-
         if name.startswith(("http://", "https://")):
-            sdist_url = name + "/archive/main.tar.gz"
+            sdist_url = self._generate_git_archive_tarball_url(name)
             print(f"This is the sdist_url: {sdist_url}")
             name = name.split("/")[-1]
             print(f"This is the package name as extracted from url: {name}")
