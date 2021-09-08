@@ -823,7 +823,7 @@ class PyPi(AbstractRecipeModel):
 
         if metadata.get("setup_requires"):
             setup_requires = (
-                metadata.get("setup_requires") if metadata.get("setup_requires") else []
+                metadata.get("setup_requires", [])
             )
             host_req = PyPi._format_dependencies(setup_requires, name)
         else:
