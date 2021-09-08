@@ -59,6 +59,14 @@ class PyPi(AbstractRecipeModel):
         self["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
 
     @staticmethod
+    def _pkg_name_from_sdist_url(sdist_url: str):
+        if sdist_url.startswith(("http://", "https://")):
+            return sdist_url.split("/")[-3] + ".tar.gz"
+        else:
+            return sdist_url.split("/")[-1]
+
+
+    @staticmethod
     def _generate_git_archive_tarball_url(git_url: str) -> str:
         """This method takes a github repository url and returns the archive
         tarball url for that repository.
@@ -103,15 +111,15 @@ class PyPi(AbstractRecipeModel):
         :return: sdist metadata
         """
         temp_folder = mkdtemp(prefix=f"grayskull-{name}-")
-        pkg_name = sdist_url.split("/")[-3] #hardcoded, changed -1 to -3
+        pkg_name = self._pkg_name_from_sdist_url(sdist_url)
         print(f"This is the pkg_name as fed in the get_sdist_metadata method: {pkg_name}")
         path_pkg = os.path.join(temp_folder, pkg_name)
-        print(f"This is the path_pkg: {path_pkg}")
+        print(f"MAHEEEEEEEEEEEE This is the path_pkg: {path_pkg}")
         PyPi._download_sdist_pkg(sdist_url=sdist_url, name= name, dest=path_pkg)
         if self._download:
             self.files_to_copy.append(path_pkg)
         log.debug(f"Unpacking {path_pkg} to {temp_folder}")
-        shutil.unpack_archive(path_pkg, temp_folder, format="gztar")
+        shutil.unpack_archive(path_pkg, temp_folder)
         print_msg("Recovering information from setup.py")
         with PyPi._injection_distutils(temp_folder) as metadata:
             metadata["sdist_path"] = temp_folder
