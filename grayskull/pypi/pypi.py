@@ -90,7 +90,7 @@ class PyPi(AbstractRecipeModel):
         )
         log.debug(f"Downloading {name} sdist - {sdist_url}")
         response = requests.get(sdist_url, allow_redirects=True, stream=True, timeout=5)
-        total_size = response.headers.get("Content-length", 0)
+        total_size = int(response.headers.get("Content-length", 0))
         with manage_progressbar(max_value=total_size, prefix=f"{name} ") as bar, open(
             dest, "wb"
         ) as pkg_file:
@@ -624,7 +624,7 @@ class PyPi(AbstractRecipeModel):
             )
         print_requirements(all_requirements)
 
-        test_entry_points = PyPi._get_test_entry_points(metadata.get("entry_points"))
+        test_entry_points = PyPi._get_test_entry_points(metadata.get("entry_points", []))
         test_imports = PyPi._get_test_imports(metadata, metadata["name"]) #pypi_metadata changed to metadata
         metadata["version"] = "1.0.0" #hardcoded
         return {
@@ -821,7 +821,7 @@ class PyPi(AbstractRecipeModel):
         host_req = PyPi._format_dependencies(setup_requires, name)
 
         if not requires_dist and not host_req and not metadata.get("requires_python"):
-            return {"host": sorted(["python", "pip"]), "run": ["python"]}
+            return {"host":["python", "pip"], "run": ["python"]}
 
         print(f"This is run_req: {self._get_run_req_from_requires_dist(requires_dist)}")
         run_req = self._get_run_req_from_requires_dist(requires_dist)
@@ -944,29 +944,29 @@ class PyPi(AbstractRecipeModel):
         """
         run_req = []
         print(f"This is requires_dist: {requires_dist}")
-        if requires_dist:
-            for req in requires_dist:
-                list_raw_requirements = req.split(";")
-                selector = ""
-                if len(list_raw_requirements) > 1:
-                    list_extra = PyPi._get_extra_from_requires_dist(
-                        list_raw_requirements[1]
-                    )
-                    if PyPi.__skip_pypi_requirement(list_extra):
-                        continue
+        for req in requires_dist:
+            list_raw_requirements = req.split(";")
+            selector = ""
+            if len(list_raw_requirements) > 1:
+                list_extra = PyPi._get_extra_from_requires_dist(
+                    list_raw_requirements[1]
+                )
+                if PyPi.__skip_pypi_requirement(list_extra):
+                    continue
 
-                    result_selector = self._get_all_selectors_pypi(list_extra)
+                result_selector = self._get_all_selectors_pypi(list_extra)
 
-                    if result_selector:
-                        selector = " ".join(result_selector)
-                        selector = f"  # [{selector}]"
-                    else:
-                        selector = ""
+                if result_selector:
+                    selector = " ".join(result_selector)
+                    selector = f"  # [{selector}]"
+                else:
+                    selector = ""
+
                 pkg_name, version = PyPi._get_name_version_from_requires_dist(
                     list_raw_requirements[0]
                 )
                 run_req.append(f"{pkg_name} {version}{selector}".strip())
-            return run_req
+                return run_req
 
     def _get_all_selectors_pypi(self, list_extra: List) -> List:
         """Get the selectors looking for the pypi data
@@ -1033,14 +1033,12 @@ class PyPi(AbstractRecipeModel):
         :param is_selector:
         :return: return the constrained versions or the selectors
         """
-        try:
-            requires__python= metadata["requires_python"]
-        except KeyError as err:
-            metadata["requires_python"] = ">=3.6" #hardcoding it for testing
+        requires__python= metadata.get("requires_python", None)
 
-        print(f'requires_python = {metadata["requires_python"]}')
-        if not metadata["requires_python"]:
+        print(f'requires_python = {requires__python}')
+        if not requires__python:
             return None
+
         req_python = re.findall(
             r"([><=!]+)\s*(\d+)(?:\.(\d+))?", metadata["requires_python"],
         )
