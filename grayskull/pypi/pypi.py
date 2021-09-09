@@ -816,18 +816,9 @@ class PyPi(AbstractRecipeModel):
         :return: all requirement section
         """
         name = metadata["name"]
-        if metadata.get("requires_dist"):
-            requires_dist = PyPi._format_dependencies(metadata.get("requires_dist"), name)
-        else:
-            requires_dist = metadata.get("requires_dist")
-
-        if metadata.get("setup_requires"):
-            setup_requires = (
-                metadata.get("setup_requires", [])
-            )
-            host_req = PyPi._format_dependencies(setup_requires, name)
-        else:
-            host_req = metadata.get("setup_requires")
+        requires_dist = PyPi._format_dependencies(metadata.get("requires_dist", []), name)
+        setup_requires = metadata.get("setup_requires", [])
+        host_req = PyPi._format_dependencies(setup_requires, name)
 
         if not requires_dist and not host_req and not metadata.get("requires_python"):
             return {"host": sorted(["python", "pip"]), "run": ["python"]}
