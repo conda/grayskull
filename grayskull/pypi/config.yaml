@@ -1,3 +1,7 @@
+annoy:
+  conda_forge: python-annoy
+  import_name: annoy
+
 Boruta:
   conda_forge: boruta_py
   import_name: boruta
