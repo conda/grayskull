@@ -575,13 +575,14 @@ class PyPi(AbstractRecipeModel):
             print(f"This is the package name as extracted from url: {name}")
             sdist_metadata = self._get_sdist_metadata(sdist_url = sdist_url, name = name)
             pypi_metadata = {}
-            metadata = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
+
         else:
             pypi_metadata = self._get_pypi_metadata(name, version)
             sdist_metadata = self._get_sdist_metadata(
                 sdist_url=pypi_metadata["sdist_url"], name=name
             )
-            metadata = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
+
+        metadata = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
 
         log.debug(f"Data merged from pypi, setup.cfg and setup.py: {metadata}")
         if metadata.get("scripts") is not None:
@@ -607,13 +608,14 @@ class PyPi(AbstractRecipeModel):
         print_msg(f"License file: {Fore.LIGHTMAGENTA_EX}{license_file}")
 
         all_requirements = self._extract_requirements(metadata)
-        print(f'All_Requirements =  {all_requirements}')
-        all_requirements["host"] = solve_list_pkg_name(
-            all_requirements["host"], self.PYPI_CONFIG
-        )
-        all_requirements["run"] = solve_list_pkg_name(
-            all_requirements["run"], self.PYPI_CONFIG
-        )
+        if all_requirements.get("host"):
+            all_requirements["host"] = solve_list_pkg_name(
+                all_requirements["host"], self.PYPI_CONFIG
+            )
+        if all_requirements.get("run"):
+            all_requirements["run"] = solve_list_pkg_name(
+                all_requirements["run"], self.PYPI_CONFIG
+            )
         if self._is_strict_cf:
             all_requirements["host"] = clean_deps_for_conda_forge(
                 all_requirements["host"]
@@ -816,7 +818,6 @@ class PyPi(AbstractRecipeModel):
         """
         name = metadata["name"]
         requires_dist = PyPi._format_dependencies(metadata.get("requires_dist", []), name)
-        print(f"MAHE THIs IS {requires_dist}")
         setup_requires = metadata.get("setup_requires", [])
         host_req = PyPi._format_dependencies(setup_requires, name)
 
@@ -847,7 +848,6 @@ class PyPi(AbstractRecipeModel):
 
         if "pip" not in host_req:
             host_req += [f"python{limit_python}", "pip"]
-        print(run_req)
         #run_req = ['schema', 'PyYAML', 'beautifulsoup4', 'requests', 'click'] #hardcoded
         print(f"This is run_red after hardcoding: {run_req}")
         if run_req:
@@ -867,7 +867,7 @@ class PyPi(AbstractRecipeModel):
                         )
                     )
 
-        if result["run"]:
+        if result.get("run"):
             result["run"].update(PyPi.__rm_duplicated_deps(
                         sorted(map(lambda x: x.lower(), run_req))
                         )
@@ -892,8 +892,6 @@ class PyPi(AbstractRecipeModel):
         re_remove_space = re.compile(r"([<>!=]+)\s+")
         re_remove_tags = re.compile(r"\s*(\[.*\])", re.DOTALL)
         re_remove_comments = re.compile(r"\s+#.*", re.DOTALL)
-
-        print(f"Here are all the dependencies: {all_dependencies}")
 
         for req in all_dependencies:
             match_req = re_deps.match(req)
@@ -946,7 +944,7 @@ class PyPi(AbstractRecipeModel):
         :param requires_dist: List of requirements
         :return:
         """
-        run_req = {}
+        run_req = []
         print(f"This is requires_dist: {requires_dist}")
         for req in requires_dist:
             list_raw_requirements = req.split(";")
@@ -970,7 +968,8 @@ class PyPi(AbstractRecipeModel):
                     list_raw_requirements[0]
                 )
                 run_req.append(f"{pkg_name} {version}{selector}".strip())
-                return run_req
+
+        return run_req
 
     def _get_all_selectors_pypi(self, list_extra: List) -> List:
         """Get the selectors looking for the pypi data
