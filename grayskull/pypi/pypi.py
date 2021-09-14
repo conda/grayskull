@@ -118,6 +118,8 @@ class PyPi(AbstractRecipeModel):
         PyPi._download_sdist_pkg(sdist_url=sdist_url, name= name, dest=path_pkg)
         if self._download:
             self.files_to_copy.append(path_pkg)
+            print("sdist metadata downloadedAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+
         log.debug(f"Unpacking {path_pkg} to {temp_folder}")
         shutil.unpack_archive(path_pkg, temp_folder)
         print_msg("Recovering information from setup.py")
@@ -416,7 +418,6 @@ class PyPi(AbstractRecipeModel):
         :param sdist_metadata: Metadata which comes from the ``setup.py``
         :return: A new dict with the result of the merge
         """
-
         def get_val(key):
             return pypi_metadata.get(key) or sdist_metadata.get(key)
 
@@ -505,11 +506,8 @@ class PyPi(AbstractRecipeModel):
         :param sdist_metadata: sdist metadata
         :return: list with all requirements
         """
-        all_deps = []
-        if sdist_metadata.get("install_requires"):
-            all_deps += sdist_metadata.get("install_requires", [])
-        if pypi_metadata.get("requires_dist"):
-            all_deps += pypi_metadata.get("requires_dist", [])
+        all_deps = sdist_metadata.get("install_requires", [])
+        all_deps += pypi_metadata.get("requires_dist", [])
 
         re_search = re.compile(r";\s*extra")
         all_deps = [pkg for pkg in all_deps if not re_search.search(pkg)]
@@ -576,7 +574,8 @@ class PyPi(AbstractRecipeModel):
             name = name.split("/")[-1]
             print(f"This is the package name as extracted from url: {name}")
             sdist_metadata = self._get_sdist_metadata(sdist_url = sdist_url, name = name)
-            metadata = sdist_metadata
+            pypi_metadata = {}
+            metadata = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
         else:
             pypi_metadata = self._get_pypi_metadata(name, version)
             sdist_metadata = self._get_sdist_metadata(
@@ -817,13 +816,14 @@ class PyPi(AbstractRecipeModel):
         """
         name = metadata["name"]
         requires_dist = PyPi._format_dependencies(metadata.get("requires_dist", []), name)
+        print(f"MAHE THIs IS {requires_dist}")
         setup_requires = metadata.get("setup_requires", [])
         host_req = PyPi._format_dependencies(setup_requires, name)
 
         if not requires_dist and not host_req and not metadata.get("requires_python"):
             return {"host":["python", "pip"], "run": ["python"]}
 
-        print(f"This is run_req: {self._get_run_req_from_requires_dist(requires_dist)}")
+        print(f"This is run_req from requires_dist: {self._get_run_req_from_requires_dist(requires_dist)}")
         run_req = self._get_run_req_from_requires_dist(requires_dist)
 
         build_req = [f"<{{ compiler('{c}') }}}}" for c in metadata.get("compilers", [])]
@@ -848,9 +848,11 @@ class PyPi(AbstractRecipeModel):
         if "pip" not in host_req:
             host_req += [f"python{limit_python}", "pip"]
         print(run_req)
-        run_req = ['schema', 'PyYAML', 'beautifulsoup4', 'requests', 'click'] #hardcoded
+        #run_req = ['schema', 'PyYAML', 'beautifulsoup4', 'requests', 'click'] #hardcoded
         print(f"This is run_red after hardcoding: {run_req}")
-        run_req.insert(0, f"python{limit_python}")
+        if run_req:
+            run_req.insert(0, f"python{limit_python}")
+
         result = {}
         if build_req:
             result = {
@@ -859,16 +861,18 @@ class PyPi(AbstractRecipeModel):
                 )
             }
 
-        result.update(
-            {
-                "host": PyPi.__rm_duplicated_deps(
-                    sorted(map(lambda x: x.lower(), host_req))
-                ),
-                "run": PyPi.__rm_duplicated_deps(
-                    sorted(map(lambda x: x.lower(), run_req))
-                ),
-            }
-        )
+        if result.get("host"):
+            result["host"].update(PyPi.__rm_duplicated_deps(
+                        sorted(map(lambda x: x.lower(), host_req))
+                        )
+                    )
+
+        if result["run"]:
+            result["run"].update(PyPi.__rm_duplicated_deps(
+                        sorted(map(lambda x: x.lower(), run_req))
+                        )
+                    )
+
         self._update_requirements_with_pin(result)
         return result
 
@@ -942,7 +946,7 @@ class PyPi(AbstractRecipeModel):
         :param requires_dist: List of requirements
         :return:
         """
-        run_req = []
+        run_req = {}
         print(f"This is requires_dist: {requires_dist}")
         for req in requires_dist:
             list_raw_requirements = req.split(";")
