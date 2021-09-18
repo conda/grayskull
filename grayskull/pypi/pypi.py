@@ -112,13 +112,10 @@ class PyPi(AbstractRecipeModel):
         """
         temp_folder = mkdtemp(prefix=f"grayskull-{name}-")
         pkg_name = self._pkg_name_from_sdist_url(sdist_url)
-        print(f"This is the pkg_name as fed in the get_sdist_metadata method: {pkg_name}")
         path_pkg = os.path.join(temp_folder, pkg_name)
-        print(f"MAHEEEEEEEEEEEE This is the path_pkg: {path_pkg}")
         PyPi._download_sdist_pkg(sdist_url=sdist_url, name= name, dest=path_pkg)
         if self._download:
             self.files_to_copy.append(path_pkg)
-            print("sdist metadata downloadedAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
 
         log.debug(f"Unpacking {path_pkg} to {temp_folder}")
         shutil.unpack_archive(path_pkg, temp_folder)
@@ -570,9 +567,7 @@ class PyPi(AbstractRecipeModel):
 
         if name.startswith(("http://", "https://")):
             sdist_url = self._generate_git_archive_tarball_url(name)
-            print(f"This is the sdist_url: {sdist_url}")
             name = name.split("/")[-1]
-            print(f"This is the package name as extracted from url: {name}")
             sdist_metadata = self._get_sdist_metadata(sdist_url = sdist_url, name = name)
             pypi_metadata = {}
 
@@ -824,7 +819,6 @@ class PyPi(AbstractRecipeModel):
         if not requires_dist and not host_req and not metadata.get("requires_python"):
             return {"host":["python", "pip"], "run": ["python"]}
 
-        print(f"This is run_req from requires_dist: {self._get_run_req_from_requires_dist(requires_dist)}")
         run_req = self._get_run_req_from_requires_dist(requires_dist)
 
         build_req = [f"<{{ compiler('{c}') }}}}" for c in metadata.get("compilers", [])]
@@ -849,7 +843,6 @@ class PyPi(AbstractRecipeModel):
         if "pip" not in host_req:
             host_req += [f"python{limit_python}", "pip"]
         #run_req = ['schema', 'PyYAML', 'beautifulsoup4', 'requests', 'click'] #hardcoded
-        print(f"This is run_red after hardcoding: {run_req}")
         if run_req:
             run_req.insert(0, f"python{limit_python}")
 
@@ -945,7 +938,6 @@ class PyPi(AbstractRecipeModel):
         :return:
         """
         run_req = []
-        print(f"This is requires_dist: {requires_dist}")
         for req in requires_dist:
             list_raw_requirements = req.split(";")
             selector = ""
@@ -1038,7 +1030,6 @@ class PyPi(AbstractRecipeModel):
         """
         requires__python= metadata.get("requires_python", None)
 
-        print(f'requires_python = {requires__python}')
         if not requires__python:
             return None
 
@@ -1047,7 +1038,6 @@ class PyPi(AbstractRecipeModel):
         )
         if not req_python:
             return None
-        print(req_python)
 
         py_ver_enabled = PyPi._get_py_version_available(
             req_python, is_strict_cf=is_strict_cf
