@@ -1,3 +1,4 @@
+from grayskull.utils import origin_is_github
 import logging
 import os
 import re
@@ -181,7 +182,7 @@ class AbstractRecipeModel(ABC):
         print(f"This is the folder_path: {folder_path}")
         package_name = self["package"]["name"].values[0]
         print(f"This is the package name before split: {package_name}")
-        if f"{package_name}".startswith(("http://", "https://")):
+        if origin_is_github(package_name):
             package_name = package_name.split("/")[-1]
 
         print(f"This is the package name: {package_name}")

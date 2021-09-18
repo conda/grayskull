@@ -28,7 +28,7 @@ from grayskull.cli.stdout import (
     progressbar_with_status,
 )
 from grayskull.license.discovery import ShortLicense, search_license_file
-from grayskull.utils import get_vendored_dependencies
+from grayskull.utils import get_vendored_dependencies, origin_is_github
 
 log = logging.getLogger(__name__)
 PyVer = namedtuple("PyVer", ["major", "minor"])
@@ -60,7 +60,7 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _pkg_name_from_sdist_url(sdist_url: str):
-        if sdist_url.startswith(("http://", "https://")):
+        if origin_is_github(sdist_url):
             return sdist_url.split("/")[-3] + ".tar.gz"
         else:
             return sdist_url.split("/")[-1]

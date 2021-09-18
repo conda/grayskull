@@ -64,3 +64,7 @@ def get_local_modules(sdist_folder: str) -> List:
             continue
         result.append(os.path.splitext(py_file)[0])
     return result
+
+
+def origin_is_github(name_or_url: str) -> bool:
+    return name_or_url.startswith(("http://", "https://"))
