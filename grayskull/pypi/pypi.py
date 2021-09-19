@@ -116,7 +116,6 @@ class PyPi(AbstractRecipeModel):
         PyPi._download_sdist_pkg(sdist_url=sdist_url, name= name, dest=path_pkg)
         if self._download:
             self.files_to_copy.append(path_pkg)
-
         log.debug(f"Unpacking {path_pkg} to {temp_folder}")
         shutil.unpack_archive(path_pkg, temp_folder)
         print_msg("Recovering information from setup.py")
@@ -564,13 +563,11 @@ class PyPi(AbstractRecipeModel):
         version = ""
         if self["package"]["version"].values:
             version = self.get_var_content(self["package"]["version"].values[0])
-
         if name.startswith(("http://", "https://")):
             sdist_url = self._generate_git_archive_tarball_url(name)
             name = name.split("/")[-1]
             sdist_metadata = self._get_sdist_metadata(sdist_url = sdist_url, name = name)
             pypi_metadata = {}
-
         else:
             pypi_metadata = self._get_pypi_metadata(name, version)
             sdist_metadata = self._get_sdist_metadata(
@@ -951,10 +948,10 @@ class PyPi(AbstractRecipeModel):
                 else:
                     selector = ""
 
-                pkg_name, version = PyPi._get_name_version_from_requires_dist(
-                    list_raw_requirements[0]
-                )
-                run_req.append(f"{pkg_name} {version}{selector}".strip())
+            pkg_name, version = PyPi._get_name_version_from_requires_dist(
+                list_raw_requirements[0]
+            )
+            run_req.append(f"{pkg_name} {version}{selector}".strip())
 
         return run_req
 
@@ -1023,9 +1020,7 @@ class PyPi(AbstractRecipeModel):
         :param is_selector:
         :return: return the constrained versions or the selectors
         """
-        requires__python= metadata.get("requires_python", None)
-
-        if not requires__python:
+        if not metadata.get("requires_python"):
             return None
 
         req_python = re.findall(
