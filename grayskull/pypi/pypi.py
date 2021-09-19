@@ -852,19 +852,16 @@ class PyPi(AbstractRecipeModel):
                     sorted(map(lambda x: x.lower(), build_req))
                 )
             }
-
         if result.get("host"):
             result["host"].update(PyPi.__rm_duplicated_deps(
                         sorted(map(lambda x: x.lower(), host_req))
                         )
                     )
-
         if result.get("run"):
             result["run"].update(PyPi.__rm_duplicated_deps(
                         sorted(map(lambda x: x.lower(), run_req))
                         )
                     )
-
         self._update_requirements_with_pin(result)
         return result
 
