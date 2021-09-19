@@ -578,7 +578,6 @@ class PyPi(AbstractRecipeModel):
             )
 
         metadata = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
-
         log.debug(f"Data merged from pypi, setup.cfg and setup.py: {metadata}")
         if metadata.get("scripts") is not None:
             self._is_arch = True
