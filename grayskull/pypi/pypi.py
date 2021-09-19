@@ -83,7 +83,6 @@ class PyPi(AbstractRecipeModel):
         :param sdist_url: sdist url
         :param dest: Folder were the method will download the sdist
         """
-        #name = sdist_url.split("/")[-1]
         print_msg(
             f"{Fore.GREEN}Starting the download of the sdist package"
             f" {Fore.BLUE}{Style.BRIGHT}{name}"
