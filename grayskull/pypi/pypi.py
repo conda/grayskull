@@ -864,6 +864,7 @@ class PyPi(AbstractRecipeModel):
                         sorted(map(lambda x: x.lower(), run_req))
                         )
                     )
+
         self._update_requirements_with_pin(result)
         return result
 
@@ -953,10 +954,12 @@ class PyPi(AbstractRecipeModel):
                     selector = f"  # [{selector}]"
                 else:
                     selector = ""
+
                 pkg_name, version = PyPi._get_name_version_from_requires_dist(
                     list_raw_requirements[0]
                 )
                 run_req.append(f"{pkg_name} {version}{selector}".strip())
+
         return run_req
 
     def _get_all_selectors_pypi(self, list_extra: List) -> List:
