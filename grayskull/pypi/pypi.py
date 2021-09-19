@@ -65,7 +65,6 @@ class PyPi(AbstractRecipeModel):
         else:
             return sdist_url.split("/")[-1]
 
-
     @staticmethod
     def _generate_git_archive_tarball_url(git_url: str) -> str:
         """This method takes a github repository url and returns the archive
@@ -414,6 +413,7 @@ class PyPi(AbstractRecipeModel):
         :param sdist_metadata: Metadata which comes from the ``setup.py``
         :return: A new dict with the result of the merge
         """
+
         def get_val(key):
             return pypi_metadata.get(key) or sdist_metadata.get(key)
 
@@ -573,7 +573,6 @@ class PyPi(AbstractRecipeModel):
             sdist_metadata = self._get_sdist_metadata(
                 sdist_url=pypi_metadata["sdist_url"], name=name
             )
-
         metadata = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
         log.debug(f"Data merged from pypi, setup.cfg and setup.py: {metadata}")
         if metadata.get("scripts") is not None:
@@ -947,12 +946,10 @@ class PyPi(AbstractRecipeModel):
                     selector = f"  # [{selector}]"
                 else:
                     selector = ""
-
             pkg_name, version = PyPi._get_name_version_from_requires_dist(
                 list_raw_requirements[0]
             )
             run_req.append(f"{pkg_name} {version}{selector}".strip())
-
         return run_req
 
     def _get_all_selectors_pypi(self, list_extra: List) -> List:
@@ -1022,7 +1019,6 @@ class PyPi(AbstractRecipeModel):
         """
         if not metadata.get("requires_python"):
             return None
-
         req_python = re.findall(
             r"([><=!]+)\s*(\d+)(?:\.(\d+))?", metadata["requires_python"],
         )
