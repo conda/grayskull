@@ -179,9 +179,7 @@ class AbstractRecipeModel(ABC):
 
         :param folder_path: Path to the folder
         """
-        print(f"This is the folder_path: {folder_path}")
         package_name = self["package"]["name"].values[0]
-        print(f"This is the package name before split: {package_name}")
         if origin_is_github(package_name):
             package_name = package_name.split("/")[-1]
 
