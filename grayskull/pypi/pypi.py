@@ -60,6 +60,8 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _pkg_name_from_sdist_url(sdist_url: str):
+        """This method extracts and returns the name of the package from the sdist url.
+        """
         if origin_is_github(sdist_url):
             return sdist_url.split("/")[-3] + ".tar.gz"
         else:
@@ -112,7 +114,7 @@ class PyPi(AbstractRecipeModel):
         pkg_name = self._pkg_name_from_sdist_url(sdist_url)
         path_pkg = os.path.join(temp_folder, pkg_name)
 
-        PyPi._download_sdist_pkg(sdist_url=sdist_url, name= name, dest=path_pkg)
+        PyPi._download_sdist_pkg(sdist_url=sdist_url, name=name, dest=path_pkg)
         if self._download:
             self.files_to_copy.append(path_pkg)
         log.debug(f"Unpacking {path_pkg} to {temp_folder}")
@@ -563,10 +565,10 @@ class PyPi(AbstractRecipeModel):
         version = ""
         if self["package"]["version"].values:
             version = self.get_var_content(self["package"]["version"].values[0])
-        if name.startswith(("http://", "https://")):
+        if origin_is_github(name):
             sdist_url = self._generate_git_archive_tarball_url(name)
             name = name.split("/")[-1]
-            sdist_metadata = self._get_sdist_metadata(sdist_url = sdist_url, name = name)
+            sdist_metadata = self._get_sdist_metadata(sdist_url=sdist_url, name=name)
             pypi_metadata = {}
         else:
             pypi_metadata = self._get_pypi_metadata(name, version)
@@ -837,9 +839,7 @@ class PyPi(AbstractRecipeModel):
 
         if "pip" not in host_req:
             host_req += [f"python{limit_python}", "pip"]
-        if run_req:
-            run_req.insert(0, f"python{limit_python}")
-
+        run_req.insert(0, f"python{limit_python}")
         result = {}
         if build_req:
             result = {
