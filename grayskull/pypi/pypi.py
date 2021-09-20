@@ -72,7 +72,7 @@ class PyPi(AbstractRecipeModel):
         :param git_url: github repository url
         :return: github repository archive tarball url
         """
-        archive_tarball_url = git_url + "/archive/main.tar.gz"
+        archive_tarball_url = git_url + f"/archive/{git_ref}.tar.gz"
         return archive_tarball_url
 
     @staticmethod
