@@ -66,7 +66,7 @@ class PyPi(AbstractRecipeModel):
             return sdist_url.split("/")[-1]
 
     @staticmethod
-    def _generate_git_archive_tarball_url(git_url: str) -> str:
+    def _generate_git_archive_tarball_url(git_url: str, git_ref: str = "main") -> str:
         """This method takes a github repository url and returns the archive
         tarball url for that repository.
         :param git_url: github repository url
