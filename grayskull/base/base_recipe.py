@@ -179,24 +179,9 @@ class AbstractRecipeModel(ABC):
 
         :param folder_path: Path to the folder
         """
-        package_name = self["package"]["name"].values[0]
-        if origin_is_github(package_name):
-            package_name = package_name.split("/")[-1]
-
-        print(f"This is the package name: {package_name}")
-
-        package_name = "grayskull" #hardcoded
-
-        #recipe_dir = Path(folder_path) / self.get_var_content(
-        #    package_name
-        #)
-
-        """The above three lines of code have been commented out during testing"""
-
-        recipe_dir = Path(folder_path) / package_name #hardcoded
-        print(self.get_var_content(
+        recipe_dir = Path(folder_path) / self.get_var_content(
             self["package"]["name"].values[0]
-        ))
+        )
         logging.debug(f"Generating recipe on folder: {recipe_dir}")
         if not recipe_dir.is_dir():
             recipe_dir.mkdir()
