@@ -809,14 +809,19 @@ class PyPi(AbstractRecipeModel):
         :return: all requirement section
         """
         name = metadata["name"]
+        print(f"This is the name {name}")
         requires_dist = PyPi._format_dependencies(metadata.get("requires_dist", []), name)
+        print(f"This is requires_dist : {requires_dist}")
         setup_requires = metadata.get("setup_requires", [])
+        print(f"This is setup_requires: {setup_requires}")
         host_req = PyPi._format_dependencies(setup_requires, name)
+        print(f"This is host_req: {host_req}")
 
         if not requires_dist and not host_req and not metadata.get("requires_python"):
             return {"host":["python", "pip"], "run": ["python"]}
 
         run_req = self._get_run_req_from_requires_dist(requires_dist)
+        print(f"This is run_req: {run_req}")
 
         build_req = [f"<{{ compiler('{c}') }}}}" for c in metadata.get("compilers", [])]
         if build_req:
