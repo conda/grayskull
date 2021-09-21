@@ -179,9 +179,13 @@ class AbstractRecipeModel(ABC):
 
         :param folder_path: Path to the folder
         """
-        recipe_dir = Path(folder_path) / self.get_var_content(
+        pkg_name = self.get_var_content(
             self["package"]["name"].values[0]
         )
+        if origin_is_github(pkg_name):
+            pkg_name = pkg_name.split("/")[-1]
+
+        recipe_dir = Path(folder_path) / pkg_name
         logging.debug(f"Generating recipe on folder: {recipe_dir}")
         if not recipe_dir.is_dir():
             recipe_dir.mkdir()
