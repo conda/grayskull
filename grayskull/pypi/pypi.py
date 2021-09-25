@@ -74,6 +74,7 @@ class PyPi(AbstractRecipeModel):
         :param git_url: github repository url
         :return: github repository archive tarball url
         """
+
         archive_tarball_url = git_url + f"/archive/{git_ref}.tar.gz"
         return archive_tarball_url
 
@@ -619,7 +620,6 @@ class PyPi(AbstractRecipeModel):
 
         test_entry_points = PyPi._get_test_entry_points(metadata.get("entry_points", []))
         test_imports = PyPi._get_test_imports(metadata, metadata["name"]) #pypi_metadata changed to metadata
-        metadata["version"] = "1.0.0" #hardcoded
         return {
             "package": {"name": name, "version": metadata["version"]},
             "build": {"entry_points": metadata.get("entry_points")},
