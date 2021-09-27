@@ -578,10 +578,10 @@ class PyPi(AbstractRecipeModel):
             version = self.get_var_content(self["package"]["version"].values[0])
         if origin_is_github(name):
             sdist_url = self._generate_git_archive_tarball_url(self, name)
-            name1=name
+            url=name
             name = name.split("/")[-1]
             sdist_metadata = self._get_sdist_metadata(sdist_url=sdist_url, name=name)
-            sdist_metadata["version"] = self._get_latest_version_of_github_repo(name1)
+            sdist_metadata["version"] = self._get_latest_version_of_github_repo(url)
             pypi_metadata = {}
         else:
             pypi_metadata = self._get_pypi_metadata(name, version)
