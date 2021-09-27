@@ -581,7 +581,10 @@ class PyPi(AbstractRecipeModel):
             url=name
             name = name.split("/")[-1]
             sdist_metadata = self._get_sdist_metadata(sdist_url=sdist_url, name=name)
-            sdist_metadata["version"] = self._get_latest_version_of_github_repo(url)
+            version= self._get_latest_version_of_github_repo(url)
+            if version.startswith("v"):
+                version = version[1:]
+            sdist_metadata["version"] = version
             pypi_metadata = {}
         else:
             pypi_metadata = self._get_pypi_metadata(name, version)
@@ -617,6 +620,7 @@ class PyPi(AbstractRecipeModel):
             all_requirements["host"] = solve_list_pkg_name(
                 all_requirements["host"], self.PYPI_CONFIG
             )
+            print(f"All requirment[host] MAHE: {all_requirements}")
         if all_requirements.get("run"):
             all_requirements["run"] = solve_list_pkg_name(
                 all_requirements["run"], self.PYPI_CONFIG
