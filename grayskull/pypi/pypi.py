@@ -35,7 +35,6 @@ PyVer = namedtuple("PyVer", ["major", "minor"])
 SUPPORTED_PY = sorted([PyVer(2, 7), PyVer(3, 6), PyVer(3, 7), PyVer(3, 8)])
 CONDA_FORGE_STRICT = sorted([PyVer(3, 6), PyVer(3, 7), PyVer(3, 8)])
 
-
 class PyPi(AbstractRecipeModel):
     URL_PYPI_METADATA = "https://pypi.org/pypi/{pkg_name}/json"
     PKG_NEEDS_C_COMPILER = ("cython",)
@@ -59,6 +58,16 @@ class PyPi(AbstractRecipeModel):
         self["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
 
     @staticmethod
+    def _get_latest_version_of_github_repo(git_url: str) -> str:
+        """get the latest version of the github repository using github api
+        """
+        latest_version_api_url = git_url.replace("www.github.com", "api.github.com/repos", 1) + "/releases/latest"
+        response = requests.get(latest_version_api_url)
+        data = response.json()
+        version = data["name"]
+        return version
+
+    @staticmethod
     def _pkg_name_from_sdist_url(sdist_url: str):
         """This method extracts and returns the name of the package from the sdist url.
         """
@@ -68,14 +77,14 @@ class PyPi(AbstractRecipeModel):
             return sdist_url.split("/")[-1]
 
     @staticmethod
-    def _generate_git_archive_tarball_url(git_url: str, git_ref: str = "main") -> str:
+    def _generate_git_archive_tarball_url(self, git_url: str) -> str:
         """This method takes a github repository url and returns the archive
         tarball url for that repository.
         :param git_url: github repository url
         :return: github repository archive tarball url
         """
-
-        archive_tarball_url = git_url + f"/archive/{git_ref}.tar.gz"
+        version = self._get_latest_version_of_github_repo(git_url)
+        archive_tarball_url = git_url + f"/archive/{version}.tar.gz"
         return archive_tarball_url
 
     @staticmethod
@@ -428,7 +437,8 @@ class PyPi(AbstractRecipeModel):
             "author": get_val("author"),
             "name": get_val("name"),
             "version": get_val("version"),
-            "source": pypi_metadata.get("source"),
+            #"source": pypi_metadata.get("source"),
+            "source": get_val("source"),
             "packages": all_packages_names,
             "url": get_val("url"),
             "classifiers": get_val("classifiers"),
@@ -567,9 +577,11 @@ class PyPi(AbstractRecipeModel):
         if self["package"]["version"].values:
             version = self.get_var_content(self["package"]["version"].values[0])
         if origin_is_github(name):
-            sdist_url = self._generate_git_archive_tarball_url(name)
+            sdist_url = self._generate_git_archive_tarball_url(self, name)
+            name1=name
             name = name.split("/")[-1]
             sdist_metadata = self._get_sdist_metadata(sdist_url=sdist_url, name=name)
+            sdist_metadata["version"] = self._get_latest_version_of_github_repo(name1)
             pypi_metadata = {}
         else:
             pypi_metadata = self._get_pypi_metadata(name, version)
@@ -617,7 +629,6 @@ class PyPi(AbstractRecipeModel):
                 all_requirements["run"]
             )
         print_requirements(all_requirements)
-
         test_entry_points = PyPi._get_test_entry_points(metadata.get("entry_points", []))
         test_imports = PyPi._get_test_imports(metadata, metadata["name"]) #pypi_metadata changed to metadata
         return {

@@ -4,6 +4,7 @@ from functools import lru_cache
 from glob import glob
 from typing import List
 
+flag: bool
 
 @lru_cache(maxsize=10)
 def get_std_modules() -> List:
@@ -67,4 +68,5 @@ def get_local_modules(sdist_folder: str) -> List:
 
 
 def origin_is_github(name_or_url: str) -> bool:
-    return f"{name_or_url}".startswith(("http://", "https://"))
+    flag = f"{name_or_url}".startswith(("http://", "https://"))
+    return flag
