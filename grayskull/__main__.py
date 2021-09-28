@@ -111,11 +111,18 @@ def main(args=None):
 
     for pkg_name in args.pypi_packages:
         logging.debug(f"Starting grayskull for pkg: {pkg_name}")
-        print_msg(
-            f"{Fore.GREEN}\n\n"
-            f"#### Initializing recipe for "
-            f"{Fore.BLUE}{pkg_name} (pypi) {Fore.GREEN}####\n"
-        )
+        if pkg_name.startswith(("http://", "https://")):
+            print_msg(
+                f"{Fore.GREEN}\n\n"
+                f"#### Initializing recipe for "
+                f"{Fore.BLUE}{pkg_name} {Fore.GREEN}####\n"
+            )
+        else:
+            print_msg(
+                f"{Fore.GREEN}\n\n"
+                f"#### Initializing recipe for "
+                f"{Fore.BLUE}{pkg_name} (pypi) {Fore.GREEN}####\n"
+            )
         pkg_name, pkg_version = parse_pkg_name_version(pkg_name)
         try:
             recipe = GrayskullFactory.create_recipe(

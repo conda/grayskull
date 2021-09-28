@@ -89,7 +89,6 @@ class PyPi(AbstractRecipeModel):
         :param git_url: github repository url
         :return: github repository archive tarball url
         """
-        # version = self._get_latest_version_of_github_repo(git_url)
         archive_tarball_url = f"{git_url}/archive/{version}.tar.gz"
         return archive_tarball_url
 
@@ -451,7 +450,6 @@ class PyPi(AbstractRecipeModel):
             "author": get_val("author"),
             "name": get_val("name"),
             "version": get_val("version"),
-            # "source": pypi_metadata.get("source"),
             "source": get_val("source"),
             "packages": all_packages_names,
             "url": get_val("url"),
@@ -595,7 +593,6 @@ class PyPi(AbstractRecipeModel):
             url = name
             name = name.split("/")[-1]
             version = self._get_latest_version_of_github_repo(url)
-            # archive_url = f"{url}/archive/{version}.tar.gz"
             archive_url = self._generate_git_archive_tarball_url(
                 self, git_url=url, version=version
             )
@@ -640,7 +637,6 @@ class PyPi(AbstractRecipeModel):
             all_requirements["host"] = solve_list_pkg_name(
                 all_requirements["host"], self.PYPI_CONFIG
             )
-            print(f"All requirment[host] MAHE: {all_requirements}")
         if all_requirements.get("run"):
             all_requirements["run"] = solve_list_pkg_name(
                 all_requirements["run"], self.PYPI_CONFIG
@@ -848,22 +844,15 @@ class PyPi(AbstractRecipeModel):
         :return: all requirement section
         """
         name = metadata["name"]
-        print(f"This is the name {name}")
         requires_dist = PyPi._format_dependencies(
             metadata.get("requires_dist", []), name
         )
-        print(f"This is requires_dist : {requires_dist}")
         setup_requires = metadata.get("setup_requires", [])
-        print(f"This is setup_requires: {setup_requires}")
         host_req = PyPi._format_dependencies(setup_requires, name)
-        print(f"This is host_req: {host_req}")
-
         if not requires_dist and not host_req and not metadata.get("requires_python"):
             return {"host": ["python", "pip"], "run": ["python"]}
 
         run_req = self._get_run_req_from_requires_dist(requires_dist)
-        print(f"This is run_req: {run_req}")
-
         build_req = [f"<{{ compiler('{c}') }}}}" for c in metadata.get("compilers", [])]
         if build_req:
             self._is_arch = True
