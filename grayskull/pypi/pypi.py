@@ -90,7 +90,7 @@ class PyPi(AbstractRecipeModel):
         :return: github repository archive tarball url
         """
         # version = self._get_latest_version_of_github_repo(git_url)
-        archive_tarball_url = git_url + f"/archive/{version}.tar.gz"
+        archive_tarball_url = f"{git_url}/archive/{version}.tar.gz"
         return archive_tarball_url
 
     @staticmethod
