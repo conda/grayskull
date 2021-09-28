@@ -1,10 +1,12 @@
 import ast
+import hashlib
 import os
 from functools import lru_cache
 from glob import glob
 from typing import List
 
 flag: bool
+
 
 @lru_cache(maxsize=10)
 def get_std_modules() -> List:
@@ -70,3 +72,11 @@ def get_local_modules(sdist_folder: str) -> List:
 def origin_is_github(name_or_url: str) -> bool:
     flag = f"{name_or_url}".startswith(("http://", "https://"))
     return flag
+
+
+def sha256_checksum(filename, block_size=65536):
+    sha256 = hashlib.sha256()
+    with open(filename, "rb") as f:
+        for block in iter(lambda: f.read(block_size), b""):
+            sha256.update(block)
+    return sha256.hexdigest()
