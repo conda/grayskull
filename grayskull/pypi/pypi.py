@@ -94,7 +94,7 @@ class PyPi(AbstractRecipeModel):
         return archive_tarball_url
 
     @staticmethod
-    def _download_sdist_pkg(sdist_url: str, name: str, dest: str):
+    def _download_sdist_pkg(sdist_url: str, dest: str, name: str = None):
         """Download the sdist package
 
         :param sdist_url: sdist url
