@@ -132,7 +132,7 @@ class PyPi(AbstractRecipeModel):
         pkg_name = self._pkg_name_from_sdist_url(sdist_url)
         path_pkg = os.path.join(temp_folder, pkg_name)
 
-        PyPi._download_sdist_pkg(sdist_url=sdist_url, name=name, dest=path_pkg)
+        PyPi._download_sdist_pkg(sdist_url=sdist_url, dest=path_pkg, name=name)
         if self._download:
             self.files_to_copy.append(path_pkg)
         log.debug(f"Unpacking {path_pkg} to {temp_folder}")
