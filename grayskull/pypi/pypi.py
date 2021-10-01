@@ -527,8 +527,8 @@ class PyPi(AbstractRecipeModel):
         :param sdist_metadata: sdist metadata
         :return: list with all requirements
         """
-        all_deps = sdist_metadata.get("install_requires", [])
-        all_deps += pypi_metadata.get("requires_dist", [])
+        all_deps = sdist_metadata.get("install_requires") or []
+        all_deps += pypi_metadata.get("requires_dist") or []
 
         re_search = re.compile(r";\s*extra")
         all_deps = [pkg for pkg in all_deps if not re_search.search(pkg)]
