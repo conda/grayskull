@@ -104,7 +104,9 @@ class PyPi(AbstractRecipeModel):
             f" {Fore.BLUE}{Style.BRIGHT}{name}"
         )
         log.debug(f"Downloading {name} sdist - {sdist_url}")
+        print(sdist_url)
         response = requests.get(sdist_url, allow_redirects=True, stream=True, timeout=5)
+        response.raise_for_status()
         total_size = int(response.headers.get("Content-length", 0))
         with manage_progressbar(max_value=total_size, prefix=f"{name} ") as bar, open(
             dest, "wb"
@@ -135,6 +137,7 @@ class PyPi(AbstractRecipeModel):
         if self._download:
             self.files_to_copy.append(path_pkg)
         log.debug(f"Unpacking {path_pkg} to {temp_folder}")
+        print(f"Unpacking {path_pkg} to {temp_folder}")
         shutil.unpack_archive(path_pkg, temp_folder)
         print_msg("Recovering information from setup.py")
         with PyPi._injection_distutils(temp_folder) as metadata:
@@ -743,6 +746,8 @@ class PyPi(AbstractRecipeModel):
             url_pypi = PyPi.URL_PYPI_METADATA.format(pkg_name=name)
 
         metadata = requests.get(url=url_pypi, timeout=5)
+        print(url_pypi)
+        metadata.raise_for_status()
         if metadata.status_code != 200:
             raise requests.HTTPError(
                 f"It was not possible to recover PyPi metadata for {name}.\n"
@@ -848,7 +853,7 @@ class PyPi(AbstractRecipeModel):
             metadata.get("requires_dist", []), name
         )
         setup_requires = metadata.get("setup_requires", [])
-        host_req = PyPi._format_dependencies(setup_requires, name)
+        host_req = PyPi._format_dependencies(setup_requires or [], name)
         if not requires_dist and not host_req and not metadata.get("requires_python"):
             return {"host": ["python", "pip"], "run": ["python"]}
 
@@ -912,7 +917,7 @@ class PyPi(AbstractRecipeModel):
         re_remove_space = re.compile(r"([<>!=]+)\s+")
         re_remove_tags = re.compile(r"\s*(\[.*\])", re.DOTALL)
         re_remove_comments = re.compile(r"\s+#.*", re.DOTALL)
-
+        print(f"MAHEEEEEEEEE {all_dependencies}")
         for req in all_dependencies:
             match_req = re_deps.match(req)
             deps_name = req

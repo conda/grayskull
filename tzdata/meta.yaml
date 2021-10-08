@@ -1,0 +1,42 @@
+{% set name = "tzdata" %}
+{% set version = "2021.2.post0" %}
+
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/tzdata-{{ version }}.tar.gz
+  sha256: 99d30a01967bb8d7868c03dc924862b1ae8a0e649a322a1107bacc1723c430b9
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - pip
+    - python
+  run:
+    - python
+
+test:
+  imports:
+    - tzdata
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/python/tzdata
+  summary: Provider of IANA time zone data
+  dev_url: https://github.com/python/tzdata
+  license: Apache-2.0
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - ForgottenProgramme

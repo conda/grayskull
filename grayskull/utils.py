@@ -70,8 +70,7 @@ def get_local_modules(sdist_folder: str) -> List:
 
 
 def origin_is_github(name_or_url: str) -> bool:
-    flag = f"{name_or_url}".startswith(("http://", "https://"))
-    return flag
+    return name_or_url.startswith(("http://", "https://")) and "github.com" in name_or_url
 
 
 def sha256_checksum(filename, block_size=65536):
