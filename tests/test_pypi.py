@@ -557,8 +557,15 @@ def test_deps_comments():
     ]
 
 
-def test_keep_filename_license():
-    recipe = PyPi(name="respx", version="0.10.1")
+@pytest.mark.parametrize(
+    "name",
+    [
+        "respx",
+        "https://github.com/lundberg/respx"
+    ]
+)
+def test_keep_filename_license(name):
+    recipe = PyPi(name=name, version="0.10.1")
     assert recipe["about"]["license_file"] == "LICENSE.md"
 
 

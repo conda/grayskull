@@ -595,7 +595,10 @@ class PyPi(AbstractRecipeModel):
             # TODO: Clean this function up a bit.
             url = name
             name = name.split("/")[-1]
-            version = self._get_latest_version_of_github_repo(url)
+            version = self.get_var_content(self["package"]["version"].values[0])
+            if version is None:
+                log.info(f"Version for {name} not specified.\nGetting the latest one.")
+                version = self._get_latest_version_of_github_repo(url)
             archive_url = self._generate_git_archive_tarball_url(
                 self, git_url=url, version=version
             )
@@ -746,8 +749,6 @@ class PyPi(AbstractRecipeModel):
             url_pypi = PyPi.URL_PYPI_METADATA.format(pkg_name=name)
 
         metadata = requests.get(url=url_pypi, timeout=5)
-        print(url_pypi)
-        metadata.raise_for_status()
         if metadata.status_code != 200:
             raise requests.HTTPError(
                 f"It was not possible to recover PyPi metadata for {name}.\n"
@@ -917,7 +918,6 @@ class PyPi(AbstractRecipeModel):
         re_remove_space = re.compile(r"([<>!=]+)\s+")
         re_remove_tags = re.compile(r"\s*(\[.*\])", re.DOTALL)
         re_remove_comments = re.compile(r"\s+#.*", re.DOTALL)
-        print(f"MAHEEEEEEEEE {all_dependencies}")
         for req in all_dependencies:
             match_req = re_deps.match(req)
             deps_name = req
