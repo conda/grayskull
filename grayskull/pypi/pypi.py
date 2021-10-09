@@ -594,9 +594,7 @@ class PyPi(AbstractRecipeModel):
             # TODO: Clean this function up a bit.
             url = name
             name = name.split("/")[-1]
-            print(f"Mahe{version}mahe")
-            print(version)
-            if version is "":
+            if not version:
                 log.info(f"Version for {name} not specified.\nGetting the latest one.")
                 version = self._get_latest_version_of_github_repo(url)
             archive_url = self._generate_git_archive_tarball_url(
