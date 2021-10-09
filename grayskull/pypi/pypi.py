@@ -104,7 +104,6 @@ class PyPi(AbstractRecipeModel):
             f" {Fore.BLUE}{Style.BRIGHT}{name}"
         )
         log.debug(f"Downloading {name} sdist - {sdist_url}")
-        print(sdist_url)
         response = requests.get(sdist_url, allow_redirects=True, stream=True, timeout=5)
         response.raise_for_status()
         total_size = int(response.headers.get("Content-length", 0))
@@ -595,8 +594,9 @@ class PyPi(AbstractRecipeModel):
             # TODO: Clean this function up a bit.
             url = name
             name = name.split("/")[-1]
-            version = self.get_var_content(self["package"]["version"].values[0])
-            if version is None:
+            print(f"Mahe{version}mahe")
+            print(version)
+            if version is "":
                 log.info(f"Version for {name} not specified.\nGetting the latest one.")
                 version = self._get_latest_version_of_github_repo(url)
             archive_url = self._generate_git_archive_tarball_url(
