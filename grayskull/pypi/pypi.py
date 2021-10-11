@@ -28,7 +28,12 @@ from grayskull.cli.stdout import (
     progressbar_with_status,
 )
 from grayskull.license.discovery import ShortLicense, search_license_file
-from grayskull.utils import get_vendored_dependencies, origin_is_github, sha256_checksum
+from grayskull.utils import (
+    get_vendored_dependencies,
+    origin_is_github,
+    sha256_checksum,
+    string_similarity,
+)
 
 log = logging.getLogger(__name__)
 PyVer = namedtuple("PyVer", ["major", "minor"])
@@ -74,6 +79,26 @@ class PyPi(AbstractRecipeModel):
         return version
 
     @staticmethod
+    def _get_most_similar_tag_in_repo(git_url:str, query:str) -> str:
+        """get the most similar tag in the given repository
+        """
+        url_parts = urlparse(git_url)
+        netloc = "api.github.com"
+        path = f"/repos{url_parts.path}/tags"
+        api_parts = url_parts.scheme, netloc, path, *url_parts[3:]
+        api_url = urlunparse(api_parts)
+        response = requests.get(api_url)
+        response.raise_for_status()
+        data = response.json()
+
+        def closest_match(tag):
+            return string_similarity(query, tag)
+
+        most_similar = max([tag["name"] for tag in data], key=closest_match)
+        log.debug(f"Most similar git reference found for query `{query}` is `{most_similar}`")
+        return most_similar
+
+    @staticmethod
     def _pkg_name_from_sdist_url(sdist_url: str):
         """This method extracts and returns the name of the package from the sdist url.
         """
@@ -83,13 +108,14 @@ class PyPi(AbstractRecipeModel):
             return sdist_url.split("/")[-1]
 
     @staticmethod
-    def _generate_git_archive_tarball_url(self, git_url: str, version: str) -> str:
+    def _generate_git_archive_tarball_url(self, git_url: str, git_ref: str) -> str:
         """This method takes a github repository url and returns the archive
         tarball url for that repository.
         :param git_url: github repository url
+        :param git_ref: github repository reference (version, name...)
         :return: github repository archive tarball url
         """
-        archive_tarball_url = f"{git_url}/archive/{version}.tar.gz"
+        archive_tarball_url = f"{git_url}/archive/{git_ref}.tar.gz"
         return archive_tarball_url
 
     @staticmethod
@@ -594,17 +620,22 @@ class PyPi(AbstractRecipeModel):
             # TODO: Clean this function up a bit.
             url = name
             name = name.split("/")[-1]
-            if not version:
-                log.info(f"Version for {name} not specified.\nGetting the latest one.")
-                version = self._get_latest_version_of_github_repo(url)
+            if version:
+                # try get the tag with the most similar name to the requested version
+                version_tag = self._get_most_similar_tag_in_repo(url, version)
+                log.info(f"Closest git reference to `{version}` is `{version_tag}`.")
+            else:
+                version_tag = self._get_latest_version_of_github_repo(url)
+                log.info(f"Version for {name} not specified.\nGetting the latest one, which is {version_tag}.")
+                if version.startswith("v"):
+                    version = version[1:]
             archive_url = self._generate_git_archive_tarball_url(
-                self, git_url=url, version=version
+                self, git_url=url, git_ref=version_tag
             )
             sdist_metadata = self._get_sdist_metadata(
                 sdist_url=archive_url, name=name, with_source=True
             )
-            if version.startswith("v"):
-                version = version[1:]
+
             sdist_metadata["version"] = version
             pypi_metadata = {}
         else:

@@ -4,6 +4,7 @@ import os
 from functools import lru_cache
 from glob import glob
 from typing import List
+from difflib import SequenceMatcher
 
 flag: bool
 
@@ -79,3 +80,6 @@ def sha256_checksum(filename, block_size=65536):
         for block in iter(lambda: f.read(block_size), b""):
             sha256.update(block)
     return sha256.hexdigest()
+
+def string_similarity(a, b):
+    return SequenceMatcher(None, a, b).ratio()
