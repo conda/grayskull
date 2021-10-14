@@ -3,6 +3,7 @@ from typing import Optional, Tuple
 
 
 def parse_pkg_name_version(pkg_name: str) -> Tuple[str, Optional[str]]:
+    origin = ""
     if pkg_name.startswith(("http://", "https://")):
         origin, pkg_name = pkg_name.rsplit("/", 1)
         origin += "/"

@@ -79,7 +79,7 @@ class PyPi(AbstractRecipeModel):
         return version
 
     @staticmethod
-    def _get_most_similar_tag_in_repo(git_url:str, query:str) -> str:
+    def _get_most_similar_tag_in_repo(git_url: str, query: str) -> str:
         """get the most similar tag in the given repository
         """
         url_parts = urlparse(git_url)
@@ -95,7 +95,9 @@ class PyPi(AbstractRecipeModel):
             return string_similarity(query, tag)
 
         most_similar = max([tag["name"] for tag in data], key=closest_match)
-        log.debug(f"Most similar git reference found for query `{query}` is `{most_similar}`")
+        log.debug(
+            f"Most similar git reference found for query `{query}` is `{most_similar}`"
+        )
         return most_similar
 
     @staticmethod
@@ -626,7 +628,10 @@ class PyPi(AbstractRecipeModel):
                 log.info(f"Closest git reference to `{version}` is `{version_tag}`.")
             else:
                 version_tag = self._get_latest_version_of_github_repo(url)
-                log.info(f"Version for {name} not specified.\nGetting the latest one, which is {version_tag}.")
+                log.info(
+                    f"Version for {name} not specified."
+                    + "\nGetting the latest one, which is {version_tag}."
+                )
                 if version.startswith("v"):
                     version = version[1:]
             archive_url = self._generate_git_archive_tarball_url(

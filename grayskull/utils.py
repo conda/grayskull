@@ -1,10 +1,10 @@
 import ast
 import hashlib
 import os
+from difflib import SequenceMatcher
 from functools import lru_cache
 from glob import glob
 from typing import List
-from difflib import SequenceMatcher
 
 flag: bool
 
@@ -71,7 +71,9 @@ def get_local_modules(sdist_folder: str) -> List:
 
 
 def origin_is_github(name_or_url: str) -> bool:
-    return name_or_url.startswith(("http://", "https://")) and "github.com" in name_or_url
+    return (
+        name_or_url.startswith(("http://", "https://")) and "github.com" in name_or_url
+    )
 
 
 def sha256_checksum(filename, block_size=65536):
@@ -80,6 +82,7 @@ def sha256_checksum(filename, block_size=65536):
         for block in iter(lambda: f.read(block_size), b""):
             sha256.update(block)
     return sha256.hexdigest()
+
 
 def string_similarity(a, b):
     return SequenceMatcher(None, a, b).ratio()
