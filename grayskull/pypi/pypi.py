@@ -154,6 +154,7 @@ class PyPi(AbstractRecipeModel):
         the metadata present in setup.py and setup.cfg
         :param sdist_url: URL to the sdist package
         :param name: name of the package
+        :param with_source: a boolean value to indicate Github packages
         :return: sdist metadata
         """
         temp_folder = mkdtemp(prefix=f"grayskull-{name}-")
