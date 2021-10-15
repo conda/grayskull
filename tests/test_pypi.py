@@ -174,7 +174,10 @@ def test_get_sha256_from_pypi_metadata():
         PyPi.get_sha256_from_pypi_metadata(metadata)
     assert err.match("Hash information for sdist was not found on PyPi metadata.")
 
-@pytest.mark.parametrize("name", ["hypothesis", "https://github.com/HypothesisWorks/hypothesis"])
+
+@pytest.mark.parametrize(
+    "name", ["hypothesis", "https://github.com/HypothesisWorks/hypothesis"]
+)
 def test_injection_distutils(name):
     recipe = PyPi(name=name, version="5.5.1")
     data = recipe._get_sdist_metadata(
@@ -190,6 +193,7 @@ def test_injection_distutils(name):
     assert data["version"] == "5.5.1"
     assert data["name"] == "hypothesis"
     assert not data.get("compilers")
+
 
 @pytest.mark.parametrize("name", ["pytest", "https://github.com/pytest-dev/pytest"])
 def test_injection_distutils_pytest(name):
@@ -216,6 +220,7 @@ def test_injection_distutils_pytest(name):
     )
     assert not data.get("compilers")
 
+
 @pytest.mark.parametrize("name", ["gsw", "https://github.com/TEOS-10/GSW-python"])
 def test_injection_distutils_compiler_gsw(name):
     recipe = PyPi(name=name, version="3.3.1")
@@ -224,6 +229,7 @@ def test_injection_distutils_compiler_gsw(name):
     )
     assert data.get("compilers") == ["c"]
     assert data["packages"] == ["gsw"]
+
 
 def test_injection_distutils_setup_reqs_ensure_list():
     pkg_name, pkg_ver = "pyinstaller-hooks-contrib", "2020.7"
@@ -319,7 +325,10 @@ def test_get_entry_points_from_sdist():
         )
     ) == sorted(["gui_scripts=entrypoints"])
 
-@pytest.mark.parametrize("name", ["hypothesis", "https://github.com/HypothesisWorks/hypothesis"])
+
+@pytest.mark.parametrize(
+    "name", ["hypothesis", "https://github.com/HypothesisWorks/hypothesis"]
+)
 def test_build_noarch_skip(name):
     recipe = PyPi(name=name, version="5.5.2")
     assert recipe["build"]["noarch"].values[0] == "python"
@@ -368,6 +377,7 @@ def test_download_pkg_sdist(pkg_pytest):
         "console_scripts": ["pytest=pytest:main", "py.test=pytest:main"]
     }
 
+
 @pytest.mark.parametrize("name", ["ciso", "https://github.com/ioos/ciso"])
 def test_ciso_recipe(name):
     recipe = PyPi(name=name, version="0.1.0")
@@ -387,8 +397,6 @@ def test_ciso_recipe(name):
     condition=(sys.platform.startswith("win")),
     reason="Test failing on windows platform",
 )
-
-
 @pytest.mark.parametrize("name", ["pymc", "https://github.com/pymc-devs/pymc"])
 def test_pymc_recipe_fortran(name):
     recipe = PyPi(name=name, version="2.3.6")
@@ -400,6 +408,7 @@ def test_pymc_recipe_fortran(name):
         ["<{ pin_compatible('numpy') }}", "python"]
     )
     assert not recipe["build"]["noarch"]
+
 
 @pytest.mark.parametrize("name", ["pytest", "https://github.com/pytest-dev/pytest"])
 def test_pytest_recipe_entry_points(name):
@@ -422,6 +431,7 @@ def test_cythongsl_recipe_build():
     assert recipe["requirements"]["build"] == "<{ compiler('c') }}"
     assert recipe["requirements"]["host"] == ["cython >=0.16", "pip", "python"]
     assert not recipe["build"]["noarch"]
+
 
 @pytest.mark.parametrize("name", ["requests", "https://github.com/psf/requests"])
 def test_requests_recipe_extra_deps(capsys, name):
