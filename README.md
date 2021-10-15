@@ -54,7 +54,7 @@ grayskull pypi pytest
 ```
 
 After that `grayskull` will create a folder with the same name as the package
-and inside of this folder it will generated the recipe (`meta.yaml`).
+and inside this folder the generated recipe will be present (`meta.yaml`).
 
 * Example with `pytest` (`grayskull pypi pytest`):
 
