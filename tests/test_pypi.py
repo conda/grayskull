@@ -397,9 +397,8 @@ def test_ciso_recipe(name):
     condition=(sys.platform.startswith("win")),
     reason="Test failing on windows platform",
 )
-@pytest.mark.parametrize("name", ["pymc", "https://github.com/pymc-devs/pymc"])
-def test_pymc_recipe_fortran(name):
-    recipe = PyPi(name=name, version="2.3.6")
+def test_pymc_recipe_fortran():
+    recipe = PyPi(name="pymc", version="2.3.6")
     assert sorted(recipe["requirements"]["build"]) == sorted(
         ["<{ compiler('c') }}", "<{ compiler('fortran') }}"]
     )
