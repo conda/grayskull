@@ -631,7 +631,7 @@ class PyPi(AbstractRecipeModel):
                 version_tag = self._get_latest_version_of_github_repo(url)
                 log.info(
                     f"Version for {name} not specified."
-                    + "\nGetting the latest one, which is {version_tag}."
+                    "\nGetting the latest one, which is {version_tag}."
                 )
                 if version.startswith("v"):
                     version = version[1:]

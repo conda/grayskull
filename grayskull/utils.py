@@ -6,7 +6,6 @@ from functools import lru_cache
 from glob import glob
 from typing import List
 
-flag: bool
 
 
 @lru_cache(maxsize=10)
