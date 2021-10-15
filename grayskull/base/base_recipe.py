@@ -182,7 +182,7 @@ class AbstractRecipeModel(ABC):
         pkg_name = self.get_var_content(self["package"]["name"].values[0])
         if origin_is_github(pkg_name):
             pkg_name = pkg_name.split("/")[-1]
-
+        # We should make this a bit more robust using urlparse
         recipe_dir = Path(folder_path) / pkg_name
         logging.debug(f"Generating recipe on folder: {recipe_dir}")
         if not recipe_dir.is_dir():
