@@ -377,11 +377,9 @@ def test_download_pkg_sdist(pkg_pytest):
         "console_scripts": ["pytest=pytest:main", "py.test=pytest:main"]
     }
 
-#commit
 
-@pytest.mark.parametrize("name", ["ciso", "https://github.com/ioos/ciso"])
-def test_ciso_recipe(name):
-    recipe = PyPi(name=name, version="0.1.0")
+def test_ciso_recipe():
+    recipe = PyPi(name="ciso", version="0.1.0")
     assert sorted(recipe["requirements"]["host"]) == sorted(
         ["cython", "numpy", "pip", "python"]
     )
