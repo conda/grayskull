@@ -693,9 +693,7 @@ class PyPi(AbstractRecipeModel):
         test_entry_points = PyPi._get_test_entry_points(
             metadata.get("entry_points", [])
         )
-        test_imports = PyPi._get_test_imports(
-            metadata, metadata["name"]
-        )  # pypi_metadata changed to metadata
+        test_imports = PyPi._get_test_imports(metadata, metadata["name"])
         return {
             "package": {"name": name, "version": metadata["version"]},
             "build": {"entry_points": metadata.get("entry_points")},
