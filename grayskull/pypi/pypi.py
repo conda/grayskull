@@ -627,7 +627,6 @@ class PyPi(AbstractRecipeModel):
         if not self._is_arch:
             self["build"]["noarch"] = "python"
 
-
     @lru_cache(maxsize=10)
     def _get_metadata(self) -> dict:
         """Method responsible to get the whole metadata available. It will
@@ -640,7 +639,9 @@ class PyPi(AbstractRecipeModel):
         if origin_is_github(name):
             url = name
             name = name.split("/")[-1]
-            version, version_tag = self._handle_version(self, name=name, version=version, url=url)
+            version, version_tag = self._handle_version(
+                self, name=name, version=version, url=url
+            )
             archive_url = self._generate_git_archive_tarball_url(
                 self, git_url=url, git_ref=version_tag
             )
