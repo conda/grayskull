@@ -112,8 +112,9 @@ class PyPi(AbstractRecipeModel):
                 f"Version for {name} not specified."
                 "\nGetting the latest one, which is {version_tag}."
             )
-            if version.startswith("v"):
-                version = version[1:]
+            version = version_tag
+        if version.startswith("v"):
+            version = version[1:]
         return version, version_tag
 
     @staticmethod
