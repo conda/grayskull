@@ -101,6 +101,22 @@ class PyPi(AbstractRecipeModel):
         return most_similar
 
     @staticmethod
+    def _handle_version(self, name: str, version: str, url: str) -> str:
+        if version:
+            # try get the tag with the most similar name to the requested version
+            version_tag = self._get_most_similar_tag_in_repo(url, version)
+            log.info(f"Closest git reference to `{version}` is `{version_tag}`.")
+        else:
+            version_tag = self._get_latest_version_of_github_repo(url)
+            log.info(
+                f"Version for {name} not specified."
+                "\nGetting the latest one, which is {version_tag}."
+            )
+            if version.startswith("v"):
+                version = version[1:]
+        return version, version_tag
+
+    @staticmethod
     def _pkg_name_from_sdist_url(sdist_url: str):
         """This method extracts and returns the name of the package from the sdist url.
         """
@@ -610,6 +626,7 @@ class PyPi(AbstractRecipeModel):
         if not self._is_arch:
             self["build"]["noarch"] = "python"
 
+
     @lru_cache(maxsize=10)
     def _get_metadata(self) -> dict:
         """Method responsible to get the whole metadata available. It will
@@ -620,28 +637,15 @@ class PyPi(AbstractRecipeModel):
         if self["package"]["version"].values:
             version = self.get_var_content(self["package"]["version"].values[0])
         if origin_is_github(name):
-            # TODO: Clean this function up a bit.
             url = name
             name = name.split("/")[-1]
-            if version:
-                # try get the tag with the most similar name to the requested version
-                version_tag = self._get_most_similar_tag_in_repo(url, version)
-                log.info(f"Closest git reference to `{version}` is `{version_tag}`.")
-            else:
-                version_tag = self._get_latest_version_of_github_repo(url)
-                log.info(
-                    f"Version for {name} not specified."
-                    "\nGetting the latest one, which is {version_tag}."
-                )
-                if version.startswith("v"):
-                    version = version[1:]
+            version, version_tag = self._handle_version(self, name=name, version=version, url=url)
             archive_url = self._generate_git_archive_tarball_url(
                 self, git_url=url, git_ref=version_tag
             )
             sdist_metadata = self._get_sdist_metadata(
                 sdist_url=archive_url, name=name, with_source=True
             )
-
             sdist_metadata["version"] = version
             pypi_metadata = {}
         else:
