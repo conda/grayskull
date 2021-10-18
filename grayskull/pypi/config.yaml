@@ -1,7 +1,3 @@
-annoy:
-  conda_forge: python-annoy
-  import_name: annoy
-
 Boruta:
   conda_forge: boruta_py
   import_name: boruta
@@ -21,6 +17,10 @@ SoundFile:
 aiohttp_cors:
   conda_forge: aiohttp-cors
   import_name: aiohttp_cors
+
+annoy:
+  conda_forge: python-annoy
+  import_name: annoy
 
 backtrace:
   conda_forge: python-backtrace
