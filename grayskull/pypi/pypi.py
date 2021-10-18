@@ -460,6 +460,9 @@ class PyPi(AbstractRecipeModel):
         all_entry_points = sdist_metadata.get("entry_points", {})
         if isinstance(all_entry_points, str) or not all_entry_points:
             return []
+        if all_entry_points.get("console_scripts") == ([],):
+            # entry_points: None
+            return []
         if all_entry_points.get("console_scripts") or all_entry_points.get(
             "gui_scripts"
         ):
