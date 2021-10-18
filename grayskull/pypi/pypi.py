@@ -102,6 +102,11 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _handle_version(self, name: str, version: str, url: str) -> str:
+        """Method responsible for handling the version of the GitHub package.
+        If version is specified, gets the closest tag in the repo.
+        If not, gets the latest version.
+        Also trims off 'v'prefix from version names if present.
+        """
         if version:
             # try get the tag with the most similar name to the requested version
             version_tag = self._get_most_similar_tag_in_repo(url, version)
