@@ -234,6 +234,30 @@ class PyPi(AbstractRecipeModel):
         return result
 
     @staticmethod
+    def _get_origin_wise_metadata(self, name: str, version: str) -> str:
+        """Method responsible for extracting metadata based on package origin."""
+        if origin_is_github(name):
+            url = name
+            name = name.split("/")[-1]
+            version, version_tag = self._handle_version(
+                self, name=name, version=version, url=url
+            )
+            archive_url = self._generate_git_archive_tarball_url(
+                self, git_url=url, git_ref=version_tag
+            )
+            sdist_metadata = self._get_sdist_metadata(
+                sdist_url=archive_url, name=name, with_source=True
+            )
+            sdist_metadata["version"] = version
+            pypi_metadata = {}
+        else:
+            pypi_metadata = self._get_pypi_metadata(name, version)
+            sdist_metadata = self._get_sdist_metadata(
+                sdist_url=pypi_metadata["sdist_url"], name=name
+            )
+        return sdist_metadata, pypi_metadata
+
+    @staticmethod
     def __rm_duplicated_deps(
         all_requirements: Union[list, set, None]
     ) -> Optional[list]:
@@ -641,25 +665,10 @@ class PyPi(AbstractRecipeModel):
         version = ""
         if self["package"]["version"].values:
             version = self.get_var_content(self["package"]["version"].values[0])
-        if origin_is_github(name):
-            url = name
-            name = name.split("/")[-1]
-            version, version_tag = self._handle_version(
-                self, name=name, version=version, url=url
-            )
-            archive_url = self._generate_git_archive_tarball_url(
-                self, git_url=url, git_ref=version_tag
-            )
-            sdist_metadata = self._get_sdist_metadata(
-                sdist_url=archive_url, name=name, with_source=True
-            )
-            sdist_metadata["version"] = version
-            pypi_metadata = {}
-        else:
-            pypi_metadata = self._get_pypi_metadata(name, version)
-            sdist_metadata = self._get_sdist_metadata(
-                sdist_url=pypi_metadata["sdist_url"], name=name
-            )
+
+        sdist_metadata, pypi_metadata = self._get_origin_wise_metadata(
+            self, name=name, version=version
+        )
         metadata = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
         log.debug(f"Data merged from pypi, setup.cfg and setup.py: {metadata}")
         if metadata.get("scripts") is not None:
