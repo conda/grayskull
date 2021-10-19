@@ -458,10 +458,8 @@ class PyPi(AbstractRecipeModel):
         :return: list with all entry points
         """
         all_entry_points = sdist_metadata.get("entry_points", {})
+        print(all_entry_points)
         if isinstance(all_entry_points, str) or not all_entry_points:
-            return []
-        if all_entry_points.get("console_scripts") == ([],):
-            # entry_points: None
             return []
         if all_entry_points.get("console_scripts") or all_entry_points.get(
             "gui_scripts"
@@ -479,7 +477,9 @@ class PyPi(AbstractRecipeModel):
                 entry_points_result += gui_scripts
             return_entry_point = []
             for entry_point in entry_points_result:
-                return_entry_point.extend(entry_point.split("\n"))
+                if isinstance(entry_point, str):
+                    entry_point.split("\n")
+                return_entry_point.extend(entry_point)
             return [ep for ep in return_entry_point if ep.strip()]
         return []
 
