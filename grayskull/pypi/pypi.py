@@ -477,7 +477,7 @@ class PyPi(AbstractRecipeModel):
             return_entry_point = []
             for entry_point in entry_points_result:
                 if isinstance(entry_point, str):
-                    entry_point.split("\n")
+                    entry_point = entry_point.split("\n")
                 return_entry_point.extend(entry_point)
             return [ep for ep in return_entry_point if ep.strip()]
         return []
