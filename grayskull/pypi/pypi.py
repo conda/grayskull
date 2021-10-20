@@ -13,7 +13,7 @@ from pathlib import Path
 from subprocess import check_output
 from tempfile import mkdtemp
 from typing import Dict, List, Optional, Tuple, Union
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 
 import requests
 from colorama import Fore, Style
@@ -28,7 +28,12 @@ from grayskull.cli.stdout import (
     progressbar_with_status,
 )
 from grayskull.license.discovery import ShortLicense, search_license_file
-from grayskull.utils import get_vendored_dependencies
+from grayskull.utils import (
+    get_vendored_dependencies,
+    origin_is_github,
+    sha256_checksum,
+    string_similarity,
+)
 
 log = logging.getLogger(__name__)
 PyVer = namedtuple("PyVer", ["major", "minor"])
@@ -59,21 +64,99 @@ class PyPi(AbstractRecipeModel):
         self["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
 
     @staticmethod
-    def _download_sdist_pkg(sdist_url: str, dest: str):
+    def _get_latest_version_of_github_repo(git_url: str) -> str:
+        """get the latest version of the github repository using github api
+        """
+        url_parts = urlparse(git_url)
+        netloc = "api.github.com"
+        path = f"/repos{url_parts.path}/releases/latest"
+        api_parts = url_parts.scheme, netloc, path, *url_parts[3:]
+        api_url = urlunparse(api_parts)
+        response = requests.get(api_url)
+        response.raise_for_status()
+        data = response.json()
+        version = data["name"]
+        return version
+
+    @staticmethod
+    def _get_most_similar_tag_in_repo(git_url: str, query: str) -> str:
+        """get the most similar tag in the given repository
+        """
+        url_parts = urlparse(git_url)
+        netloc = "api.github.com"
+        path = f"/repos{url_parts.path}/tags"
+        api_parts = url_parts.scheme, netloc, path, *url_parts[3:]
+        api_url = urlunparse(api_parts)
+        response = requests.get(api_url)
+        response.raise_for_status()
+        data = response.json()
+
+        def closest_match(tag):
+            return string_similarity(query, tag)
+
+        most_similar = max([tag["name"] for tag in data], key=closest_match)
+        log.debug(
+            f"Most similar git reference found for query `{query}` is `{most_similar}`"
+        )
+        return most_similar
+
+    @staticmethod
+    def _handle_version(self, name: str, version: str, url: str) -> str:
+        """Method responsible for handling the version of the GitHub package.
+        If version is specified, gets the closest tag in the repo.
+        If not, gets the latest version.
+        Also trims off 'v'prefix from version names if present.
+        """
+        if version:
+            # try get the tag with the most similar name to the requested version
+            version_tag = self._get_most_similar_tag_in_repo(url, version)
+            log.info(f"Closest git reference to `{version}` is `{version_tag}`.")
+        else:
+            version_tag = self._get_latest_version_of_github_repo(url)
+            log.info(
+                f"Version for {name} not specified."
+                "\nGetting the latest one, which is {version_tag}."
+            )
+            version = version_tag
+        if version.startswith("v"):
+            version = version[1:]
+        return version, version_tag
+
+    @staticmethod
+    def _pkg_name_from_sdist_url(sdist_url: str):
+        """This method extracts and returns the name of the package from the sdist url.
+        """
+        if origin_is_github(sdist_url):
+            return sdist_url.split("/")[-3] + ".tar.gz"
+        else:
+            return sdist_url.split("/")[-1]
+
+    @staticmethod
+    def _generate_git_archive_tarball_url(self, git_url: str, git_ref: str) -> str:
+        """This method takes a github repository url and returns the archive
+        tarball url for that repository.
+        :param git_url: github repository url
+        :param git_ref: github repository reference (version, name...)
+        :return: github repository archive tarball url
+        """
+        archive_tarball_url = f"{git_url}/archive/{git_ref}.tar.gz"
+        return archive_tarball_url
+
+    @staticmethod
+    def _download_sdist_pkg(sdist_url: str, dest: str, name: Optional[str] = None):
         """Download the sdist package
 
         :param sdist_url: sdist url
         :param dest: Folder were the method will download the sdist
         """
-        name = sdist_url.split("/")[-1]
         print_msg(
             f"{Fore.GREEN}Starting the download of the sdist package"
             f" {Fore.BLUE}{Style.BRIGHT}{name}"
         )
         log.debug(f"Downloading {name} sdist - {sdist_url}")
         response = requests.get(sdist_url, allow_redirects=True, stream=True, timeout=5)
-        total_size = int(response.headers["Content-length"])
-
+        response.raise_for_status()
+        total_size = int(response.headers.get("Content-length", 0))
         with manage_progressbar(max_value=total_size, prefix=f"{name} ") as bar, open(
             dest, "wb"
         ) as pkg_file:
@@ -86,19 +169,21 @@ class PyPi(AbstractRecipeModel):
                     bar.update(min(progress_val, total_size))
 
     @lru_cache(maxsize=10)
-    def _get_sdist_metadata(self, sdist_url: str, name: str) -> dict:
+    def _get_sdist_metadata(
+        self, sdist_url: str, name: str, with_source: bool = False
+    ) -> dict:
         """Method responsible to return the sdist metadata which is basically
         the metadata present in setup.py and setup.cfg
-
         :param sdist_url: URL to the sdist package
         :param name: name of the package
+        :param with_source: a boolean value to indicate Github packages
         :return: sdist metadata
         """
         temp_folder = mkdtemp(prefix=f"grayskull-{name}-")
-        pkg_name = sdist_url.split("/")[-1]
+        pkg_name = self._pkg_name_from_sdist_url(sdist_url)
         path_pkg = os.path.join(temp_folder, pkg_name)
 
-        PyPi._download_sdist_pkg(sdist_url=sdist_url, dest=path_pkg)
+        PyPi._download_sdist_pkg(sdist_url=sdist_url, dest=path_pkg, name=name)
         if self._download:
             self.files_to_copy.append(path_pkg)
         log.debug(f"Unpacking {path_pkg} to {temp_folder}")
@@ -106,7 +191,13 @@ class PyPi(AbstractRecipeModel):
         print_msg("Recovering information from setup.py")
         with PyPi._injection_distutils(temp_folder) as metadata:
             metadata["sdist_path"] = temp_folder
-            return metadata
+
+        # At this point the tarball was successfully extracted
+        # so we can assume the sha256 can be computed reliably
+        if with_source:
+            metadata["source"] = {"url": sdist_url, "sha256": sha256_checksum(path_pkg)}
+
+        return metadata
 
     @staticmethod
     def _merge_sdist_metadata(setup_py: dict, setup_cfg: dict) -> dict:
@@ -140,6 +231,30 @@ class PyPi(AbstractRecipeModel):
         if "compilers" in result:
             result["compilers"] = get_full_list("compilers")
         return result
+
+    @staticmethod
+    def _get_origin_wise_metadata(self, name: str, version: str) -> str:
+        """Method responsible for extracting metadata based on package origin."""
+        if origin_is_github(name):
+            url = name
+            name = name.split("/")[-1]
+            version, version_tag = self._handle_version(
+                self, name=name, version=version, url=url
+            )
+            archive_url = self._generate_git_archive_tarball_url(
+                self, git_url=url, git_ref=version_tag
+            )
+            sdist_metadata = self._get_sdist_metadata(
+                sdist_url=archive_url, name=name, with_source=True
+            )
+            sdist_metadata["version"] = version
+            pypi_metadata = {}
+        else:
+            pypi_metadata = self._get_pypi_metadata(name, version)
+            sdist_metadata = self._get_sdist_metadata(
+                sdist_url=pypi_metadata["sdist_url"], name=name
+            )
+        return sdist_metadata, pypi_metadata
 
     @staticmethod
     def __rm_duplicated_deps(
@@ -411,7 +526,7 @@ class PyPi(AbstractRecipeModel):
             "author": get_val("author"),
             "name": get_val("name"),
             "version": get_val("version"),
-            "source": pypi_metadata.get("source"),
+            "source": get_val("source"),
             "packages": all_packages_names,
             "url": get_val("url"),
             "classifiers": get_val("classifiers"),
@@ -488,11 +603,8 @@ class PyPi(AbstractRecipeModel):
         :param sdist_metadata: sdist metadata
         :return: list with all requirements
         """
-        all_deps = []
-        if sdist_metadata.get("install_requires"):
-            all_deps += sdist_metadata.get("install_requires", [])
-        if pypi_metadata.get("requires_dist"):
-            all_deps += pypi_metadata.get("requires_dist", [])
+        all_deps = sdist_metadata.get("install_requires") or []
+        all_deps += pypi_metadata.get("requires_dist") or []
 
         re_search = re.compile(r";\s*extra")
         all_deps = [pkg for pkg in all_deps if not re_search.search(pkg)]
@@ -552,9 +664,9 @@ class PyPi(AbstractRecipeModel):
         version = ""
         if self["package"]["version"].values:
             version = self.get_var_content(self["package"]["version"].values[0])
-        pypi_metadata = self._get_pypi_metadata(name, version)
-        sdist_metadata = self._get_sdist_metadata(
-            sdist_url=pypi_metadata["sdist_url"], name=name
+
+        sdist_metadata, pypi_metadata = self._get_origin_wise_metadata(
+            self, name=name, version=version
         )
         metadata = PyPi._merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata)
         log.debug(f"Data merged from pypi, setup.cfg and setup.py: {metadata}")
@@ -581,12 +693,14 @@ class PyPi(AbstractRecipeModel):
         print_msg(f"License file: {Fore.LIGHTMAGENTA_EX}{license_file}")
 
         all_requirements = self._extract_requirements(metadata)
-        all_requirements["host"] = solve_list_pkg_name(
-            all_requirements["host"], self.PYPI_CONFIG
-        )
-        all_requirements["run"] = solve_list_pkg_name(
-            all_requirements["run"], self.PYPI_CONFIG
-        )
+        if all_requirements.get("host"):
+            all_requirements["host"] = solve_list_pkg_name(
+                all_requirements["host"], self.PYPI_CONFIG
+            )
+        if all_requirements.get("run"):
+            all_requirements["run"] = solve_list_pkg_name(
+                all_requirements["run"], self.PYPI_CONFIG
+            )
         if self._is_strict_cf:
             all_requirements["host"] = clean_deps_for_conda_forge(
                 all_requirements["host"]
@@ -595,9 +709,10 @@ class PyPi(AbstractRecipeModel):
                 all_requirements["run"]
             )
         print_requirements(all_requirements)
-
-        test_entry_points = PyPi._get_test_entry_points(metadata.get("entry_points"))
-        test_imports = PyPi._get_test_imports(metadata, pypi_metadata["name"])
+        test_entry_points = PyPi._get_test_entry_points(
+            metadata.get("entry_points", [])
+        )
+        test_imports = PyPi._get_test_imports(metadata, metadata["name"])
         return {
             "package": {"name": name, "version": metadata["version"]},
             "build": {"entry_points": metadata.get("entry_points")},
@@ -787,17 +902,15 @@ class PyPi(AbstractRecipeModel):
         :return: all requirement section
         """
         name = metadata["name"]
-        requires_dist = PyPi._format_dependencies(metadata.get("requires_dist"), name)
-        setup_requires = (
-            metadata.get("setup_requires") if metadata.get("setup_requires") else []
+        requires_dist = PyPi._format_dependencies(
+            metadata.get("requires_dist", []), name
         )
-        host_req = PyPi._format_dependencies(setup_requires, name)
-
+        setup_requires = metadata.get("setup_requires", [])
+        host_req = PyPi._format_dependencies(setup_requires or [], name)
         if not requires_dist and not host_req and not metadata.get("requires_python"):
-            return {"host": sorted(["python", "pip"]), "run": ["python"]}
+            return {"host": ["python", "pip"], "run": ["python"]}
 
         run_req = self._get_run_req_from_requires_dist(requires_dist)
-
         build_req = [f"<{{ compiler('{c}') }}}}" for c in metadata.get("compilers", [])]
         if build_req:
             self._is_arch = True
@@ -819,7 +932,6 @@ class PyPi(AbstractRecipeModel):
 
         if "pip" not in host_req:
             host_req += [f"python{limit_python}", "pip"]
-
         run_req.insert(0, f"python{limit_python}")
         result = {}
         if build_req:
@@ -858,7 +970,6 @@ class PyPi(AbstractRecipeModel):
         re_remove_space = re.compile(r"([<>!=]+)\s+")
         re_remove_tags = re.compile(r"\s*(\[.*\])", re.DOTALL)
         re_remove_comments = re.compile(r"\s+#.*", re.DOTALL)
-
         for req in all_dependencies:
             match_req = re_deps.match(req)
             deps_name = req
@@ -989,7 +1100,7 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _generic_py_ver_to(
-        pypi_metadata: dict, is_selector: bool = False, is_strict_cf: bool = False
+        metadata: dict, is_selector: bool = False, is_strict_cf: bool = False
     ) -> Optional[str]:
         """Generic function which abstract the parse of the requires_python
         present in the PyPi metadata. Basically it can generate the selectors
@@ -999,10 +1110,10 @@ class PyPi(AbstractRecipeModel):
         :param is_selector:
         :return: return the constrained versions or the selectors
         """
-        if not pypi_metadata["requires_python"]:
+        if not metadata.get("requires_python"):
             return None
         req_python = re.findall(
-            r"([><=!]+)\s*(\d+)(?:\.(\d+))?", pypi_metadata["requires_python"],
+            r"([><=!]+)\s*(\d+)(?:\.(\d+))?", metadata["requires_python"],
         )
         if not req_python:
             return None

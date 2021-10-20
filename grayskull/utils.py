@@ -1,5 +1,7 @@
 import ast
+import hashlib
 import os
+from difflib import SequenceMatcher
 from functools import lru_cache
 from glob import glob
 from typing import List
@@ -64,3 +66,21 @@ def get_local_modules(sdist_folder: str) -> List:
             continue
         result.append(os.path.splitext(py_file)[0])
     return result
+
+
+def origin_is_github(name_or_url: str) -> bool:
+    return (
+        name_or_url.startswith(("http://", "https://")) and "github.com" in name_or_url
+    )
+
+
+def sha256_checksum(filename, block_size=65536):
+    sha256 = hashlib.sha256()
+    with open(filename, "rb") as f:
+        for block in iter(lambda: f.read(block_size), b""):
+            sha256.update(block)
+    return sha256.hexdigest()
+
+
+def string_similarity(a, b):
+    return SequenceMatcher(None, a, b).ratio()
