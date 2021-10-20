@@ -187,7 +187,6 @@ class PyPi(AbstractRecipeModel):
         if self._download:
             self.files_to_copy.append(path_pkg)
         log.debug(f"Unpacking {path_pkg} to {temp_folder}")
-        print(f"Unpacking {path_pkg} to {temp_folder}")
         shutil.unpack_archive(path_pkg, temp_folder)
         print_msg("Recovering information from setup.py")
         with PyPi._injection_distutils(temp_folder) as metadata:
