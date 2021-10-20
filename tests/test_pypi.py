@@ -175,6 +175,7 @@ def test_get_sha256_from_pypi_metadata():
     assert err.match("Hash information for sdist was not found on PyPi metadata.")
 
 
+@pytest.mark.github
 @pytest.mark.parametrize(
     "name", ["hypothesis", "https://github.com/HypothesisWorks/hypothesis"]
 )
@@ -195,6 +196,7 @@ def test_injection_distutils(name):
     assert not data.get("compilers")
 
 
+@pytest.mark.github
 @pytest.mark.parametrize("name", ["pytest", "https://github.com/pytest-dev/pytest"])
 def test_injection_distutils_pytest(name):
     recipe = PyPi(name=name, version="5.3.2")
@@ -221,6 +223,7 @@ def test_injection_distutils_pytest(name):
     assert not data.get("compilers")
 
 
+@pytest.mark.github
 @pytest.mark.parametrize("name", ["gsw", "https://github.com/TEOS-10/GSW-python"])
 def test_injection_distutils_compiler_gsw(name):
     recipe = PyPi(name=name, version="3.3.1")
@@ -408,6 +411,7 @@ def test_pymc_recipe_fortran():
     assert not recipe["build"]["noarch"]
 
 
+@pytest.mark.github
 @pytest.mark.parametrize("name", ["pytest", "https://github.com/pytest-dev/pytest"])
 def test_pytest_recipe_entry_points(name):
     recipe = PyPi(name=name, version="5.3.5")
@@ -431,6 +435,7 @@ def test_cythongsl_recipe_build():
     assert not recipe["build"]["noarch"]
 
 
+@pytest.mark.github
 @pytest.mark.parametrize("name", ["requests", "https://github.com/psf/requests"])
 def test_requests_recipe_extra_deps(capsys, name):
     CLIConfig().stdout = True
@@ -567,6 +572,7 @@ def test_deps_comments():
     ]
 
 
+@pytest.mark.github
 @pytest.mark.parametrize("name", ["respx", "https://github.com/lundberg/respx"])
 def test_keep_filename_license(name):
     recipe = PyPi(name=name, version="0.10.1")

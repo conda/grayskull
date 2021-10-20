@@ -90,10 +90,7 @@ def license_pytest_5_3_1(license_pytest_path) -> str:
         return f.read()
 
 
-@pytest.mark.xfail(
-    reason="This test may fail because github has limitation regarding the"
-    " number of requisitions we can do to their api."
-)
+@pytest.mark.github
 def test_search_license_api_github(license_pytest_5_3_1: str):
     license_api = search_license_api_github(
         "https://github.com/pytest-dev/pytest", "5.3.1"
@@ -105,6 +102,7 @@ def test_search_license_api_github(license_pytest_5_3_1: str):
         assert f.read() == license_pytest_5_3_1
 
 
+@pytest.mark.github
 def test_get_api_github_url():
     assert (
         _get_api_github_url("https://github.com/pytest-dev/pytest", "5.3.1")
@@ -124,6 +122,10 @@ def test_search_license_folder(pkg_pytest):
     assert license_folder.name == "MIT"
 
 
+@pytest.mark.xfail(
+    reason="This test may fail because github has limitation regarding the"
+    " number of requisitions we can do to their api."
+)
 def test_search_license_repository(pkg_pytest):
     license_repo = search_license_repo("https://github.com/pytest-dev/pytest", "5.3.5")
     assert license_repo.path.endswith("LICENSE")
