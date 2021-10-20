@@ -1,6 +1,7 @@
 import os
 import shutil
 
+import pytest
 from pytest import fixture
 
 from grayskull.pypi import PyPi
@@ -20,3 +21,13 @@ def pkg_pytest(tmpdir_factory) -> str:
     )
     shutil.unpack_archive(dest_pkg, str(folder))
     return dest_pkg
+
+
+def pytest_collection_modifyitems(config, items):
+    github_mark = pytest.mark.xfail(
+        reason="This test may fail because github has limitation regarding the"
+        " number of requisitions we can do to their api."
+    )
+    for item in items:
+        if "github" in item.keywords:
+            item.add_marker(github_mark)
