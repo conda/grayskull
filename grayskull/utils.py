@@ -70,7 +70,7 @@ def get_local_modules(sdist_folder: str) -> List:
 
 def origin_is_github(name_or_url: str) -> bool:
     return (
-        name_or_url.startswith(("http://", "https://")) and "github.com" in name_or_url
+        name_or_url.startswith(("http://", "https://")) and "github.com" in name_or_url  # lgtm [py/incomplete-url-substring-sanitization]
     )
 
 
