@@ -30,7 +30,7 @@ setup(
         "stdlib-list",
         "pip",
         "setuptools >=30.3.0",
-        "rapidfuzz >=0.7.6,<0.13.0",
+        "rapidfuzz >=1.7.1",
         "progressbar2 >=3.53.0",
         "colorama",
     ],

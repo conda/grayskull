@@ -18,6 +18,10 @@ aiohttp_cors:
   conda_forge: aiohttp-cors
   import_name: aiohttp_cors
 
+annoy:
+  conda_forge: python-annoy
+  import_name: annoy
+
 backtrace:
   conda_forge: python-backtrace
   import_name: backtrace

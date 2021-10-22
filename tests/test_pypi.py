@@ -175,8 +175,12 @@ def test_get_sha256_from_pypi_metadata():
     assert err.match("Hash information for sdist was not found on PyPi metadata.")
 
 
-def test_injection_distutils():
-    recipe = PyPi(name="hypothesis", version="5.5.1")
+@pytest.mark.github
+@pytest.mark.parametrize(
+    "name", ["hypothesis", "https://github.com/HypothesisWorks/hypothesis"]
+)
+def test_injection_distutils(name):
+    recipe = PyPi(name=name, version="5.5.1")
     data = recipe._get_sdist_metadata(
         "https://pypi.io/packages/source/h/hypothesis/hypothesis-5.5.1.tar.gz",
         "hypothesis",
@@ -192,8 +196,10 @@ def test_injection_distutils():
     assert not data.get("compilers")
 
 
-def test_injection_distutils_pytest():
-    recipe = PyPi(name="pytest", version="5.3.2")
+@pytest.mark.github
+@pytest.mark.parametrize("name", ["pytest", "https://github.com/pytest-dev/pytest"])
+def test_injection_distutils_pytest(name):
+    recipe = PyPi(name=name, version="5.3.2")
     data = recipe._get_sdist_metadata(
         "https://pypi.io/packages/source/p/pytest/pytest-5.3.2.tar.gz", "pytest"
     )
@@ -217,8 +223,10 @@ def test_injection_distutils_pytest():
     assert not data.get("compilers")
 
 
-def test_injection_distutils_compiler_gsw():
-    recipe = PyPi(name="gsw", version="3.3.1")
+@pytest.mark.github
+@pytest.mark.parametrize("name", ["gsw", "https://github.com/TEOS-10/GSW-python"])
+def test_injection_distutils_compiler_gsw(name):
+    recipe = PyPi(name=name, version="3.3.1")
     data = recipe._get_sdist_metadata(
         "https://pypi.io/packages/source/g/gsw/gsw-3.3.1.tar.gz", "gsw"
     )
@@ -321,8 +329,11 @@ def test_get_entry_points_from_sdist():
     ) == sorted(["gui_scripts=entrypoints"])
 
 
-def test_build_noarch_skip():
-    recipe = PyPi(name="hypothesis", version="5.5.2")
+@pytest.mark.parametrize(
+    "name", ["hypothesis", "https://github.com/HypothesisWorks/hypothesis"]
+)
+def test_build_noarch_skip(name):
+    recipe = PyPi(name=name, version="5.5.2")
     assert recipe["build"]["noarch"].values[0] == "python"
     assert not recipe["build"]["skip"].values
 
@@ -400,8 +411,10 @@ def test_pymc_recipe_fortran():
     assert not recipe["build"]["noarch"]
 
 
-def test_pytest_recipe_entry_points():
-    recipe = PyPi(name="pytest", version="5.3.5")
+@pytest.mark.github
+@pytest.mark.parametrize("name", ["pytest", "https://github.com/pytest-dev/pytest"])
+def test_pytest_recipe_entry_points(name):
+    recipe = PyPi(name=name, version="5.3.5")
     assert sorted(recipe["build"]["entry_points"]) == sorted(
         ["pytest=pytest:main", "py.test=pytest:main"]
     )
@@ -422,9 +435,11 @@ def test_cythongsl_recipe_build():
     assert not recipe["build"]["noarch"]
 
 
-def test_requests_recipe_extra_deps(capsys):
+@pytest.mark.github
+@pytest.mark.parametrize("name", ["requests", "https://github.com/psf/requests"])
+def test_requests_recipe_extra_deps(capsys, name):
     CLIConfig().stdout = True
-    recipe = PyPi(name="requests", version="2.22.0")
+    recipe = PyPi(name=name, version="2.22.0")
     captured_stdout = capsys.readouterr()
     assert "win-inet-pton" not in recipe["requirements"]["run"]
     assert recipe["build"]["noarch"]
@@ -557,8 +572,10 @@ def test_deps_comments():
     ]
 
 
-def test_keep_filename_license():
-    recipe = PyPi(name="respx", version="0.10.1")
+@pytest.mark.github
+@pytest.mark.parametrize("name", ["respx", "https://github.com/lundberg/respx"])
+def test_keep_filename_license(name):
+    recipe = PyPi(name=name, version="0.10.1")
     assert recipe["about"]["license_file"] == "LICENSE.md"
 
 
@@ -661,7 +678,7 @@ def test_arch_metadata():
     recipe = PyPi(name="remove_dagmc_tags", version="0.0.5")
     assert "noarch" not in recipe["build"]
 
-
+    
 def test_entry_points_is_list_of_str():
     """Test to verify that whether console_scripts is a list of strings,
     a multiline string, or a list of empty lists; entry_points is always a list"""
@@ -695,3 +712,8 @@ def test_entry_points_is_list_of_str():
         "entry_points": {"console_scripts": [[]]},
     }
     assert isinstance(PyPi._get_entry_points_from_sdist(sdist_metadata), list)
+
+    
+def test_replace_slash_in_imports():
+    recipe = PyPi(name="asgi-lifespan", version="1.0.1")
+    assert "asgi_lifespan._concurrency" == recipe["test"]["imports"][1]

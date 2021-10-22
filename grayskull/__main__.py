@@ -12,6 +12,7 @@ from grayskull.base.factory import GrayskullFactory
 from grayskull.cli import CLIConfig
 from grayskull.cli.parser import parse_pkg_name_version
 from grayskull.cli.stdout import print_msg
+from grayskull.utils import origin_is_github
 
 init(autoreset=True)
 logging.basicConfig(format="%(levelname)s:%(message)s")
@@ -111,10 +112,11 @@ def main(args=None):
 
     for pkg_name in args.pypi_packages:
         logging.debug(f"Starting grayskull for pkg: {pkg_name}")
+        pypi_label = "" if origin_is_github(pkg_name) else " (pypi)"
         print_msg(
             f"{Fore.GREEN}\n\n"
             f"#### Initializing recipe for "
-            f"{Fore.BLUE}{pkg_name} (pypi) {Fore.GREEN}####\n"
+            f"{Fore.BLUE}{pkg_name}{pypi_label} {Fore.GREEN}####\n"
         )
         pkg_name, pkg_version = parse_pkg_name_version(pkg_name)
         try:
