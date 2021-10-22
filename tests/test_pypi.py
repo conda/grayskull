@@ -99,14 +99,14 @@ def test_get_selector():
 @pytest.mark.parametrize(
     "requires_python, exp_selector, ex_cf",
     [
-        (">=3.5", "2k", None),
+        (">=3.5", "2k", "<36"),
         (">=3.6", "2k", None),
         (">=3.7", "<37", "<37"),
         ("<=3.7", ">=38", ">=38"),
         ("<=3.7.1", ">=38", ">=38"),
         ("<3.7", ">=37", ">=37"),
         (">2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*", "<36", "<36"),
-        (">=2.7, !=3.6.*", "==36", "==36"),
+        (">=2.7, !=3.6.*", "==36", "<37"),
         (">3.7", "<38", "<38"),
         (">2.7", "2k", "<36"),
         ("<3", "3k", "skip"),
@@ -129,14 +129,14 @@ def test_py_version_to_selector(requires_python, exp_selector, ex_cf):
 @pytest.mark.parametrize(
     "requires_python, exp_limit, ex_cf",
     [
-        (">=3.5", ">=3.5", None),
-        (">=3.6", ">=3.6", None),
+        (">=3.5", ">=3.5", ">=3.6"),
+        (">=3.6", ">=3.6", ">=3.6"),
         (">=3.7", ">=3.7", ">=3.7"),
         ("<=3.7", "<3.8", "<3.8"),
         ("<=3.7.1", "<3.8", "<3.8"),
         ("<3.7", "<3.7", "<3.7"),
         (">2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*", ">=3.6", ">=3.6"),
-        (">=2.7, !=3.6.*", "!=3.6", "!=3.6"),
+        (">=2.7, !=3.6.*", "!=3.6", ">=3.7"),
         (">3.7", ">=3.8", ">=3.8"),
         (">2.7", ">=3.6", ">=3.6"),
         ("<3", "<3.0", "skip"),
@@ -682,3 +682,10 @@ def test_arch_metadata():
 def test_replace_slash_in_imports():
     recipe = PyPi(name="asgi-lifespan", version="1.0.1")
     assert "asgi_lifespan._concurrency" == recipe["test"]["imports"][1]
+
+
+def test_add_python_min_to_strict_conda_forge():
+    recipe = PyPi(name="dgllife", version="0.2.8", is_strict_cf=True)
+    assert recipe["build"]["noarch"] == "python"
+    assert recipe["requirements"]["host"].values[1] == "python >=3.6"
+    assert "python >=3.6" in recipe["requirements"]["run"].values
