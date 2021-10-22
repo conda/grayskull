@@ -663,7 +663,6 @@ def test_arch_metadata():
 
 
 def test_entry_points_is_list_of_str():
-    # recipe = PyPi(name="ptpython", version="3.0.20")
     """Test to verify that whether console_scripts is a list of strings,
     a multiline string, or a list of empty lists; entry_points is always a list"""
     sdist_metadata = {
