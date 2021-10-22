@@ -660,3 +660,43 @@ def test_noarch_metadata():
 def test_arch_metadata():
     recipe = PyPi(name="remove_dagmc_tags", version="0.0.5")
     assert "noarch" not in recipe["build"]
+
+
+def test_entry_points_is_list_of_str():
+    #recipe = PyPi(name="ptpython", version="3.0.20")
+    """Test to verify that whether console_scripts is a list of strings, a multiline string, or a list of empty lists; entry_points is always a list"""
+    sdist_metadata = {
+        'entry_points': {
+            'console_scripts': [
+                'ptpython = ptpython.entry_points.run_ptpython:run',
+                'ptipython = ptpython.entry_points.run_ptipython:run',
+                'ptpython3 = ptpython.entry_points.run_ptpython:run',
+                'ptpython3.9 = ptpython.entry_points.run_ptpython:run',
+                'ptipython3 = ptpython.entry_points.run_ptipython:run',
+                'ptipython3.9 = ptpython.entry_points.run_ptipython:run'
+            ]
+        },
+    }
+    assert isinstance(PyPi._get_entry_points_from_sdist(sdist_metadata), list)
+    sdist_metadata = {
+        'entry_points': {
+            'console_scripts':"""
+                ptpython = ptpython.entry_points.run_ptpython:run
+                ptipython = ptpython.entry_points.run_ptipython:run
+                ptpython3 = ptpython.entry_points.run_ptpython:run
+                ptpython3.9 = ptpython.entry_points.run_ptpython:run
+                ptipython3 = ptpython.entry_points.run_ptipython:run
+                ptipython3.9 = ptpython.entry_points.run_ptipython:run
+                """
+
+        },
+    }
+    assert isinstance(PyPi._get_entry_points_from_sdist(sdist_metadata), list)
+    sdist_metadata = {
+        'entry_points': {
+            'console_scripts': [
+                []
+            ]
+        },
+    }
+    assert isinstance(PyPi._get_entry_points_from_sdist(sdist_metadata), list)
