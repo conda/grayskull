@@ -678,7 +678,7 @@ def test_arch_metadata():
     recipe = PyPi(name="remove_dagmc_tags", version="0.0.5")
     assert "noarch" not in recipe["build"]
 
-    
+
 def test_entry_points_is_list_of_str():
     """Test to verify that whether console_scripts is a list of strings,
     a multiline string, or a list of empty lists; entry_points is always a list"""
@@ -713,7 +713,7 @@ def test_entry_points_is_list_of_str():
     }
     assert isinstance(PyPi._get_entry_points_from_sdist(sdist_metadata), list)
 
-    
+
 def test_replace_slash_in_imports():
     recipe = PyPi(name="asgi-lifespan", version="1.0.1")
     assert "asgi_lifespan._concurrency" == recipe["test"]["imports"][1]
