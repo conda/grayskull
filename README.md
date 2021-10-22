@@ -16,13 +16,12 @@
 -------------
 ## Introduction
 
-The Grayskull project was created with the intention to eventually replace the
-`conda skeleton`. The main goal of this project is to generate concise recipes
- for [conda-forge](https://conda-forge.org/).
-
-The current status of ``grayskull`` is generating recipes just looking for ``PyPI``,
- but in the future we will expand that to also support to load recipes and also
- generate recipes looking for other repositories, such as, CRAN, Conan, etc..
+Grayskull is an automatic conda recipe generator. <br>
+The main goal of this project is to generate concise recipes
+for [conda-forge](https://conda-forge.org/).
+The Grayskull project was created with the intention to eventually replace `conda skeleton`. <br> 
+Presently Grayskull can generate recipes for Python packages available on PyPI and also those not published on PyPI but available as GitHub repositories.
+Future versions of Grayskull will support recipe generation for packages of other repositories such as CRAN and Conan etc..
 
 ## Installation
 
@@ -60,6 +59,10 @@ and inside this folder the generated recipe will be present (`meta.yaml`).
 
 ![Grayskull CLI](https://raw.githubusercontent.com/conda-incubator/grayskull/master/docs/images/cli_example_grayskull.gif)
 
+If your package is a GitHub repository just replace the package name with the GitHub repository URL. <br>
+For example: <br>
+
+```grayskull pypi https://github.com/confluentinc/confluent-kafka-python```
 
 ### Online Grayskull
 
