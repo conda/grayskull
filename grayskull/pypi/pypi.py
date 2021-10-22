@@ -12,7 +12,7 @@ from functools import lru_cache
 from pathlib import Path
 from subprocess import check_output
 from tempfile import mkdtemp
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import urlparse, urlunparse
 
 import requests
@@ -37,8 +37,8 @@ from grayskull.utils import (
 
 log = logging.getLogger(__name__)
 PyVer = namedtuple("PyVer", ["major", "minor"])
-SUPPORTED_PY = sorted([PyVer(2, 7), PyVer(3, 6), PyVer(3, 7), PyVer(3, 8)])
-CONDA_FORGE_STRICT = sorted([PyVer(3, 6), PyVer(3, 7), PyVer(3, 8)])
+SUPPORTED_PY = sorted([PyVer(2, 7), PyVer(3, 6), PyVer(3, 7), PyVer(3, 8), PyVer(3, 9)])
+CONDA_FORGE_STRICT = sorted([PyVer(3, 6), PyVer(3, 7), PyVer(3, 8), PyVer(3, 9)])
 
 
 class PyPi(AbstractRecipeModel):
@@ -101,7 +101,9 @@ class PyPi(AbstractRecipeModel):
         return most_similar
 
     @staticmethod
-    def _handle_version(self, name: str, version: str, url: str) -> str:
+    def _handle_version(
+        self, name: str, version: str, url: str
+    ) -> Tuple[Union[str, Any], Any]:
         """Method responsible for handling the version of the GitHub package.
         If version is specified, gets the closest tag in the repo.
         If not, gets the latest version.
@@ -412,7 +414,7 @@ class PyPi(AbstractRecipeModel):
         :param run_py: If it should run the setup.py with run_py, otherwise it will run
         invoking the distutils directly
         """
-        deps_installed = deps_installed if deps_installed else []
+        deps_installed = deps_installed or []
         original_path = deepcopy(sys.path)
         pip_dir = mkdtemp(prefix="pip-dir-")
         if not os.path.exists(pip_dir):
@@ -710,6 +712,7 @@ class PyPi(AbstractRecipeModel):
             all_requirements["run"] = clean_deps_for_conda_forge(
                 all_requirements["run"]
             )
+
         print_requirements(all_requirements)
         test_entry_points = PyPi._get_test_entry_points(
             metadata.get("entry_points", [])
@@ -1123,7 +1126,9 @@ class PyPi(AbstractRecipeModel):
         py_ver_enabled = PyPi._get_py_version_available(
             req_python, is_strict_cf=is_strict_cf
         )
-        small_py3_version = get_small_py3_version(list(py_ver_enabled.keys()))
+        small_py3_version = get_small_py3_version(
+            list(py_ver_enabled.keys()), is_strict_cf=is_strict_cf
+        )
         all_py = list(py_ver_enabled.values())
         if all(all_py):
             return None
@@ -1171,9 +1176,12 @@ class PyPi(AbstractRecipeModel):
     def py_version_to_limit_python(
         pypi_metadata: dict, is_strict_cf: bool = False
     ) -> Optional[str]:
-        return PyPi._generic_py_ver_to(
+        result = PyPi._generic_py_ver_to(
             pypi_metadata, is_selector=False, is_strict_cf=is_strict_cf
         )
+        if not result and is_strict_cf:
+            result = f">={CONDA_FORGE_STRICT[0].major}.{CONDA_FORGE_STRICT[0].minor}"
+        return result
 
     @staticmethod
     def py_version_to_selector(
@@ -1192,16 +1200,21 @@ class PyPi(AbstractRecipeModel):
         :param req_python: Requires python
         :return: Dict of Python versions if it is enabled or disabled
         """
-        sup_python_ver = deepcopy(CONDA_FORGE_STRICT if is_strict_cf else SUPPORTED_PY)
-        for _, major, minor in req_python:
-            if not minor:
-                minor = 0
-            new_py_ver = PyVer(int(major), int(minor))
-            if new_py_ver in sup_python_ver:
-                continue
-            sup_python_ver.append(new_py_ver)
-        sup_python_ver.sort()
-        py_ver_enabled = {py_ver: True for py_ver in sup_python_ver}
+        sup_python_ver = set(CONDA_FORGE_STRICT if is_strict_cf else SUPPORTED_PY)
+        sup_python_ver.update(
+            {
+                PyVer(int(major), int(minor or 0))
+                for _, major, minor in req_python
+                if major
+            }
+        )
+        sup_python_ver = sorted(list(sup_python_ver))
+        if is_strict_cf:
+            py_ver_enabled = {
+                py_ver: py_ver in CONDA_FORGE_STRICT for py_ver in sup_python_ver
+            }
+        else:
+            py_ver_enabled = {py_ver: True for py_ver in sup_python_ver}
         for op, major, minor in req_python:
             if not minor:
                 minor = 0
@@ -1232,7 +1245,9 @@ class PyPi(AbstractRecipeModel):
             all_selector += (
                 ["py2k"]
                 if is_selector
-                else get_small_py3_version(list(selectors.keys()))
+                else get_small_py3_version(
+                    list(selectors.keys()), is_strict_cf=is_strict_cf
+                )
             )
         for py_ver, is_enabled in selectors.items():
             if (not is_strict_cf and py_ver == PyVer(2, 7)) or is_enabled:
@@ -1276,11 +1291,15 @@ class PyPi(AbstractRecipeModel):
             return value_lower
 
 
-def get_small_py3_version(list_py_ver: List[PyVer]) -> PyVer:
+def get_small_py3_version(
+    list_py_ver: List[PyVer], is_strict_cf: bool = False
+) -> PyVer:
     list_py_ver = sorted(list_py_ver)
+    min_python_version = CONDA_FORGE_STRICT[0] if is_strict_cf else PyVer(3, 0)
     for py_ver in list_py_ver:
-        if py_ver >= PyVer(3, 0):
+        if py_ver >= min_python_version:
             return py_ver
+    return min_python_version
 
 
 def search_setup_root(path_folder: Union[Path, str]) -> Path:
@@ -1310,11 +1329,12 @@ def clean_deps_for_conda_forge(list_deps: List) -> List:
         if match_del is None:
             result_deps.append(dependency)
             continue
+
         match_del = match_del.groups()
         if not match_del[0]:
             match_del = ("==", match_del[1])
         major = int(match_del[1][0])
-        minor = int(match_del[1][1:].replace("k", "0"))
+        minor = int(match_del[1][1:].replace("k", "0") or 0)
         current_py = PyVer(major=major, minor=minor)
         log.debug(f"Evaluating: {py_ver_min}{match_del}{current_py} -- {dependency}")
         if eval(f"py_ver_min{match_del[0]}current_py"):
