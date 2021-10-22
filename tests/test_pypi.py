@@ -203,6 +203,7 @@ def test_injection_distutils_pytest(name):
     data = recipe._get_sdist_metadata(
         "https://pypi.io/packages/source/p/pytest/pytest-5.3.2.tar.gz", "pytest"
     )
+    assert recipe.get_jinja_var("name") == "pytest"
     assert sorted(data["install_requires"]) == sorted(
         [
             "py>=1.5.0",

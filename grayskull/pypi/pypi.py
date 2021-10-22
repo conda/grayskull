@@ -240,6 +240,7 @@ class PyPi(AbstractRecipeModel):
         if origin_is_github(name):
             url = name
             name = name.split("/")[-1]
+            self.set_jinja_var("name", name)
             version, version_tag = self._handle_version(
                 self, name=name, version=version, url=url
             )

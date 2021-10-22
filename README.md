@@ -19,7 +19,7 @@
 Grayskull is an automatic conda recipe generator. <br>
 The main goal of this project is to generate concise recipes
 for [conda-forge](https://conda-forge.org/).
-The Grayskull project was created with the intention to eventually replace `conda skeleton`. <br> 
+The Grayskull project was created with the intention to eventually replace `conda skeleton`. <br>
 Presently Grayskull can generate recipes for Python packages available on PyPI and also those not published on PyPI but available as GitHub repositories.
 Future versions of Grayskull will support recipe generation for packages of other repositories such as CRAN and Conan etc..
 
