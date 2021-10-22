@@ -744,7 +744,7 @@ class PyPi(AbstractRecipeModel):
         meta_pkg = metadata["packages"]
         if isinstance(meta_pkg, str):
             meta_pkg = [metadata["packages"]]
-        return sorted(meta_pkg)[:2]
+        return [impt.replace("/", ".") for impt in sorted(meta_pkg)[:2]]
 
     @staticmethod
     def _get_test_entry_points(entry_points: Union[List, str]) -> List:

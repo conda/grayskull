@@ -677,3 +677,8 @@ def test_noarch_metadata():
 def test_arch_metadata():
     recipe = PyPi(name="remove_dagmc_tags", version="0.0.5")
     assert "noarch" not in recipe["build"]
+
+
+def test_replace_slash_in_imports():
+    recipe = PyPi(name="asgi-lifespan", version="1.0.1")
+    assert "asgi_lifespan._concurrency" == recipe["test"]["imports"][1]
