@@ -62,7 +62,9 @@ and inside this folder the generated recipe will be present (`meta.yaml`).
 If your package is a GitHub repository just replace the package name with the GitHub repository URL. <br>
 For example: <br>
 
-```grayskull pypi https://github.com/confluentinc/confluent-kafka-python```
+```bash
+grayskull pypi https://github.com/confluentinc/confluent-kafka-python
+```
 
 ### Online Grayskull
 
