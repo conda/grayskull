@@ -242,6 +242,10 @@ opencv-python:
   import_name: cv2
   conda_forge: opencv
 
+ortools:
+  conda_forge: ortools-python
+  import_name: ortools
+
 pandas_flavor:
   conda_forge: pandas-flavor
   import_name: pandas_flavor
