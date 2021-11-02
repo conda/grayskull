@@ -210,6 +210,10 @@ message_ix:
   conda_forge: message-ix
   import_name: message_ix
 
+msgpack:
+  conda_forge: msgpack-python
+  import_name: msgpack
+
 mss:
   conda_forge: python-mss
   import_name: mss
