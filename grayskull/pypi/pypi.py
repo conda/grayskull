@@ -768,7 +768,7 @@ class PyPi(AbstractRecipeModel):
         right license for the package
 
         :param metadata: metadata
-        :return: Return an object which contains relevant informations regarding
+        :return: Return an object which contains relevant information regarding
         the license.
         """
         git_url = metadata.get("dev_url", None)
