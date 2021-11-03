@@ -45,7 +45,7 @@ def test_refresh_section(data_recipes):
 def test_generate_recipe(tmpdir, data_recipes):
     recipe = EmptyGray(name="pkg1", version="1.0.0")
     recipe.update_all_recipe()
-    recipe.generate_recipe(tmpdir, mantainers=["marcelotrevisani"])
+    recipe.generate_recipe(tmpdir, maintainers=["marcelotrevisani"])
 
     with open(tmpdir / "pkg1" / "meta.yaml") as recipe_file:
         generated_recipe = recipe_file.read()

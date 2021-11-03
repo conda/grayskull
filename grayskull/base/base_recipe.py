@@ -171,7 +171,7 @@ class AbstractRecipeModel(ABC):
     def generate_recipe(
         self,
         folder_path: Union[str, Path] = ".",
-        mantainers: Optional[List] = None,
+        maintainers: Optional[List] = None,
         disable_extra: bool = False,
     ):
         """Write the recipe in a location. It will create a folder with the
@@ -189,7 +189,7 @@ class AbstractRecipeModel(ABC):
         recipe_path = recipe_dir / "meta.yaml"
 
         if not disable_extra:
-            self._add_extra_section(mantainers)
+            self._add_extra_section(maintainers)
 
         with recipe_path.open("w") as recipe:
             yaml.dump(self.get_clean_yaml(self._yaml), recipe)

@@ -132,7 +132,7 @@ def main(args=None):
                 f"{Fore.RED}Package seems to be missing on pypi.\nException: {err}\n\n"
             )
             continue
-        recipe.generate_recipe(args.output, mantainers=args.maintainers)
+        recipe.generate_recipe(args.output, maintainers=args.maintainers)
         print_msg(
             f"\n{Fore.GREEN}#### Recipe generated on "
             f"{os.path.realpath(args.output)} for {pkg_name} ####\n"
