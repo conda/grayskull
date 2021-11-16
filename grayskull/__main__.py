@@ -129,7 +129,7 @@ def main(args=None):
             )
         except requests.exceptions.HTTPError as err:
             print_msg(
-                f"{Fore.RED}Package seems to be missing on pypi.\nException: {err}\n\n"
+                f"{Fore.RED}Package seems to be missing.\nException: {err}\n\n"
             )
             continue
         recipe.generate_recipe(args.output, maintainers=args.maintainers)

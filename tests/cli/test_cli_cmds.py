@@ -46,8 +46,8 @@ def test_msg_missing_pkg_pypi(capsys):
     main(["pypi", "NOT_A_PACKAGE_123123123"])
     captured = capsys.readouterr()
     assert (
-        "Package seems to be missing on pypi."
-        "\nException: It was not possible to recover PyPi metadata"
+        "Package seems to be missing."
+        "\nException: It was not possible to recover package metadata"
         " for NOT_A_PACKAGE_123123123.\n"
         "Error code: 404" in captured.out
     )
