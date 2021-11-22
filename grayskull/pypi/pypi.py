@@ -809,7 +809,7 @@ class PyPi(AbstractRecipeModel):
         metadata = requests.get(url=url_pypi, timeout=5)
         if metadata.status_code != 200:
             raise requests.HTTPError(
-                f"It was not possible to recover PyPi metadata for {name}.\n"
+                f"It was not possible to recover package metadata for {name}.\n"
                 f"Error code: {metadata.status_code}"
             )
 
