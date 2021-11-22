@@ -128,9 +128,7 @@ def main(args=None):
                 is_strict_cf=args.is_strict_conda_forge,
             )
         except requests.exceptions.HTTPError as err:
-            print_msg(
-                f"{Fore.RED}Package seems to be missing.\nException: {err}\n\n"
-            )
+            print_msg(f"{Fore.RED}Package seems to be missing.\nException: {err}\n\n")
             continue
         recipe.generate_recipe(args.output, maintainers=args.maintainers)
         print_msg(
