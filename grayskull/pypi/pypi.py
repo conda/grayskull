@@ -37,8 +37,12 @@ from grayskull.utils import (
 
 log = logging.getLogger(__name__)
 PyVer = namedtuple("PyVer", ["major", "minor"])
-SUPPORTED_PY = sorted([PyVer(2, 7), PyVer(3, 6), PyVer(3, 7), PyVer(3, 8), PyVer(3, 9)])
-CONDA_FORGE_STRICT = sorted([PyVer(3, 6), PyVer(3, 7), PyVer(3, 8), PyVer(3, 9)])
+SUPPORTED_PY = sorted(
+    [PyVer(2, 7), PyVer(3, 6), PyVer(3, 7), PyVer(3, 8), PyVer(3, 9), PyVer(3, 10)]
+)
+CONDA_FORGE_STRICT = sorted(
+    [PyVer(3, 6), PyVer(3, 7), PyVer(3, 8), PyVer(3, 9), PyVer(3, 10)]
+)
 
 
 class PyPi(AbstractRecipeModel):
