@@ -13,7 +13,7 @@ dependencies:
   - stdlib-list
   - pip
   - setuptools>=30.3.0
-  - rapidfuzz>=0.7.6,<0.13.0
+  - rapidfuzz>=1.9.1
   - progressbar2>=3.53.0
   - colorama
   - mock
@@ -21,3 +21,5 @@ dependencies:
   - numpy
   - compilers
   - fortran-compiler
+  - conda-souschef
+  - setuptools-scm

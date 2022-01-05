@@ -33,6 +33,7 @@ setup(
         "rapidfuzz >=1.7.1",
         "progressbar2 >=3.53.0",
         "colorama",
+        "conda-souschef",
     ],
     extras_require={
         "testing": ["pytest", "mock", "pytest-cov", "pytest-console-scripts"]

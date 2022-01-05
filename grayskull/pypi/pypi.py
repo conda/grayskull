@@ -65,8 +65,7 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _get_latest_version_of_github_repo(git_url: str) -> str:
-        """get the latest version of the github repository using github api
-        """
+        """get the latest version of the github repository using github api"""
         url_parts = urlparse(git_url)
         netloc = "api.github.com"
         path = f"/repos{url_parts.path}/releases/latest"
@@ -75,13 +74,11 @@ class PyPi(AbstractRecipeModel):
         response = requests.get(api_url)
         response.raise_for_status()
         data = response.json()
-        version = data["name"]
-        return version
+        return data["name"]
 
     @staticmethod
     def _get_most_similar_tag_in_repo(git_url: str, query: str) -> str:
-        """get the most similar tag in the given repository
-        """
+        """get the most similar tag in the given repository"""
         url_parts = urlparse(git_url)
         netloc = "api.github.com"
         path = f"/repos{url_parts.path}/tags"
@@ -126,8 +123,8 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _pkg_name_from_sdist_url(sdist_url: str):
-        """This method extracts and returns the name of the package from the sdist url.
-        """
+        """This method extracts and returns the name of the package from the sdist
+        url."""
         if origin_is_github(sdist_url):
             return sdist_url.split("/")[-3] + ".tar.gz"
         else:
@@ -141,8 +138,7 @@ class PyPi(AbstractRecipeModel):
         :param git_ref: github repository reference (version, name...)
         :return: github repository archive tarball url
         """
-        archive_tarball_url = f"{git_url}/archive/{git_ref}.tar.gz"
-        return archive_tarball_url
+        return f"{git_url}/archive/{git_ref}.tar.gz"
 
     @staticmethod
     def _download_sdist_pkg(sdist_url: str, dest: str, name: Optional[str] = None):
@@ -235,7 +231,9 @@ class PyPi(AbstractRecipeModel):
         return result
 
     @staticmethod
-    def _get_origin_wise_metadata(self, name: str, version: str) -> str:
+    def _get_origin_wise_metadata(
+        self, name: str, version: str
+    ) -> tuple[Any, dict[str, Any] | Any]:
         """Method responsible for extracting metadata based on package origin."""
         if origin_is_github(name):
             url = name
@@ -754,13 +752,9 @@ class PyPi(AbstractRecipeModel):
 
     @staticmethod
     def _get_test_entry_points(entry_points: Union[List, str]) -> List:
-        if entry_points:
-            if isinstance(entry_points, str):
-                entry_points = [entry_points]
-        test_entry_points = [
-            f"{ep.split('=')[0].strip()} --help" for ep in entry_points
-        ]
-        return test_entry_points
+        if entry_points and isinstance(entry_points, str):
+            entry_points = [entry_points]
+        return [f"{ep.split('=')[0].strip()} --help" for ep in entry_points]
 
     @staticmethod
     def _discover_license(metadata: dict) -> Optional[ShortLicense]:
@@ -822,7 +816,7 @@ class PyPi(AbstractRecipeModel):
                 json.dump(metadata, f, indent=4)
             self.files_to_copy.append(download_file)
         info = metadata["info"]
-        project_urls = info.get("project_urls") if info.get("project_urls") else {}
+        project_urls = info.get("project_urls") or {}
         log.info(f"Package: {name}=={info['version']}")
         log.debug(f"Full PyPI metadata:\n{metadata}")
         return {
@@ -896,10 +890,7 @@ class PyPi(AbstractRecipeModel):
         :param list_extra: list with all extra requirements
         :return: True if we should skip the requirement
         """
-        for extra in list_extra:
-            if extra[1] == "extra" or extra[3] == "testing":
-                return True
-        return False
+        return any(extra[1] == "extra" or extra[3] == "testing" for extra in list_extra)
 
     def _extract_requirements(self, metadata: dict) -> dict:
         """Extract the requirements for `build`, `host` and `run`
@@ -1107,7 +1098,7 @@ class PyPi(AbstractRecipeModel):
     @staticmethod
     def _generic_py_ver_to(
         metadata: dict, is_selector: bool = False, is_strict_cf: bool = False
-    ) -> Optional[str]:
+    ) -> Optional[str]:  # sourcery no-metrics
         """Generic function which abstract the parse of the requires_python
         present in the PyPi metadata. Basically it can generate the selectors
         for Python or the constrained version if it is a `noarch: python` python package
@@ -1119,7 +1110,8 @@ class PyPi(AbstractRecipeModel):
         if not metadata.get("requires_python"):
             return None
         req_python = re.findall(
-            r"([><=!]+)\s*(\d+)(?:\.(\d+))?", metadata["requires_python"],
+            r"([><=!]+)\s*(\d+)(?:\.(\d+))?",
+            metadata["requires_python"],
         )
         if not req_python:
             return None
