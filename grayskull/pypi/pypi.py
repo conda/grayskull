@@ -75,7 +75,7 @@ class PyPi(AbstractRecipeModel):
         response = requests.get(api_url)
         response.raise_for_status()
         data = response.json()
-        version = data["name"]
+        version = data["tag_name"]
         return version
 
     @staticmethod
