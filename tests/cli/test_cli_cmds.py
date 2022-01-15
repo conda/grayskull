@@ -3,18 +3,19 @@ import sys
 import pytest
 
 import grayskull
-from grayskull.__main__ import main
+from grayskull import __main__ as cli
+from grayskull.config import Configuration
 
 
 def test_version(capsys):
-    main(["--version"])
+    cli.main(["--version"])
     captured = capsys.readouterr()
     assert captured.out.strip() == grayskull.__version__
 
 
 def test_pypi_cmd(tmpdir):
     out_folder = tmpdir.mkdir("out")
-    main(
+    cli.main(
         ["pypi", "pytest=5.3.2", "-o", str(out_folder), "-m", "m1", "m2", "--download"]
     )
     pytest_folder = out_folder / "pytest"
@@ -28,7 +29,7 @@ def test_pypi_cmd(tmpdir):
 
 @pytest.mark.parametrize("option", ["--heman", "--shera"])
 def test_easter(capsys, option):
-    main([option])
+    cli.main([option])
     captured = capsys.readouterr()
     assert "By the power of Grayskull..." in captured.out.strip()
 
@@ -36,14 +37,14 @@ def test_easter(capsys, option):
 def test_grayskull_without_options(capsys, monkeypatch):
     monkeypatch.setattr(sys, "argv", ["foo"])
     with pytest.raises(SystemExit) as pytest_wrapped_e:
-        main([])
+        cli.main([])
     assert pytest_wrapped_e.type == SystemExit
     captured = capsys.readouterr()
     assert "Grayskull - Conda recipe generator" in captured.out
 
 
 def test_msg_missing_pkg_pypi(capsys):
-    main(["pypi", "NOT_A_PACKAGE_123123123"])
+    cli.main(["pypi", "NOT_A_PACKAGE_123123123"])
     captured = capsys.readouterr()
     assert (
         "Package seems to be missing."
@@ -55,5 +56,26 @@ def test_msg_missing_pkg_pypi(capsys):
 
 def test_license_discovery(tmpdir):
     out_folder = tmpdir.mkdir("out-license")
-    main(["pypi", "httplib2shim=0.0.3", "-o", str(out_folder)])
+    cli.main(["pypi", "httplib2shim=0.0.3", "-o", str(out_folder)])
     assert (out_folder / "httplib2shim" / "LICENSE").exists()
+
+
+def test_change_pypi_url(mocker):
+    mocker.patch("grayskull.__main__.generate_recipe", return_value=None)
+    mocker.patch(
+        "grayskull.__main__.create_python_recipe", return_value=({"extra": {}}, None)
+    )
+    spy = mocker.spy(cli, "create_python_recipe")
+
+    cli.main(["pypi", "pytest=5.3.2", "--pypi-url=http://url_pypi.com/abc"])
+    spy.assert_called_once_with(
+        "pytest=5.3.2",
+        is_strict_cf=False,
+        download=False,
+        url_pypi_metadata="http://url_pypi.com/abc",
+    )
+
+
+def test_config_url_pypi_metadata():
+    config = Configuration("pytest", url_pypi_metadata="http://url_pypi.com/abc")
+    assert config.url_pypi_metadata == "http://url_pypi.com/abc/{pkg_name}/json"

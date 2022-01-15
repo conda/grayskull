@@ -89,6 +89,12 @@ def main(args=None):
         dest="is_strict_conda_forge",
         help="It will generate the recipes strict for the conda-forge channel.",
     )
+    pypi_cmds.add_argument(
+        "--pypi-url",
+        default="https://pypi.org/pypi/",
+        dest="url_pypi_metadata",
+        help="Pypi url server",
+    )
 
     args = parser.parse_args(args)
 
@@ -121,7 +127,10 @@ def main(args=None):
         )
         try:
             recipe, config = create_python_recipe(
-                pkg_name, args.is_strict_conda_forge, args.download
+                pkg_name,
+                is_strict_cf=args.is_strict_conda_forge,
+                download=args.download,
+                url_pypi_metadata=args.url_pypi_metadata,
             )
         except requests.exceptions.HTTPError as err:
             print_msg(f"{Fore.RED}Package seems to be missing.\nException: {err}\n\n")
@@ -139,14 +148,9 @@ def main(args=None):
         )
 
 
-def create_python_recipe(pkg_name, is_strict_conda_forge=True, download=False):
+def create_python_recipe(pkg_name, **kwargs):
     pkg_origin, pkg_name, pkg_version = parse_pkg_name_version(pkg_name)
-    config = Configuration(
-        name=pkg_name,
-        version=pkg_version,
-        is_strict_cf=is_strict_conda_forge,
-        download=download,
-    )
+    config = Configuration(name=pkg_name, version=pkg_version, **kwargs)
     return GrayskullFactory.create_recipe("pypi", config, pkg_name), config
 
 
