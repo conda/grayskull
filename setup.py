@@ -22,7 +22,7 @@ setup(
     setup_requires=["setuptools-scm", "setuptools>=30.3.0"],
     package_data={"": ["LICENSE", "license/data/*", "license/data/*.*"]},
     include_package_data=True,
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     install_requires=[
         "requests",
         "ruamel.yaml >=0.16.10",
