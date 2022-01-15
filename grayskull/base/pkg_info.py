@@ -19,6 +19,16 @@ def is_pkg_available(pkg_name: str, channel: str = "conda-forge") -> bool:
     return response.status_code == 200
 
 
+def normalize_pkg_name(pkg_name: str) -> str:
+    if is_pkg_available(pkg_name):
+        return pkg_name
+    if is_pkg_available(pkg_name.replace("-", "_")):
+        return pkg_name.replace("-", "_")
+    elif is_pkg_available(pkg_name.replace("_", "-")):
+        return pkg_name.replace("_", "-")
+    return pkg_name
+
+
 def check_pkgs_availability(
     list_pkgs: List[str], channel: Optional[str] = None
 ) -> List[Tuple[str, bool]]:

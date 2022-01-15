@@ -125,14 +125,20 @@ def test_solve_version_delimiter():
 
 
 def test_version_solver():
-    assert _version_solver(
-        [(">=", "1.5.0"), ("<", "1.8.0")],
-        ConfigPkg("foo", delimiter_min="1.0.0", delimiter_max="2.0.0"),
-    ) == [">=1.5.0", "<1.8.0"]
-    assert _version_solver(
-        [(">", "0.5.0"), ("<=", "1.8.0")],
-        ConfigPkg("foo", delimiter_min="1.0.0", delimiter_max="2.0.0"),
-    ) == [">=1.0.0", "<=1.8.0"]
+    assert (
+        _version_solver(
+            [(">=", "1.5.0"), ("<", "1.8.0")],
+            ConfigPkg("foo", delimiter_min="1.0.0", delimiter_max="2.0.0"),
+        )
+        == [">=1.5.0", "<1.8.0"]
+    )
+    assert (
+        _version_solver(
+            [(">", "0.5.0"), ("<=", "1.8.0")],
+            ConfigPkg("foo", delimiter_min="1.0.0", delimiter_max="2.0.0"),
+        )
+        == [">=1.0.0", "<=1.8.0"]
+    )
 
 
 def test_solve_pkg_name(path_example):

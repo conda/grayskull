@@ -74,7 +74,7 @@ def solve_version_delimiter(delimiter_exp: str, pkg_cfg: ConfigPkg) -> str:
 def _version_solver(list_exp: List, pkg_cfg: ConfigPkg) -> List:
     result = []
     for op, version in list_exp:
-        if op == "==" or op == "":
+        if op in ["==", ""]:
             return list_exp
         elif ">" in op and pkg_cfg.delimiter_min:
             if eval(

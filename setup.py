@@ -22,7 +22,7 @@ setup(
     setup_requires=["setuptools-scm", "setuptools>=30.3.0"],
     package_data={"": ["LICENSE", "license/data/*", "license/data/*.*"]},
     include_package_data=True,
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     install_requires=[
         "requests",
         "ruamel.yaml >=0.16.10",
@@ -33,6 +33,7 @@ setup(
         "rapidfuzz >=1.7.1",
         "progressbar2 >=3.53.0",
         "colorama",
+        "conda-souschef >=2.1.0",
     ],
     extras_require={
         "testing": ["pytest", "mock", "pytest-cov", "pytest-console-scripts"]

@@ -12,7 +12,8 @@ from grayskull.base.factory import GrayskullFactory
 from grayskull.cli import CLIConfig
 from grayskull.cli.parser import parse_pkg_name_version
 from grayskull.cli.stdout import print_msg
-from grayskull.utils import origin_is_github
+from grayskull.config import Configuration
+from grayskull.utils import generate_recipe, origin_is_github
 
 init(autoreset=True)
 logging.basicConfig(format="%(levelname)s:%(message)s")
@@ -118,23 +119,35 @@ def main(args=None):
             f"#### Initializing recipe for "
             f"{Fore.BLUE}{pkg_name}{pypi_label} {Fore.GREEN}####\n"
         )
-        pkg_name, pkg_version = parse_pkg_name_version(pkg_name)
         try:
-            recipe = GrayskullFactory.create_recipe(
-                "pypi",
-                pkg_name,
-                pkg_version,
-                download=args.download,
-                is_strict_cf=args.is_strict_conda_forge,
+            recipe, config = create_python_recipe(
+                pkg_name, args.is_strict_conda_forge, args.download
             )
         except requests.exceptions.HTTPError as err:
             print_msg(f"{Fore.RED}Package seems to be missing.\nException: {err}\n\n")
             continue
-        recipe.generate_recipe(args.output, maintainers=args.maintainers)
+
+        if "extra" in recipe:
+            recipe["extra"]["recipe-maintainers"] = args.maintainers
+        else:
+            recipe.add_section({"extra": {"recipe-maintainers": args.maintainers}})
+
+        generate_recipe(recipe, config, args.output)
         print_msg(
             f"\n{Fore.GREEN}#### Recipe generated on "
             f"{os.path.realpath(args.output)} for {pkg_name} ####\n"
         )
+
+
+def create_python_recipe(pkg_name, is_strict_conda_forge=True, download=False):
+    pkg_origin, pkg_name, pkg_version = parse_pkg_name_version(pkg_name)
+    config = Configuration(
+        name=pkg_name,
+        version=pkg_version,
+        is_strict_cf=is_strict_conda_forge,
+        download=download,
+    )
+    return GrayskullFactory.create_recipe("pypi", config, pkg_name), config
 
 
 if __name__ == "__main__":
