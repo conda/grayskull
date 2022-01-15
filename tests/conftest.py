@@ -4,7 +4,7 @@ import shutil
 import pytest
 from pytest import fixture
 
-from grayskull.pypi import PyPi
+from grayskull.strategy.py_base import download_sdist_pkg
 
 
 @fixture(scope="session")
@@ -16,7 +16,7 @@ def data_dir() -> str:
 def pkg_pytest(tmpdir_factory) -> str:
     folder = tmpdir_factory.mktemp("test-download-pkg")
     dest_pkg = str(folder / "PYTEST-PKG.tar.gz")
-    PyPi._download_sdist_pkg(
+    download_sdist_pkg(
         "https://pypi.io/packages/source/p/pytest/pytest-5.3.5.tar.gz", dest_pkg
     )
     shutil.unpack_archive(dest_pkg, str(folder))

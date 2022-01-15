@@ -8,12 +8,12 @@ dependencies:
   - pytest-xdist
   - pytest-forked
   - requests
-  - ruamel.yaml>=0.16.10
+  - ruamel.yaml >=0.16.10
   - ruamel.yaml.jinja2
   - stdlib-list
   - pip
-  - setuptools>=30.3.0
-  - rapidfuzz>=1.9.1
+  - setuptools >=30.3.0
+  - rapidfuzz >=1.9.1
   - progressbar2>=3.53.0
   - colorama
   - mock
@@ -21,5 +21,5 @@ dependencies:
   - numpy
   - compilers
   - fortran-compiler
-  - conda-souschef
+  - conda-souschef >=2.1.0
   - setuptools-scm
