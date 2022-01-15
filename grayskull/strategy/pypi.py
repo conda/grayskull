@@ -4,7 +4,7 @@ import os
 import re
 from pathlib import Path
 from tempfile import mkdtemp
-from typing import Any, List, Optional
+from typing import List, Optional
 
 import requests
 from colorama import Fore
@@ -186,7 +186,7 @@ def merge_requires_dist(pypi_metadata: dict, sdist_metadata: dict) -> List:
     return requires_dist
 
 
-def get_origin_wise_metadata(config) -> tuple[Any, dict[str, Any] | Any]:
+def get_origin_wise_metadata(config):
     """Method responsible for extracting metadata based on package origin."""
     if origin_is_github(config.name):
         url = config.name
