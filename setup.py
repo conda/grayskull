@@ -36,7 +36,13 @@ setup(
         "conda-souschef >=2.1.0",
     ],
     extras_require={
-        "testing": ["pytest", "mock", "pytest-cov", "pytest-console-scripts"]
+        "testing": [
+            "pytest",
+            "mock",
+            "pytest-cov",
+            "pytest-console-scripts",
+            "pytest-mock",
+        ]
     },
     url="https://github.com/conda-incubator/grayskull",
     license="MIT",

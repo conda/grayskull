@@ -80,3 +80,8 @@ class Configuration:
                     f"sup_py {op} PyVer(int({major}), int({minor}))"
                 )
         return py_ver_enabled
+
+    def __post_init__(self):
+        if self.url_pypi_metadata != "https://pypi.org/pypi/{pkg_name}/json":
+            preffix = "/" if not self.url_pypi_metadata.endswith("/") else ""
+            self.url_pypi_metadata += f"{preffix}{{pkg_name}}/json"

@@ -8,6 +8,7 @@ dependencies:
   - pytest-cov
   - pytest-xdist
   - pytest-forked
+  - pytest-mock
   - requests
   - ruamel.yaml >=0.16.10
   - ruamel.yaml.jinja2

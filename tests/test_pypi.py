@@ -477,7 +477,7 @@ def test_pymc_recipe_fortran():
 
 
 def test_pytest_recipe_entry_points():
-    recipe = create_python_recipe("pytest=5.3.5", is_strict_conda_forge=False)[0]
+    recipe = create_python_recipe("pytest=5.3.5", is_strict_cf=False)[0]
     assert sorted(recipe["build"]["entry_points"]) == sorted(
         ["pytest=pytest:main", "py.test=pytest:main"]
     )
@@ -678,7 +678,7 @@ def test_multiples_exit_setup():
 
 
 def test_sequence_inside_another_in_dependencies():
-    recipe = create_python_recipe("unittest2=1.1.0")[0]
+    recipe = create_python_recipe("unittest2=1.1.0", is_strict_cf=True)[0]
     assert recipe["requirements"]["host"] == [
         "argparse",
         "pip",
@@ -800,7 +800,7 @@ def test_replace_slash_in_imports():
 
 
 def test_add_python_min_to_strict_conda_forge():
-    recipe = create_python_recipe("dgllife=0.2.8")[0]
+    recipe = create_python_recipe("dgllife=0.2.8", is_strict_cf=True)[0]
     assert recipe["build"]["noarch"] == "python"
     assert recipe["requirements"]["host"][1] == "python >=3.6"
     assert "python >=3.6" in recipe["requirements"]["run"]
