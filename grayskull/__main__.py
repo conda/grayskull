@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import sys
+from typing import List, Optional
 
 import requests
 from colorama import Fore, Style, init
@@ -9,8 +10,8 @@ from colorama.ansi import clear_screen
 
 import grayskull
 from grayskull.base.factory import GrayskullFactory
+from grayskull.base.github import get_git_current_user
 from grayskull.cli import CLIConfig
-from grayskull.cli.parser import parse_pkg_name_version
 from grayskull.cli.stdout import print_msg
 from grayskull.config import Configuration
 from grayskull.utils import generate_recipe, origin_is_github
@@ -136,10 +137,7 @@ def main(args=None):
             print_msg(f"{Fore.RED}Package seems to be missing.\nException: {err}\n\n")
             continue
 
-        if "extra" in recipe:
-            recipe["extra"]["recipe-maintainers"] = args.maintainers
-        else:
-            recipe.add_section({"extra": {"recipe-maintainers": args.maintainers}})
+        add_extra_section(recipe, args.maintainers)
 
         generate_recipe(recipe, config, args.output)
         print_msg(
@@ -149,9 +147,18 @@ def main(args=None):
 
 
 def create_python_recipe(pkg_name, **kwargs):
-    pkg_origin, pkg_name, pkg_version = parse_pkg_name_version(pkg_name)
-    config = Configuration(name=pkg_name, version=pkg_version, **kwargs)
+    config = Configuration(name=pkg_name, **kwargs)
     return GrayskullFactory.create_recipe("pypi", config, pkg_name), config
+
+
+def add_extra_section(recipe, maintainers: Optional[List] = None):
+    maintainers = maintainers or [get_git_current_user()]
+    if "extra" in "recipe":
+        recipe["extra"]["recipe-maintainers"] = maintainers
+    else:
+        recipe.add_section({"extra": {"recipe-maintainers": maintainers}})
+    prefix = f"\n   - {Fore.LIGHTMAGENTA_EX}"
+    print_msg(f"\nMaintainers:{prefix}{prefix.join(maintainers)}")
 
 
 if __name__ == "__main__":

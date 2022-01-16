@@ -188,9 +188,9 @@ def merge_requires_dist(pypi_metadata: dict, sdist_metadata: dict) -> List:
 
 def get_origin_wise_metadata(config):
     """Method responsible for extracting metadata based on package origin."""
-    if origin_is_github(config.name):
-        url = config.name
-        name = config.name.split("/")[-1]
+    if config.repo_github and origin_is_github(config.repo_github):
+        url = config.repo_github
+        name = config.name
         version, version_tag = handle_gh_version(
             name=name, version=config.version, url=url
         )
