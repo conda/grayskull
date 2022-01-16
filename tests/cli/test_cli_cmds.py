@@ -65,6 +65,7 @@ def test_change_pypi_url(mocker):
     mocker.patch(
         "grayskull.__main__.create_python_recipe", return_value=({"extra": {}}, None)
     )
+    mocker.patch("grayskull.__main__.add_extra_section", return_value=None)
     spy = mocker.spy(cli, "create_python_recipe")
 
     cli.main(["pypi", "pytest=5.3.2", "--pypi-url=http://url_pypi.com/abc"])

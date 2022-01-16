@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
+from grayskull.cli.parser import parse_pkg_name_version
 from grayskull.utils import PyVer
 
 
@@ -34,6 +35,7 @@ class Configuration:
     url_pypi_metadata: str = "https://pypi.org/pypi/{pkg_name}/json"
     download: bool = False
     is_arch: bool = False
+    repo_github: Optional[str] = None
 
     def get_oldest_py3_version(self, list_py_ver: List[PyVer]) -> PyVer:
         list_py_ver = sorted(list_py_ver)
@@ -85,3 +87,12 @@ class Configuration:
         if self.url_pypi_metadata != "https://pypi.org/pypi/{pkg_name}/json":
             preffix = "/" if not self.url_pypi_metadata.endswith("/") else ""
             self.url_pypi_metadata += f"{preffix}{{pkg_name}}/json"
+        pkg_repo, pkg_name, pkg_version = parse_pkg_name_version(self.name)
+        if pkg_repo:
+            prefix = "" if pkg_repo.endswith("/") else "/"
+            self.repo_github = f"{pkg_repo}{prefix}{pkg_name}"
+
+        self.name = pkg_name
+
+        if pkg_version:
+            self.version = pkg_version
