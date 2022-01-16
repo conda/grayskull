@@ -33,7 +33,15 @@ def get_all_licenses_from_spdx() -> List:
 
     :return: List with all licenses information on spdx.org
     """
-    response = requests.get(url="https://spdx.org/licenses/licenses.json", timeout=5)
+    try:
+        response = requests.get(
+            url="https://spdx.org/licenses/licenses.json", timeout=5
+        )
+    except requests.exceptions.ConnectionError:
+        log.info(
+            "SPDX licence server didn't respond. Grayskull will continue without that."
+        )
+        return []
     log.debug(
         f"Response from spdx.org. Status code:{response.status_code},"
         f" response: {response}"
@@ -58,6 +66,8 @@ def match_license(name: str) -> dict:
     :return: Information of the license matched
     """
     all_licenses = get_all_licenses_from_spdx()
+    if not all_licenses:
+        return {}
     name = re.sub(r"\s+license\s*", "", name.strip(), flags=re.IGNORECASE)
 
     best_matches = process.extract(name, _get_all_license_choice(all_licenses))
@@ -89,6 +99,8 @@ def get_short_license_id(name: str) -> str:
     :return: short identifier (spdx) for the given license name
     """
     recipe_license = match_license(name)
+    if not recipe_license:
+        return "IT-WAS-NOT-POSSIBLE-TO-RECOVER-LICENCE"
     return recipe_license["licenseId"]
 
 

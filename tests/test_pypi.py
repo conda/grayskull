@@ -424,7 +424,7 @@ def test_format_host_requirements():
     )
     assert sorted(
         format_dependencies(["setuptools_scm [toml] >=3.4.1"], "pkg")
-    ) == sorted(["setuptools_scm >=3.4.1"])
+    ) == sorted(["setuptools_scm  >=3.4.1"])
 
 
 def test_download_pkg_sdist(pkg_pytest):
