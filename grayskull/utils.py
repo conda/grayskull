@@ -141,7 +141,7 @@ def format_dependencies(all_dependencies: List, name: str) -> List:
             if len(match_req) > 1:
                 deps_name = " ".join(match_req)
         deps_name = re_remove_space.sub(r"\1", deps_name.strip())
-        deps_name = re_remove_tags.sub(r"", deps_name.strip())
+        deps_name = re_remove_tags.sub(r" ", deps_name.strip())
         deps_name = re_remove_comments.sub("", deps_name)
         formatted_dependencies.append(deps_name.strip())
     return formatted_dependencies
