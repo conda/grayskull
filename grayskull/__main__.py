@@ -153,7 +153,7 @@ def create_python_recipe(pkg_name, **kwargs):
 
 def add_extra_section(recipe, maintainers: Optional[List] = None):
     maintainers = maintainers or [get_git_current_user()]
-    if "extra" in "recipe":
+    if "extra" in recipe:
         recipe["extra"]["recipe-maintainers"] = maintainers
     else:
         recipe.add_section({"extra": {"recipe-maintainers": maintainers}})

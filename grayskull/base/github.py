@@ -25,7 +25,7 @@ def fetch_latest_metadata_from_github_repo(git_url):
 
 def get_latest_version_of_github_repo(git_url: str) -> str:
     """get the latest version of the github repository using github api"""
-    return fetch_latest_metadata_from_github_repo(git_url)["name"]
+    return fetch_latest_metadata_from_github_repo(git_url)["tag_name"]
 
 
 def get_most_similar_tag_in_repo(git_url: str, query: str) -> str:
