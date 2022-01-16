@@ -96,6 +96,14 @@ def main(args=None):
         dest="url_pypi_metadata",
         help="Pypi url server",
     )
+    pypi_cmds.add_argument(
+        "--recursive",
+        "-r",
+        default=False,
+        action="store_true",
+        dest="is_recursive",
+        help="Recursively run grayskull on missing dependencies.",
+    )
 
     args = parser.parse_args(args)
 
@@ -118,7 +126,11 @@ def main(args=None):
     print_msg(Style.RESET_ALL)
     print_msg(clear_screen())
 
-    for pkg_name in args.pypi_packages:
+    generate_recipes_from_list(args.pypi_packages, args)
+
+
+def generate_recipes_from_list(list_pkgs, args):
+    for pkg_name in list_pkgs:
         logging.debug(f"Starting grayskull for pkg: {pkg_name}")
         pypi_label = "" if origin_is_github(pkg_name) else " (pypi)"
         print_msg(
@@ -142,13 +154,16 @@ def main(args=None):
         generate_recipe(recipe, config, args.output)
         print_msg(
             f"\n{Fore.GREEN}#### Recipe generated on "
-            f"{os.path.realpath(args.output)} for {pkg_name} ####\n"
+            f"{os.path.realpath(args.output)} for {pkg_name} ####\n\n"
         )
+
+        if args.is_recursive and config.missing_deps:
+            generate_recipes_from_list(config.missing_deps, args)
 
 
 def create_python_recipe(pkg_name, **kwargs):
     config = Configuration(name=pkg_name, **kwargs)
-    return GrayskullFactory.create_recipe("pypi", config, pkg_name), config
+    return GrayskullFactory.create_recipe("pypi", config), config
 
 
 def add_extra_section(recipe, maintainers: Optional[List] = None):

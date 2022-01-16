@@ -357,7 +357,8 @@ def get_metadata(recipe, config) -> dict:
             all_requirements["run"], config.py_cf_supported[0]
         )
 
-    print_requirements(all_requirements)
+    all_missing_deps = print_requirements(all_requirements)
+    config.missing_deps = all_missing_deps
     test_entry_points = get_test_entry_points(metadata.get("entry_points", []))
     test_imports = get_test_imports(metadata, metadata["name"])
     return {
