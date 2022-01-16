@@ -36,6 +36,7 @@ class Configuration:
     download: bool = False
     is_arch: bool = False
     repo_github: Optional[str] = None
+    missing_deps: set = field(default_factory=set)
 
     def get_oldest_py3_version(self, list_py_ver: List[PyVer]) -> PyVer:
         list_py_ver = sorted(list_py_ver)

@@ -104,3 +104,4 @@ def print_requirements(all_requirements: Dict):
             print_msg(f"Missing dependencies: {', '.join(all_missing_deps)}")
         else:
             print_msg("All dependencies are already on conda-forge.")
+    return all_missing_deps

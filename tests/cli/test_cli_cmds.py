@@ -80,3 +80,18 @@ def test_change_pypi_url(mocker):
 def test_config_url_pypi_metadata():
     config = Configuration("pytest", url_pypi_metadata="http://url_pypi.com/abc")
     assert config.url_pypi_metadata == "http://url_pypi.com/abc/{pkg_name}/json"
+
+
+@pytest.mark.parametrize("option", ["-r", "--recursive"])
+def test_recursive_option(mocker, option, tmpdir):
+    folder = tmpdir.mkdir(f"recursive_pkg{option}")
+
+    def mock_is_pkg_available(pkg):
+        return pkg != "colorama"
+
+    mocker.patch("grayskull.cli.stdout.is_pkg_available", new=mock_is_pkg_available)
+    spy = mocker.spy(cli, "generate_recipes_from_list")
+    cli.main(["pypi", "pytest=5.3.2", option, "-o", str(folder)])
+    assert spy.call_count == 2
+    assert spy.call_args_list[0].args[0] == ["pytest=5.3.2"]
+    assert spy.call_args_list[1].args[0] == {"colorama"}

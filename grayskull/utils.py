@@ -199,7 +199,7 @@ def get_clean_yaml(recipe_yaml: CommentedMap) -> CommentedMap:
 def add_new_lines_after_section(recipe_yaml: CommentedMap) -> CommentedMap:
     for section in recipe_yaml.keys():
         if section == "package":
-            recipe_yaml.yaml_set_comment_before_after_key(section, "\n\n\n")
+            recipe_yaml.yaml_set_comment_before_after_key(section, "\n\n")
         else:
             recipe_yaml.yaml_set_comment_before_after_key(section, "\n")
     return recipe_yaml

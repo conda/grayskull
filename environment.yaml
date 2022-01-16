@@ -23,5 +23,5 @@ dependencies:
   - numpy
   - compilers
   - fortran-compiler
-  - conda-souschef >=2.1.0
+  - conda-souschef >=2.1.1
   - setuptools-scm

@@ -33,7 +33,7 @@ setup(
         "rapidfuzz >=1.7.1",
         "progressbar2 >=3.53.0",
         "colorama",
-        "conda-souschef >=2.1.0",
+        "conda-souschef >=2.1.1",
     ],
     extras_require={
         "testing": [
