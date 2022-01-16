@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import sys
+from pathlib import Path
 from typing import List, Optional
 
 import requests
@@ -104,6 +105,25 @@ def main(args=None):
         dest="is_recursive",
         help="Recursively run grayskull on missing dependencies.",
     )
+    pypi_cmds.add_argument(
+        "--sections",
+        "-s",
+        default=None,
+        required=False,
+        choices=(
+            "package",
+            "source",
+            "build",
+            "requirements",
+            "test",
+            "about",
+            "extra",
+        ),
+        nargs="+",
+        dest="sections_populate",
+        help="If sections are specified, grayskull will populate just the sections "
+        "informed.",
+    )
 
     args = parser.parse_args(args)
 
@@ -138,18 +158,23 @@ def generate_recipes_from_list(list_pkgs, args):
             f"#### Initializing recipe for "
             f"{Fore.BLUE}{pkg_name}{pypi_label} {Fore.GREEN}####\n"
         )
+        is_pkg_file = Path(pkg_name).is_file()
+        if is_pkg_file:
+            args.output = pkg_name
         try:
             recipe, config = create_python_recipe(
                 pkg_name,
                 is_strict_cf=args.is_strict_conda_forge,
                 download=args.download,
                 url_pypi_metadata=args.url_pypi_metadata,
+                sections_populate=args.sections_populate,
             )
         except requests.exceptions.HTTPError as err:
             print_msg(f"{Fore.RED}Package seems to be missing.\nException: {err}\n\n")
             continue
 
-        add_extra_section(recipe, args.maintainers)
+        if is_pkg_file and "extra" in args.sections_populate:
+            add_extra_section(recipe, args.maintainers)
 
         generate_recipe(recipe, config, args.output)
         print_msg(
@@ -161,9 +186,14 @@ def generate_recipes_from_list(list_pkgs, args):
             generate_recipes_from_list(config.missing_deps, args)
 
 
-def create_python_recipe(pkg_name, **kwargs):
+def create_python_recipe(pkg_name, sections_populate=None, **kwargs):
     config = Configuration(name=pkg_name, **kwargs)
-    return GrayskullFactory.create_recipe("pypi", config), config
+    return (
+        GrayskullFactory.create_recipe(
+            "pypi", config, sections_populate=sections_populate
+        ),
+        config,
+    )
 
 
 def add_extra_section(recipe, maintainers: Optional[List] = None):

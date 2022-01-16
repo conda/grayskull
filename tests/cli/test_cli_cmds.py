@@ -1,9 +1,12 @@
 import sys
+from copy import deepcopy
 
 import pytest
+from souschef.recipe import Recipe
 
 import grayskull
 from grayskull import __main__ as cli
+from grayskull.base.factory import GrayskullFactory
 from grayskull.config import Configuration
 
 
@@ -74,6 +77,7 @@ def test_change_pypi_url(mocker):
         is_strict_cf=False,
         download=False,
         url_pypi_metadata="http://url_pypi.com/abc",
+        sections_populate=None,
     )
 
 
@@ -95,3 +99,27 @@ def test_recursive_option(mocker, option, tmpdir):
     assert spy.call_count == 2
     assert spy.call_args_list[0].args[0] == ["pytest=5.3.2"]
     assert spy.call_args_list[1].args[0] == {"colorama"}
+
+
+def test_part_reload_recipe(tmpdir):
+    recipe = GrayskullFactory.create_recipe(
+        "pypi", Configuration(name="pytest", version="5.3.2")
+    )
+    host = deepcopy([str(i) for i in recipe["requirements"]["host"]])
+    run = deepcopy([str(i) for i in recipe["requirements"]["run"]])
+    recipe["requirements"] = {}
+    recipe["foo"] = "bar"
+    assert not recipe["requirements"].value
+    assert host
+    assert run
+    assert recipe["foo"] == "bar"
+
+    folder = tmpdir.mkdir("reload_recipe")
+    recipe_path = folder / "recipe.yaml"
+    recipe.save(str(recipe_path))
+    cli.main(["pypi", str(recipe_path), "--sections", "requirements"])
+
+    recipe = Recipe(load_file=str(recipe_path))
+    assert host == [str(v) for v in recipe["requirements"]["host"] if v]
+    assert run == [str(v) for v in recipe["requirements"]["run"] if v]
+    assert recipe["foo"] == "bar"

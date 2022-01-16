@@ -175,20 +175,25 @@ def generate_recipe(
     pkg_name = config.name
     if origin_is_github(pkg_name):
         pkg_name = pkg_name.split("/")[-1]
-    recipe_dir = Path(folder_path) / pkg_name
-    logging.debug(f"Generating recipe on folder: {recipe_dir}")
-    if not recipe_dir.is_dir():
-        recipe_dir.mkdir()
-    recipe_path = recipe_dir / "meta.yaml"
-
-    add_new_lines_after_section(recipe.yaml)
+    if Path(folder_path).is_file():
+        folder_path = Path(folder_path)
+        recipe_path = folder_path
+        recipe_folder = folder_path.parent
+    else:
+        recipe_dir = Path(folder_path) / pkg_name
+        logging.debug(f"Generating recipe on: {recipe_dir}")
+        if not recipe_dir.is_dir():
+            recipe_dir.mkdir()
+        recipe_path = recipe_dir / "meta.yaml"
+        recipe_folder = recipe_dir
+        add_new_lines_after_section(recipe.yaml)
 
     clean_yaml(recipe)
     recipe.save(recipe_path)
     for file_to_recipe in config.files_to_copy:
         name = file_to_recipe.split(os.path.sep)[-1]
         if os.path.isfile(file_to_recipe):
-            copyfile(file_to_recipe, os.path.join(recipe_dir, name))
+            copyfile(file_to_recipe, os.path.join(recipe_folder, name))
 
 
 def get_clean_yaml(recipe_yaml: CommentedMap) -> CommentedMap:
