@@ -74,6 +74,8 @@ class Configuration:
         else:
             py_ver_enabled = {py_ver: True for py_ver in sup_python_ver}
         for op, major, minor in req_python:
+            if op == "=":
+                op = "=="
             if not minor:
                 minor = 0
             for sup_py, is_enabled in py_ver_enabled.items():

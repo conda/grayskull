@@ -21,6 +21,8 @@ from grayskull.strategy.py_base import (
     RE_DEPS_NAME,
     clean_deps_for_conda_forge,
     discover_license,
+    ensure_pep440,
+    ensure_pep440_in_req_list,
     get_compilers,
     get_entry_points_from_sdist,
     get_extra_from_requires_dist,
@@ -85,8 +87,10 @@ def merge_pypi_sdist_metadata(
         "entry_points": get_entry_points_from_sdist(sdist_metadata),
         "scripts": get_val("scripts"),
         "summary": get_val("summary"),
-        "requires_python": pypi_metadata.get("requires_python")
-        or sdist_metadata.get("python_requires"),
+        "requires_python": ensure_pep440(
+            pypi_metadata.get("requires_python")
+            or sdist_metadata.get("python_requires")
+        ),
         "doc_url": get_val("doc_url"),
         "dev_url": get_val("dev_url"),
         "license": get_val("license"),
@@ -341,14 +345,17 @@ def get_metadata(recipe, config) -> dict:
     print_msg(f"License file: {Fore.LIGHTMAGENTA_EX}{license_file}")
 
     all_requirements = extract_requirements(metadata, config, recipe)
+
     if all_requirements.get("host"):
         all_requirements["host"] = solve_list_pkg_name(
             all_requirements["host"], PYPI_CONFIG
         )
+        all_requirements["host"] = ensure_pep440_in_req_list(all_requirements["host"])
     if all_requirements.get("run"):
         all_requirements["run"] = solve_list_pkg_name(
             all_requirements["run"], PYPI_CONFIG
         )
+        all_requirements["run"] = ensure_pep440_in_req_list(all_requirements["run"])
     if config.is_strict_cf:
         all_requirements["host"] = clean_deps_for_conda_forge(
             all_requirements["host"], config.py_cf_supported[0]

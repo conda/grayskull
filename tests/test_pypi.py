@@ -15,6 +15,7 @@ from grayskull.cli.parser import parse_pkg_name_version
 from grayskull.config import Configuration
 from grayskull.strategy.py_base import (
     clean_deps_for_conda_forge,
+    ensure_pep440,
     generic_py_ver_to,
     get_compilers,
     get_entry_points_from_sdist,
@@ -839,3 +840,17 @@ def test_get_test_imports_clean_modules():
         )
         == ["_pytest", "_pytest._code"]
     )
+
+
+def test_ensure_pep440():
+    assert ensure_pep440("pytest ~=5.3.2") == "pytest >=5.3.2,==5.3.*"
+
+
+def test_pep440_recipe():
+    recipe = create_python_recipe("codalab=0.5.26", is_strict_cf=False)[0]
+    assert recipe["requirements"]["host"] == ["pip", "python >=3.6,<3.7"]
+
+
+def test_pep440_in_recipe_pypi():
+    recipe = create_python_recipe("kedro=0.17.6", is_strict_cf=False)[0]
+    assert sorted(recipe["requirements"]["run"])[0] == "anyconfig >=0.10.0,==0.10.*"
