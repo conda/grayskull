@@ -576,7 +576,16 @@ def get_test_imports(metadata: dict, default: Optional[str] = None) -> List:
     meta_pkg = metadata["packages"]
     if isinstance(meta_pkg, str):
         meta_pkg = [metadata["packages"]]
-    return [impt.replace("/", ".") for impt in sorted(meta_pkg)[:2]]
+    result = []
+    for module in sorted(meta_pkg):
+        if "/" in module or "." in module or module.startswith("_"):
+            continue
+        if module in ["test", "tests"]:
+            continue
+        result.append(module)
+    if not result:
+        return [impt.replace("/", ".") for impt in sorted(meta_pkg)[:2]]
+    return result
 
 
 def get_entry_points_from_sdist(sdist_metadata: dict) -> List:
