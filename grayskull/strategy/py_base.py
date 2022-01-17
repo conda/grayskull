@@ -293,8 +293,8 @@ def get_setup_cfg(source_path: str) -> dict:
     setup_cfg = read_configuration(str(path_setup_cfg))
     setup_cfg = dict(setup_cfg)
     if setup_cfg.get("options", {}).get("python_requires"):
-        setup_cfg["options"]["python_requires"] = str(
-            setup_cfg["options"]["python_requires"]
+        setup_cfg["options"]["python_requires"] = ensure_pep440(
+            str(setup_cfg["options"]["python_requires"])
         )
     result = {}
     result.update(setup_cfg.get("options", {}))
@@ -677,3 +677,30 @@ def get_sdist_metadata(
         metadata["source"] = {"url": sdist_url, "sha256": sha256_checksum(path_pkg)}
 
     return metadata
+
+
+def ensure_pep440_in_req_list(list_req: List[str]) -> List[str]:
+    return [ensure_pep440(pkg) for pkg in list_req]
+
+
+def ensure_pep440(pkg: str) -> str:
+    if not pkg:
+        return pkg
+    if pkg.strip().startswith("<{") or pkg.strip().startswith("{{"):
+        return pkg
+    split_pkg = pkg.strip().split(" ")
+    if len(split_pkg) <= 1:
+        return pkg
+    constrain_pkg = "".join(split_pkg[1:])
+    list_constrains = constrain_pkg.split(",")
+    full_constrain = []
+    for constrain in list_constrains:
+        if "~=" in constrain:
+            version = constrain.strip().replace("~=", "").strip()
+            version_reduced = ".".join(version.split(".")[:-1])
+            version_reduced += ".*"
+            full_constrain.append(f">={version},=={version_reduced}")
+        else:
+            full_constrain.append(constrain.strip())
+    all_constrains = ",".join(full_constrain)
+    return f"{split_pkg[0]} {all_constrains}"
