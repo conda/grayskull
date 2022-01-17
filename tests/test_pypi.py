@@ -584,10 +584,7 @@ def test_django_rest_framework_xml_license():
 
 
 def test_get_test_imports():
-    assert get_test_imports({"packages": ["pkg", "pkg.mod1", "pkg.mod2"]}) == [
-        "pkg",
-        "pkg.mod1",
-    ]
+    assert get_test_imports({"packages": ["pkg", "pkg.mod1", "pkg.mod2"]}) == ["pkg"]
     assert get_test_imports({"packages": None}, default="pkg-mod") == ["pkg_mod"]
     assert get_test_imports({"packages": "pkg"}, default="pkg-mod") == ["pkg"]
 
@@ -796,7 +793,7 @@ def test_entry_points_is_list_of_str():
 
 def test_replace_slash_in_imports():
     recipe = create_python_recipe("asgi-lifespan=1.0.1")[0]
-    assert "asgi_lifespan._concurrency" == recipe["test"]["imports"][1]
+    assert ["asgi_lifespan"] == recipe["test"]["imports"]
 
 
 def test_add_python_min_to_strict_conda_forge():
@@ -804,3 +801,41 @@ def test_add_python_min_to_strict_conda_forge():
     assert recipe["build"]["noarch"] == "python"
     assert recipe["requirements"]["host"][1] == "python >=3.6"
     assert "python >=3.6" in recipe["requirements"]["run"]
+
+
+def test_get_test_imports_clean_modules():
+    assert (
+        get_test_imports(
+            {
+                "packages": [
+                    "_pytest",
+                    "tests",
+                    "test",
+                    "_pytest._code",
+                    "_pytest._io",
+                    "_pytest.assertion",
+                    "_pytest.config",
+                    "_pytest.mark",
+                    "pytest",
+                    "pytest.foo",
+                    "zar",
+                ]
+            }
+        )
+        == ["pytest", "zar"]
+    )
+    assert (
+        get_test_imports(
+            {
+                "packages": [
+                    "_pytest",
+                    "_pytest._code",
+                    "_pytest._io",
+                    "_pytest.assertion",
+                    "_pytest.config",
+                    "_pytest.mark",
+                ]
+            }
+        )
+        == ["_pytest", "_pytest._code"]
+    )
