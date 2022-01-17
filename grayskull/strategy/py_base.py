@@ -581,6 +581,10 @@ def get_test_imports(metadata: dict, default: Optional[str] = None) -> List:
         if "/" in module or "." in module or module.startswith("_"):
             continue
         if module in ["test", "tests"]:
+            log.warning(
+                f"The package wrongfully added the test folder as a module ({module}),"
+                f" as a result that might result in conda clobber warnings."
+            )
             continue
         result.append(module)
     if not result:
