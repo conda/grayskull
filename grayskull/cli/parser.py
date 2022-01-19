@@ -1,11 +1,17 @@
 import re
 from typing import Optional, Tuple
 
-from grayskull.utils import origin_is_github
+from grayskull.sdist import SdistContent
+from grayskull.utils import origin_is_github, origin_is_local_sdist
 
 
-def parse_pkg_name_version(pkg_name: str) -> Tuple[str, str, Optional[str]]:
+def parse_pkg_name_version(
+    pkg_name: str,
+) -> Tuple[str, str, Optional[str]]:
     origin = ""
+    if origin_is_local_sdist(pkg_name):
+        sdist = SdistContent(pkg_name)
+        return "", sdist.name, sdist.version
     if origin_is_github(pkg_name):
         origin, pkg_name = pkg_name.rsplit("/", 1)
         origin += "/"

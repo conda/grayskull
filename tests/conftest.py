@@ -1,5 +1,8 @@
 import os
 import shutil
+import tarfile
+import zipfile
+from pathlib import Path
 
 import pytest
 from pytest import fixture
@@ -21,6 +24,35 @@ def pkg_pytest(tmpdir_factory) -> str:
     )
     shutil.unpack_archive(dest_pkg, str(folder))
     return dest_pkg
+
+
+@fixture(scope="session")
+def sdist_pkg_info(data_dir) -> Path:
+    return Path(data_dir) / "local-sdist" / "PKG-INFO-TEST"
+
+
+@fixture
+def local_tar_sdist(tmp_path, sdist_pkg_info) -> str:
+    mypkg = tmp_path / "mypkg.tar.gz"
+    with tarfile.open(mypkg, "w") as tar:
+        tar.add(sdist_pkg_info, arcname="mypkg-1.0.0/PKG-INFO")
+    return str(mypkg)
+
+
+@fixture
+def local_tar_not_sdist(tmp_path, sdist_pkg_info) -> str:
+    mypkg = tmp_path / "mypkg.tar.gz"
+    with tarfile.open(mypkg, "w") as tar:
+        tar.add(sdist_pkg_info, arcname="mypkg-1.0.0/README")
+    return str(mypkg)
+
+
+@fixture
+def local_zip_sdist(tmp_path, sdist_pkg_info) -> str:
+    mypkg = tmp_path / "mypkg.zip"
+    with zipfile.ZipFile(mypkg, "w") as myzip:
+        myzip.write(sdist_pkg_info, arcname="mypkg-1.0.0/PKG-INFO")
+    return str(mypkg)
 
 
 def pytest_collection_modifyitems(config, items):

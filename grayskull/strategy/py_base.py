@@ -659,12 +659,15 @@ def get_sdist_metadata(
     :return: sdist metadata
     """
     temp_folder = mkdtemp(prefix=f"grayskull-{config.name}-")
-    pkg_name = pkg_name_from_sdist_url(sdist_url)
-    path_pkg = os.path.join(temp_folder, pkg_name)
+    if config.from_local_sdist:
+        path_pkg = Path(config.local_sdist).resolve()
+    else:
+        pkg_name = pkg_name_from_sdist_url(sdist_url)
+        path_pkg = os.path.join(temp_folder, pkg_name)
 
-    download_sdist_pkg(sdist_url=sdist_url, dest=path_pkg, name=config.name)
-    if config.download:
-        config.files_to_copy.append(path_pkg)
+        download_sdist_pkg(sdist_url=sdist_url, dest=path_pkg, name=config.name)
+        if config.download:
+            config.files_to_copy.append(path_pkg)
     log.debug(f"Unpacking {path_pkg} to {temp_folder}")
     shutil.unpack_archive(path_pkg, temp_folder)
     print_msg("Recovering information from setup.py")
@@ -675,6 +678,11 @@ def get_sdist_metadata(
     # so we can assume the sha256 can be computed reliably
     if with_source:
         metadata["source"] = {"url": sdist_url, "sha256": sha256_checksum(path_pkg)}
+    if config.from_local_sdist:
+        metadata["source"] = {
+            "path": str(path_pkg),
+            "sha256": sha256_checksum(path_pkg),
+        }
 
     return metadata
 

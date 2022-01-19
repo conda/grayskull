@@ -21,7 +21,7 @@ class GrayskullFactory(ABC):
                 f"Please inform a valid one."
                 f"{', '.join(GrayskullFactory.REGISTERED_STRATEGY.keys())}"
             )
-        if Path(config.name).is_file():
+        if Path(config.name).is_file() and not config.from_local_sdist:
             recipe = Recipe(load_file=config.name)
             config.name = _get_name(recipe)
             config.version = _get_version(recipe)

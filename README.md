@@ -66,6 +66,15 @@ For example: <br>
 grayskull pypi https://github.com/confluentinc/confluent-kafka-python
 ```
 
+You can also generate a recipe from a local sdist archive:
+
+```bash
+grayskull pypi ./pytest-5.3.5.tar.gz
+```
+
+Note that such a recipe isn't really portable as it will depend on the local path of the
+sdist file. It can be useful if you want to automatically generate a conda package.
+
 ### Online Grayskull
 
 It is also possible to use Grayskull without any installation. You can go to this website [marcelotrevisani.com/grayskull](https://www.marcelotrevisani.com/grayskull) and inform the name and the version (optional) of the package and it will create the recipe for you.

@@ -854,3 +854,11 @@ def test_pep440_recipe():
 def test_pep440_in_recipe_pypi():
     recipe = create_python_recipe("kedro=0.17.6", is_strict_cf=False)[0]
     assert sorted(recipe["requirements"]["run"])[0] == "anyconfig >=0.10.0,==0.10.*"
+
+
+def test_create_recipe_from_local_sdist(pkg_pytest):
+    recipe = create_python_recipe(pkg_pytest, from_local_sdist=True)[0]
+    assert recipe["source"]["path"] == pkg_pytest
+    assert recipe["about"]["home"] == "https://docs.pytest.org/en/latest/"
+    assert recipe["about"]["license"] == "MIT"
+    assert recipe["about"]["license_file"] == "LICENSE"

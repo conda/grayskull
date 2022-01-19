@@ -1,0 +1,40 @@
+Metadata-Version: 2.1
+Name: test-package
+Version: 1.2.0
+Summary: Test package
+Home-page: https://gitlab.com/johndoe/test-package
+Author: John Doe
+Author-email: john.doe@gmail.com
+License: MIT license
+Description: # test-package
+
+        [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+        [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+        [![pipeline](https://gitlab.com/johndoe/test-package/badges/main/pipeline.svg)](https://gitlab.com/johndoe/test-package/-/commits/main)
+        [![coverage](https://gitlab.com/johndoe/test-package/badges/main/coverage.svg)](https://gitlab.com/johndoe/test-package/-/commits/main)
+
+        `test-package` is a Python package for testing.
+
+        ## Installation
+
+        Only Python 3.8 and above is tested. Create a virtualenv and run:
+
+        ```bash
+        pip3 install test-package
+        ```
+
+        ## License
+
+        MIT
+
+Keywords: test
+Platform: UNKNOWN
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Provides-Extra: tests
