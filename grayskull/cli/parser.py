@@ -1,7 +1,7 @@
 import re
+from pathlib import Path
 from typing import Optional, Tuple
 
-from grayskull.sdist import SdistContent
 from grayskull.utils import origin_is_github, origin_is_local_sdist
 
 
@@ -10,8 +10,17 @@ def parse_pkg_name_version(
 ) -> Tuple[str, str, Optional[str]]:
     origin = ""
     if origin_is_local_sdist(pkg_name):
-        sdist = SdistContent(pkg_name)
-        return "", sdist.name, sdist.version
+        # Try to get package name and version from sdist archive
+        # If the version is normalized, there should be no dash in it
+        # Will get them from PKG-INFO later
+        filename = Path(pkg_name).stem
+        if filename.endswith(".tar"):
+            filename = filename[:-4]
+        name, _, version = filename.rpartition("-")
+        if name == "":
+            name = filename
+            version = ""
+        return "", name, version
     if origin_is_github(pkg_name):
         origin, pkg_name = pkg_name.rsplit("/", 1)
         origin += "/"

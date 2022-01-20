@@ -14,6 +14,7 @@ from urllib.parse import urlparse
 
 import requests
 from colorama import Fore, Style
+from pkginfo import UnpackedSDist
 
 from grayskull.cli.stdout import manage_progressbar, print_msg
 from grayskull.config import Configuration
@@ -652,7 +653,7 @@ def get_sdist_metadata(
     sdist_url: str, config: Configuration, with_source: bool = False
 ) -> dict:
     """Method responsible to return the sdist metadata which is basically
-    the metadata present in setup.py and setup.cfg
+    the metadata present in setup.py and setup.cfg or PKG-INFO
     :param sdist_url: URL to the sdist package
     :param config: package configuration
     :param with_source: a boolean value to indicate Github packages
@@ -684,6 +685,12 @@ def get_sdist_metadata(
             "sha256": sha256_checksum(path_pkg),
         }
 
+    # Get some keys from PKG-INFO
+    path_pkg_info = list(Path(temp_folder).rglob("PKG-INFO"))
+    if path_pkg_info:
+        dist = UnpackedSDist(path_pkg_info[0].parent)
+        for key in ("name", "version", "summary", "author"):
+            metadata[key] = getattr(dist, key, None)
     return metadata
 
 

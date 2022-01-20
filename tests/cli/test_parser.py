@@ -1,3 +1,5 @@
+import pytest
+
 from grayskull.cli.parser import parse_pkg_name_version
 
 
@@ -24,15 +26,22 @@ def test_parse_git_github_url():
     assert not version
 
 
-def test_parse_local_sdist_tar(local_tar_sdist):
-    origin, pkg_name, pkg_version = parse_pkg_name_version(local_tar_sdist)
+@pytest.mark.parametrize("extension", [".zip", ".tar", ".tar.gz", ".tar.bz2"])
+@pytest.mark.parametrize(
+    "filepath, expected_name, expected_version",
+    [
+        ("mypkg-1.2.0", "mypkg", "1.2.0"),
+        ("mypkg-with-dash-1.2.0", "mypkg-with-dash", "1.2.0"),
+        ("mypkg-1.0rc1", "mypkg", "1.0rc1"),
+        ("mypkg", "mypkg", ""),
+    ],
+)
+def test_parse_local_sdist(
+    extension, filepath, expected_name, expected_version, tmp_path
+):
+    p = tmp_path / f"{filepath}{extension}"
+    p.write_text("foo")
+    origin, name, version = parse_pkg_name_version(str(p))
     assert origin == ""
-    assert pkg_name == "test-package"
-    assert pkg_version == "1.2.0"
-
-
-def test_parse_local_sdist_zip(local_zip_sdist):
-    origin, pkg_name, pkg_version = parse_pkg_name_version(local_zip_sdist)
-    assert origin == ""
-    assert pkg_name == "test-package"
-    assert pkg_version == "1.2.0"
+    assert name == expected_name
+    assert version == expected_version
