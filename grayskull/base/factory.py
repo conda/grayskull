@@ -31,6 +31,12 @@ class GrayskullFactory(ABC):
         GrayskullFactory.REGISTERED_STRATEGY[repo_type.lower()].fetch_data(
             recipe, config, sections=sections_populate
         )
+
+        if "build" not in recipe:
+            recipe.add_section({"build": {"number": 0}})
+        else:
+            recipe["build"]["number"] = 0
+
         return recipe
 
 
