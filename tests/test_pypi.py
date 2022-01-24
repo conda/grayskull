@@ -500,6 +500,7 @@ def test_cythongsl_recipe_build():
     assert recipe["requirements"]["build"] == ["<{ compiler('c') }}"]
     assert recipe["requirements"]["host"] == ["cython >=0.16", "pip", "python"]
     assert recipe["build"]["noarch"] is None
+    assert recipe["build"]["number"] == 0
 
 
 @pytest.mark.github
