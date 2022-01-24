@@ -180,7 +180,7 @@ def generate_recipes_from_list(list_pkgs, args):
             print_msg(f"{Fore.RED}Package seems to be missing.\nException: {err}\n\n")
             continue
 
-        if is_pkg_file and "extra" in args.sections_populate:
+        if args.sections_populate is None or "extra" in args.sections_populate:
             add_extra_section(recipe, args.maintainers)
 
         generate_recipe(recipe, config, args.output)
