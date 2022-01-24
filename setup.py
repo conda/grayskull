@@ -34,6 +34,7 @@ setup(
         "progressbar2 >=3.53.0",
         "colorama",
         "conda-souschef >=2.1.1",
+        "pkginfo",
     ],
     extras_require={
         "testing": [

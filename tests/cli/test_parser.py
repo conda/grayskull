@@ -1,3 +1,5 @@
+import pytest
+
 from grayskull.cli.parser import parse_pkg_name_version
 
 
@@ -22,3 +24,24 @@ def test_parse_git_github_url():
     assert origin == "https://github.com/pytest-dev/"
     assert pkg_name == "pytest"
     assert not version
+
+
+@pytest.mark.parametrize("extension", [".zip", ".tar", ".tar.gz", ".tar.bz2"])
+@pytest.mark.parametrize(
+    "filepath, expected_name, expected_version",
+    [
+        ("mypkg-1.2.0", "mypkg", "1.2.0"),
+        ("mypkg-with-dash-1.2.0", "mypkg-with-dash", "1.2.0"),
+        ("mypkg-1.0rc1", "mypkg", "1.0rc1"),
+        ("mypkg", "mypkg", ""),
+    ],
+)
+def test_parse_local_sdist(
+    extension, filepath, expected_name, expected_version, tmp_path
+):
+    p = tmp_path / f"{filepath}{extension}"
+    p.write_text("foo")
+    origin, name, version = parse_pkg_name_version(str(p))
+    assert origin == ""
+    assert name == expected_name
+    assert version == expected_version

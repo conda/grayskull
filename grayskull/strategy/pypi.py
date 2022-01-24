@@ -204,6 +204,12 @@ def get_origin_wise_metadata(config):
         )
         sdist_metadata["version"] = version
         pypi_metadata = {}
+    elif config.from_local_sdist:
+        sdist_metadata = get_sdist_metadata(
+            sdist_url="",
+            config=config,
+        )
+        pypi_metadata = {}
     else:
         pypi_metadata = get_pypi_metadata(config)
         sdist_metadata = get_sdist_metadata(

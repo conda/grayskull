@@ -36,6 +36,8 @@ class Configuration:
     download: bool = False
     is_arch: bool = False
     repo_github: Optional[str] = None
+    from_local_sdist: bool = False
+    local_sdist: Optional[str] = None
     missing_deps: set = field(default_factory=set)
 
     def get_oldest_py3_version(self, list_py_ver: List[PyVer]) -> PyVer:
@@ -87,6 +89,8 @@ class Configuration:
         return py_ver_enabled
 
     def __post_init__(self):
+        if self.from_local_sdist:
+            self.local_sdist = self.name
         if self.url_pypi_metadata != "https://pypi.org/pypi/{pkg_name}/json":
             preffix = "/" if not self.url_pypi_metadata.endswith("/") else ""
             self.url_pypi_metadata += f"{preffix}{{pkg_name}}/json"

@@ -14,6 +14,7 @@ from urllib.parse import urlparse
 
 import requests
 from colorama import Fore, Style
+from pkginfo import UnpackedSDist
 
 from grayskull.cli.stdout import manage_progressbar, print_msg
 from grayskull.config import Configuration
@@ -652,19 +653,22 @@ def get_sdist_metadata(
     sdist_url: str, config: Configuration, with_source: bool = False
 ) -> dict:
     """Method responsible to return the sdist metadata which is basically
-    the metadata present in setup.py and setup.cfg
+    the metadata present in setup.py and setup.cfg or PKG-INFO
     :param sdist_url: URL to the sdist package
     :param config: package configuration
     :param with_source: a boolean value to indicate Github packages
     :return: sdist metadata
     """
     temp_folder = mkdtemp(prefix=f"grayskull-{config.name}-")
-    pkg_name = pkg_name_from_sdist_url(sdist_url)
-    path_pkg = os.path.join(temp_folder, pkg_name)
+    if config.from_local_sdist:
+        path_pkg = Path(config.local_sdist).resolve()
+    else:
+        pkg_name = pkg_name_from_sdist_url(sdist_url)
+        path_pkg = os.path.join(temp_folder, pkg_name)
 
-    download_sdist_pkg(sdist_url=sdist_url, dest=path_pkg, name=config.name)
-    if config.download:
-        config.files_to_copy.append(path_pkg)
+        download_sdist_pkg(sdist_url=sdist_url, dest=path_pkg, name=config.name)
+        if config.download:
+            config.files_to_copy.append(path_pkg)
     log.debug(f"Unpacking {path_pkg} to {temp_folder}")
     shutil.unpack_archive(path_pkg, temp_folder)
     print_msg("Recovering information from setup.py")
@@ -675,7 +679,18 @@ def get_sdist_metadata(
     # so we can assume the sha256 can be computed reliably
     if with_source:
         metadata["source"] = {"url": sdist_url, "sha256": sha256_checksum(path_pkg)}
+    if config.from_local_sdist:
+        metadata["source"] = {
+            "path": str(path_pkg),
+            "sha256": sha256_checksum(path_pkg),
+        }
 
+    # Get some keys from PKG-INFO
+    path_pkg_info = list(Path(temp_folder).rglob("PKG-INFO"))
+    if path_pkg_info:
+        dist = UnpackedSDist(path_pkg_info[0].parent)
+        for key in ("name", "version", "summary", "author"):
+            metadata[key] = getattr(dist, key, None)
     return metadata
 
 

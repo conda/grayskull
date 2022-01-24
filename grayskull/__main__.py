@@ -15,7 +15,7 @@ from grayskull.base.github import get_git_current_user
 from grayskull.cli import CLIConfig
 from grayskull.cli.stdout import print_msg
 from grayskull.config import Configuration
-from grayskull.utils import generate_recipe, origin_is_github
+from grayskull.utils import generate_recipe, origin_is_github, origin_is_local_sdist
 
 init(autoreset=True)
 logging.basicConfig(format="%(levelname)s:%(message)s")
@@ -152,13 +152,19 @@ def main(args=None):
 def generate_recipes_from_list(list_pkgs, args):
     for pkg_name in list_pkgs:
         logging.debug(f"Starting grayskull for pkg: {pkg_name}")
-        pypi_label = "" if origin_is_github(pkg_name) else " (pypi)"
+        from_local_sdist = origin_is_local_sdist(pkg_name)
+        if origin_is_github(pkg_name):
+            pypi_label = ""
+        elif from_local_sdist:
+            pypi_label = " (local)"
+        else:
+            pypi_label = " (pypi)"
         print_msg(
             f"{Fore.GREEN}\n\n"
             f"#### Initializing recipe for "
             f"{Fore.BLUE}{pkg_name}{pypi_label} {Fore.GREEN}####\n"
         )
-        is_pkg_file = Path(pkg_name).is_file()
+        is_pkg_file = Path(pkg_name).is_file() and (not from_local_sdist)
         if is_pkg_file:
             args.output = pkg_name
         try:
@@ -168,6 +174,7 @@ def generate_recipes_from_list(list_pkgs, args):
                 download=args.download,
                 url_pypi_metadata=args.url_pypi_metadata,
                 sections_populate=args.sections_populate,
+                from_local_sdist=from_local_sdist,
             )
         except requests.exceptions.HTTPError as err:
             print_msg(f"{Fore.RED}Package seems to be missing.\nException: {err}\n\n")

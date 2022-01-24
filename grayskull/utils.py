@@ -90,6 +90,16 @@ def origin_is_github(name_or_url: str) -> bool:
     )  # lgtm [py/incomplete-url-substring-sanitization]
 
 
+def origin_is_local_sdist(name: str) -> bool:
+    """Return True if the given local file can be a sdist"""
+    # Available formats according to
+    # https://docs.python.org/3/distutils/sourcedist.html#creating-a-source-distribution
+    return (
+        name.endswith((".tar.gz", ".tar.bz2", ".tar.xz", ".tar.Z", ".tar", ".zip"))
+        and Path(name).is_file()
+    )
+
+
 def sha256_checksum(filename, block_size=65536):
     sha256 = hashlib.sha256()
     with open(filename, "rb") as f:
