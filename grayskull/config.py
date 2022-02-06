@@ -78,6 +78,8 @@ class Configuration:
         for op, major, minor in req_python:
             if op == "=":
                 op = "=="
+            elif op == "~=":
+                op = ">="
             if not minor:
                 minor = 0
             for sup_py, is_enabled in py_ver_enabled.items():

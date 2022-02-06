@@ -159,6 +159,7 @@ def test_get_selector():
         (">2.7", "2k", "<36"),
         ("<3", "3k", "skip"),
         ("!=3.7", "==37", "==37"),
+        ("~=3.7", "<37", "<37"),
     ],
 )
 def test_py_version_to_selector(requires_python, exp_selector, ex_cf, recipe_config):
@@ -191,6 +192,7 @@ def test_py_version_to_selector(requires_python, exp_selector, ex_cf, recipe_con
         (">2.7", ">=3.6", ">=3.6"),
         ("<3", "<3.0", "skip"),
         ("!=3.7", "!=3.7", "!=3.7"),
+        ("~=3.7", ">=3.7", ">=3.7"),
     ],
 )
 def test_py_version_to_limit_python(requires_python, exp_limit, ex_cf, recipe_config):
@@ -528,9 +530,13 @@ def test_zipp_recipe_tags_on_deps():
     ]
 
 
-def test_generic_py_ver_to():
+@pytest.mark.parametrize(
+    "requires_python, expected",
+    [(">=3.5, <3.8", ">=3.5,<3.8"), (">=3.7", ">=3.7"), ("~=3.6", ">=3.6")],
+)
+def test_generic_py_ver_to(requires_python, expected):
     config = Configuration(name="abc")
-    assert generic_py_ver_to({"requires_python": ">=3.5, <3.8"}, config) == ">=3.5,<3.8"
+    assert generic_py_ver_to({"requires_python": requires_python}, config) == expected
 
 
 def test_botocore_recipe_license_name():
@@ -849,7 +855,7 @@ def test_ensure_pep440():
 
 def test_pep440_recipe():
     recipe = create_python_recipe("codalab=0.5.26", is_strict_cf=False)[0]
-    assert recipe["requirements"]["host"] == ["pip", "python >=3.6,<3.7"]
+    assert recipe["requirements"]["host"] == ["pip", "python >=3.6"]
 
 
 def test_pep440_in_recipe_pypi():
