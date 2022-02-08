@@ -75,11 +75,18 @@ def merge_pypi_sdist_metadata(
     all_packages_names = get_val("packages")
     if not all_packages_names:
         all_packages_names = get_val("py_modules")
+
+    source_section = get_val("source")
+    if not config.from_local_sdist:
+        source_section["url"] = adjust_source_url_to_include_placeholders(
+            source_section["url"], get_val("version")
+        )
+
     return {
         "author": get_val("author"),
         "name": get_val("name"),
         "version": get_val("version"),
-        "source": get_val("source"),
+        "source": source_section,
         "packages": all_packages_names,
         "url": get_val("url"),
         "classifiers": get_val("classifiers"),
@@ -101,6 +108,12 @@ def merge_pypi_sdist_metadata(
         "requires_dist": requires_dist,
         "sdist_path": get_val("sdist_path"),
     }
+
+
+def adjust_source_url_to_include_placeholders(url, version):
+    url_split = url.rsplit("/", 1)
+    url_split[-1] = url_split[-1].replace(version, "{{ version }}")
+    return "/".join(url_split)
 
 
 def get_url_filename(metadata: dict, default: Optional[str] = None) -> str:
