@@ -77,9 +77,10 @@ def merge_pypi_sdist_metadata(
         all_packages_names = get_val("py_modules")
 
     source_section = get_val("source")
-    source_section["url"] = adjust_source_url_to_include_placeholders(
-        source_section["url"], get_val("version")
-    )
+    if not config.from_local_sdist:
+        source_section["url"] = adjust_source_url_to_include_placeholders(
+            source_section["url"], get_val("version")
+        )
 
     return {
         "author": get_val("author"),
