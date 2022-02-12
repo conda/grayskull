@@ -859,7 +859,7 @@ def test_pep440_in_recipe_pypi():
 
 def test_create_recipe_from_local_sdist(pkg_pytest):
     recipe = create_python_recipe(pkg_pytest, from_local_sdist=True)[0]
-    assert recipe["source"]["path"] == pkg_pytest
+    assert recipe["source"]["url"] == f"file://{pkg_pytest}"
     assert recipe["about"]["home"] == "https://docs.pytest.org/en/latest/"
     assert recipe["about"]["summary"] == "pytest: simple powerful testing with Python"
     assert recipe["about"]["license"] == "MIT"
