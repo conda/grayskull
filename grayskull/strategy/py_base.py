@@ -165,17 +165,18 @@ def generic_py_ver_to(
         if py_ver == PyVer(2, 7):
             continue
         if all(all_py[pos:]) and any(all_py[:pos]) is False:
-            return (
-                f"# [py<{py_ver.major}{py_ver.minor}]"
-                if is_selector
-                else f">={py_ver.major}.{py_ver.minor}"
-            )
+            if is_selector:
+                minor = f"{py_ver.minor:02d}" if py_ver.major >= 4 else py_ver.minor
+                return f"# [py<{py_ver.major}{minor}]"
+            else:
+                return f">={py_ver.major}.{py_ver.minor}"
         elif any(all_py[pos:]) is False:
             if is_selector:
                 py2k = ""
                 if not config.is_strict_cf and not all_py[0]:
                     py2k = " or py2k"
-                return f"# [py>={py_ver.major}{py_ver.minor}{py2k}]"
+                minor = f"{py_ver.minor:02d}" if py_ver.major >= 4 else py_ver.minor
+                return f"# [py>={py_ver.major}{minor}{py2k}]"
             else:
                 py2 = ""
                 if not all_py[0]:
