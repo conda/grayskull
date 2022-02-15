@@ -864,3 +864,8 @@ def test_create_recipe_from_local_sdist(pkg_pytest):
     assert recipe["about"]["summary"] == "pytest: simple powerful testing with Python"
     assert recipe["about"]["license"] == "MIT"
     assert recipe["about"]["license_file"] == "LICENSE"
+
+
+def test_400_for_python_selector():
+    recipe = create_python_recipe("pyquil", version="3.0.1")[0]
+    assert recipe["build"]["skip"].selector == "py>=400 or py2k"
