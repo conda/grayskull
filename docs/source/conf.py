@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = 'Grayskull'
-copyright = '2022, Mahe Iram Khan'
-author = 'Mahe Iram Khan'
+copyright = '2022, Grayskull Developers.'
+author = 'Grayskull Developers'
 
 # The full version, including alpha/beta/rc tags
 release = '1.1.0'
