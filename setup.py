@@ -16,6 +16,8 @@ setup(
         "console_scripts": [
             "grayskull = grayskull.__main__:main",
             "greyskull = grayskull.__main__:main",
+            "conda-grayskull = grayskull.__main__:main",
+            "conda-greyskull = grayskull.__main__:main",
         ]
     },
     use_scm_version={"write_to": "grayskull/_version.py"},
