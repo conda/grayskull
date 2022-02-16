@@ -142,7 +142,7 @@ def generic_py_ver_to(
     if not metadata.get("requires_python"):
         return None
     req_python = re.findall(
-        r"([><=!]+)\s*(\d+)(?:\.(\d+))?",
+        r"([~><=!]+)\s*(\d+)(?:\.(\d+))?",
         metadata["requires_python"],
     )
     if not req_python:
