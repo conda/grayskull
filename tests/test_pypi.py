@@ -875,3 +875,14 @@ def test_create_recipe_from_local_sdist(pkg_pytest):
 def test_400_for_python_selector():
     recipe = create_python_recipe("pyquil", version="3.0.1")[0]
     assert recipe["build"]["skip"].selector == "py>=400 or py2k"
+
+
+def test_update_requirements_with_pin_mixed_numpy_pin_compatible():
+    requirements = {
+        "build": ["<{ compiler('c') }}"],
+        "host": ["cython", "numpy", "pip", "python"],
+        "run": ["numpy >=1.19.1,<2.0.0", "pyparsing >=2.4.7, <3.0.0", "python"],
+    }
+    update_requirements_with_pin(requirements)
+    assert "<{ pin_compatible('numpy') }}" in requirements["run"]
+    assert "numpy" not in requirements["run"]
