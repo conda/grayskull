@@ -531,11 +531,19 @@ def update_requirements_with_pin(requirements: dict):
 
     if not is_compiler_present():
         return
+
+    def clean_list_pkg(pkg, list_pkgs):
+        result = []
+        for p in list_pkgs:
+            if pkg == p.strip().split(" ", 1)[0]:
+                continue
+            result.append(p)
+        return result
+
     for pkg in requirements["host"]:
         pkg_name = RE_DEPS_NAME.match(pkg).group(0)
         if pkg_name in PIN_PKG_COMPILER.keys():
-            if pkg_name in requirements["run"]:
-                requirements["run"].remove(pkg_name)
+            requirements["run"] = clean_list_pkg(pkg_name, requirements["run"])
             requirements["run"].append(PIN_PKG_COMPILER[pkg_name])
 
 
