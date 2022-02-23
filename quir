@@ -1,0 +1,25 @@
+diff --git a/grayskull/license/discovery.py b/grayskull/license/discovery.py
+index 00c5cb2..e84e589 100644
+--- a/grayskull/license/discovery.py
++++ b/grayskull/license/discovery.py
+@@ -9,6 +9,8 @@ from pathlib import Path
+ from subprocess import check_output
+ from tempfile import mkdtemp
+ from typing import List, Optional, Union
++from colorama import Fore
++
+
+ import requests
+ from rapidfuzz import process
+@@ -345,6 +347,8 @@ def get_license_type(path_license: str, default: Optional[st
+r] = None) -> Option
+         license_content, licenses_text, scorer=token_sort_ratio
+     )
+
++    print(f"{Fore.YELLOW}Match percentage of the license is {int(best_match[0][
+1])}%. Low match percentage could mean that the license was modified.")
++
+     if default and best_match[0][1] < 51:
+         log.info(f"Match too low for recipe {best_match}, using the default {de
+fault}")
+         return default
