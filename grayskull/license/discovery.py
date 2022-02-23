@@ -345,7 +345,7 @@ def get_license_type(path_license: str, default: Optional[str] = None) -> Option
     best_match = process.extract(
         license_content, licenses_text, scorer=token_sort_ratio
     )
-    print(
+    print_msg(
         f"{Fore.YELLOW}Match percentage of the license is {int(best_match[0][1])}%. "
         + "Low match percentage could mean that the license was modified."
     )
