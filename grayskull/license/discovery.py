@@ -346,7 +346,7 @@ def get_license_type(path_license: str, default: Optional[str] = None) -> Option
         license_content, licenses_text, scorer=token_sort_ratio
     )
     print(
-        f"{Fore.YELLOW}Match percentage of the license is {int(best_match[0][1])}%."
+        f"{Fore.YELLOW}Match percentage of the license is {int(best_match[0][1])}%. "
         + "Low match percentage could mean that the license was modified."
     )
 
