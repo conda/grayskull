@@ -11,6 +11,7 @@ from tempfile import mkdtemp
 from typing import List, Optional, Union
 
 import requests
+from colorama import Fore
 from rapidfuzz import process
 from rapidfuzz.fuzz import token_set_ratio, token_sort_ratio
 
@@ -343,6 +344,10 @@ def get_license_type(path_license: str, default: Optional[str] = None) -> Option
     licenses_text = list(map(itemgetter(1), all_licenses))
     best_match = process.extract(
         license_content, licenses_text, scorer=token_sort_ratio
+    )
+    print_msg(
+        f"{Fore.YELLOW}Match percentage of the license is {int(best_match[0][1])}%. "
+        + "Low match percentage could mean that the license was modified."
     )
 
     if default and best_match[0][1] < 51:
