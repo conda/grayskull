@@ -25,13 +25,20 @@ def main(args=None):
     if not args:
         args = sys.argv[1:] or ["--help"]
 
+    # create the top-level parser
     parser = argparse.ArgumentParser(description="Grayskull - Conda recipe generator")
-    pypi_parser = parser.add_subparsers(help="Options to generate PyPI recipes")
-    pypi_cmds = pypi_parser.add_parser("pypi", help="Generate recipes based on PyPI")
-    pypi_cmds.add_argument(
+    subparsers = parser.add_subparsers(help="sub-command help")
+    # create parser for cran
+    cran_parser = subparsers.add_parser("cran", help="Options to generate CRAN recipes")
+    cran_parser.add_argument(
+        "cran_packages", nargs="+", help="Specify the CRAN packages name.", default=[]
+    )
+    # create parser for pypi
+    pypi_parser = subparsers.add_parser("pypi", help="Options to generate PyPI recipes")
+    pypi_parser.add_argument(
         "pypi_packages", nargs="+", help="Specify the PyPI packages name.", default=[]
     )
-    pypi_cmds.add_argument(
+    pypi_parser.add_argument(
         "--download",
         "-d",
         dest="download",
@@ -40,7 +47,7 @@ def main(args=None):
         help="Download the sdist package and PyPI information in the same folder"
         " the recipe is located.",
     )
-    pypi_cmds.add_argument(
+    pypi_parser.add_argument(
         "--maintainers",
         "-m",
         dest="maintainers",
@@ -63,41 +70,41 @@ def main(args=None):
         dest="grayskull_power",
         help=argparse.SUPPRESS,
     )
-    pypi_cmds.add_argument(
+    pypi_parser.add_argument(
         "--output",
         "-o",
         dest="output",
         default=".",
         help="Path to where the recipe will be created",
     )
-    pypi_cmds.add_argument(
+    pypi_parser.add_argument(
         "--stdout",
         dest="stdout",
         default=True,
         help="Disable or enable stdout, if it is False, Grayskull"
         " will disable the prints. Default is True",
     )
-    pypi_cmds.add_argument(
+    pypi_parser.add_argument(
         "--list-missing-deps",
         default=False,
         action="store_true",
         dest="list_missing_deps",
         help="After the execution Grayskull will print all the missing dependencies.",
     )
-    pypi_cmds.add_argument(
+    pypi_parser.add_argument(
         "--strict-conda-forge",
         default=False,
         action="store_true",
         dest="is_strict_conda_forge",
         help="It will generate the recipes strict for the conda-forge channel.",
     )
-    pypi_cmds.add_argument(
+    pypi_parser.add_argument(
         "--pypi-url",
         default="https://pypi.org/pypi/",
         dest="url_pypi_metadata",
         help="Pypi url server",
     )
-    pypi_cmds.add_argument(
+    pypi_parser.add_argument(
         "--recursive",
         "-r",
         default=False,
@@ -105,7 +112,7 @@ def main(args=None):
         dest="is_recursive",
         help="Recursively run grayskull on missing dependencies.",
     )
-    pypi_cmds.add_argument(
+    pypi_parser.add_argument(
         "--sections",
         "-s",
         default=None,
@@ -256,6 +263,16 @@ def create_python_recipe(pkg_name, sections_populate=None, **kwargs):
     return (
         GrayskullFactory.create_recipe(
             "pypi", config, sections_populate=sections_populate
+        ),
+        config,
+    )
+
+
+def create_r_recipe(pkg_name, sections_populate=None, **kwargs):
+    config = Configuration(name=pkg_name, **kwargs)
+    return (
+        GrayskullFactory.create_recipe(
+            "cran", config, sections_populate=sections_populate
         ),
         config,
     )
