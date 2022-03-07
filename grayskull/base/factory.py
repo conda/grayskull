@@ -11,6 +11,7 @@ from grayskull.strategy.pypi import PypiStrategy
 class GrayskullFactory(ABC):
     REGISTERED_STRATEGY = {
         "pypi": PypiStrategy,
+        "cran": PypiStrategy,
     }
 
     @staticmethod
