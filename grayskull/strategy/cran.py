@@ -5,8 +5,11 @@ import tarfile
 import zipfile
 from os.path import basename
 
+import requests
 import yaml
 from yaml import SafeDumper
+
+from grayskull.strategy.abstract_strategy import AbstractStrategy
 
 log = logging.getLogger(__name__)
 
@@ -21,6 +24,13 @@ ALL_SECTIONS = (
     "about",
     "extra",
 )
+
+
+class CranStrategy(AbstractStrategy):
+    @staticmethod
+    def fetch_data(recipe):
+        if not (recipe["build"] and recipe["build"]["script"]):
+            recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
 
 
 def dict_from_cran_lines(lines):
@@ -182,3 +192,15 @@ def get_cran_index(cran_url, session, verbose=True):
         if re.match(r"^[A-Za-z]", p):
             records.setdefault(p.lower(), (p, None))
     return records
+
+
+def get_available_binaries(cran_url, details):
+    url = cran_url + "/" + details["dir"]
+    response = requests.get(url)
+    response.raise_for_status()
+    ext = details["ext"]
+    for filename in re.findall(r'<a href="([^"]*)">\1</a>', response.text):
+        if filename.endswith(ext):
+            pkg, _, ver = filename.rpartition("_")
+            ver, _, _ = ver.rpartition(ext)
+            details["binaries"].setdefault(pkg, []).append((ver, url + filename))
