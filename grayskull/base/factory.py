@@ -5,13 +5,14 @@ from pathlib import Path
 from souschef.jinja_expression import get_global_jinja_var
 from souschef.recipe import Recipe
 
+from grayskull.strategy.cran import CranStrategy
 from grayskull.strategy.pypi import PypiStrategy
 
 
 class GrayskullFactory(ABC):
     REGISTERED_STRATEGY = {
         "pypi": PypiStrategy,
-        "cran": PypiStrategy,
+        "cran": CranStrategy,
     }
 
     @staticmethod
