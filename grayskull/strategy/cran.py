@@ -164,3 +164,21 @@ def get_archive_metadata(path, verbose=True):
     else:
         sys.exit("Cannot extract a DESCRIPTION from file %s" % path)
     sys.exit("%s does not seem to be a CRAN package (no DESCRIPTION) file" % path)
+
+
+def get_cran_index(cran_url, session, verbose=True):
+    if verbose:
+        print("Fetching main index from %s" % cran_url)
+    r = session.get(cran_url + "/src/contrib/")
+    r.raise_for_status()
+    records = {}
+    for p in re.findall(r'<td><a href="([^"]+)">\1</a></td>', r.text):
+        if p.endswith(".tar.gz") and "_" in p:
+            name, version = p.rsplit(".", 2)[0].split("_", 1)
+            records[name.lower()] = (name, version)
+    r = session.get(cran_url + "/src/contrib/Archive/")
+    r.raise_for_status()
+    for p in re.findall(r'<td><a href="([^"]+)/">\1/</a></td>', r.text):
+        if re.match(r"^[A-Za-z]", p):
+            records.setdefault(p.lower(), (p, None))
+    return records
