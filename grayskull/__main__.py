@@ -154,6 +154,7 @@ def main(args=None):
     print_msg(clear_screen())
 
     generate_recipes_from_list(args.pypi_packages, args)
+    generate_r_recipes_from_list(args.cran_packages, args)
 
 
 def generate_recipes_from_list(list_pkgs, args):
@@ -208,6 +209,43 @@ def create_python_recipe(pkg_name, sections_populate=None, **kwargs):
         ),
         config,
     )
+
+
+def generate_r_recipes_from_list(list_pkgs, args):
+    for pkg_name in list_pkgs:
+        logging.debug(f"Starting grayskull for pkg: {pkg_name}")
+        from_local_sdist = origin_is_local_sdist(pkg_name)
+        cran_label = " (cran)"
+        print_msg(
+            f"{Fore.GREEN}\n\n"
+            f"#### Initializing recipe for "
+            f"{Fore.BLUE}{pkg_name}{cran_label} {Fore.GREEN}####\n"
+        )
+        is_pkg_file = Path(pkg_name).is_file() and (not from_local_sdist)
+        if is_pkg_file:
+            args.output = pkg_name
+        try:
+            recipe, config = create_r_recipe(
+                pkg_name,
+                is_strict_cf=args.is_strict_conda_forge,
+                download=args.download,
+                sections_populate=args.sections_populate,
+            )
+        except requests.exceptions.HTTPError as err:
+            print_msg(f"{Fore.RED}Package seems to be missing.\nException: {err}\n\n")
+            continue
+
+        if args.sections_populate is None or "extra" in args.sections_populate:
+            add_extra_section(recipe, args.maintainers)
+
+        generate_recipe(recipe, config, args.output)
+        print_msg(
+            f"\n{Fore.GREEN}#### Recipe generated on "
+            f"{os.path.realpath(args.output)} for {pkg_name} ####\n\n"
+        )
+
+        if args.is_recursive and config.missing_deps:
+            generate_r_recipes_from_list(config.missing_deps, args)
 
 
 def create_r_recipe(pkg_name, sections_populate=None, **kwargs):
