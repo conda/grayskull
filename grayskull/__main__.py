@@ -33,6 +33,69 @@ def main(args=None):
     cran_parser.add_argument(
         "cran_packages", nargs="+", help="Specify the CRAN packages name.", default=[]
     )
+    cran_parser.add_argument(
+        "--stdout",
+        dest="stdout",
+        default=True,
+        help="Disable or enable stdout, if it is False, Grayskull"
+        " will disable the prints. Default is True",
+    )
+    cran_parser.add_argument(
+        "--list-missing-deps",
+        default=False,
+        action="store_true",
+        dest="list_missing_deps",
+        help="After the execution Grayskull will print all the missing dependencies.",
+    )
+    cran_parser.add_argument(
+        "--download",
+        "-d",
+        dest="download",
+        action="store_true",
+        default=False,
+        help="Download the sdist package and PyPI information in the same folder"
+        " the recipe is located.",
+    )
+    cran_parser.add_argument(
+        "--maintainers",
+        "-m",
+        dest="maintainers",
+        nargs="+",
+        help="List of maintainers which will be added to the recipe.",
+    )
+    cran_parser.add_argument(
+        "--output",
+        "-o",
+        dest="output",
+        default=".",
+        help="Path to where the recipe will be created",
+    )
+    cran_parser.add_argument(
+        "--strict-conda-forge",
+        default=False,
+        action="store_true",
+        dest="is_strict_conda_forge",
+        help="It will generate the recipes strict for the conda-forge channel.",
+    )
+    cran_parser.add_argument(
+        "--sections",
+        "-s",
+        default=None,
+        required=False,
+        choices=(
+            "package",
+            "source",
+            "build",
+            "requirements",
+            "test",
+            "about",
+            "extra",
+        ),
+        nargs="+",
+        dest="sections_populate",
+        help="If sections are specified, grayskull will populate just the sections "
+        "informed.",
+    )
     # create parser for pypi
     pypi_parser = subparsers.add_parser("pypi", help="Options to generate PyPI recipes")
     pypi_parser.add_argument(
@@ -153,8 +216,10 @@ def main(args=None):
     print_msg(Style.RESET_ALL)
     print_msg(clear_screen())
 
-    generate_recipes_from_list(args.pypi_packages, args)
-    generate_r_recipes_from_list(args.cran_packages, args)
+    if getattr(args, "pypi_packages", None):
+        generate_recipes_from_list(args.pypi_packages, args)
+    elif getattr(args, "cran_packages", None):
+        generate_r_recipes_from_list(args.cran_packages, args)
 
 
 def generate_recipes_from_list(list_pkgs, args):
