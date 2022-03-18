@@ -28,7 +28,7 @@ ALL_SECTIONS = (
 
 class CranStrategy(AbstractStrategy):
     @staticmethod
-    def fetch_data(recipe):
+    def fetch_data(recipe, config, sections=None):
         if not (recipe["build"] and recipe["build"]["script"]):
             recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
 
