@@ -29,6 +29,8 @@ ALL_SECTIONS = (
     "extra",
 )
 
+cran_url = "https://cran.r-project.org"
+
 
 class CranStrategy(AbstractStrategy):
     @staticmethod
@@ -234,3 +236,7 @@ def get_cran_metadata(config: Configuration) -> dict:
     """Method responsible for getting CRAN metadata.
     :return: CRAN metadata"""
     # get_archive_metadata(path, verbose=True)
+    cran_index = get_cran_index(cran_url)
+    if config.name.lower() not in cran_index:
+        sys.exit("Package %s not found" % config.name)
+    package, cran_version = cran_index[config.name.lower()]
