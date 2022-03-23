@@ -1,17 +1,21 @@
 import logging
+import os
 import re
 import sys
 import tarfile
 import zipfile
 from os.path import basename
+from pathlib import Path
 
 import requests
 import yaml
 from yaml import SafeDumper
 
+from grayskull.config import Configuration
 from grayskull.strategy.abstract_strategy import AbstractStrategy
 
 log = logging.getLogger(__name__)
+CRAN_CONFIG = Path(os.path.dirname(__file__)) / "config.yaml"
 
 ALL_SECTIONS = (
     "package",
@@ -29,8 +33,7 @@ ALL_SECTIONS = (
 class CranStrategy(AbstractStrategy):
     @staticmethod
     def fetch_data(recipe, config, sections=None):
-        if not (recipe["build"] and recipe["build"]["script"]):
-            recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
+        ...
 
 
 def dict_from_cran_lines(lines):
@@ -176,6 +179,27 @@ def get_archive_metadata(path, verbose=True):
     sys.exit("%s does not seem to be a CRAN package (no DESCRIPTION) file" % path)
 
 
+def get_cran_archive_versions(cran_url, session, package, verbose=True):
+    if verbose:
+        print(f"Fetching archived versions for package {package} from {cran_url}")
+    r = session.get(cran_url + "/src/contrib/Archive/" + package + "/")
+    try:
+        r.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 404:
+            print("No archive directory for package %s" % package)
+            return []
+        raise
+    versions = []
+    for p, dt in re.findall(
+        r'<td><a href="([^"]+)">\1</a></td>\s*<td[^>]*>([^<]*)</td>', r.text
+    ):
+        if p.endswith(".tar.gz") and "_" in p:
+            name, version = p.rsplit(".", 2)[0].split("_", 1)
+            versions.append((dt.strip(), version))
+    return [v for dt, v in sorted(versions, reverse=True)]
+
+
 def get_cran_index(cran_url, session, verbose=True):
     if verbose:
         print("Fetching main index from %s" % cran_url)
@@ -204,3 +228,9 @@ def get_available_binaries(cran_url, details):
             pkg, _, ver = filename.rpartition("_")
             ver, _, _ = ver.rpartition(ext)
             details["binaries"].setdefault(pkg, []).append((ver, url + filename))
+
+
+def get_cran_metadata(config: Configuration) -> dict:
+    """Method responsible for getting CRAN metadata.
+    :return: CRAN metadata"""
+    # get_archive_metadata(path, verbose=True)
