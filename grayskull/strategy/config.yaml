@@ -314,6 +314,10 @@ python-qnotifications:
   conda_forge: qnotifications
   import_name: QNotifications
 
+symengine:
+  conda_forge: python-symengine
+  import_name: symengine
+
 quantum-grove:
   conda_forge: grove
   import_name: grove
