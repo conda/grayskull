@@ -35,7 +35,7 @@ cran_url = "https://cran.r-project.org"
 class CranStrategy(AbstractStrategy):
     @staticmethod
     def fetch_data(recipe, config, sections=None):
-        ...
+        get_cran_metadata(config)
 
 
 def dict_from_cran_lines(lines):
@@ -202,17 +202,17 @@ def get_cran_archive_versions(cran_url, session, package, verbose=True):
     return [v for dt, v in sorted(versions, reverse=True)]
 
 
-def get_cran_index(cran_url, session, verbose=True):
+def get_cran_index(cran_url, verbose=True):
     if verbose:
         print("Fetching main index from %s" % cran_url)
-    r = session.get(cran_url + "/src/contrib/")
+    r = requests.get(cran_url + "/src/contrib/")
     r.raise_for_status()
     records = {}
     for p in re.findall(r'<td><a href="([^"]+)">\1</a></td>', r.text):
         if p.endswith(".tar.gz") and "_" in p:
             name, version = p.rsplit(".", 2)[0].split("_", 1)
             records[name.lower()] = (name, version)
-    r = session.get(cran_url + "/src/contrib/Archive/")
+    r = requests.get(cran_url + "/src/contrib/Archive/")
     r.raise_for_status()
     for p in re.findall(r'<td><a href="([^"]+)/">\1/</a></td>', r.text):
         if re.match(r"^[A-Za-z]", p):
@@ -240,3 +240,8 @@ def get_cran_metadata(config: Configuration) -> dict:
     if config.name.lower() not in cran_index:
         sys.exit("Package %s not found" % config.name)
     package, cran_version = cran_index[config.name.lower()]
+    print(package)
+    print(cran_version)
+    download_url = cran_url + "/src/contrib/" + package + "_" + cran_version + ".tar.gz"
+    r = requests.get(download_url)
+    r.raise_for_status()
