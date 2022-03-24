@@ -6,6 +6,7 @@ import tarfile
 import zipfile
 from os.path import basename
 from pathlib import Path
+from tempfile import mkdtemp
 
 import requests
 import yaml
@@ -242,6 +243,14 @@ def get_cran_metadata(config: Configuration) -> dict:
     package, cran_version = cran_index[config.name.lower()]
     print(package)
     print(cran_version)
-    download_url = cran_url + "/src/contrib/" + package + "_" + cran_version + ".tar.gz"
-    r = requests.get(download_url)
-    r.raise_for_status()
+    tarball_name = package + "_" + cran_version + ".tar.gz"
+    download_url = cran_url + "/src/contrib/" + tarball_name
+    response = requests.get(download_url)
+    response.raise_for_status()
+    download_file = os.path.join(
+        str(mkdtemp(f"grayskull-cran-metadata-{config.name}-")),
+        tarball_name
+    )
+    with open(download_file, "wb") as f:
+        f.write(response.content)
+    return get_archive_metadata(download_file)
