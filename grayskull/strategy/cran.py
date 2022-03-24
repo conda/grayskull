@@ -7,9 +7,12 @@ import zipfile
 from os.path import basename
 from pathlib import Path
 from tempfile import mkdtemp
+from typing import List
 
 import requests
 import yaml
+from souschef.jinja_expression import set_global_jinja_var
+from souschef.recipe import Recipe
 from yaml import SafeDumper
 
 from grayskull.config import Configuration
@@ -36,7 +39,7 @@ cran_url = "https://cran.r-project.org"
 class CranStrategy(AbstractStrategy):
     @staticmethod
     def fetch_data(recipe, config, sections=None):
-        get_cran_metadata(config)
+        return update_recipe(recipe, config, sections or ALL_SECTIONS)
 
 
 def dict_from_cran_lines(lines):
@@ -233,7 +236,7 @@ def get_available_binaries(cran_url, details):
             details["binaries"].setdefault(pkg, []).append((ver, url + filename))
 
 
-def get_cran_metadata(config: Configuration) -> dict:
+def get_cran_metadata(recipe, config: Configuration) -> dict:
     """Method responsible for getting CRAN metadata.
     :return: CRAN metadata"""
     # get_archive_metadata(path, verbose=True)
@@ -248,9 +251,39 @@ def get_cran_metadata(config: Configuration) -> dict:
     response = requests.get(download_url)
     response.raise_for_status()
     download_file = os.path.join(
-        str(mkdtemp(f"grayskull-cran-metadata-{config.name}-")),
-        tarball_name
+        str(mkdtemp(f"grayskull-cran-metadata-{config.name}-")), tarball_name
     )
     with open(download_file, "wb") as f:
         f.write(response.content)
-    return get_archive_metadata(download_file)
+    metadata = get_archive_metadata(download_file)
+    print(metadata)
+    return {
+        "package": {"name": metadata["Package"], "version": metadata["Version"]},
+        "requirements": {
+            "run": metadata["Imports"],
+        },
+        "about": {
+            "home": metadata["URL"],
+            "summary": metadata["Description"],
+            "dev_url": metadata["URL"],
+            "license": metadata["License"],
+        },
+        "source": metadata.get("source", {}),
+    }
+
+
+def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]):
+    """Update one specific section."""
+    from souschef.section import Section
+
+    metadata = get_cran_metadata(recipe, config)
+    for section in all_sections:
+        if metadata.get(section):
+            if section == "package":
+                set_global_jinja_var(recipe, "version", metadata["package"]["version"])
+                config.version = metadata["package"]["version"]
+                recipe["package"]["version"] = "<{ version }}"
+            elif section in recipe and isinstance(recipe[section], Section):
+                recipe[section].update(metadata[section])
+            else:
+                recipe.add_section({section: metadata[section]})
