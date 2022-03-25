@@ -1,5 +1,6 @@
 import logging
 import os
+import pprint
 import re
 import sys
 import tarfile
@@ -256,17 +257,41 @@ def get_cran_metadata(recipe, config: Configuration) -> dict:
     with open(download_file, "wb") as f:
         f.write(response.content)
     metadata = get_archive_metadata(download_file)
-    print(metadata)
+    pprint.pprint(metadata)
+    # return {
+    #     "package": {"name": metadata["Package"], "version": metadata["Version"]},
+    #     "requirements": {
+    #         "run": metadata["Imports"],
+    #     },
+    #     "about": {
+    #         "home": metadata["URL"],
+    #         "summary": metadata["Description"],
+    #         "dev_url": metadata["URL"],
+    #         "license": metadata["License"],
+    #     },
+    #     "source": metadata.get("source", {}),
+    # }
+    imports = [s.strip() for s in metadata.get("Imports", "").split(",") if s.strip()]
     return {
-        "package": {"name": metadata["Package"], "version": metadata["Version"]},
+        "package": {
+            "name": metadata.get("Package"),
+            "version": metadata.get("Version"),
+        },
+        "build": {"entry_points": metadata.get("entry_points")},
         "requirements": {
-            "run": metadata["Imports"],
+            "run": imports,
+        },
+        "test": {
+            "imports": metadata.get("tests"),
         },
         "about": {
-            "home": metadata["URL"],
-            "summary": metadata["Description"],
-            "dev_url": metadata["URL"],
-            "license": metadata["License"],
+            "home": metadata["URL"]
+            if metadata.get("url")
+            else metadata.get("project_url"),
+            "summary": metadata.get("Description"),
+            "doc_url": metadata.get("doc_url"),
+            "dev_url": metadata.get("dev_url"),
+            "license": metadata.get("License"),
         },
         "source": metadata.get("source", {}),
     }
