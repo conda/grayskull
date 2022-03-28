@@ -22,6 +22,10 @@ annoy:
   conda_forge: python-annoy
   import_name: annoy
 
+asana:
+  conda_forge: python-asana
+  import_name: asana
+
 backtrace:
   conda_forge: python-backtrace
   import_name: backtrace
@@ -194,6 +198,10 @@ jupyterlab_latex:
   conda_forge: jupyterlab-latex
   import_name: jupyterlab_latex
 
+kubernetes:
+  conda_forge: python-kubernetes
+  import_name: kubernetes
+
 libaio:
   conda_forge: python-libaio
   import_name: libaio
@@ -229,6 +237,10 @@ ndarray_listener:
 neo:
   conda_forge: python-neo
   import_name: neo
+
+neo4j:
+  conda_forge: neo4j-python-driver
+  import_name: neo4j
 
 nest_asyncio:
   conda_forge: nest-asyncio
@@ -326,6 +338,10 @@ radio_beam:
   conda_forge: radio-beam
   import_name: radio_beam
 
+redis:
+  conda_forge: redis-py
+  import_name: redis
+
 rocketpyalpha:
   conda_forge: rocketpy
   import_name: rocketpy
@@ -369,6 +385,10 @@ termstyle:
 torch_geometric:
   conda_forge: pytorch_geometric
   import_name: torch_geometric
+
+trino:
+  conda_forge: trino-python-client
+  import_name: trino
 
 useDAVE:
   conda_forge: dave
