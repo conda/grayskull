@@ -271,7 +271,19 @@ def get_cran_metadata(recipe, config: Configuration) -> dict:
     #     },
     #     "source": metadata.get("source", {}),
     # }
-    imports = [s.strip() for s in metadata.get("Imports", "").split(",") if s.strip()]
+    imports = []
+    for s in metadata.get("Imports", "").split(","):
+        if not s.strip():
+            continue
+        r = s.split("(")
+        if len(r) == 1:
+            imports.append(f"r-{r[0].strip()}")
+        else:
+            constrain = r[1].strip().replace(")", "").replace(" ", "")
+            imports.append(f"r-{r[0].strip()} {constrain.strip()}")
+
+    # imports = [f"r-{s.strip().replace('(', '').replace(')', '').replace(' ', '')}"
+    # for s in metadata.get("Imports", "").split(",") if s.strip()]
     d = {
         "package": {
             "name": metadata.get("Package"),
@@ -302,16 +314,24 @@ def get_cran_metadata(recipe, config: Configuration) -> dict:
 
 def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]):
     """Update one specific section."""
-    from souschef.section import Section
-
     metadata = get_cran_metadata(recipe, config)
-    for section in all_sections:
-        if metadata.get(section):
-            if section == "package":
-                set_global_jinja_var(recipe, "version", metadata["package"]["version"])
-                config.version = metadata["package"]["version"]
-                recipe["package"]["version"] = "<{ version }}"
-            elif section in recipe and isinstance(recipe[section], Section):
-                recipe[section].update(metadata[section])
-            else:
-                recipe.add_section({section: metadata[section]})
+    recipe.add_section(metadata)
+    set_global_jinja_var(recipe, "version", metadata["package"]["version"])
+    config.version = metadata["package"]["version"]
+    recipe["package"]["version"] = "<{ version }}"
+    recipe["test"]["commands"] = [
+        f"$R -e \"library('{config.name}')\"  # [not win]",
+        f'"%R%" -e "library(\'{config.name}\')"  # [win]',
+    ]
+
+    # for section in all_sections:
+    #     if metadata.get(section):
+    #         if section == "package":
+    #             set_global_jinja_var(recipe, "version",
+    #             metadata["package"]["version"])
+    #             config.version = metadata["package"]["version"]
+    #             recipe["package"]["version"] = "<{ version }}"
+    #         elif section in recipe and isinstance(recipe[section], Section):
+    #             recipe[section].update(metadata[section])
+    #         else:
+    #             recipe.add_section({section: metadata[section]})
