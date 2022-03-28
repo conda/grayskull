@@ -272,7 +272,7 @@ def get_cran_metadata(recipe, config: Configuration) -> dict:
     #     "source": metadata.get("source", {}),
     # }
     imports = [s.strip() for s in metadata.get("Imports", "").split(",") if s.strip()]
-    return {
+    d = {
         "package": {
             "name": metadata.get("Package"),
             "version": metadata.get("Version"),
@@ -285,16 +285,19 @@ def get_cran_metadata(recipe, config: Configuration) -> dict:
             "imports": metadata.get("tests"),
         },
         "about": {
-            "home": metadata["URL"]
-            if metadata.get("url")
-            else metadata.get("project_url"),
+            "home": metadata["URL"],
             "summary": metadata.get("Description"),
             "doc_url": metadata.get("doc_url"),
             "dev_url": metadata.get("dev_url"),
             "license": metadata.get("License"),
         },
-        "source": metadata.get("source", {}),
+        "source": metadata.get("source"),
+        "cran_metadata": "\n".join(
+            ["# %s" % line for line in metadata["orig_lines"] if line]
+        ),
     }
+    print(d["cran_metadata"])
+    return d
 
 
 def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]):
