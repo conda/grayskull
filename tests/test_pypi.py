@@ -125,17 +125,14 @@ def test_get_extra_from_requires_dist():
 def test_get_all_selectors_pypi(recipe_config):
     _, config = recipe_config
     config.version = "5.3.1"
-    assert (
-        get_all_selectors_pypi(
-            [
-                ("(", "sys_platform", "==", "win32", "", "and"),
-                ("", "python_version", "==", "2.7", ")", "and"),
-                ("", "extra", "==", "socks", "", ""),
-            ],
-            config,
-        )
-        == ["(", "win", "and", "py==27", ")"]
-    )
+    assert get_all_selectors_pypi(
+        [
+            ("(", "sys_platform", "==", "win32", "", "and"),
+            ("", "python_version", "==", "2.7", ")", "and"),
+            ("", "extra", "==", "socks", "", ""),
+        ],
+        config,
+    ) == ["(", "win", "and", "py==27", ")"]
 
 
 def test_get_selector():
@@ -338,58 +335,46 @@ def test_get_entry_points_from_sdist():
         {"entry_points": {"gui_scripts": ["gui_scripts=entrypoints"]}}
     ) == ["gui_scripts=entrypoints"]
 
-    assert (
-        sorted(
-            get_entry_points_from_sdist(
-                {
-                    "entry_points": {
-                        "gui_scripts": ["gui_scripts=entrypoints"],
-                        "console_scripts": ["console_scripts=entrypoints"],
-                    }
+    assert sorted(
+        get_entry_points_from_sdist(
+            {
+                "entry_points": {
+                    "gui_scripts": ["gui_scripts=entrypoints"],
+                    "console_scripts": ["console_scripts=entrypoints"],
                 }
-            )
+            }
         )
-        == sorted(["gui_scripts=entrypoints", "console_scripts=entrypoints"])
-    )
-    assert (
-        sorted(
-            get_entry_points_from_sdist(
-                {
-                    "entry_points": {
-                        "gui_scripts": None,
-                        "console_scripts": "console_scripts=entrypoints",
-                    }
+    ) == sorted(["gui_scripts=entrypoints", "console_scripts=entrypoints"])
+    assert sorted(
+        get_entry_points_from_sdist(
+            {
+                "entry_points": {
+                    "gui_scripts": None,
+                    "console_scripts": "console_scripts=entrypoints",
                 }
-            )
+            }
         )
-        == sorted(["console_scripts=entrypoints"])
-    )
-    assert (
-        sorted(
-            get_entry_points_from_sdist(
-                {
-                    "entry_points": {
-                        "gui_scripts": None,
-                        "console_scripts": "console_scripts=entrypoints\nfoo=bar.main",
-                    }
+    ) == sorted(["console_scripts=entrypoints"])
+    assert sorted(
+        get_entry_points_from_sdist(
+            {
+                "entry_points": {
+                    "gui_scripts": None,
+                    "console_scripts": "console_scripts=entrypoints\nfoo=bar.main",
                 }
-            )
+            }
         )
-        == sorted(["console_scripts=entrypoints", "foo=bar.main"])
-    )
-    assert (
-        sorted(
-            get_entry_points_from_sdist(
-                {
-                    "entry_points": {
-                        "gui_scripts": "gui_scripts=entrypoints",
-                        "console_scripts": None,
-                    }
+    ) == sorted(["console_scripts=entrypoints", "foo=bar.main"])
+    assert sorted(
+        get_entry_points_from_sdist(
+            {
+                "entry_points": {
+                    "gui_scripts": "gui_scripts=entrypoints",
+                    "console_scripts": None,
                 }
-            )
+            }
         )
-        == sorted(["gui_scripts=entrypoints"])
-    )
+    ) == sorted(["gui_scripts=entrypoints"])
 
 
 @pytest.mark.parametrize(
@@ -812,41 +797,35 @@ def test_add_python_min_to_strict_conda_forge():
 
 
 def test_get_test_imports_clean_modules():
-    assert (
-        get_test_imports(
-            {
-                "packages": [
-                    "_pytest",
-                    "tests",
-                    "test",
-                    "_pytest._code",
-                    "_pytest._io",
-                    "_pytest.assertion",
-                    "_pytest.config",
-                    "_pytest.mark",
-                    "pytest",
-                    "pytest.foo",
-                    "zar",
-                ]
-            }
-        )
-        == ["pytest", "zar"]
-    )
-    assert (
-        get_test_imports(
-            {
-                "packages": [
-                    "_pytest",
-                    "_pytest._code",
-                    "_pytest._io",
-                    "_pytest.assertion",
-                    "_pytest.config",
-                    "_pytest.mark",
-                ]
-            }
-        )
-        == ["_pytest", "_pytest._code"]
-    )
+    assert get_test_imports(
+        {
+            "packages": [
+                "_pytest",
+                "tests",
+                "test",
+                "_pytest._code",
+                "_pytest._io",
+                "_pytest.assertion",
+                "_pytest.config",
+                "_pytest.mark",
+                "pytest",
+                "pytest.foo",
+                "zar",
+            ]
+        }
+    ) == ["pytest", "zar"]
+    assert get_test_imports(
+        {
+            "packages": [
+                "_pytest",
+                "_pytest._code",
+                "_pytest._io",
+                "_pytest.assertion",
+                "_pytest.config",
+                "_pytest.mark",
+            ]
+        }
+    ) == ["_pytest", "_pytest._code"]
 
 
 def test_ensure_pep440():
