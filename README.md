@@ -57,7 +57,7 @@ and inside this folder the generated recipe will be present (`meta.yaml`).
 
 * Example with `pytest` (`grayskull pypi pytest`):
 
-![Grayskull CLI](https://raw.githubusercontent.com/conda-incubator/grayskull/master/docs/images/cli_example_grayskull.gif)
+![Grayskull CLI](https://github.com/conda-incubator/grayskull/raw/main/images/cli_example_grayskull.gif)
 
 If your package is a GitHub repository just replace the package name with the GitHub repository URL. <br>
 For example: <br>
