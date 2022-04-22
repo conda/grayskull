@@ -602,6 +602,21 @@ def get_test_imports(metadata: dict, default: Optional[str] = None) -> List:
     return result
 
 
+def get_test_requirements(metadata: Dict, extras_require_test: Optional[str]) -> List:
+    """Extract test requirements from metadata
+
+    :param metadata:
+    :param extras_require_test: `extras_require` option for test requirements
+    :return: list of test requirements
+    """
+    if not extras_require_test:
+        return list()
+    try:
+        return metadata["extras_require"][extras_require_test]
+    except KeyError:
+        return list()
+
+
 def get_entry_points_from_sdist(sdist_metadata: dict) -> List:
     """Extract entry points from sdist metadata
 

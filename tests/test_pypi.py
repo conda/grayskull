@@ -576,6 +576,27 @@ def test_django_rest_framework_xml_license():
     assert recipe["test"]["imports"][0] == "rest_framework_xml"
 
 
+def test_get_test_requirements():
+    config = Configuration(name="ewokscore", version="0.1.0rc5")
+    recipe = GrayskullFactory.create_recipe("pypi", config)
+    assert "pytest" not in recipe["test"]["requires"]
+    assert "pytest --pyargs ewokscore" not in recipe["test"]["commands"]
+
+    config = Configuration(
+        name="ewokscore", version="0.1.0rc5", extras_require_test="wrongoption"
+    )
+    recipe = GrayskullFactory.create_recipe("pypi", config)
+    assert "pytest" not in recipe["test"]["requires"]
+    assert "pytest --pyargs ewokscore" not in recipe["test"]["commands"]
+
+    config = Configuration(
+        name="ewokscore", version="0.1.0rc5", extras_require_test="test"
+    )
+    recipe = GrayskullFactory.create_recipe("pypi", config)
+    assert "pytest" in recipe["test"]["requires"]
+    assert "pytest --pyargs ewokscore" in recipe["test"]["commands"]
+
+
 def test_get_test_imports():
     assert get_test_imports({"packages": ["pkg", "pkg.mod1", "pkg.mod2"]}) == ["pkg"]
     assert get_test_imports({"packages": None}, default="pkg-mod") == ["pkg_mod"]

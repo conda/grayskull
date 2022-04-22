@@ -124,6 +124,12 @@ def main(args=None):
         help="If sections are specified, grayskull will populate just the sections "
         "informed.",
     )
+    pypi_cmds.add_argument(
+        "--extras-require-test",
+        default=None,
+        dest="extras_require_test",
+        help="Extra requirements to run tests.",
+    )
 
     args = parser.parse_args(args)
 
@@ -175,6 +181,7 @@ def generate_recipes_from_list(list_pkgs, args):
                 url_pypi_metadata=args.url_pypi_metadata,
                 sections_populate=args.sections_populate,
                 from_local_sdist=from_local_sdist,
+                extras_require_test=args.extras_require_test,
             )
         except requests.exceptions.HTTPError as err:
             print_msg(f"{Fore.RED}Package seems to be missing.\nException: {err}\n\n")
