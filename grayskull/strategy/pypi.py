@@ -30,6 +30,7 @@ from grayskull.strategy.py_base import (
     get_sdist_metadata,
     get_test_entry_points,
     get_test_imports,
+    get_test_requirements,
     parse_extra_metadata_to_selector,
     py_version_to_limit_python,
     py_version_to_selector,
@@ -385,16 +386,24 @@ def get_metadata(recipe, config) -> dict:
 
     all_missing_deps = print_requirements(all_requirements)
     config.missing_deps = all_missing_deps
-    test_entry_points = get_test_entry_points(metadata.get("entry_points", []))
     test_imports = get_test_imports(metadata, metadata["name"])
+    test_commands = ["pip check"]
+    test_requirements = ["pip"]
+    test_requirements.extend(
+        get_test_requirements(metadata, config.extras_require_test)
+    )
+    if "pytest" in test_requirements:
+        for module in test_imports:
+            test_commands.append("pytest --pyargs " + module)
+    test_commands.extend(get_test_entry_points(metadata.get("entry_points", [])))
     return {
         "package": {"name": name, "version": metadata["version"]},
         "build": {"entry_points": metadata.get("entry_points")},
         "requirements": all_requirements,
         "test": {
             "imports": test_imports,
-            "commands": ["pip check"] + test_entry_points,
-            "requires": ["pip"],
+            "commands": test_commands,
+            "requires": test_requirements,
         },
         "about": {
             "home": metadata["url"]
