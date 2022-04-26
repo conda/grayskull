@@ -268,7 +268,8 @@ def search_license_folder(
     :return: License information
     """
     re_search = re.compile(
-        r"(\bcopyright\b|\blicense[s]*\b|\bcopying\b|\bcopyleft\b)", re.IGNORECASE
+        r"(\bcopyright\b|\bnotice\b|\blicense[s]*\b|\bcopying\b|\bcopyleft\b)",
+        re.IGNORECASE,
     )
     for folder_path, _, filenames in os.walk(str(path)):
         if os.path.basename(folder_path).startswith("."):
