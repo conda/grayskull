@@ -392,7 +392,7 @@ def get_metadata(recipe, config) -> dict:
     test_requirements.extend(
         get_test_requirements(metadata, config.extras_require_test)
     )
-    if "pytest" in test_requirements:
+    if any("pytest" in req for req in test_requirements):
         for module in test_imports:
             test_commands.append("pytest --pyargs " + module)
     test_commands.extend(get_test_entry_points(metadata.get("entry_points", [])))
