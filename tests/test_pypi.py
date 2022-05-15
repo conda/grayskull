@@ -589,8 +589,17 @@ def test_get_test_requirements():
     assert "pytest" not in recipe["test"]["requires"]
     assert "pytest --pyargs ewokscore" not in recipe["test"]["commands"]
 
+    # pytest dependency has no version constraints
     config = Configuration(
         name="ewokscore", version="0.1.0rc5", extras_require_test="test"
+    )
+    recipe = GrayskullFactory.create_recipe("pypi", config)
+    assert "pytest" in recipe["test"]["requires"]
+    assert "pytest --pyargs ewokscore" in recipe["test"]["commands"]
+
+    # pytest dependency has version constraints
+    config = Configuration(
+        name="ewokscore", version="0.1.0rc8 ", extras_require_test="test"
     )
     recipe = GrayskullFactory.create_recipe("pypi", config)
     assert "pytest" in recipe["test"]["requires"]
