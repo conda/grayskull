@@ -122,6 +122,33 @@ def test_get_extra_from_requires_dist():
     ]
 
 
+def test_get_extra_requirements():
+    config = Configuration(name="pypushflow")
+    data = get_sdist_metadata(
+        "https://pypi.io/packages/source/p/pypushflow/pypushflow-0.3.0rc2.tar.gz",
+        config,
+    )
+    received = {extra: set(lst) for extra, lst in data["extras_require"].items()}
+    expected = {
+        "mx": {"pymongo >=4, <5"},
+        "test": {
+            "mongita >=1, <2",
+            "pytest >=7, <8",
+            "psutil >=5.8, <6",
+            "pytest-subtests >=0.4, <1",
+        },
+        "dev": {
+            "pytest >=7, <8",
+            "black >=22, <23",
+            "psutil >=5.8, <6",
+            "flake8 >=4, <5",
+            "mongita >=1, <2",
+            "pytest-subtests >=0.4, <1",
+        },
+    }
+    assert received == expected
+
+
 def test_get_all_selectors_pypi(recipe_config):
     _, config = recipe_config
     config.version = "5.3.1"
