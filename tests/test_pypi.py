@@ -122,20 +122,44 @@ def test_get_extra_from_requires_dist():
     ]
 
 
+def test_get_extra_requirements():
+    config = Configuration(name="pypushflow")
+    data = get_sdist_metadata(
+        "https://pypi.io/packages/source/p/pypushflow/pypushflow-0.3.0rc2.tar.gz",
+        config,
+    )
+    received = {extra: set(lst) for extra, lst in data["extras_require"].items()}
+    expected = {
+        "mx": {"pymongo >=4, <5"},
+        "test": {
+            "mongita >=1, <2",
+            "pytest >=7, <8",
+            "psutil >=5.8, <6",
+            "pytest-subtests >=0.4, <1",
+        },
+        "dev": {
+            "pytest >=7, <8",
+            "black >=22, <23",
+            "psutil >=5.8, <6",
+            "flake8 >=4, <5",
+            "mongita >=1, <2",
+            "pytest-subtests >=0.4, <1",
+        },
+    }
+    assert received == expected
+
+
 def test_get_all_selectors_pypi(recipe_config):
     _, config = recipe_config
     config.version = "5.3.1"
-    assert (
-        get_all_selectors_pypi(
-            [
-                ("(", "sys_platform", "==", "win32", "", "and"),
-                ("", "python_version", "==", "2.7", ")", "and"),
-                ("", "extra", "==", "socks", "", ""),
-            ],
-            config,
-        )
-        == ["(", "win", "and", "py==27", ")"]
-    )
+    assert get_all_selectors_pypi(
+        [
+            ("(", "sys_platform", "==", "win32", "", "and"),
+            ("", "python_version", "==", "2.7", ")", "and"),
+            ("", "extra", "==", "socks", "", ""),
+        ],
+        config,
+    ) == ["(", "win", "and", "py==27", ")"]
 
 
 def test_get_selector():
@@ -338,58 +362,46 @@ def test_get_entry_points_from_sdist():
         {"entry_points": {"gui_scripts": ["gui_scripts=entrypoints"]}}
     ) == ["gui_scripts=entrypoints"]
 
-    assert (
-        sorted(
-            get_entry_points_from_sdist(
-                {
-                    "entry_points": {
-                        "gui_scripts": ["gui_scripts=entrypoints"],
-                        "console_scripts": ["console_scripts=entrypoints"],
-                    }
+    assert sorted(
+        get_entry_points_from_sdist(
+            {
+                "entry_points": {
+                    "gui_scripts": ["gui_scripts=entrypoints"],
+                    "console_scripts": ["console_scripts=entrypoints"],
                 }
-            )
+            }
         )
-        == sorted(["gui_scripts=entrypoints", "console_scripts=entrypoints"])
-    )
-    assert (
-        sorted(
-            get_entry_points_from_sdist(
-                {
-                    "entry_points": {
-                        "gui_scripts": None,
-                        "console_scripts": "console_scripts=entrypoints",
-                    }
+    ) == sorted(["gui_scripts=entrypoints", "console_scripts=entrypoints"])
+    assert sorted(
+        get_entry_points_from_sdist(
+            {
+                "entry_points": {
+                    "gui_scripts": None,
+                    "console_scripts": "console_scripts=entrypoints",
                 }
-            )
+            }
         )
-        == sorted(["console_scripts=entrypoints"])
-    )
-    assert (
-        sorted(
-            get_entry_points_from_sdist(
-                {
-                    "entry_points": {
-                        "gui_scripts": None,
-                        "console_scripts": "console_scripts=entrypoints\nfoo=bar.main",
-                    }
+    ) == sorted(["console_scripts=entrypoints"])
+    assert sorted(
+        get_entry_points_from_sdist(
+            {
+                "entry_points": {
+                    "gui_scripts": None,
+                    "console_scripts": "console_scripts=entrypoints\nfoo=bar.main",
                 }
-            )
+            }
         )
-        == sorted(["console_scripts=entrypoints", "foo=bar.main"])
-    )
-    assert (
-        sorted(
-            get_entry_points_from_sdist(
-                {
-                    "entry_points": {
-                        "gui_scripts": "gui_scripts=entrypoints",
-                        "console_scripts": None,
-                    }
+    ) == sorted(["console_scripts=entrypoints", "foo=bar.main"])
+    assert sorted(
+        get_entry_points_from_sdist(
+            {
+                "entry_points": {
+                    "gui_scripts": "gui_scripts=entrypoints",
+                    "console_scripts": None,
                 }
-            )
+            }
         )
-        == sorted(["gui_scripts=entrypoints"])
-    )
+    ) == sorted(["gui_scripts=entrypoints"])
 
 
 @pytest.mark.parametrize(
@@ -589,6 +601,36 @@ def test_django_rest_framework_xml_license():
     assert recipe["about"]["license"] == "BSD-3-Clause"
     assert recipe["about"]["license_file"] == "LICENSE"
     assert recipe["test"]["imports"][0] == "rest_framework_xml"
+
+
+def test_get_test_requirements():
+    config = Configuration(name="ewokscore", version="0.1.0rc5")
+    recipe = GrayskullFactory.create_recipe("pypi", config)
+    assert "pytest" not in recipe["test"]["requires"]
+    assert "pytest --pyargs ewokscore" not in recipe["test"]["commands"]
+
+    config = Configuration(
+        name="ewokscore", version="0.1.0rc5", extras_require_test="wrongoption"
+    )
+    recipe = GrayskullFactory.create_recipe("pypi", config)
+    assert "pytest" not in recipe["test"]["requires"]
+    assert "pytest --pyargs ewokscore" not in recipe["test"]["commands"]
+
+    # pytest dependency has no version constraints
+    config = Configuration(
+        name="ewokscore", version="0.1.0rc5", extras_require_test="test"
+    )
+    recipe = GrayskullFactory.create_recipe("pypi", config)
+    assert "pytest" in recipe["test"]["requires"]
+    assert "pytest --pyargs ewokscore" in recipe["test"]["commands"]
+
+    # pytest dependency has version constraints
+    config = Configuration(
+        name="ewokscore", version="0.1.0rc8 ", extras_require_test="test"
+    )
+    recipe = GrayskullFactory.create_recipe("pypi", config)
+    assert "pytest" in recipe["test"]["requires"]
+    assert "pytest --pyargs ewokscore" in recipe["test"]["commands"]
 
 
 def test_get_test_imports():
@@ -812,41 +854,35 @@ def test_add_python_min_to_strict_conda_forge():
 
 
 def test_get_test_imports_clean_modules():
-    assert (
-        get_test_imports(
-            {
-                "packages": [
-                    "_pytest",
-                    "tests",
-                    "test",
-                    "_pytest._code",
-                    "_pytest._io",
-                    "_pytest.assertion",
-                    "_pytest.config",
-                    "_pytest.mark",
-                    "pytest",
-                    "pytest.foo",
-                    "zar",
-                ]
-            }
-        )
-        == ["pytest", "zar"]
-    )
-    assert (
-        get_test_imports(
-            {
-                "packages": [
-                    "_pytest",
-                    "_pytest._code",
-                    "_pytest._io",
-                    "_pytest.assertion",
-                    "_pytest.config",
-                    "_pytest.mark",
-                ]
-            }
-        )
-        == ["_pytest", "_pytest._code"]
-    )
+    assert get_test_imports(
+        {
+            "packages": [
+                "_pytest",
+                "tests",
+                "test",
+                "_pytest._code",
+                "_pytest._io",
+                "_pytest.assertion",
+                "_pytest.config",
+                "_pytest.mark",
+                "pytest",
+                "pytest.foo",
+                "zar",
+            ]
+        }
+    ) == ["pytest", "zar"]
+    assert get_test_imports(
+        {
+            "packages": [
+                "_pytest",
+                "_pytest._code",
+                "_pytest._io",
+                "_pytest.assertion",
+                "_pytest.config",
+                "_pytest.mark",
+            ]
+        }
+    ) == ["_pytest", "_pytest._code"]
 
 
 def test_ensure_pep440():

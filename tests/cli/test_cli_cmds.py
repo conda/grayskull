@@ -79,6 +79,7 @@ def test_change_pypi_url(mocker):
         url_pypi_metadata="http://url_pypi.com/abc",
         sections_populate=None,
         from_local_sdist=False,
+        extras_require_test=None,
     )
 
 

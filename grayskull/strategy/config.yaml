@@ -58,6 +58,10 @@ conda_mirror:
   conda_forge: conda-mirror
   import_name: conda_mirror
 
+confluent-kafka:
+  conda_forge: python-confluent-kafka
+  import_name: confluent_kafka
+
 coreapi:
   conda_forge: python-coreapi
   import_name: coreapi

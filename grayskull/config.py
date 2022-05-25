@@ -39,6 +39,7 @@ class Configuration:
     from_local_sdist: bool = False
     local_sdist: Optional[str] = None
     missing_deps: set = field(default_factory=set)
+    extras_require_test: Optional[str] = None
 
     def get_oldest_py3_version(self, list_py_ver: List[PyVer]) -> PyVer:
         list_py_ver = sorted(list_py_ver)

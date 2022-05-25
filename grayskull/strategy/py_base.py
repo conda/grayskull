@@ -22,6 +22,8 @@ from grayskull.license.discovery import ShortLicense, search_license_file
 from grayskull.utils import (
     PyVer,
     get_vendored_dependencies,
+    merge_dict_of_lists_item,
+    merge_list_item,
     origin_is_github,
     sha256_checksum,
 )
@@ -256,23 +258,14 @@ def merge_sdist_metadata(setup_py: dict, setup_cfg: dict) -> dict:
         if key not in result:
             result[key] = value
 
-    def get_full_list(sec_key: str) -> List:
-        if sec_key not in setup_py:
-            return setup_cfg.get(sec_key, [])
-        cfg_val = set(setup_cfg.get(sec_key, []))
-        result_val = set(result.get(sec_key, []))
-        return list(cfg_val.union(result_val))
+    merge_list_item(result, setup_cfg, "install_requires")
+    merge_list_item(result, setup_cfg, "setup_requires")
+    merge_list_item(result, setup_cfg, "compilers")
+    merge_dict_of_lists_item(result, setup_cfg, "extras_require")
 
-    if "install_requires" in result:
-        result["install_requires"] = get_full_list("install_requires")
-    if "extras_require" in result:
-        result["extras_require"] = get_full_list("extras_require")
-    if "setup_requires" in result:
-        result["setup_requires"] = get_full_list("setup_requires")
-        if "setuptools-scm" in result["setup_requires"]:
-            result["setup_requires"].remove("setuptools-scm")
-    if "compilers" in result:
-        result["compilers"] = get_full_list("compilers")
+    if "setuptools-scm" in result.get("setup_requires", []):
+        result["setup_requires"].remove("setuptools-scm")
+
     return result
 
 
@@ -600,6 +593,21 @@ def get_test_imports(metadata: dict, default: Optional[str] = None) -> List:
     if not result:
         return [impt.replace("/", ".") for impt in sorted(meta_pkg)[:2]]
     return result
+
+
+def get_test_requirements(metadata: Dict, extras_require_test: Optional[str]) -> List:
+    """Extract test requirements from metadata
+
+    :param metadata:
+    :param extras_require_test: `extras_require` option for test requirements
+    :return: list of test requirements
+    """
+    if not extras_require_test:
+        return list()
+    try:
+        return metadata["extras_require"][extras_require_test]
+    except KeyError:
+        return list()
 
 
 def get_entry_points_from_sdist(sdist_metadata: dict) -> List:

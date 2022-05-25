@@ -7,6 +7,8 @@ from grayskull.utils import (
     get_all_modules_imported_script,
     get_std_modules,
     get_vendored_dependencies,
+    merge_dict_of_lists_item,
+    merge_list_item,
     origin_is_local_sdist,
 )
 
@@ -57,3 +59,62 @@ def test_origin_is_not_local_sdist_file(tmp_path):
 )
 def test_origin_is_not_local_sdist_filename(filename):
     assert not origin_is_local_sdist(filename)
+
+
+def test_merge_lists_item():
+    destination = {}
+    add = {}
+    merge_list_item(destination, add, "name")
+    assert destination == {}
+
+    destination = {"name": [1]}
+    add = {}
+    merge_list_item(destination, add, "name")
+    destination = {key: set(lst) for key, lst in destination.items()}
+    assert destination == {"name": {1}}
+
+    destination = {}
+    add = {"name": [2]}
+    merge_list_item(destination, add, "name")
+    destination = {key: set(lst) for key, lst in destination.items()}
+    assert destination == {"name": {2}}
+
+    destination = {"name": [1]}
+    add = {"name": [2]}
+    merge_list_item(destination, add, "name")
+    destination = {key: set(lst) for key, lst in destination.items()}
+    assert destination == {"name": {1, 2}}
+
+
+def test_merge_dict_of_lists_item():
+    destination = {}
+    add = {}
+    merge_dict_of_lists_item(destination, add, "name")
+    assert destination == {}
+
+    destination = {"name": {"sub_name": [1]}}
+    add = {}
+    merge_dict_of_lists_item(destination, add, "name")
+    for key in destination:
+        destination[key] = {
+            sub_key: set(lst) for sub_key, lst in destination[key].items()
+        }
+    assert destination == {"name": {"sub_name": {1}}}
+
+    destination = {}
+    add = {"name": {"sub_name": [2]}}
+    merge_dict_of_lists_item(destination, add, "name")
+    for key in destination:
+        destination[key] = {
+            sub_key: set(lst) for sub_key, lst in destination[key].items()
+        }
+    assert destination == {"name": {"sub_name": {2}}}
+
+    destination = {"name": {"sub_name": [1]}}
+    add = {"name": {"sub_name": [2]}}
+    merge_dict_of_lists_item(destination, add, "name")
+    for key in destination:
+        destination[key] = {
+            sub_key: set(lst) for sub_key, lst in destination[key].items()
+        }
+    assert destination == {"name": {"sub_name": {1, 2}}}

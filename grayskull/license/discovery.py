@@ -151,7 +151,10 @@ def get_opensource_license(license_spdx: str) -> dict:
 
 @lru_cache(maxsize=10)
 def get_opensource_license_data() -> List:
-    response = requests.get(url="https://api.opensource.org/licenses/", timeout=5)
+    try:
+        response = requests.get(url="https://api.opensource.org/licenses/", timeout=5)
+    except requests.exceptions.RequestException:
+        return []
     if response.status_code != 200:
         return []
     return response.json()
@@ -268,7 +271,8 @@ def search_license_folder(
     :return: License information
     """
     re_search = re.compile(
-        r"(\bcopyright\b|\blicense[s]*\b|\bcopying\b|\bcopyleft\b)", re.IGNORECASE
+        r"(\bcopyright\b|\bnotice\b|\blicense[s]*\b|\bcopying\b|\bcopyleft\b)",
+        re.IGNORECASE,
     )
     for folder_path, _, filenames in os.walk(str(path)):
         if os.path.basename(folder_path).startswith("."):

@@ -235,3 +235,19 @@ def _clean_yaml(recipe, all_obj_to_delete=None):
             value_to_delete = _clean_yaml(value)
         all_obj_to_delete.extend(value_to_delete)
     return all_obj_to_delete
+
+
+def merge_list_item(destination: dict, add: dict, key: str) -> None:
+    lst = set(destination.get(key, []))
+    lst |= set(add.get(key, []))
+    if lst:
+        destination[key] = list(lst)
+
+
+def merge_dict_of_lists_item(destination: dict, add: dict, key: str) -> None:
+    sub_destination = destination.get(key, {})
+    sub_add = add.get(key, {})
+    for sub_key in set(sub_destination) | set(sub_add):
+        merge_list_item(sub_destination, sub_add, sub_key)
+    if sub_destination:
+        destination[key] = sub_destination
