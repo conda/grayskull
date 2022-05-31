@@ -166,6 +166,10 @@ hdfs:
   conda_forge: python-hdfs
   import_name: hdfs
 
+hjson:
+  conda_forge: hjson-py
+  import_name: hjson
+
 htcondor:
   conda_forge: python-htcondor
   import_name: htcondor
