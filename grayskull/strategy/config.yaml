@@ -409,3 +409,7 @@ vsts:
 xxhash:
   import_name: xxhash
   conda_forge: python-xxhash
+
+kaleido:
+  conda_forge: python-kaleido
+  import_name: kaleido
