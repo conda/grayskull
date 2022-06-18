@@ -31,6 +31,7 @@ from grayskull.strategy.py_base import (
     get_test_entry_points,
     get_test_imports,
     get_test_requirements,
+    package_in_requirements,
     parse_extra_metadata_to_selector,
     py_version_to_limit_python,
     py_version_to_selector,
@@ -392,7 +393,7 @@ def get_metadata(recipe, config) -> dict:
     test_requirements.extend(
         get_test_requirements(metadata, config.extras_require_test)
     )
-    if any("pytest" in req for req in test_requirements):
+    if package_in_requirements("pytest", test_requirements):
         for module in test_imports:
             test_commands.append("pytest --pyargs " + module)
     test_commands.extend(get_test_entry_points(metadata.get("entry_points", [])))

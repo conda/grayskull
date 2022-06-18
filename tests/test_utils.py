@@ -10,6 +10,8 @@ from grayskull.utils import (
     merge_dict_of_lists_item,
     merge_list_item,
     origin_is_local_sdist,
+    package_in_requirements,
+    remove_package_from_requirements,
 )
 
 
@@ -118,3 +120,35 @@ def test_merge_dict_of_lists_item():
             sub_key: set(lst) for sub_key, lst in destination[key].items()
         }
     assert destination == {"name": {"sub_name": {1, 2}}}
+
+
+@pytest.mark.parametrize(
+    "requirements",
+    [["setuptools_scm"], ["setuptools-scm"], ["setuptools_scm[toml] >= 3.4.1"]],
+)
+def test_package_in_requirements(requirements):
+    assert package_in_requirements("setuptools_scm", requirements)
+    assert package_in_requirements("setuptools-scm", requirements)
+    assert not package_in_requirements("setuptools", requirements)
+
+
+@pytest.mark.parametrize(
+    "requirements",
+    [["setuptools_scm"], ["setuptools-scm"], ["setuptools_scm[toml] >= 3.4.1"]],
+)
+def test_remove_package_from_requirements(requirements):
+    reduced = remove_package_from_requirements("setuptools_scm", requirements)
+    assert len(reduced) == len(requirements) - 1
+    reduced = remove_package_from_requirements("setuptools-scm", requirements)
+    assert len(reduced) == len(requirements) - 1
+    reduced = remove_package_from_requirements("setuptools", requirements)
+    assert len(reduced) == len(requirements)
+
+
+def test_remove_package_from_requirements_corner_cases():
+    reduced = remove_package_from_requirements("setuptools_scm", [])
+    assert not reduced
+    reduced = remove_package_from_requirements("", ["setuptools_scm"])
+    assert reduced == ["setuptools_scm"]
+    reduced = remove_package_from_requirements("", [])
+    assert not reduced

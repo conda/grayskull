@@ -25,6 +25,8 @@ from grayskull.utils import (
     merge_dict_of_lists_item,
     merge_list_item,
     origin_is_github,
+    package_in_requirements,
+    remove_package_from_requirements,
     sha256_checksum,
 )
 
@@ -263,8 +265,11 @@ def merge_sdist_metadata(setup_py: dict, setup_cfg: dict) -> dict:
     merge_list_item(result, setup_cfg, "compilers")
     merge_dict_of_lists_item(result, setup_cfg, "extras_require")
 
-    if "setuptools-scm" in result.get("setup_requires", []):
-        result["setup_requires"].remove("setuptools-scm")
+    setup_requires = result.get("setup_requires")
+    if setup_requires:
+        result["setup_requires"] = remove_package_from_requirements(
+            "setuptools-scm", setup_requires
+        )
 
     return result
 
@@ -356,10 +361,13 @@ def injection_distutils(folder: str) -> dict:
 
         if "use_scm_version" in data_dist and kwargs["use_scm_version"]:
             log.debug("setuptools_scm found on setup.py")
-            if "setuptools_scm" not in data_dist["setup_requires"]:
-                data_dist["setup_requires"] += ["setuptools_scm"]
-            if "setuptools-scm" in data_dist["setup_requires"]:
-                data_dist["setup_requires"].remove("setuptools-scm")
+            if not package_in_requirements(
+                "setuptools_scm", data_dist["setup_requires"]
+            ):
+                data_dist["setup_requires"].append("setuptools_scm")
+            data_dist["setup_requires"] = remove_package_from_requirements(
+                "setuptools-scm", data_dist["setup_requires"]
+            )
 
         if kwargs.get("ext_modules", None):
             data_dist["compilers"] = ["c"]

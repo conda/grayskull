@@ -9,7 +9,7 @@ from functools import lru_cache
 from glob import glob
 from pathlib import Path
 from shutil import copyfile
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional, Sequence, Union
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -251,3 +251,29 @@ def merge_dict_of_lists_item(destination: dict, add: dict, key: str) -> None:
         merge_list_item(sub_destination, sub_add, sub_key)
     if sub_destination:
         destination[key] = sub_destination
+
+
+def package_in_requirements(package: str, requirements: Sequence[str]) -> bool:
+    return any(
+        is_requirement_of_package(package, requirement) for requirement in requirements
+    )
+
+
+def remove_package_from_requirements(
+    package: str, requirements: Sequence[str]
+) -> Sequence[str]:
+    return [
+        requirement
+        for requirement in requirements
+        if not is_requirement_of_package(package, requirement)
+    ]
+
+
+def is_requirement_of_package(package: str, requirement: str) -> bool:
+    """For example "setuptools_scm[toml] >= 3.4.1" is a
+    requirement expression of the package "setuptools-scm".
+    """
+    package = package.replace("-", "_")
+    requirement = requirement.replace("-", "_")
+    pattern = rf"^{package}[^_\w]|^{package}$"
+    return bool(re.match(pattern, requirement))
