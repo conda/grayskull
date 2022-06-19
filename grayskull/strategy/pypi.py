@@ -4,7 +4,7 @@ import os
 import re
 from pathlib import Path
 from tempfile import mkdtemp
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import requests
 from colorama import Fore
@@ -30,7 +30,6 @@ from grayskull.strategy.py_base import (
     get_sdist_metadata,
     get_test_entry_points,
     get_test_imports,
-    get_test_requirements,
     parse_extra_metadata_to_selector,
     py_version_to_limit_python,
     py_version_to_selector,
@@ -371,63 +370,97 @@ def get_metadata(recipe, config) -> dict:
             )
     else:
         license_name = "Other"
-
     if not license_file:
         license_file = ["PLEASE_ADD_LICENSE_FILE"]
     if not license_name:
         license_name = "Other"
-    all_requirements = extract_requirements(metadata, config, recipe)
 
-    if all_requirements.get("host"):
-        all_requirements["host"] = solve_list_pkg_name(
-            all_requirements["host"], PYPI_CONFIG
+    requirements_section = extract_requirements(metadata, config, recipe)
+    optional_requirements = extract_optional_requirements(metadata, config)
+    for key in requirements_section:
+        requirements_section[key] = normalize_requirements_list(
+            requirements_section[key], config
         )
-        all_requirements["host"] = ensure_pep440_in_req_list(all_requirements["host"])
-    if all_requirements.get("run"):
-        all_requirements["run"] = solve_list_pkg_name(
-            all_requirements["run"], PYPI_CONFIG
-        )
-        all_requirements["run"] = ensure_pep440_in_req_list(all_requirements["run"])
-    if config.is_strict_cf:
-        all_requirements["host"] = clean_deps_for_conda_forge(
-            all_requirements["host"], config.py_cf_supported[0]
-        )
-        all_requirements["run"] = clean_deps_for_conda_forge(
-            all_requirements["run"], config.py_cf_supported[0]
+    for key in optional_requirements:
+        optional_requirements[key] = normalize_requirements_list(
+            optional_requirements[key], config
         )
 
-    all_missing_deps = print_requirements(all_requirements)
+    all_missing_deps = print_requirements(requirements_section, optional_requirements)
     config.missing_deps = all_missing_deps
-    test_imports = get_test_imports(metadata, metadata["name"])
-    test_commands = ["pip check"]
-    test_requirements = ["pip"]
-    test_requirements.extend(
-        get_test_requirements(metadata, config.extras_require_test)
-    )
-    if any("pytest" in req for req in test_requirements):
-        test_commands.extend(f"pytest --pyargs {module}" for module in test_imports)
-    test_commands.extend(get_test_entry_points(metadata.get("entry_points", [])))
-    return {
-        "package": {"name": name, "version": metadata["version"]},
-        "build": {"entry_points": metadata.get("entry_points")},
-        "requirements": all_requirements,
-        "test": {
-            "imports": test_imports,
-            "commands": test_commands,
-            "requires": test_requirements,
-        },
-        "about": {
-            "home": metadata["url"]
-            if metadata.get("url")
-            else metadata.get("project_url"),
-            "summary": metadata.get("summary"),
-            "doc_url": metadata.get("doc_url"),
-            "dev_url": metadata.get("dev_url"),
-            "license": license_name,
-            "license_file": license_file,
-        },
-        "source": metadata.get("source", {}),
+
+    test_requirements = optional_requirements.pop(config.extras_require_test, [])
+    test_section = compose_test_section(metadata, test_requirements)
+
+    about_section = {
+        "home": metadata["url"] if metadata.get("url") else metadata.get("project_url"),
+        "summary": metadata.get("summary"),
+        "doc_url": metadata.get("doc_url"),
+        "dev_url": metadata.get("dev_url"),
+        "license": license_name,
+        "license_file": license_file,
     }
+
+    source_section = metadata.get("source", {})
+
+    build_section = {"entry_points": metadata.get("entry_points")}
+
+    outputs = []
+    if optional_requirements:
+        if config.extras_require_split:
+            outputs.append(
+                {
+                    "name": name,
+                    "requirements": requirements_section,
+                }
+            )
+            for option, req_list in optional_requirements.items():
+                req_section = dict(requirements_section)
+                req_section["run"] = [f"{name} =={{{{ version }}}}"] + req_list
+                outputs.append(
+                    {
+                        "name": f"{name}-{option}",
+                        "requirements": req_section,
+                    }
+                )
+        else:
+            # Sort options in terms of inclusion
+            optional_requirements_items = list()
+            for option, req_list in optional_requirements.items():
+                for _idx, (_, req_list2) in enumerate(optional_requirements_items):
+                    if set(req_list).issubset(req_list2):
+                        break
+                else:
+                    _idx = len(optional_requirements_items)
+                optional_requirements_items.insert(_idx, (option, req_list))
+
+            # Add options to run requirements
+            for option, req_list in optional_requirements_items:
+                req_list = [s for s in req_list if s not in requirements_section["run"]]
+                if not req_list:
+                    continue
+                requirements_section["run"] += [f"# Extra: {option}"] + req_list
+
+    if outputs:
+        package_section = {"name": name + "-meta", "version": metadata["version"]}
+        return {
+            "package": package_section,
+            "build": build_section,
+            "outputs": outputs,
+            "test": test_section,
+            "about": about_section,
+            "source": source_section,
+        }
+    else:
+        package_section = {"name": name, "version": metadata["version"]}
+        return {
+            "package": package_section,
+            "build": build_section,
+            "requirements": requirements_section,
+            "test": test_section,
+            "about": about_section,
+            "source": source_section,
+        }
 
 
 def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]):
@@ -445,11 +478,12 @@ def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]
                 recipe[section].update(metadata[section])
             else:
                 recipe.add_section({section: metadata[section]})
+
     if not config.is_arch:
         recipe["build"]["noarch"] = "python"
 
 
-def extract_requirements(metadata: dict, config, recipe) -> dict:
+def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]:
     """Extract the requirements for `build`, `host` and `run`"""
     name = metadata["name"]
     requires_dist = format_dependencies(metadata.get("requires_dist", []), name)
@@ -511,3 +545,49 @@ def remove_selectors_pkgs_if_needed(
             pkg = re_selector.sub("", pkg)
         result.append(pkg)
     return result
+
+
+def extract_optional_requirements(metadata: dict, config) -> Dict[str, List[str]]:
+    """Extract all optional requirements that are specified in the configuration"""
+    keys = set()
+    if config.extras_require_all:
+        extras_require = metadata.get("extras_require")
+        if extras_require:
+            keys.update(extras_require.keys())
+    if config.extras_require_include:
+        keys.update(config.extras_require_include)
+    if config.extras_require_exclude:
+        keys -= set(config.extras_require_exclude)
+    if config.extras_require_test:
+        keys.add(config.extras_require_test)
+    result = dict()
+    for key in sorted(keys):
+        requirements = metadata["extras_require"].get(key)
+        if requirements:
+            result[key] = requirements
+    return result
+
+
+def normalize_requirements_list(requirements: List[str], config) -> List[str]:
+    """Adapt requirements to PEP440, Conda and Conda-Forge"""
+    requirements = solve_list_pkg_name(requirements, PYPI_CONFIG)
+    requirements = ensure_pep440_in_req_list(requirements)
+    if config.is_strict_cf:
+        requirements = clean_deps_for_conda_forge(
+            requirements, config.py_cf_supported[0]
+        )
+    return requirements
+
+
+def compose_test_section(metadata: dict, test_requirements: List[str]) -> dict:
+    test_imports = get_test_imports(metadata, metadata["name"])
+    test_requirements = ["pip"] + test_requirements
+    test_commands = ["pip check"]
+    if any("pytest" in req for req in test_requirements):
+        test_commands.extend(f"pytest --pyargs {module}" for module in test_imports)
+    test_commands.extend(get_test_entry_points(metadata.get("entry_points", [])))
+    return {
+        "imports": test_imports,
+        "commands": test_commands,
+        "requires": test_requirements,
+    }

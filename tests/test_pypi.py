@@ -130,7 +130,9 @@ def test_get_extra_requirements():
         "https://pypi.io/packages/source/p/pypushflow/pypushflow-0.3.0rc2.tar.gz",
         config,
     )
-    received = {extra: set(lst) for extra, lst in data["extras_require"].items()}
+    received = {
+        extra: set(req_lst) for extra, req_lst in data["extras_require"].items()
+    }
     expected = {
         "mx": {"pymongo >=4, <5"},
         "test": {
@@ -149,6 +151,146 @@ def test_get_extra_requirements():
         },
     }
     assert received == expected
+
+
+def test_get_include_extra_requirements():
+    base_requirements = [
+        "cloudpickle >=1.1.1",
+        "fsspec >=0.6.0",
+        "packaging >=20.0",
+        "partd >=0.3.10",
+        "python >=3.8",
+        "pyyaml >=5.3.1",
+        "toolz >=0.8.2",
+    ]
+
+    extras = dict()
+    extras["array"] = ["numpy >=1.18"]
+    extras["distributed"] = ["distributed ==2022.6.1"]
+    extras["diagnostics"] = ["bokeh >=2.4.2", "jinja2"]
+    extras["dataframe"] = ["numpy >=1.18", "pandas >=1.0"]
+    extras["test"] = ["pytest-xdist", "pytest", "pytest-rerunfailures", "pre-commit"]
+    extras["complete"] = [
+        "distributed ==2022.6.1",
+        "jinja2",
+        "numpy >=1.18",
+        "bokeh >=2.4.2",
+        "pandas >=1.0",
+    ]
+
+    def set_of_strings(sequence):
+        return set(map(str, sequence))
+
+    # extras are not used
+    config = Configuration(name="dask", version="2022.6.1")
+    recipe = GrayskullFactory.create_recipe("pypi", config)
+    recipe["name"] == "dask"
+    assert "outputs" not in recipe
+    assert set(recipe["requirements"]["run"]) == set(base_requirements)
+    assert set(recipe["test"]["requires"]) == {"pip"}
+
+    # all extras are included in the requirements
+    config = Configuration(name="dask", version="2022.6.1", extras_require_all=True)
+    recipe = GrayskullFactory.create_recipe("pypi", config)
+    recipe["name"] == "dask"
+    assert "outputs" not in recipe
+
+    expected = list(base_requirements)
+    for name, req_lst in extras.items():
+        if name != "complete":
+            expected.append(f"Extra: {name}")
+            expected.extend(req_lst)
+    assert set_of_strings(recipe["requirements"]["run"]) == set(expected)
+    assert set_of_strings(recipe["test"]["requires"]) == {"pip"}
+
+    # all extras are included in the requirements except for the
+    # test requirements which are in the test section
+    config = Configuration(
+        name="dask",
+        version="2022.6.1",
+        extras_require_all=True,
+        extras_require_test="test",
+    )
+    recipe = GrayskullFactory.create_recipe("pypi", config)
+    recipe["name"] == "dask"
+    assert "outputs" not in recipe
+
+    expected = list(base_requirements)
+    for name, req_lst in extras.items():
+        if name not in ("test", "complete"):
+            expected.append(f"Extra: {name}")
+            expected.extend(req_lst)
+    assert set_of_strings(recipe["requirements"]["run"]) == set(expected)
+    assert set_of_strings(recipe["test"]["requires"]) == {"pip", *extras["test"]}
+
+    # only "array" is included in the requirements
+    config = Configuration(
+        name="dask", version="2022.6.1", extras_require_include=("array",)
+    )
+    recipe = GrayskullFactory.create_recipe("pypi", config)
+    recipe["name"] == "dask"
+    assert "outputs" not in recipe
+    assert set_of_strings(recipe["requirements"]["run"]) == {
+        *base_requirements,
+        "Extra: array",
+        *extras["array"],
+    }
+    assert set_of_strings(recipe["test"]["requires"]) == {"pip"}
+
+    # only "test" is included but in the test section
+    config = Configuration(
+        name="dask",
+        version="2022.6.1",
+        extras_require_all=True,
+        extras_require_exclude=set(extras) - {"test"},
+        extras_require_test="test",
+    )
+    recipe = GrayskullFactory.create_recipe("pypi", config)
+    recipe["name"] == "dask"
+    assert "outputs" not in recipe
+    assert set_of_strings(recipe["requirements"]["run"]) == set(base_requirements)
+    assert set_of_strings(recipe["test"]["requires"]) == {"pip", *extras["test"]}
+
+    # only "test" is included in the test section
+    config = Configuration(
+        name="dask",
+        version="2022.6.1",
+        extras_require_all=True,
+        extras_require_exclude=set(extras) - {"test"},
+        extras_require_test="test",
+        extras_require_split=True,
+    )
+    recipe = GrayskullFactory.create_recipe("pypi", config)
+    recipe["name"] == "dask"
+    assert "outputs" not in recipe
+    assert set_of_strings(recipe["requirements"]["run"]) == set(base_requirements)
+    assert set_of_strings(recipe["test"]["requires"]) == {"pip", *extras["test"]}
+
+    # all extras have their own output except for the
+    # test requirements which are in the test section
+    config = Configuration(
+        name="dask",
+        version="2022.6.1",
+        extras_require_all=True,
+        extras_require_test="test",
+        extras_require_split=True,
+    )
+    recipe = GrayskullFactory.create_recipe("pypi", config)
+    recipe["name"] == "dask-meta"
+    assert not list(recipe["requirements"].items())
+    assert len(recipe["outputs"]) == 6
+
+    expected = dict()
+    expected["dask"] = set(base_requirements)
+    for name, req_lst in extras.items():
+        if name != "test":
+            expected[f"dask-{name}"] = {"dask =={{ version }}", *req_lst}
+    found = dict()
+    for output in recipe["outputs"]:
+        found[output["name"]] = set_of_strings(output["requirements"]["run"])
+    assert found == expected
+
+    assert set_of_strings(recipe["test"]["requires"]) == {"pip", *extras["test"]}
 
 
 def test_get_all_selectors_pypi(recipe_config):
