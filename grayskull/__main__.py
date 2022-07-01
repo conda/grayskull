@@ -130,6 +130,13 @@ def main(args=None):
         dest="extras_require_test",
         help="Extra requirements to run tests.",
     )
+    pypi_cmds.add_argument(
+        "--tag",
+        "-t",
+        default=None,
+        dest="github_release_tag",
+        help="If tag is specified, grayskull will build from given release tag, rather than latest.",
+    )
 
     args = parser.parse_args(args)
 
@@ -182,6 +189,7 @@ def generate_recipes_from_list(list_pkgs, args):
                 sections_populate=args.sections_populate,
                 from_local_sdist=from_local_sdist,
                 extras_require_test=args.extras_require_test,
+                github_release_tag=args.github_release_tag,
             )
         except requests.exceptions.HTTPError as err:
             print_msg(f"{Fore.RED}Package seems to be missing.\nException: {err}\n\n")

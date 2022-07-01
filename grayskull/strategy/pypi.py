@@ -210,7 +210,7 @@ def get_origin_wise_metadata(config):
         url = config.repo_github
         name = config.name
         version, version_tag = handle_gh_version(
-            name=name, version=config.version, url=url
+            name=name, version=config.version, url=url, tag=config.github_release_tag
         )
         archive_url = generate_git_archive_tarball_url(git_url=url, git_ref=version_tag)
         sdist_metadata = get_sdist_metadata(
@@ -219,10 +219,7 @@ def get_origin_wise_metadata(config):
         sdist_metadata["version"] = version
         pypi_metadata = {}
     elif config.from_local_sdist:
-        sdist_metadata = get_sdist_metadata(
-            sdist_url="",
-            config=config,
-        )
+        sdist_metadata = get_sdist_metadata(sdist_url="", config=config,)
         pypi_metadata = {}
     else:
         pypi_metadata = get_pypi_metadata(config)
