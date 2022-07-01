@@ -80,6 +80,7 @@ def test_change_pypi_url(mocker):
         sections_populate=None,
         from_local_sdist=False,
         extras_require_test=None,
+        github_release_tag=None,
     )
 
 
