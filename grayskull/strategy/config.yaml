@@ -394,6 +394,10 @@ termstyle:
   conda_forge: python-termstyle
   import_name: termstyle
 
+torch:
+  conda_forge: pytorch
+  import_name: torch
+
 torch_geometric:
   conda_forge: pytorch_geometric
   import_name: torch_geometric
