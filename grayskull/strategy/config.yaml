@@ -166,6 +166,10 @@ hdfs:
   conda_forge: python-hdfs
   import_name: hdfs
 
+hjson:
+  conda_forge: hjson-py
+  import_name: hjson
+
 htcondor:
   conda_forge: python-htcondor
   import_name: htcondor
@@ -362,6 +366,10 @@ sagemaker_mxnet_training:
   conda_forge: sagemaker_mxnet_container
   import_name: sagemaker_mxnet_container
 
+scikit-build:
+  conda_forge: scikit-build
+  import_name: skbuild
+
 setuptools_scm:
   conda_forge: setuptools-scm
   import_name: setuptools_scm
@@ -405,3 +413,7 @@ vsts:
 xxhash:
   import_name: xxhash
   conda_forge: python-xxhash
+
+kaleido:
+  conda_forge: python-kaleido
+  import_name: kaleido
