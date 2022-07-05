@@ -287,10 +287,11 @@ def get_cran_metadata(recipe, config: Configuration) -> dict:
             constrain = r[1].strip().replace(")", "").replace(" ", "")
             imports.append(f"r-{r[0].strip()} {constrain.strip()}")
 
-    # Every CRAN package will also depend on the R base package.
+    # Every CRAN package will always depend on the R base package.
     # Hence the 'r-base' package is always present
     # in the host and run requirements.
     imports.append("r-base")
+    imports.sort()
 
     d = {
         "package": {
@@ -304,9 +305,7 @@ def get_cran_metadata(recipe, config: Configuration) -> dict:
         },
         "build": {
             "entry_points": metadata.get("entry_points"),
-            # "rpaths":
-            #    - "lib/R/lib/"
-            #    - "lib/"
+            "rpaths": ["lib/R/lib/", "lib/"],
         },
         "requirements": {
             "build": "",
