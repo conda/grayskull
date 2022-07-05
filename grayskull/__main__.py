@@ -194,7 +194,7 @@ def main(args=None):
         help="If sections are specified, grayskull will populate just the sections "
         "informed.",
     )
-    pypi_cmds.add_argument(
+    pypi_parser.add_argument(
         "--extras-require-test",
         default=None,
         dest="extras_require_test",
