@@ -1,6 +1,5 @@
 import logging
 import os
-import pprint
 import re
 import sys
 import tarfile
@@ -18,6 +17,7 @@ from yaml import SafeDumper
 
 from grayskull.config import Configuration
 from grayskull.strategy.abstract_strategy import AbstractStrategy
+from grayskull.utils import sha256_checksum
 
 log = logging.getLogger(__name__)
 CRAN_CONFIG = Path(os.path.dirname(__file__)) / "config.yaml"
@@ -43,6 +43,7 @@ class CranStrategy(AbstractStrategy):
         return update_recipe(recipe, config, sections or ALL_SECTIONS)
 
 
+# Convert the data extracted from the description file into a dictionary
 def dict_from_cran_lines(lines):
     d = {}
     for line in lines:
@@ -65,6 +66,10 @@ def dict_from_cran_lines(lines):
     return d
 
 
+# The dictionary generated from the description file
+# contents has packages listed one after another
+# in a single line.
+# This function breaks that line into multiple lines.
 def remove_package_line_continuations(chunk):
     """
     >>> chunk = [
@@ -142,7 +147,8 @@ def yaml_quote_string(string):
     )
 
 
-# Due to how we render the metadata there can be significant areas of repeated newlines.
+# Due to how the metadata is rendered there can be
+# significant areas of repeated newlines.
 # This collapses them and also strips any trailing spaces.
 def clear_whitespace(string):
     lines = []
@@ -155,6 +161,8 @@ def clear_whitespace(string):
     return "\n".join(lines)
 
 
+# Reads the description file contents and formats them by
+# running other functions on the content and returns the dictionary.
 def read_description_contents(fp):
     bytes_ = fp.read()
     text = bytes_.decode("utf-8", errors="replace")
@@ -163,6 +171,7 @@ def read_description_contents(fp):
     return dict_from_cran_lines(lines)
 
 
+# Extracting the DESCRIPTION file from the downloaded package.
 def get_archive_metadata(path, verbose=True):
     if verbose:
         print("Reading package metadata from %s" % path)
@@ -207,6 +216,7 @@ def get_cran_archive_versions(cran_url, session, package, verbose=True):
     return [v for dt, v in sorted(versions, reverse=True)]
 
 
+# Fetch the entire CRAN index and store it.
 def get_cran_index(cran_url, verbose=True):
     if verbose:
         print("Fetching main index from %s" % cran_url)
@@ -237,6 +247,7 @@ def get_available_binaries(cran_url, details):
             details["binaries"].setdefault(pkg, []).append((ver, url + filename))
 
 
+# Look for the package in the stored CRAN index.
 def get_cran_metadata(recipe, config: Configuration) -> dict:
     """Method responsible for getting CRAN metadata.
     :return: CRAN metadata"""
@@ -249,6 +260,7 @@ def get_cran_metadata(recipe, config: Configuration) -> dict:
     print(cran_version)
     tarball_name = package + "_" + cran_version + ".tar.gz"
     download_url = cran_url + "/src/contrib/" + tarball_name
+    print(download_url)
     response = requests.get(download_url)
     response.raise_for_status()
     download_file = os.path.join(
@@ -257,21 +269,14 @@ def get_cran_metadata(recipe, config: Configuration) -> dict:
     with open(download_file, "wb") as f:
         f.write(response.content)
     metadata = get_archive_metadata(download_file)
+    import pprint
+
     pprint.pprint(metadata)
-    # return {
-    #     "package": {"name": metadata["Package"], "version": metadata["Version"]},
-    #     "requirements": {
-    #         "run": metadata["Imports"],
-    #     },
-    #     "about": {
-    #         "home": metadata["URL"],
-    #         "summary": metadata["Description"],
-    #         "dev_url": metadata["URL"],
-    #         "license": metadata["License"],
-    #     },
-    #     "source": metadata.get("source", {}),
-    # }
+
     imports = []
+    # Extract 'imports' from metadata.
+    # Imports is equivalent to run and host dependencies.
+    # Add 'r-' suffix to all packages listed in imports.
     for s in metadata.get("Imports", "").split(","):
         if not s.strip():
             continue
@@ -282,16 +287,31 @@ def get_cran_metadata(recipe, config: Configuration) -> dict:
             constrain = r[1].strip().replace(")", "").replace(" ", "")
             imports.append(f"r-{r[0].strip()} {constrain.strip()}")
 
-    # imports = [f"r-{s.strip().replace('(', '').replace(')', '').replace(' ', '')}"
-    # for s in metadata.get("Imports", "").split(",") if s.strip()]
+    # Every CRAN package will also depend on the R base package.
+    # Hence the 'r-base' package is always present
+    # in the host and run requirements.
+    imports.append("r-base")
+
     d = {
         "package": {
-            "name": metadata.get("Package"),
+            "name": "r-" + metadata.get("Package"),
             "version": metadata.get("Version"),
         },
-        "build": {"entry_points": metadata.get("entry_points")},
+        "source": {
+            "sha256": sha256_checksum(download_file),
+            "url": "{{ cran_mirror }}/src/contrib/"
+            + "{{ package }}_{{ cran_version }}.tar.gz",
+        },
+        "build": {
+            "entry_points": metadata.get("entry_points"),
+            # "rpaths":
+            #    - "lib/R/lib/"
+            #    - "lib/"
+        },
         "requirements": {
+            "build": "",
             "run": imports,
+            "host": imports,
         },
         "test": {
             "imports": metadata.get("tests"),
@@ -303,12 +323,10 @@ def get_cran_metadata(recipe, config: Configuration) -> dict:
             "dev_url": metadata.get("dev_url"),
             "license": metadata.get("License"),
         },
-        "source": metadata.get("source"),
-        "cran_metadata": "\n".join(
-            ["# %s" % line for line in metadata["orig_lines"] if line]
-        ),
+        # "cran_metadata": "\n".join(
+        #    ["# %s" % line for line in metadata["orig_lines"] if line]
+        # ),
     }
-    print(d["cran_metadata"])
     return d
 
 
@@ -323,15 +341,3 @@ def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]
         f"$R -e \"library('{config.name}')\"  # [not win]",
         f'"%R%" -e "library(\'{config.name}\')"  # [win]',
     ]
-
-    # for section in all_sections:
-    #     if metadata.get(section):
-    #         if section == "package":
-    #             set_global_jinja_var(recipe, "version",
-    #             metadata["package"]["version"])
-    #             config.version = metadata["package"]["version"]
-    #             recipe["package"]["version"] = "<{ version }}"
-    #         elif section in recipe and isinstance(recipe[section], Section):
-    #             recipe[section].update(metadata[section])
-    #         else:
-    #             recipe.add_section({section: metadata[section]})
