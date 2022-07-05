@@ -16,13 +16,13 @@ dependencies:
   - pip
   - setuptools >=30.3.0
   - rapidfuzz >=1.9.1
-  - progressbar2>=3.53.0
+  - progressbar2 >=3.53.0
   - colorama
   - mock
   - pytest-console-scripts
   - numpy
   - compilers
   - fortran-compiler
-  - conda-souschef >=2.1.1
+  - conda-souschef >=2.1.2
   - setuptools-scm
   - pkginfo
