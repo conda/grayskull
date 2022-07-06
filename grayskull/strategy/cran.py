@@ -66,10 +66,6 @@ def dict_from_cran_lines(lines):
     return d
 
 
-# The dictionary generated from the description file
-# contents has packages listed one after another
-# in a single line.
-# This function breaks that line into multiple lines.
 def remove_package_line_continuations(chunk):
     """
     >>> chunk = [
@@ -269,9 +265,11 @@ def get_cran_metadata(recipe, config: Configuration) -> dict:
     with open(download_file, "wb") as f:
         f.write(response.content)
     metadata = get_archive_metadata(download_file)
-    import pprint
-
-    pprint.pprint(metadata)
+    global r_recipe_end_comment
+    r_recipe_end_comment = "\n".join(
+        ["# %s" % line for line in metadata["orig_lines"] if line]
+    )
+    print(r_recipe_end_comment)
 
     imports = []
     # Extract 'imports' from metadata.
@@ -291,7 +289,7 @@ def get_cran_metadata(recipe, config: Configuration) -> dict:
     # Hence the 'r-base' package is always present
     # in the host and run requirements.
     imports.append("r-base")
-    imports.sort()
+    imports.sort()  # this is not a requirement in conda but good for readability
 
     d = {
         "package": {
@@ -322,9 +320,7 @@ def get_cran_metadata(recipe, config: Configuration) -> dict:
             "dev_url": metadata.get("dev_url"),
             "license": metadata.get("License"),
         },
-        # "cran_metadata": "\n".join(
-        #    ["# %s" % line for line in metadata["orig_lines"] if line]
-        # ),
+        "r_recipe_end_comment": "",
     }
     return d
 
@@ -333,6 +329,9 @@ def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]
     """Update one specific section."""
     metadata = get_cran_metadata(recipe, config)
     recipe.add_section(metadata)
+    # why am I receiving an AttributeError for this?
+    # 'Recipe' object has no attribute '__re_add_comments'
+    recipe.__re_add_comments(r_recipe_end_comment)
     set_global_jinja_var(recipe, "version", metadata["package"]["version"])
     config.version = metadata["package"]["version"]
     recipe["package"]["version"] = "<{ version }}"
