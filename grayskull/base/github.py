@@ -25,14 +25,14 @@ def fetch_latest_metadata_from_github_repo(git_url):
 
 def verify_github_repo_tag(git_url, tag):
     """partial clone of fetch_latest_metadata..()
-       attempts to pull repo metadata instead from git/refs/tags/{tag} 
-       if successful it tries to match refs tag with requested tag
-       
-       partial matches return a list of possible refs - 
-       e.g. "v.1.8.2rc" vs 1.8.2rc1, 1.8.2rc2
-       handled with a printed list of matches and exits
-       
-       returns True when requested tag is found where expected
+    attempts to pull repo metadata instead from git/refs/tags/{tag}
+    if successful it tries to match refs tag with requested tag
+
+    partial matches return a list of possible refs -
+    e.g. "v.1.8.2rc" vs 1.8.2rc1, 1.8.2rc2
+    handled with a printed list of matches and exits
+
+    returns True when requested tag is found where expected
     """
     url_parts = urlparse(git_url)
     netloc = "api.github.com"
@@ -43,7 +43,8 @@ def verify_github_repo_tag(git_url, tag):
     response.raise_for_status()
     if isinstance(response.json(), list):
         print_msg(
-            f"Found multiple tags matching requested {tag}, possible matches: {[i['ref'].split('/')[-1] for i in response.json()]}"
+            f"""Found multiple tags matching requested {tag}, possible
+            matches: {[i['ref'].split('/')[-1] for i in response.json()]}"""
         )
         return False
     elif response.json()["ref"].split("/")[-1] == tag:
