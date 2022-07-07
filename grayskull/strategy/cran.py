@@ -320,7 +320,6 @@ def get_cran_metadata(recipe, config: Configuration) -> dict:
             "dev_url": metadata.get("dev_url"),
             "license": metadata.get("License"),
         },
-        "r_recipe_end_comment": "",
     }
     return d
 
@@ -329,9 +328,6 @@ def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]
     """Update one specific section."""
     metadata = get_cran_metadata(recipe, config)
     recipe.add_section(metadata)
-    # why am I receiving an AttributeError for this?
-    # 'Recipe' object has no attribute '__re_add_comments'
-    recipe.__re_add_comments(r_recipe_end_comment)
     set_global_jinja_var(recipe, "version", metadata["package"]["version"])
     config.version = metadata["package"]["version"]
     recipe["package"]["version"] = "<{ version }}"
@@ -339,3 +335,4 @@ def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]
         f"$R -e \"library('{config.name}')\"  # [not win]",
         f'"%R%" -e "library(\'{config.name}\')"  # [win]',
     ]
+    recipe.inline_comment = r_recipe_end_comment
