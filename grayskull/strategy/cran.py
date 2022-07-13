@@ -341,5 +341,5 @@ def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]
         f"$R -e \"library('{config.name}')\"  # [not win]",
         f'"%R%" -e "library(\'{config.name}\')"  # [win]',
     ]
-    # recipe.inline_comment = r_recipe_end_comment
     recipe.inline_comment = posix_native
+    recipe.inline_comment = r_recipe_end_comment
