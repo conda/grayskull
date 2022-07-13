@@ -324,6 +324,12 @@ def get_cran_metadata(recipe, config: Configuration) -> dict:
     return d
 
 
+# add posix and native at the top
+set_posix = "{{% set posix = 'm2-' if win else '' %}}"
+set_native = "{{% set native = 'm2w64-' if win else '' %}}"
+posix_native = "\n" + set_posix + "\n" + set_native
+
+
 def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]):
     """Update one specific section."""
     metadata = get_cran_metadata(recipe, config)
@@ -335,4 +341,5 @@ def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]
         f"$R -e \"library('{config.name}')\"  # [not win]",
         f'"%R%" -e "library(\'{config.name}\')"  # [win]',
     ]
-    recipe.inline_comment = r_recipe_end_comment
+    # recipe.inline_comment = r_recipe_end_comment
+    recipe.inline_comment = posix_native
