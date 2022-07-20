@@ -60,8 +60,6 @@ def dict_from_cran_lines(lines):
         except ValueError:
             sys.exit("Error: Could not parse metadata (%s)" % line)
         d[k] = v
-        # if k not in CRAN_KEYS:
-        #     print("Warning: Unknown key %s" % k)
     d["orig_lines"] = lines
     return d
 
