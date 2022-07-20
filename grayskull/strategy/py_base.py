@@ -540,7 +540,7 @@ def update_requirements_with_pin(requirements: dict):
             requirements["run"].append(PIN_PKG_COMPILER[pkg_name])
 
 
-def discover_license(metadata: dict) -> Optional[ShortLicense]:
+def discover_license(metadata: dict) -> List[ShortLicense]:
     """Based on the metadata this method will try to discover what is the
     right license for the package
 
@@ -555,14 +555,12 @@ def discover_license(metadata: dict) -> Optional[ShortLicense]:
     if not git_url and urlparse((metadata.get("url") or "")).netloc == "github.com":
         git_url = metadata.get("url")
 
-    short_license = search_license_file(
+    return search_license_file(
         metadata.get("sdist_path"),
         git_url,
         metadata.get("version"),
         license_name_metadata=metadata.get("license"),
     )
-    if short_license:
-        return short_license
 
 
 def get_test_entry_points(entry_points: Union[List, str]) -> List:

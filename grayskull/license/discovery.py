@@ -183,7 +183,7 @@ def search_license_file(
     git_url: Optional[str] = None,
     version: Optional[str] = None,
     license_name_metadata: Optional[str] = None,
-) -> Optional[ShortLicense]:
+) -> List[ShortLicense]:
     """Search for the license file. First it will try to find it in the given
     folder, after that it will search on the github api and for the last it will
     clone the repository and it will search for the license there.
@@ -197,8 +197,8 @@ def search_license_file(
     if license_name_metadata:
         license_name_metadata = get_short_license_id(license_name_metadata)
 
-    license_sdist = search_license_folder(folder_path, license_name_metadata)
-    if license_sdist:
+    all_license_sdist = search_license_folder(folder_path, license_name_metadata)
+    for license_sdist in all_license_sdist:
         license_sdist.is_packaged = True
         license_sdist.path = os.path.relpath(license_sdist.path, folder_path)
         license_sdist.path = license_sdist.path.replace("\\", "/")
@@ -206,19 +206,20 @@ def search_license_file(
         splited = license_sdist.path.split("/")
         if len(splited) > 1:
             license_sdist.path = "/".join(splited[1:])
-        return license_sdist
+    if all_license_sdist:
+        return all_license_sdist
 
     if not git_url:
-        return ShortLicense(license_name_metadata, None, False)
+        return [ShortLicense(license_name_metadata, None, False)]
 
     github_license = search_license_api_github(git_url, version, license_name_metadata)
     if github_license:
-        return github_license
+        return [github_license]
 
     repo_license = search_license_repo(git_url, version, license_name_metadata)
     if repo_license:
         return repo_license
-    return ShortLicense(license_name_metadata, None, False)
+    return [ShortLicense(license_name_metadata, None, False)]
 
 
 @lru_cache(maxsize=13)
@@ -280,19 +281,27 @@ def search_license_folder(
         r"(\bcopyright\b|\bnotice\b|\blicense[s]*\b|\bcopying\b|\bcopyleft\b)",
         re.IGNORECASE,
     )
-    for folder_path, _, filenames in os.walk(str(path)):
+    all_licences = []
+    for folder_path, dirnames, filenames in os.walk(str(path)):
         if os.path.basename(folder_path).startswith("."):
             continue
+        dirnames[:] = [
+            folder
+            for folder in dirnames
+            if folder not in ("doc", "theme", "themes", "docs")
+        ]
         for one_file in filenames:
             if re_search.match(one_file):
                 lc_path = os.path.join(folder_path, one_file)
-                return ShortLicense(get_license_type(lc_path, default), lc_path, False)
-    return None
+                all_licences.append(
+                    ShortLicense(get_license_type(lc_path, default), lc_path, False)
+                )
+    return all_licences
 
 
 def search_license_repo(
     git_url: str, version: Optional[str], default: Optional[str] = None
-) -> Optional[ShortLicense]:
+) -> Optional[List[ShortLicense]]:
     """Search for the license file in the given github repository
 
     :param git_url: GitHub URL

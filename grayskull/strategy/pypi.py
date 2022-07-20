@@ -348,22 +348,33 @@ def get_metadata(recipe, config) -> dict:
         config.is_arch = True
         print_msg(f"{Fore.YELLOW}scripts detected. Package not eligible for noarch.")
 
-    license_metadata = discover_license(metadata)
-
-    license_file = "PLEASE_ADD_LICENSE_FILE"
-    license_name = "Other"
-    if license_metadata:
-        license_name = license_metadata.name
+    all_license_metadata = discover_license(metadata)
+    license_file = []
+    all_license_name = set()
+    for license_metadata in all_license_metadata:
+        all_license_name.add(license_metadata.name)
         if license_metadata.path:
             if license_metadata.is_packaged:
-                license_file = license_metadata.path
+                license_file.append(license_metadata.path)
             else:
-                license_file = os.path.basename(license_metadata.path)
+                license_file.append(os.path.basename(license_metadata.path))
                 config.files_to_copy.append(license_metadata.path)
 
-    print_msg(f"License type: {Fore.LIGHTMAGENTA_EX}{license_name}")
-    print_msg(f"License file: {Fore.LIGHTMAGENTA_EX}{license_file}")
+        print_msg(f"License type: {Fore.LIGHTMAGENTA_EX}{license_metadata.name}")
+        print_msg(f"License file: {Fore.LIGHTMAGENTA_EX}{license_file}")
+    if all_license_name:
+        license_name = " & ".join(all_license_name)
+        print_msg(
+            f"{Fore.RED}Multiple licenses detected!"
+            f" {Fore.LIGHTYELLOW_EX}Please, be sure to check them."
+        )
+    else:
+        license_name = "Other"
 
+    if not license_file:
+        license_file = ["PLEASE_ADD_LICENSE_FILE"]
+    if not license_name:
+        license_name = "Other"
     all_requirements = extract_requirements(metadata, config, recipe)
 
     if all_requirements.get("host"):
