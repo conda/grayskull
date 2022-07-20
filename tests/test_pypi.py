@@ -404,11 +404,17 @@ def test_get_entry_points_from_sdist():
     ) == sorted(["gui_scripts=entrypoints"])
 
 
-@pytest.mark.parametrize(
-    "name", ["hypothesis=5.5.2", "https://github.com/HypothesisWorks/hypothesis"]
-)
-def test_build_noarch_skip(name):
-    recipe = create_python_recipe(name)[0]
+def test_build_noarch_skip():
+    recipe = create_python_recipe("hypothesis=5.5.2")[0]
+    assert recipe["build"]["noarch"] == "python"
+    assert "skip" not in recipe["build"]
+
+
+@pytest.mark.github
+def test_build_noarch_skip_github():
+    recipe = create_python_recipe(
+        "https://github.com/HypothesisWorks/hypothesis", version="5.5.2"
+    )[0]
     assert recipe["build"]["noarch"] == "python"
     assert "skip" not in recipe["build"]
 

@@ -1,7 +1,9 @@
 import os
 from typing import List
+from unittest.mock import patch
 
 import pytest
+import requests
 from pytest import fixture
 
 from grayskull.license.discovery import (
@@ -134,3 +136,8 @@ def test_search_license_repository(pkg_pytest):
 
 def test_predict_license_type(license_pytest_path):
     assert get_license_type(license_pytest_path) == "MIT"
+
+
+def test_fallback_cache_licence():
+    with patch("requests.get", side_effect=requests.exceptions.RequestException):
+        assert get_opensource_license_data()
