@@ -40,6 +40,7 @@ class Configuration:
     local_sdist: Optional[str] = None
     missing_deps: set = field(default_factory=set)
     extras_require_test: Optional[str] = None
+    github_release_tag: Optional[str] = None
 
     def get_oldest_py3_version(self, list_py_ver: List[PyVer]) -> PyVer:
         list_py_ver = sorted(list_py_ver)
