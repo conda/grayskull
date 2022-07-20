@@ -135,7 +135,7 @@ def main(args=None):
         "-t",
         default=None,
         dest="github_release_tag",
-        help="If tag is specified, grayskull will build from given release tag, rather than latest.",
+        help="If tag is specified, grayskull will build from release tag",
     )
 
     args = parser.parse_args(args)
