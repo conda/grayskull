@@ -117,7 +117,7 @@ def test_get_api_github_url():
 
 
 def test_search_license_folder(pkg_pytest):
-    license_folder = search_license_folder(os.path.dirname(pkg_pytest))
+    license_folder = search_license_folder(os.path.dirname(pkg_pytest))[0]
     assert license_folder.path == os.path.join(
         os.path.dirname(pkg_pytest), "pytest-5.3.5", "LICENSE"
     )

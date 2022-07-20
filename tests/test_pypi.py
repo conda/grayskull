@@ -504,7 +504,7 @@ def test_pytest_recipe_entry_points():
         ["pytest=pytest:main", "py.test=pytest:main"]
     )
     assert recipe["about"]["license"] == "MIT"
-    assert recipe["about"]["license_file"] == "LICENSE"
+    assert recipe["about"]["license_file"] == ["LICENSE"]
     assert "skip" in recipe["build"]
     assert recipe["build"]["skip"].inline_comment == "# [py2k]"
     assert not recipe["build"]["noarch"]
@@ -606,7 +606,7 @@ def test_django_rest_framework_xml_license():
     config = Configuration(name="djangorestframework-xml", version="1.4.0")
     recipe = GrayskullFactory.create_recipe("pypi", config)
     assert recipe["about"]["license"] == "BSD-3-Clause"
-    assert recipe["about"]["license_file"] == "LICENSE"
+    assert recipe["about"]["license_file"] == ["LICENSE"]
     assert recipe["test"]["imports"][0] == "rest_framework_xml"
 
 
@@ -709,7 +709,7 @@ def test_deps_comments():
 @pytest.mark.parametrize("name", ["respx=0.10.1", "https://github.com/lundberg/respx"])
 def test_keep_filename_license(name):
     recipe = create_python_recipe(name)[0]
-    assert recipe["about"]["license_file"] == "LICENSE.md"
+    assert recipe["about"]["license_file"] == ["LICENSE.md"]
 
 
 def test_platform_system_selector():
@@ -912,7 +912,7 @@ def test_create_recipe_from_local_sdist(pkg_pytest):
     assert recipe["about"]["home"] == "https://docs.pytest.org/en/latest/"
     assert recipe["about"]["summary"] == "pytest: simple powerful testing with Python"
     assert recipe["about"]["license"] == "MIT"
-    assert recipe["about"]["license_file"] == "LICENSE"
+    assert recipe["about"]["license_file"] == ["LICENSE"]
 
 
 def test_400_for_python_selector():
@@ -948,4 +948,4 @@ def test_notice_file_different_licence():
             "apache-airflow-providers-databricks", version="3.1.0"
         )
     assert set(recipe["about"]["license_file"]) == {"NOTICE", "LICENSE"}
-    assert recipe["about"]["license"] == "MIT & Apache-2.0"
+    assert recipe["about"]["license"] in ["MIT & Apache-2.0", "Apache-2.0 & MIT"]

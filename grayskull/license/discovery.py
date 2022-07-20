@@ -218,7 +218,7 @@ def search_license_file(
 
     repo_license = search_license_repo(git_url, version, license_name_metadata)
     if repo_license:
-        return [repo_license]
+        return repo_license
     return [ShortLicense(license_name_metadata, None, False)]
 
 
@@ -282,9 +282,14 @@ def search_license_folder(
         re.IGNORECASE,
     )
     all_licences = []
-    for folder_path, _, filenames in os.walk(str(path)):
+    for folder_path, dirnames, filenames in os.walk(str(path)):
         if os.path.basename(folder_path).startswith("."):
             continue
+        dirnames[:] = [
+            folder
+            for folder in dirnames
+            if folder not in ("doc", "theme", "themes", "docs")
+        ]
         for one_file in filenames:
             if re_search.match(one_file):
                 lc_path = os.path.join(folder_path, one_file)
