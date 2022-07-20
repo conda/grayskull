@@ -2,6 +2,7 @@ import hashlib
 import json
 import os
 import sys
+from unittest.mock import patch
 
 import pytest
 from colorama import Fore, Style
@@ -928,3 +929,23 @@ def test_update_requirements_with_pin_mixed_numpy_pin_compatible():
     update_requirements_with_pin(requirements)
     assert "<{ pin_compatible('numpy') }}" in requirements["run"]
     assert "numpy" not in requirements["run"]
+
+
+def test_notice_file():
+    recipe, _ = create_python_recipe(
+        "apache-airflow-providers-databricks", version="3.1.0"
+    )
+    assert set(recipe["about"]["license_file"]) == {"NOTICE", "LICENSE"}
+    assert recipe["about"]["license"] == "Apache-2.0"
+
+
+def test_notice_file_different_licence():
+    with patch(
+        "grayskull.license.discovery.get_license_type",
+        side_effect=["Apache-2.0", "MIT"],
+    ):
+        recipe, _ = create_python_recipe(
+            "apache-airflow-providers-databricks", version="3.1.0"
+        )
+    assert set(recipe["about"]["license_file"]) == {"NOTICE", "LICENSE"}
+    assert recipe["about"]["license"] == "MIT & Apache-2.0"
