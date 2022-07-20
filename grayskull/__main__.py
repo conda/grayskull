@@ -316,8 +316,6 @@ def generate_r_recipes_from_list(list_pkgs, args):
             f"{os.path.realpath(args.output)} for {pkg_name} ####\n\n"
         )
 
-        # if args.is_recursive and config.missing_deps:
-        #     generate_r_recipes_from_list(config.missing_deps, args)
 
 
 def create_r_recipe(pkg_name, sections_populate=None, **kwargs):
