@@ -22,7 +22,7 @@ setup(
     },
     use_scm_version={"write_to": "grayskull/_version.py"},
     setup_requires=["setuptools-scm", "setuptools>=30.3.0"],
-    package_data={"": ["LICENSE", "license/data/*", "license/data/*.*"]},
+    package_data={"": ["LICENSE", "license/data/*", "license/data/*.*", "licence/licence_cache.json"]},
     include_package_data=True,
     python_requires=">=3.8",
     install_requires=[

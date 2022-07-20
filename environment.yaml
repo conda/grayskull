@@ -10,8 +10,6 @@ dependencies:
   - pytest-forked
   - pytest-mock
   - requests
-  - ruamel.yaml >=0.16.10
-  - ruamel.yaml.jinja2
   - stdlib-list
   - pip
   - setuptools >=30.3.0

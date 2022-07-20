@@ -1,5 +1,6 @@
 include LICENSE
 include README.rst
+include licence/licence_cache.json
 recursive-include license/data * *.*
 
 exclude .github

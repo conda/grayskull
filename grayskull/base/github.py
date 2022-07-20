@@ -28,17 +28,26 @@ def get_latest_version_of_github_repo(git_url: str) -> str:
     return fetch_latest_metadata_from_github_repo(git_url)["tag_name"]
 
 
+def fetch_all_tags_gh(git_url):
+    url_parts = urlparse(git_url)
+    netloc = "api.github.com"
+    path = f"/repos{url_parts.path}/git/refs/tags"
+    api_parts = url_parts.scheme, netloc, path, *url_parts[3:]
+    api_url = urlunparse(api_parts)
+    response = requests.get(api_url)
+    response.raise_for_status()
+    return response.json()
+
+
 def get_most_similar_tag_in_repo(git_url: str, query: str) -> str:
     """get the most similar tag in the given repository"""
-    data = fetch_latest_metadata_from_github_repo(git_url)
+    data = fetch_all_tags_gh(git_url)
+    all_tags = [tag["ref"].rsplit("/", 1)[-1] for tag in data]
 
     def closest_match(tag):
         return string_similarity(query, tag)
 
-    if isinstance(data, dict):
-        most_similar = data["tag_name"]
-    else:
-        most_similar = max([tag["name"] for tag in data], key=closest_match)
+    most_similar = max(all_tags, key=closest_match)
     log.debug(
         f"Most similar git reference found for query `{query}` is `{most_similar}`"
     )

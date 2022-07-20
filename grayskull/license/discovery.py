@@ -1,4 +1,5 @@
 import base64
+import json
 import logging
 import os
 import re
@@ -149,14 +150,19 @@ def get_opensource_license(license_spdx: str) -> dict:
     return {}
 
 
+def read_licence_cache():
+    with open(Path(__file__).parent / "licence_cache.json", "r") as licence_cache:
+        return json.load(licence_cache)
+
+
 @lru_cache(maxsize=10)
 def get_opensource_license_data() -> List:
     try:
         response = requests.get(url="https://api.opensource.org/licenses/", timeout=5)
     except requests.exceptions.RequestException:
-        return []
+        return read_licence_cache()
     if response.status_code != 200:
-        return []
+        return read_licence_cache()
     return response.json()
 
 
