@@ -11,6 +11,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "discouraged",
+      "redundant"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -20,11 +25,6 @@
     "name": "Attribution Assurance License",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -45,6 +45,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "discouraged",
+      "redundant"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -54,11 +59,6 @@
     "name": "Academic Free License, Version 3.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -79,6 +79,9 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -88,9 +91,6 @@
     "name": "GNU AFFERO GENERAL PUBLIC LICENSE, Version 3 (AGPL-3.0)",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -107,6 +107,10 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "miscellaneous"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -116,10 +120,6 @@
     "name": "Adaptive Public License, Version 1.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "miscellaneous"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -140,6 +140,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -149,11 +154,6 @@
     "name": "Apple Public Source License, Version 2.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -170,6 +170,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "obsolete",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -179,11 +184,6 @@
     "name": "Apache Software License, Version 1.1",
     "other_names": [],
     "superseded_by": "Apache-2.0",
-    "keywords": [
-      "discouraged",
-      "obsolete",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -208,6 +208,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "popular",
+      "permissive"
+    ],
     "links": [
       {
         "note": "tl;dr legal",
@@ -225,11 +230,6 @@
     "name": "Apache License, Version 2.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "popular",
-      "permissive"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -250,6 +250,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "discouraged",
+      "obsolete"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -259,11 +264,6 @@
     "name": "Artistic License, Version 1.0",
     "other_names": [],
     "superseded_by": "Artistic-2.0",
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "obsolete"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -288,6 +288,10 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "miscellaneous",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -297,10 +301,6 @@
     "name": "Artistic License, Version 2.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "miscellaneous",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -320,6 +320,11 @@
         "identifier": "BSD-2-Clause",
         "scheme": "SPDX"
       }
+    ],
+    "keywords": [
+      "osi-approved",
+      "popular",
+      "permissive"
     ],
     "links": [
       {
@@ -343,11 +348,6 @@
       }
     ],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "popular",
-      "permissive"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -371,6 +371,11 @@
         "identifier": "License :: OSI Approved :: BSD License",
         "scheme": "Trove"
       }
+    ],
+    "keywords": [
+      "osi-approved",
+      "popular",
+      "permissive"
     ],
     "links": [
       {
@@ -398,11 +403,6 @@
       }
     ],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "popular",
-      "permissive"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -419,6 +419,9 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -428,9 +431,6 @@
     "name": "Boost Software License 1.0 (BSL-1.0)",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -447,6 +447,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -456,11 +461,6 @@
     "name": "Computer Associates Trusted Open Source License, Version 1.1",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -481,6 +481,10 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "popular"
+    ],
     "links": [
       {
         "note": "Wikipedia page",
@@ -494,10 +498,6 @@
     "name": "Common Development and Distribution License, Version 1.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "popular"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -514,6 +514,9 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -523,9 +526,6 @@
     "name": "Cea Cnrs Inria Logiciel Libre License, Version 2.1",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -546,6 +546,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -555,11 +560,6 @@
     "name": "CNRI portion of the multi-part Python License",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -576,6 +576,9 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -585,9 +588,6 @@
     "name": "Common Public Attribution License Version 1.0 (CPAL-1.0)",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -612,6 +612,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "obsolete",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -621,11 +626,6 @@
     "name": "Common Public License, Version 1.0",
     "other_names": [],
     "superseded_by": "EPL-1.0",
-    "keywords": [
-      "discouraged",
-      "obsolete",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -642,6 +642,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -651,11 +656,6 @@
     "name": "CUA Office Public License",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -672,6 +672,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "retired",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -681,11 +686,6 @@
     "name": "The MITRE Collaborative Virtual Workspace License",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "retired",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -702,6 +702,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "obsolete",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -711,11 +716,6 @@
     "name": "Educational Community License, Version 1.0",
     "other_names": [],
     "superseded_by": "ECL-2.0",
-    "keywords": [
-      "discouraged",
-      "obsolete",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -732,6 +732,10 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "special-purpose",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -741,10 +745,6 @@
     "name": "Educational Community License, Version 2.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "special-purpose",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -765,6 +765,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "discouraged",
+      "obsolete"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -774,11 +779,6 @@
     "name": "The Eiffel Forum License, Version 1",
     "other_names": [],
     "superseded_by": "EFL-2.0",
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "obsolete"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -803,6 +803,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "discouraged",
+      "redundant"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -812,11 +817,6 @@
     "name": "Eiffel Forum License, Version 2",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -833,6 +833,10 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "popular"
+    ],
     "links": [
       {
         "note": "Wikipedia page",
@@ -846,10 +850,6 @@
     "name": "Eclipse Public License, Version 1.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "popular"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -866,6 +866,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -875,11 +880,6 @@
     "name": "EU DataGrid Software License",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -900,6 +900,9 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -909,9 +912,6 @@
     "name": "European Union Public License, Version 1.1",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -928,6 +928,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -937,11 +942,6 @@
     "name": "Entessa Public License",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -958,6 +958,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "discouraged",
+      "redundant"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -967,11 +972,6 @@
     "name": "Fair License (Fair)",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -988,6 +988,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -997,11 +1002,6 @@
     "name": "Frameworx License, Version 1.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1026,6 +1026,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "popular",
+      "copyleft"
+    ],
     "links": [
       {
         "note": "tl;dr legal",
@@ -1043,11 +1048,6 @@
     "name": "GNU General Public License, Version 2.0",
     "other_names": [],
     "superseded_by": "GPL-3.0",
-    "keywords": [
-      "osi-approved",
-      "popular",
-      "copyleft"
-    ],
     "text": [
       {
         "media_type": "text/plain",
@@ -1081,6 +1081,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "popular",
+      "copyleft"
+    ],
     "links": [
       {
         "note": "tl;dr legal",
@@ -1098,11 +1103,6 @@
     "name": "GNU General Public License, Version 3.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "popular",
-      "copyleft"
-    ],
     "text": [
       {
         "media_type": "text/plain",
@@ -1124,6 +1124,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "discouraged",
+      "redundant"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -1133,11 +1138,6 @@
     "name": "Historical Permission Notice and Disclaimer",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1154,6 +1154,10 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "special-purpose"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -1163,10 +1167,6 @@
     "name": "IPA Font License",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "special-purpose"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1187,6 +1187,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -1196,11 +1201,6 @@
     "name": "IBM Public License, Version 1.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1225,6 +1225,9 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -1238,9 +1241,6 @@
     "name": "ISC License (ISC)",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1261,6 +1261,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "retired",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -1270,11 +1275,6 @@
     "name": "The Intel Open Source License",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "retired",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1299,6 +1299,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "popular",
+      "copyleft"
+    ],
     "links": [
       {
         "note": "Wikipedia page",
@@ -1312,11 +1317,6 @@
     "name": "GNU Lesser General Public License, Version 2.1",
     "other_names": [],
     "superseded_by": "LGPL-3.0",
-    "keywords": [
-      "osi-approved",
-      "popular",
-      "copyleft"
-    ],
     "text": [
       {
         "media_type": "text/plain",
@@ -1350,6 +1350,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "popular",
+      "copyleft"
+    ],
     "links": [
       {
         "note": "Wikipedia page",
@@ -1363,11 +1368,6 @@
     "name": "GNU Lesser General Public License, Version 3.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "popular",
-      "copyleft"
-    ],
     "text": [
       {
         "media_type": "text/plain",
@@ -1389,6 +1389,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "discouraged",
+      "obsolete"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -1398,11 +1403,6 @@
     "name": "Lucent Public License, Plan 9, Version 1.0",
     "other_names": [],
     "superseded_by": "LPL-1.02",
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "obsolete"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1419,6 +1419,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "discouraged",
+      "redundant"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -1428,11 +1433,6 @@
     "name": "Lucent Public License, Version 1.02",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1453,6 +1453,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -1462,11 +1467,6 @@
     "name": "LaTeX Project Public License, Version 1.3c",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1478,20 +1478,20 @@
   {
     "id": "LiLiQ-P-1.1",
     "identifiers": [],
+    "keywords": [
+      "osi-approved",
+      "international",
+      "permissive"
+    ],
     "links": [
       {
         "note": "OSI Page",
         "url": "https://opensource.org/licenses/LiLiQ-P-1.1"
       }
     ],
-    "name": "Licence Libre du Québec – Permissive, Version 1.1",
+    "name": "Licence Libre du Qu\u00e9bec \u2013 Permissive, Version 1.1",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "international",
-      "permissive"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1503,20 +1503,20 @@
   {
     "id": "LiLiQ-R+",
     "identifiers": [],
+    "keywords": [
+      "international",
+      "osi-approved",
+      "copyleft"
+    ],
     "links": [
       {
         "note": "OSI Page",
         "url": "https://opensource.org/licenses/LiLiQ-Rplus-1.1"
       }
     ],
-    "name": "Licence Libre du Québec – Réciprocité forte, Version 1.1",
+    "name": "Licence Libre du Qu\u00e9bec \u2013 R\u00e9ciprocit\u00e9 forte, Version 1.1",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "international",
-      "osi-approved",
-      "copyleft"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1528,20 +1528,20 @@
   {
     "id": "LiLiQ-R-1.1",
     "identifiers": [],
+    "keywords": [
+      "international",
+      "osi-approved",
+      "copyleft"
+    ],
     "links": [
       {
         "note": "OSI Page",
         "url": "https://opensource.org/licenses/LiLiQ-R-1.1"
       }
     ],
-    "name": "Licence Libre du Québec – Réciprocité, Version 1.1",
+    "name": "Licence Libre du Qu\u00e9bec \u2013 R\u00e9ciprocit\u00e9, Version 1.1",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "international",
-      "osi-approved",
-      "copyleft"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1570,6 +1570,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "popular",
+      "permissive"
+    ],
     "links": [
       {
         "note": "tl;dr legal",
@@ -1596,11 +1601,6 @@
       }
     ],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "popular",
-      "permissive"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1621,6 +1621,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "discouraged",
+      "obsolete"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -1630,11 +1635,6 @@
     "name": "Mozilla Public License, Version 1.0",
     "other_names": [],
     "superseded_by": "MPL-2.0",
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "obsolete"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1659,6 +1659,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "discouraged",
+      "obsolete"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -1668,11 +1673,6 @@
     "name": "Mozilla Public License, Version 1.1",
     "other_names": [],
     "superseded_by": "MPL-2.0",
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "obsolete"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1693,6 +1693,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "popular",
+      "copyleft"
+    ],
     "links": [
       {
         "note": "Wikipedia page",
@@ -1710,11 +1715,6 @@
     "name": "Mozilla Public License, Version 2.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "popular",
-      "copyleft"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1731,6 +1731,9 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -1740,9 +1743,6 @@
     "name": "Microsoft Public License (MS-PL)",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1759,6 +1759,9 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -1768,9 +1771,6 @@
     "name": "Microsoft Reciprocal License (MS-RL)",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1787,6 +1787,9 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -1796,9 +1799,6 @@
     "name": "The MirOS Licence (MirOS)",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1819,6 +1819,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -1828,11 +1833,6 @@
     "name": "Motosoto Open Source License, Version 0.9.1",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1849,6 +1849,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -1858,11 +1863,6 @@
     "name": "Multics License",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1879,6 +1879,10 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "special-purpose"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -1888,10 +1892,6 @@
     "name": "NASA Open Source Agreement, Version 1.3",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "special-purpose"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1912,6 +1912,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "discouraged",
+      "redundant"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -1921,11 +1926,6 @@
     "name": "The University of Illinois/NCSA Open Source License",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1946,6 +1946,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -1955,11 +1960,6 @@
     "name": "The Nethack General Public License",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -1976,6 +1976,9 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -1985,9 +1988,6 @@
     "name": "The Non-Profit Open Software License, Version 3.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2004,6 +2004,9 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2013,9 +2016,6 @@
     "name": "NTP License (NTP)",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2032,6 +2032,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2041,11 +2046,6 @@
     "name": "NAUMEN Public License",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2066,6 +2066,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2075,11 +2080,6 @@
     "name": "Nokia Open Source License, Version 1.0a",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2096,6 +2096,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2105,11 +2110,6 @@
     "name": "The OCLC Research Public License, Version 2.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2126,6 +2126,10 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "special-purpose"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2135,10 +2139,6 @@
     "name": "SIL Open Font License, Version 1.1",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "special-purpose"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2159,6 +2159,9 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2168,9 +2171,6 @@
     "name": "The Open Group Test Suite License (OGTSL)",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2182,6 +2182,10 @@
   {
     "id": "OPL-2.1",
     "identifiers": [],
+    "keywords": [
+      "osi-approved",
+      "special-purpose"
+    ],
     "links": [
       {
         "note": "OSET Foundation Page",
@@ -2195,10 +2199,6 @@
     "name": "OSET Foundation Public License",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "special-purpose"
-    ],
     "text": [
       {
         "media_type": "application/pdf",
@@ -2220,6 +2220,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "discouraged",
+      "redundant"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2229,11 +2234,6 @@
     "name": "Open Software License, Version 1.0",
     "other_names": [],
     "superseded_by": "OLS-3.0",
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2250,6 +2250,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "discouraged",
+      "redundant"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2259,11 +2264,6 @@
     "name": "Open Software License, Version 2.1",
     "other_names": [],
     "superseded_by": "OLS-3.0",
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2280,6 +2280,10 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "miscellaneous"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2289,10 +2293,6 @@
     "name": "Open Software License, Version 3.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "miscellaneous"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2309,6 +2309,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2318,11 +2323,6 @@
     "name": "The PHP License, Version 3.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2339,6 +2339,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "discouraged",
+      "redundant"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2348,11 +2353,6 @@
     "name": "The PostgreSQL Licence",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2377,6 +2377,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2386,11 +2391,6 @@
     "name": "Python License, Version 2.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2415,6 +2415,9 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2424,9 +2427,6 @@
     "name": "The Q Public License Version (QPL-1.0)",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2443,6 +2443,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "obsolete",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2452,11 +2457,6 @@
     "name": "Reciprocal Public License, Version 1.1",
     "other_names": [],
     "superseded_by": "RPL-1.5",
-    "keywords": [
-      "discouraged",
-      "obsolete",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2473,6 +2473,9 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2482,9 +2485,6 @@
     "name": "Reciprocal Public License, Version 1.5",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2501,6 +2501,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2510,11 +2515,6 @@
     "name": "RealNetworks Public Source License, Version 1.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2535,6 +2535,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2544,11 +2549,6 @@
     "name": "The Ricoh Source Code Public License",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2569,6 +2569,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "retired",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2578,11 +2583,6 @@
     "name": "Sun Industry Standards Source License",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "retired",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2603,6 +2603,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2612,11 +2617,6 @@
     "name": "Sun Public License, Version 1.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2633,6 +2633,9 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2642,9 +2645,6 @@
     "name": "Simple Public License (SimPL-2.0)",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2665,6 +2665,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2674,11 +2679,6 @@
     "name": "The Sleepycat License",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2690,6 +2690,9 @@
   {
     "id": "UPL",
     "identifiers": [],
+    "keywords": [
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2699,9 +2702,6 @@
     "name": "The Universal Permissive License (UPL), Version 1.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2722,6 +2722,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2731,11 +2736,6 @@
     "name": "The Vovida Software License, Version 1.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2756,6 +2756,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2765,11 +2770,6 @@
     "name": "The W3C Software Notice and License",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2786,6 +2786,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2795,11 +2800,6 @@
     "name": "The wxWindows Library Licence",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2816,6 +2816,11 @@
         "scheme": "SPDX"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2825,11 +2830,6 @@
     "name": "The Sybase Open Source Licence",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2850,6 +2850,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "osi-approved",
+      "discouraged",
+      "redundant"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2859,11 +2864,6 @@
     "name": "The X.Net, Inc. License",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2888,6 +2888,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "non-reusable",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2897,11 +2902,6 @@
     "name": "The Zope Public License, Version 2.0",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2926,6 +2926,9 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2935,9 +2938,6 @@
     "name": "The zlib/libpng License (Zlib)",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
@@ -2954,6 +2954,11 @@
         "scheme": "Trove"
       }
     ],
+    "keywords": [
+      "discouraged",
+      "retired",
+      "osi-approved"
+    ],
     "links": [
       {
         "note": "OSI Page",
@@ -2963,11 +2968,6 @@
     "name": "Jabber Open Source License",
     "other_names": [],
     "superseded_by": null,
-    "keywords": [
-      "discouraged",
-      "retired",
-      "osi-approved"
-    ],
     "text": [
       {
         "media_type": "text/html",
