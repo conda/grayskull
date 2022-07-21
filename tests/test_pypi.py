@@ -954,3 +954,16 @@ def test_notice_file_different_licence():
 def test_console_script_toml_format():
     recipe, _ = create_python_recipe("consolemd", version="0.5.1")
     assert recipe["build"]["entry_points"] == ["consolemd = consolemd.cli:cli"]
+
+
+def test_section_order():
+    recipe, _ = create_python_recipe("requests", version="2.27.1")
+    assert (
+        "package",
+        "source",
+        "build",
+        "requirements",
+        "test",
+        "about",
+        "extra",
+    ) == tuple(recipe.keys())
