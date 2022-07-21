@@ -266,6 +266,9 @@ def get_pypi_metadata(config: Configuration) -> dict:
     project_urls = info.get("project_urls") or {}
     log.info(f"Package: {config.name}=={info['version']}")
     log.debug(f"Full PyPI metadata:\n{metadata}")
+    sdist_url = get_sdist_url_from_pypi(metadata)
+    if sdist_url is None:
+        raise AttributeError(f"There is no sdist package on pypi for {config.name}.")
     return {
         "name": config.name,
         "version": info["version"],
@@ -282,7 +285,7 @@ def get_pypi_metadata(config: Configuration) -> dict:
             f"{get_url_filename(metadata)}",
             "sha256": get_sha256_from_pypi_metadata(metadata),
         },
-        "sdist_url": get_sdist_url_from_pypi(metadata),
+        "sdist_url": sdist_url,
     }
 
 
