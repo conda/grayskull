@@ -24,3 +24,5 @@ dependencies:
   - conda-souschef >=2.1.2
   - setuptools-scm
   - pkginfo
+  - tomli
+  - tomli-w

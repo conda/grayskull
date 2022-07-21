@@ -949,3 +949,8 @@ def test_notice_file_different_licence():
         )
     assert set(recipe["about"]["license_file"]) == {"NOTICE", "LICENSE"}
     assert recipe["about"]["license"] in ["MIT & Apache-2.0", "Apache-2.0 & MIT"]
+
+
+def test_console_script_toml_format():
+    recipe, _ = create_python_recipe("consolemd", version="0.5.1")
+    assert recipe["build"]["entry_points"] == ["consolemd = consolemd.cli:cli"]

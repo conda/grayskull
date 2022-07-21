@@ -13,6 +13,7 @@ from typing import Dict, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
 import requests
+import tomli
 from colorama import Fore, Style
 from pkginfo import UnpackedSDist
 
@@ -615,11 +616,36 @@ def get_entry_points_from_sdist(sdist_metadata: dict) -> List:
     :return: list with all entry points
     """
     all_entry_points = sdist_metadata.get("entry_points", {})
-    if isinstance(all_entry_points, str) or not all_entry_points:
+    if not all_entry_points:
         return []
+    if isinstance(all_entry_points, str):
+        all_lines = []
+        for line in all_entry_points.splitlines():
+            if "=" not in line:
+                all_lines.append(line)
+                continue
+            all_parts = [line_col.strip() for line_col in line.split("=")]
+            if not all_parts[-1].startswith(("'", '"')):
+                all_parts[-1] = f"'{all_parts[-1]}'"
+            all_lines.append("=".join(all_parts))
+        try:
+            all_entry_points = tomli.loads("\n".join(all_lines))
+        except tomli.TOMLDecoderError:
+            return []
+
     if all_entry_points.get("console_scripts") or all_entry_points.get("gui_scripts"):
         console_scripts = all_entry_points.get("console_scripts", [])
+        if isinstance(console_scripts, dict):
+            console_scripts = [
+                f"{k} = {v}" for k, v in all_entry_points["console_scripts"].items()
+            ]
+
         gui_scripts = all_entry_points.get("gui_scripts", [])
+        if isinstance(gui_scripts, dict):
+            gui_scripts = [
+                f"{k} = {v}" for k, v in all_entry_points["gui_scripts"].items()
+            ]
+
         entry_points_result = []
         if console_scripts:
             if isinstance(console_scripts, str):

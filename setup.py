@@ -44,6 +44,8 @@ setup(
         "colorama",
         "conda-souschef >=2.1.2",
         "pkginfo",
+        "tomli",
+        "tomli-w",
     ],
     extras_require={
         "testing": [
