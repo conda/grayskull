@@ -967,3 +967,10 @@ def test_section_order():
         "about",
         "extra",
     ) == tuple(recipe.keys())
+
+
+def test_no_sdist_pkg_pypi():
+    with pytest.raises(
+        AttributeError, match="There is no sdist package on pypi for arn"
+    ):
+        recipe, _ = create_python_recipe("arn", version="0.1.5")
