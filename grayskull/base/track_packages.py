@@ -18,6 +18,7 @@ class ConfigPkg:
     conda_forge: str = ""
     delimiter_min: str = ""
     delimiter_max: str = ""
+    avoid_selector: bool = False
 
     def __post_init__(self):
         if not self.import_name:

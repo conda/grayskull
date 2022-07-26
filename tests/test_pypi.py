@@ -39,6 +39,7 @@ from grayskull.strategy.pypi import (
     get_sha256_from_pypi_metadata,
     get_url_filename,
     merge_pypi_sdist_metadata,
+    remove_selectors_pkgs_if_needed,
 )
 from grayskull.utils import PyVer, format_dependencies, generate_recipe
 
@@ -974,3 +975,30 @@ def test_no_sdist_pkg_pypi():
         AttributeError, match="There is no sdist package on pypi for arn"
     ):
         recipe, _ = create_python_recipe("arn", version="0.1.5")
+
+
+def test_remove_selectors_pkgs_if_needed():
+    assert remove_selectors_pkgs_if_needed(
+        [
+            "import_metadata >1.0  # [py>3]",
+            "pywin32  # [win]",
+            "requests >=2.0  # [unix]",
+        ]
+    ) == ["import_metadata >1.0", "pywin32", "requests >=2.0  # [unix]"]
+
+
+def test_remove_selectors_pkgs_if_needed_with_recipe():
+    recipe, _ = create_python_recipe("transformers", is_strict_cf=True, version="4.3.3")
+    assert recipe["requirements"]["run"] == [
+        "dataclasses",
+        "filelock",
+        "importlib-metadata",
+        "numpy >=1.17",
+        "packaging",
+        "python",
+        "regex !=2019.12.17",
+        "requests",
+        "sacremoses",
+        "tokenizers <0.11,>=0.10.1",
+        "tqdm >=4.27",
+    ]
