@@ -9,11 +9,10 @@ from functools import lru_cache
 from glob import glob
 from pathlib import Path
 from shutil import copyfile
-from typing import Any, List, Optional, Union
+from typing import List, Optional, Union
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
-from souschef.ingredient import IngredientList
 from souschef.section import Section
 
 log = logging.getLogger(__name__)
@@ -29,7 +28,12 @@ def get_std_modules() -> List:
     from stdlib_list import stdlib_list
 
     all_libs = set()
-    for py_ver in ("2.7", "3.6", "3.7", "3.8"):
+    for py_ver in (
+        "2.7",
+        "3.6",
+        "3.7",
+        "3.8",
+    ):
         all_libs.update(stdlib_list(py_ver))
     return list(all_libs)
 
@@ -45,9 +49,8 @@ def get_all_modules_imported_script(script_file: str) -> set:
     def visit_ImportFrom(node):
         # if node.module is missing it's a "from . import ..." statement
         # if level > 0 it's a "from .submodule import ..." statement
-        if node.module is not None and node.level == 0:
-            if node.module:
-                modules.add(node.module.split(".")[0])
+        if node.module is not None and node.level == 0 and node.module:
+            modules.add(node.module.split(".")[0])
 
     node_iter = ast.NodeVisitor()
     node_iter.visit_Import = visit_Import
@@ -155,21 +158,6 @@ def format_dependencies(all_dependencies: List, name: str) -> List:
         deps_name = re_remove_comments.sub("", deps_name)
         formatted_dependencies.append(deps_name.strip())
     return formatted_dependencies
-
-
-def populate_metadata_from_dict(metadata: Any, section: Section) -> Section:
-    if not isinstance(metadata, bool) and not metadata:
-        return section
-    if isinstance(metadata, list):
-        section.value = IngredientList(section.yaml)
-        return section
-    if isinstance(metadata, dict):
-        for name, value in metadata.items():
-            if isinstance(value, bool) or value:
-                section.add_section({name: value})
-    else:
-        section.value = metadata
-    return section
 
 
 def generate_recipe(

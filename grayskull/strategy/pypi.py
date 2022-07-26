@@ -13,7 +13,7 @@ from souschef.recipe import Recipe
 
 from grayskull.base.github import generate_git_archive_tarball_url, handle_gh_version
 from grayskull.base.pkg_info import normalize_pkg_name
-from grayskull.base.track_packages import solve_list_pkg_name
+from grayskull.base.track_packages import _get_track_info_from_file, solve_list_pkg_name
 from grayskull.cli.stdout import print_msg, print_requirements, progressbar_with_status
 from grayskull.config import Configuration
 from grayskull.strategy.abstract_strategy import AbstractStrategy
@@ -301,9 +301,7 @@ def get_run_req_from_requires_dist(requires_dist: List, config: Configuration) -
             if skip_pypi_requirement(list_extra):
                 continue
 
-            result_selector = get_all_selectors_pypi(list_extra, config)
-
-            if result_selector:
+            if result_selector := get_all_selectors_pypi(list_extra, config):
                 selector = " ".join(result_selector)
                 selector = f"  # [{selector}]"
             else:
@@ -325,8 +323,7 @@ def get_all_selectors_pypi(list_extra: List, config: Configuration) -> List:
     result_selector = []
     for extra in list_extra:
         config.is_arch = True
-        selector = parse_extra_metadata_to_selector(extra[1], extra[2], extra[3])
-        if selector:
+        if selector := parse_extra_metadata_to_selector(extra[1], extra[2], extra[3]):
             if extra[0]:
                 result_selector.append(extra[0])
             result_selector.append(selector)
@@ -408,8 +405,7 @@ def get_metadata(recipe, config) -> dict:
         get_test_requirements(metadata, config.extras_require_test)
     )
     if any("pytest" in req for req in test_requirements):
-        for module in test_imports:
-            test_commands.append("pytest --pyargs " + module)
+        test_commands.extend(f"pytest --pyargs {module}" for module in test_imports)
     test_commands.extend(get_test_entry_points(metadata.get("entry_points", [])))
     return {
         "package": {"name": name, "version": metadata["version"]},
@@ -468,8 +464,7 @@ def extract_requirements(metadata: dict, config, recipe) -> dict:
         config.is_arch = True
 
     if config.is_arch:
-        version_to_selector = py_version_to_selector(metadata, config)
-        if version_to_selector:
+        if version_to_selector := py_version_to_selector(metadata, config):
             try:
                 recipe["build"]["skip"] = True
             except (TypeError, KeyError):
@@ -484,6 +479,10 @@ def extract_requirements(metadata: dict, config, recipe) -> dict:
     if "pip" not in host_req:
         host_req += [f"python{limit_python}", "pip"]
     run_req.insert(0, f"python{limit_python}")
+
+    if config.is_strict_cf:
+        host_req = remove_selectors_pkgs_if_needed(host_req)
+        run_req = remove_selectors_pkgs_if_needed(run_req)
     result = {}
     if build_req:
         result = {
@@ -497,4 +496,18 @@ def extract_requirements(metadata: dict, config, recipe) -> dict:
         }
     )
     update_requirements_with_pin(result)
+    return result
+
+
+def remove_selectors_pkgs_if_needed(
+    list_req: List, config_file: Optional[Path] = None
+) -> List:
+    info_pkgs = _get_track_info_from_file(config_file or PYPI_CONFIG)
+    re_selector = re.compile(r"\s+#\s+\[.*", re.DOTALL)
+    result = []
+    for pkg in list_req:
+        pkg_cfg_info = info_pkgs.get(pkg.strip().split()[0], {})
+        if pkg_cfg_info.get("avoid_selector", False):
+            pkg = re_selector.sub("", pkg)
+        result.append(pkg)
     return result

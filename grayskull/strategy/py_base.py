@@ -518,21 +518,13 @@ def update_requirements_with_pin(requirements: dict):
         re_compiler = re.compile(
             r"^\s*[<{]\{\s*compiler\(['\"]\w+['\"]\)\s*\}\}\s*$", re.MULTILINE
         )
-        for build in requirements["build"]:
-            if re_compiler.match(build):
-                return True
-        return False
+        return any(re_compiler.match(build) for build in requirements["build"])
 
     if not is_compiler_present():
         return
 
     def clean_list_pkg(pkg, list_pkgs):
-        result = []
-        for p in list_pkgs:
-            if pkg == p.strip().split(" ", 1)[0]:
-                continue
-            result.append(p)
-        return result
+        return [p for p in list_pkgs if pkg != p.strip().split(" ", 1)[0]]
 
     for pkg in requirements["host"]:
         pkg_name = RE_DEPS_NAME.match(pkg).group(0)
@@ -753,8 +745,7 @@ def ensure_pep440(pkg: str) -> str:
     for constrain in list_constrains:
         if "~=" in constrain:
             version = constrain.strip().replace("~=", "").strip()
-            version_reduced = ".".join(version.split(".")[:-1])
-            version_reduced += ".*"
+            version_reduced = ".".join(version.split(".")[:-1]) + ".*"
             full_constrain.append(f">={version},=={version_reduced}")
         else:
             full_constrain.append(constrain.strip())

@@ -421,3 +421,28 @@ xxhash:
 kaleido:
   conda_forge: python-kaleido
   import_name: kaleido
+
+dataclasses:
+  conda_forge: dataclasses
+  import_name: dataclasses
+  avoid_selector: true
+
+typing:
+  conda_forge: typing
+  import_name: typing
+  avoid_selector: true
+
+import_metadata:
+  conda_forge: import_metadata
+  import_name: import_metadata
+  avoid_selector: true
+
+enum34:
+  conda_forge: enum34
+  import_name: enum
+  avoid_selector: true
+
+pywin32:
+  conda_forge: pywin32
+  import_name: pywin
+  avoid_selector: true
