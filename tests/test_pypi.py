@@ -989,16 +989,19 @@ def test_remove_selectors_pkgs_if_needed():
 
 def test_remove_selectors_pkgs_if_needed_with_recipe():
     recipe, _ = create_python_recipe("transformers", is_strict_cf=True, version="4.3.3")
-    assert recipe["requirements"]["run"] == [
-        "dataclasses",
-        "filelock",
-        "importlib-metadata",
-        "numpy >=1.17",
-        "packaging",
-        "python",
-        "regex !=2019.12.17",
-        "requests",
-        "sacremoses",
-        "tokenizers <0.11,>=0.10.1",
-        "tqdm >=4.27",
-    ]
+    assert set(recipe["requirements"]["run"]).issubset(
+        {
+            "dataclasses",
+            "filelock",
+            "importlib-metadata",
+            "numpy >=1.17",
+            "packaging",
+            "python",
+            "regex !=2019.12.17",
+            "requests",
+            "sacremoses",
+            "tokenizers <0.11,>=0.10.1",
+            "tokenizers >=0.10.1,<0.11",
+            "tqdm >=4.27",
+        }
+    )
