@@ -23,6 +23,9 @@ jobs:
     - uses: conda-incubator/setup-miniconda@v2
       with:
         auto-update-conda: true
+        mamba-version: "*"
+        channels: conda-forge,defaults
+        channel-priority: true
         python-version: ${{ matrix.py_ver }}
         environment-file: environment.yaml
         activate-environment: gs
