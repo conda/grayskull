@@ -137,6 +137,37 @@ def main(args=None):
         dest="github_release_tag",
         help="If tag is specified, grayskull will build from release tag",
     )
+    pypi_cmds.add_argument(
+        "--extras-require-all",
+        default=False,
+        action="store_true",
+        dest="extras_require_all",
+        help="Include all extra requirements.",
+    )
+    pypi_cmds.add_argument(
+        "--extras-require-include",
+        default=tuple(),
+        type=str,
+        nargs="*",
+        dest="extras_require_include",
+        help="Include these extra requirements.",
+    )
+    pypi_cmds.add_argument(
+        "--extras-require-exclude",
+        default=tuple(),
+        type=str,
+        nargs="*",
+        dest="extras_require_exclude",
+        help="Exclude these extra requirements (overrides include).",
+    )
+    pypi_cmds.add_argument(
+        "--extras-require-split",
+        default=False,
+        action="store_true",
+        dest="extras_require_split",
+        help="Create a separate conda package for each extra requirements."
+        " Ignored when no extra requirements are selected.",
+    )
 
     args = parser.parse_args(args)
 
@@ -190,6 +221,10 @@ def generate_recipes_from_list(list_pkgs, args):
                 from_local_sdist=from_local_sdist,
                 extras_require_test=args.extras_require_test,
                 github_release_tag=args.github_release_tag,
+                extras_require_include=tuple(args.extras_require_include),
+                extras_require_exclude=tuple(args.extras_require_exclude),
+                extras_require_all=args.extras_require_all,
+                extras_require_split=args.extras_require_split,
             )
         except requests.exceptions.HTTPError as err:
             print_msg(f"{Fore.RED}Package seems to be missing.\nException: {err}\n\n")

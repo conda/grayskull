@@ -81,6 +81,10 @@ def test_change_pypi_url(mocker):
         from_local_sdist=False,
         extras_require_test=None,
         github_release_tag=None,
+        extras_require_include=tuple(),
+        extras_require_exclude=tuple(),
+        extras_require_all=False,
+        extras_require_split=False,
     )
 
 
