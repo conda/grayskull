@@ -242,13 +242,13 @@ def test_extract_optional_requirements(dask_sdist_metadata):
 
 
 def test_compose_test_section_with_console_scripts():
-    config = Configuration(name="pytest")
+    config = Configuration(name="pytest", version="7.1.2")
     metadata1 = get_pypi_metadata(config)
     metadata2 = get_sdist_metadata(
         "https://pypi.io/packages/source/p/pytest/pytest-7.1.2.tar.gz", config
     )
     metadata = merge_pypi_sdist_metadata(metadata1, metadata2, config)
-    test_requirements = list()
+    test_requirements = []
     test_section = compose_test_section(metadata, test_requirements)
     test_section = {k: set(v) for k, v in test_section.items()}
     expected = {
@@ -260,7 +260,7 @@ def test_compose_test_section_with_console_scripts():
 
 
 def test_compose_test_section_with_requirements(dask_sdist_metadata):
-    config = Configuration(name="dask")
+    config = Configuration(name="dask", version="2022.7.1")
     metadata = get_pypi_metadata(config)
     test_requirements = dask_sdist_metadata["extras_require"]["test"]
     test_section = compose_test_section(metadata, test_requirements)
