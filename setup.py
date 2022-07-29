@@ -54,6 +54,7 @@ setup(
             "pytest-cov",
             "pytest-console-scripts",
             "pytest-mock",
+            "setuptools-scm",
         ]
     },
     url="https://github.com/conda-incubator/grayskull",
