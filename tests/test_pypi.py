@@ -423,7 +423,7 @@ def test_normalize_requirements_list():
     config = Configuration(name="pytest")
     requirements = ["pytest ~=5.3.2", "pyqt5"]
     requirements = set(normalize_requirements_list(requirements, config))
-    expected = {"pytest >=5.3.2,==5.3.*", "pyqt"}
+    expected = {"pytest ~=5.3.2", "pyqt"}
     assert requirements == expected
 
 
@@ -1170,7 +1170,7 @@ def test_get_test_imports_clean_modules():
 
 
 def test_ensure_pep440():
-    assert ensure_pep440("pytest ~=5.3.2") == "pytest >=5.3.2,==5.3.*"
+    assert ensure_pep440("pytest ~=5.3.2") == "pytest ~=5.3.2"
 
 
 def test_pep440_recipe():
@@ -1180,7 +1180,7 @@ def test_pep440_recipe():
 
 def test_pep440_in_recipe_pypi():
     recipe = create_python_recipe("kedro=0.17.6", is_strict_cf=False)[0]
-    assert sorted(recipe["requirements"]["run"])[0] == "anyconfig >=0.10.0,==0.10.*"
+    assert sorted(recipe["requirements"]["run"])[0] == "anyconfig ~=0.10.0"
 
 
 def test_create_recipe_from_local_sdist(pkg_pytest):
