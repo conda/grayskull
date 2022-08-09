@@ -726,13 +726,6 @@ def ensure_pep440(pkg: str) -> str:
         return pkg
     constrain_pkg = "".join(split_pkg[1:])
     list_constrains = constrain_pkg.split(",")
-    full_constrain = []
-    for constrain in list_constrains:
-        if "~=" in constrain:
-            version = constrain.strip().replace("~=", "").strip()
-            version_reduced = ".".join(version.split(".")[:-1]) + ".*"
-            full_constrain.append(f">={version},=={version_reduced}")
-        else:
-            full_constrain.append(constrain.strip())
+    full_constrain = [constrain.strip() for constrain in list_constrains]
     all_constrains = ",".join(full_constrain)
     return f"{split_pkg[0]} {all_constrains}"
