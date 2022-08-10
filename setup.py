@@ -44,6 +44,7 @@ setup(
         "colorama",
         "conda-souschef >=2.2.1",
         "pkginfo",
+        "packaging >=21.3",
         "tomli",
         "tomli-w",
     ],

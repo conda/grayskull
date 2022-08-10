@@ -15,6 +15,8 @@ from urllib.parse import urlparse
 import requests
 import tomli
 from colorama import Fore, Style
+from packaging.utils import canonicalize_version
+from packaging.version import Version
 from pkginfo import UnpackedSDist
 
 from grayskull.cli.stdout import manage_progressbar, print_msg
@@ -730,9 +732,25 @@ def ensure_pep440(pkg: str) -> str:
     for constrain in list_constrains:
         if "~=" in constrain:
             version = constrain.strip().replace("~=", "").strip()
-            version_reduced = ".".join(version.split(".")[:-1]) + ".*"
-            full_constrain.append(f">={version},=={version_reduced}")
+            version_upper = next_incompatible_version(version)
+            full_constrain.append(f">={version},<{version_upper}")
         else:
             full_constrain.append(constrain.strip())
     all_constrains = ",".join(full_constrain)
     return f"{split_pkg[0]} {all_constrains}"
+
+
+def next_incompatible_version(version: str) -> str:
+    """Return the next incompatible version for the given version."""
+    comments_removed = version.split("#")[0]
+    version_ = Version(comments_removed)
+    epoch = version_.epoch
+    previous_release = version_.release
+    if len(previous_release) < 2:
+        raise ValueError(
+            f"~= operator requires at least two version numbers, but given only "
+            f"'{version}'"
+        )
+    release = previous_release[:-2] + (previous_release[-2] + 1,)
+    release_str = ".".join(str(r) for r in release)
+    return canonicalize_version(f"{epoch}!{release_str}a")
