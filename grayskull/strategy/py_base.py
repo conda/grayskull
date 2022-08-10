@@ -277,7 +277,10 @@ def get_setup_cfg(source_path: str) -> dict:
      files unpacked
     :return: Metadata of setup.cfg
     """
-    from setuptools.config import read_configuration
+    try:
+        from setuptools.config.setupcfg import read_configuration
+    except ImportError:
+        from setuptools.config import read_configuration
 
     log.debug(f"Started setup.cfg from {source_path}")
     print_msg("Recovering metadata from setup.cfg")
