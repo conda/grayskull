@@ -496,7 +496,7 @@ def py_version_to_selector(pypi_metadata: dict, config) -> Optional[str]:
 
 
 def py_version_to_limit_python(pypi_metadata: dict, config=None) -> Optional[str]:
-    config = config or Configuration()
+    config = config or Configuration(pypi_metadata["name"])
     result = generic_py_ver_to(pypi_metadata, is_selector=False, config=config)
     if not result and config.is_strict_cf:
         result = (
