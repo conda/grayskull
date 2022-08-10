@@ -35,14 +35,11 @@ PIN_PKG_COMPILER = {"numpy": "<{ pin_compatible('numpy') }}"}
 
 
 def search_setup_root(path_folder: Union[Path, str]) -> Path:
-    setup_py = list(Path(path_folder).rglob("setup.py"))
-    if setup_py:
+    if setup_py := list(Path(path_folder).rglob("setup.py")):
         return setup_py[0]
-    setup_cfg = list(Path(path_folder).rglob("setup.cfg"))
-    if setup_cfg:
+    if setup_cfg := list(Path(path_folder).rglob("setup.cfg")):
         return setup_cfg[0]
-    pyproject_toml = list(Path(path_folder).rglob("pyproject.toml"))
-    if pyproject_toml:
+    if pyproject_toml := list(Path(path_folder).rglob("pyproject.toml")):
         return pyproject_toml[0]
 
 

@@ -1281,3 +1281,8 @@ def test_remove_selectors_pkgs_if_needed_with_recipe():
             "tqdm >=4.27",
         }
     )
+
+
+def test_noarch_python_min_constrain():
+    recipe, _ = create_python_recipe("humre", is_strict_cf=True, version="0.1.1")
+    assert recipe["requirements"]["run"] == ["python >=3.6"]
