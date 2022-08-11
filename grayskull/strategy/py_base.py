@@ -753,4 +753,4 @@ def next_incompatible_version(version: str) -> str:
         )
     release = previous_release[:-2] + (previous_release[-2] + 1,)
     release_str = ".".join(str(r) for r in release)
-    return canonicalize_version(f"{epoch}!{release_str}a")
+    return canonicalize_version(f"{epoch}!{release_str}dev")
