@@ -363,7 +363,11 @@ def injection_distutils(folder: str) -> dict:
                 data_dist["setup_requires"].remove("setuptools-scm")
 
         if kwargs.get("ext_modules", None):
-            data_dist["compilers"] = ["c"]
+            compilers = {"c"}
+            for module in kwargs.get("ext_modules", []):
+                if module.language and module.language.lower() in ("c++", "cpp"):
+                    compilers.add("cxx")
+            data_dist["compilers"] = list(compilers)
             if len(kwargs["ext_modules"]) > 0:
                 for ext_mod in kwargs["ext_modules"]:
                     if (
