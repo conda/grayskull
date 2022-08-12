@@ -365,15 +365,19 @@ def injection_distutils(folder: str) -> dict:
                 data_dist["setup_requires"].remove("setuptools-scm")
 
         if kwargs.get("ext_modules", None):
-            data_dist["compilers"] = ["c"]
-            if len(kwargs["ext_modules"]) > 0:
-                for ext_mod in kwargs["ext_modules"]:
-                    if (
-                        hasattr(ext_mod, "has_f2py_sources")
-                        and ext_mod.has_f2py_sources()
-                    ):
-                        data_dist["compilers"].append("fortran")
-                        break
+            compilers = {"c"}
+            for module in kwargs.get("ext_modules", []):
+                if (getattr(module, "language", "") or "").lower() in {"c++", "cpp"}:
+                    compilers.add("cxx")
+                elif (
+                    hasattr(module, "has_f2py_sources") and module.has_f2py_sources()
+                ) or (getattr(module, "language", "") or "").lower() in (
+                    "fortran",
+                    "f77",
+                    "f90",
+                ):
+                    compilers.add("fortran")
+            data_dist["compilers"] = list(compilers)
         log.debug(f"Injection distutils all arguments: {kwargs}")
         if data_dist.get("run_py", False):
             del data_dist["run_py"]

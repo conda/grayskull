@@ -765,13 +765,15 @@ def test_pymc_recipe_fortran():
     recipe = GrayskullFactory.create_recipe(
         "pypi", Configuration(name="pymc", version="2.3.6")
     )
-    assert sorted(recipe["requirements"]["build"]) == sorted(
-        ["<{ compiler('c') }}", "<{ compiler('fortran') }}"]
-    )
-    assert sorted(recipe["requirements"]["host"]) == sorted(["numpy", "python", "pip"])
-    assert sorted(recipe["requirements"]["run"]) == sorted(
-        ["<{ pin_compatible('numpy') }}", "python"]
-    )
+    assert set(recipe["requirements"]["build"]) == {
+        "<{ compiler('c') }}",
+        "<{ compiler('fortran') }}",
+    }
+    assert set(recipe["requirements"]["host"]) == {"numpy", "python", "pip"}
+    assert set(recipe["requirements"]["run"]) == {
+        "<{ pin_compatible('numpy') }}",
+        "python",
+    }
     assert not recipe["build"]["noarch"]
 
 
@@ -1286,3 +1288,11 @@ def test_remove_selectors_pkgs_if_needed_with_recipe():
 def test_noarch_python_min_constrain():
     recipe, _ = create_python_recipe("humre", is_strict_cf=True, version="0.1.1")
     assert recipe["requirements"]["run"] == ["python >=3.6"]
+
+
+def test_cpp_language_extra():
+    recipe, _ = create_python_recipe("xbcausalforest", version="0.1.3")
+    assert set(recipe["requirements"]["build"]) == {
+        "<{ compiler('cxx') }}",
+        "<{ compiler('c') }}",
+    }
