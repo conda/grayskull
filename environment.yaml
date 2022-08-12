@@ -26,3 +26,4 @@ dependencies:
   - pkginfo
   - tomli
   - tomli-w
+  - libcblas

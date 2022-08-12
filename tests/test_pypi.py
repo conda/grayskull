@@ -765,13 +765,15 @@ def test_pymc_recipe_fortran():
     recipe = GrayskullFactory.create_recipe(
         "pypi", Configuration(name="pymc", version="2.3.6")
     )
-    assert sorted(recipe["requirements"]["build"]) == sorted(
-        ["<{ compiler('c') }}", "<{ compiler('fortran') }}"]
-    )
-    assert sorted(recipe["requirements"]["host"]) == sorted(["numpy", "python", "pip"])
-    assert sorted(recipe["requirements"]["run"]) == sorted(
-        ["<{ pin_compatible('numpy') }}", "python"]
-    )
+    assert set(recipe["requirements"]["build"]) == {
+        "<{ compiler('c') }}",
+        "<{ compiler('fortran') }}",
+    }
+    assert set(recipe["requirements"]["host"]) == {"numpy", "python", "pip"}
+    assert set(recipe["requirements"]["run"]) == {
+        "<{ pin_compatible('numpy') }}",
+        "python",
+    }
     assert not recipe["build"]["noarch"]
 
 

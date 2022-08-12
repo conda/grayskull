@@ -365,10 +365,16 @@ def injection_distutils(folder: str) -> dict:
         if kwargs.get("ext_modules", None):
             compilers = {"c"}
             for module in kwargs.get("ext_modules", []):
-                if getattr(module, "language", "").lower() in {"c++", "cpp"}:
+                if (getattr(module, "language", "") or "").lower() in {"c++", "cpp"}:
                     compilers.add("cxx")
-                elif hasattr(module, "has_f2py_sources") and module.has_f2py_sources():
-                    data_dist["compilers"].add("fortran")
+                elif (
+                    hasattr(module, "has_f2py_sources") and module.has_f2py_sources()
+                ) or (getattr(module, "language", "") or "").lower() in (
+                    "fortran",
+                    "f77",
+                    "f90",
+                ):
+                    compilers.add("fortran")
             data_dist["compilers"] = list(compilers)
         log.debug(f"Injection distutils all arguments: {kwargs}")
         if data_dist.get("run_py", False):
