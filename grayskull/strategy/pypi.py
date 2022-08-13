@@ -530,17 +530,22 @@ def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]
     result = {}
     if build_req:
         result = {
-            "build": rm_duplicated_deps(sorted(map(lambda x: x.lower(), build_req)))
+            "build": rm_duplicated_deps(sort_reqs(map(lambda x: x.lower(), build_req)))
         }
 
     result.update(
         {
-            "host": rm_duplicated_deps(sorted(map(lambda x: x.lower(), host_req))),
-            "run": rm_duplicated_deps(sorted(map(lambda x: x.lower(), run_req))),
+            "host": rm_duplicated_deps(sort_reqs(map(lambda x: x.lower(), host_req))),
+            "run": rm_duplicated_deps(sort_reqs(map(lambda x: x.lower(), run_req))),
         }
     )
     update_requirements_with_pin(result)
     return result
+
+
+def sort_reqs(reqs: List[str]) -> List[str]:
+    """Sort requirements."""
+    return sorted(reqs)
 
 
 def remove_selectors_pkgs_if_needed(
