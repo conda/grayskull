@@ -94,13 +94,13 @@ def print_requirements(
         print_msg(f"{key.capitalize()} requirements:")
         req_list = requirements.get(key, [])
         if req_list:
-            print_req(sorted(req_list))
+            print_req(req_list)
         else:
             print_msg("  <none>")
 
     for key, req_list in optional_requirements.items():
         print_msg(f"{key.capitalize()} requirements (optional):")
-        print_req(sorted(req_list))
+        print_req(req_list)
 
     print_msg(f"\n{Fore.RED}RED{Style.RESET_ALL}: Missing packages")
     print_msg(f"{Fore.GREEN}GREEN{Style.RESET_ALL}: Packages available on conda-forge")
