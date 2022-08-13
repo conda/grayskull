@@ -545,7 +545,9 @@ def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]
 
 def sort_reqs(reqs: List[str]) -> List[str]:
     """Sort requirements."""
-    return sorted(reqs)
+    python_reqs = [req for req in reqs if req.startswith("python ")]
+    non_python_reqs = [req for req in reqs if not req.startswith("python ")]
+    return python_reqs + sorted(non_python_reqs)
 
 
 def remove_selectors_pkgs_if_needed(
