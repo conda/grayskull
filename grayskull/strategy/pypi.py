@@ -4,7 +4,7 @@ import os
 import re
 from pathlib import Path
 from tempfile import mkdtemp
-from typing import Dict, List, Optional
+from typing import Dict, Iterable, List, Optional
 
 import requests
 from colorama import Fore
@@ -543,11 +543,13 @@ def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]
     return result
 
 
-def sort_reqs(reqs: List[str]) -> List[str]:
+def sort_reqs(reqs: Iterable[str]) -> List[str]:
     """Sort requirements."""
-    python_reqs = [req for req in reqs if req.startswith("python ")]
-    non_python_reqs = [req for req in reqs if not req.startswith("python ")]
-    return python_reqs + sorted(non_python_reqs)
+    reqs_list = list(reqs)
+    python_reqs = [req for req in reqs_list if req.startswith("python ")]
+    non_python_reqs = [req for req in reqs_list if not req.startswith("python ")]
+    result = python_reqs + sorted(non_python_reqs)
+    return result
 
 
 def remove_selectors_pkgs_if_needed(
