@@ -544,10 +544,14 @@ def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]
 
 
 def sort_reqs(reqs: Iterable[str]) -> List[str]:
-    """Sort requirements."""
+    """Sort requirements. Put python first, then sort alphabetically."""
     reqs_list = list(reqs)
-    python_reqs = [req for req in reqs_list if req.startswith("python ")]
-    non_python_reqs = [req for req in reqs_list if not req.startswith("python ")]
+
+    def is_python(req: str) -> bool:
+        return req == "python" or req.startswith("python ")
+
+    python_reqs = [req for req in reqs_list if is_python(req)]
+    non_python_reqs = [req for req in reqs_list if not is_python(req)]
     result = python_reqs + sorted(non_python_reqs)
     return result
 
