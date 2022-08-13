@@ -43,6 +43,7 @@ from grayskull.strategy.pypi import (
     merge_pypi_sdist_metadata,
     normalize_requirements_list,
     remove_selectors_pkgs_if_needed,
+    sort_reqs,
 )
 from grayskull.utils import PyVer, format_dependencies, generate_recipe
 
@@ -1296,3 +1297,16 @@ def test_cpp_language_extra():
         "<{ compiler('cxx') }}",
         "<{ compiler('c') }}",
     }
+
+
+def test_sort_reqs():
+    assert sort_reqs(["pandas >=1.0", "numpy", "python"]) == [
+        "python",
+        "numpy",
+        "pandas >=1.0",
+    ]
+    assert sort_reqs(["pandas >=1.0", "numpy", "python >=3.8"]) == [
+        "python >=3.8",
+        "numpy",
+        "pandas >=1.0",
+    ]
