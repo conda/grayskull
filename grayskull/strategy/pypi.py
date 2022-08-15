@@ -4,7 +4,7 @@ import os
 import re
 from pathlib import Path
 from tempfile import mkdtemp
-from typing import Dict, List, Optional
+from typing import Dict, Iterable, List, Optional
 
 import requests
 from colorama import Fore
@@ -530,16 +530,29 @@ def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]
     result = {}
     if build_req:
         result = {
-            "build": rm_duplicated_deps(sorted(map(lambda x: x.lower(), build_req)))
+            "build": rm_duplicated_deps(sort_reqs(map(lambda x: x.lower(), build_req)))
         }
 
     result.update(
         {
-            "host": rm_duplicated_deps(sorted(map(lambda x: x.lower(), host_req))),
-            "run": rm_duplicated_deps(sorted(map(lambda x: x.lower(), run_req))),
+            "host": rm_duplicated_deps(sort_reqs(map(lambda x: x.lower(), host_req))),
+            "run": rm_duplicated_deps(sort_reqs(map(lambda x: x.lower(), run_req))),
         }
     )
     update_requirements_with_pin(result)
+    return result
+
+
+def sort_reqs(reqs: Iterable[str]) -> List[str]:
+    """Sort requirements. Put python first, then sort alphabetically."""
+    reqs_list = list(reqs)
+
+    def is_python(req: str) -> bool:
+        return req == "python" or req.startswith("python ")
+
+    python_reqs = [req for req in reqs_list if is_python(req)]
+    non_python_reqs = [req for req in reqs_list if not is_python(req)]
+    result = python_reqs + sorted(non_python_reqs)
     return result
 
 

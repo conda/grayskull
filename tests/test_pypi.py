@@ -43,6 +43,7 @@ from grayskull.strategy.pypi import (
     merge_pypi_sdist_metadata,
     normalize_requirements_list,
     remove_selectors_pkgs_if_needed,
+    sort_reqs,
 )
 from grayskull.utils import PyVer, format_dependencies, generate_recipe
 
@@ -798,7 +799,7 @@ def test_cythongsl_recipe_build():
     )
 
     assert recipe["requirements"]["build"] == ["<{ compiler('c') }}"]
-    assert recipe["requirements"]["host"] == ["cython >=0.16", "pip", "python"]
+    assert recipe["requirements"]["host"] == ["python", "cython >=0.16", "pip"]
     assert recipe["build"]["noarch"] is None
     assert recipe["build"]["number"] == 0
 
@@ -822,8 +823,8 @@ def test_zipp_recipe_tags_on_deps():
     recipe = GrayskullFactory.create_recipe("pypi", config)
     assert recipe["build"]["noarch"]
     assert recipe["requirements"]["host"] == [
-        "pip",
         "python >=3.6",
+        "pip",
         "setuptools-scm >=3.4.1",
     ]
 
@@ -973,9 +974,9 @@ def test_deps_comments():
     config = Configuration(name="kubernetes_asyncio", version="11.2.0")
     recipe = GrayskullFactory.create_recipe("pypi", config)
     assert recipe["requirements"]["run"] == [
+        "python",
         "aiohttp >=2.3.10,<4.0.0",
         "certifi >=14.05.14",
-        "python",
         "python-dateutil >=2.5.3",
         "pyyaml >=3.12",
         "setuptools >=21.0.0",
@@ -1013,15 +1014,15 @@ def test_multiples_exit_setup():
 def test_sequence_inside_another_in_dependencies():
     recipe = create_python_recipe("unittest2=1.1.0", is_strict_cf=True)[0]
     assert recipe["requirements"]["host"] == [
+        "python >=3.6",
         "argparse",
         "pip",
-        "python >=3.6",
         "six >=1.4",
         "traceback2",
     ]
     assert recipe["requirements"]["run"] == [
-        "argparse",
         "python >=3.6",
+        "argparse",
         "six >=1.4",
         "traceback2",
     ]
@@ -1135,7 +1136,7 @@ def test_replace_slash_in_imports():
 def test_add_python_min_to_strict_conda_forge():
     recipe = create_python_recipe("dgllife=0.2.8", is_strict_cf=True)[0]
     assert recipe["build"]["noarch"] == "python"
-    assert recipe["requirements"]["host"][1] == "python >=3.6"
+    assert recipe["requirements"]["host"][0] == "python >=3.6"
     assert "python >=3.6" in recipe["requirements"]["run"]
 
 
@@ -1177,7 +1178,7 @@ def test_ensure_pep440():
 
 def test_pep440_recipe():
     recipe = create_python_recipe("codalab=0.5.26", is_strict_cf=False)[0]
-    assert recipe["requirements"]["host"] == ["pip", "python >=3.6"]
+    assert recipe["requirements"]["host"] == ["python >=3.6", "pip"]
 
 
 def test_pep440_in_recipe_pypi():
@@ -1296,3 +1297,16 @@ def test_cpp_language_extra():
         "<{ compiler('cxx') }}",
         "<{ compiler('c') }}",
     }
+
+
+def test_sort_reqs():
+    assert sort_reqs(["pandas >=1.0", "numpy", "python"]) == [
+        "python",
+        "numpy",
+        "pandas >=1.0",
+    ]
+    assert sort_reqs(["pandas >=1.0", "numpy", "python >=3.8"]) == [
+        "python >=3.8",
+        "numpy",
+        "pandas >=1.0",
+    ]
