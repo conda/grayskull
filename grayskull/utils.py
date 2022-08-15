@@ -119,14 +119,18 @@ def rm_duplicated_deps(all_requirements: Union[list, set, None]) -> Optional[lis
     if not all_requirements:
         return None
     new_value = []
+
+    # Keep track of requirements which have already been added to the list.
+    # Here we store a canonicalized version of the requirement: lowercase,
+    # and underscores converted to dashes.
+    added_reqs = set()
+
     for dep in all_requirements:
-        if (
-            dep in new_value
-            or dep.replace("-", "_") in new_value
-            or dep.replace("_", "-") in new_value
-        ):
+        canonicalized = dep.replace("_", "-").lower()
+        if canonicalized in added_reqs:
             continue
         new_value.append(dep)
+        added_reqs.add(canonicalized)
     return new_value
 
 

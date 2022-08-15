@@ -10,6 +10,7 @@ from grayskull.utils import (
     merge_dict_of_lists_item,
     merge_list_item,
     origin_is_local_sdist,
+    rm_duplicated_deps,
 )
 
 
@@ -118,3 +119,8 @@ def test_merge_dict_of_lists_item():
             sub_key: set(lst) for sub_key, lst in destination[key].items()
         }
     assert destination == {"name": {"sub_name": {1, 2}}}
+
+
+def test_rm_duplicated_deps():
+    assert rm_duplicated_deps([]) is None
+    assert rm_duplicated_deps(["my_craZy-pkg", "my-crazy-pkg"]) == ["my_craZy-pkg"]
