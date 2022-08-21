@@ -543,7 +543,7 @@ def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]
     return result
 
 
-def sort_reqs(reqs: Iterable[str], alphabetize: bool = True) -> List[str]:
+def sort_reqs(reqs: Iterable[str], alphabetize: bool = False) -> List[str]:
     """Sort requirements. Put python first, then optionally sort alphabetically."""
     reqs_list = list(reqs)
 
