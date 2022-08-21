@@ -543,8 +543,8 @@ def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]
     return result
 
 
-def sort_reqs(reqs: Iterable[str]) -> List[str]:
-    """Sort requirements. Put python first, then sort alphabetically."""
+def sort_reqs(reqs: Iterable[str], alphabetize: bool = True) -> List[str]:
+    """Sort requirements. Put python first, then optionally sort alphabetically."""
     reqs_list = list(reqs)
 
     def is_python(req: str) -> bool:
@@ -552,7 +552,9 @@ def sort_reqs(reqs: Iterable[str]) -> List[str]:
 
     python_reqs = [req for req in reqs_list if is_python(req)]
     non_python_reqs = [req for req in reqs_list if not is_python(req)]
-    result = python_reqs + sorted(non_python_reqs)
+    if alphabetize:
+        non_python_reqs.sort()
+    result = python_reqs + non_python_reqs
     return result
 
 
