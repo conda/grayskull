@@ -123,4 +123,5 @@ def test_merge_dict_of_lists_item():
 
 def test_rm_duplicated_deps():
     assert rm_duplicated_deps([]) is None
-    assert rm_duplicated_deps(["my_craZy-pkg", "my-crazy-pkg"]) == ["my_craZy-pkg"]
+    # my-crazy-pkg is preferred because "my-crazy-pkg" < "my_craZy-pkg":
+    assert rm_duplicated_deps(["my_craZy-pkg", "my-crazy-pkg"]) == ["my-crazy-pkg"]
