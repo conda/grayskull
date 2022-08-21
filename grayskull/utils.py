@@ -118,20 +118,27 @@ def string_similarity(a, b):
 def rm_duplicated_deps(all_requirements: Union[list, set, None]) -> Optional[list]:
     if not all_requirements:
         return None
-    new_value = []
-
     # Keep track of requirements which have already been added to the list.
-    # Here we store a canonicalized version of the requirement: lowercase,
-    # and underscores converted to dashes.
-    added_reqs = set()
+    # The key is a canonicalized version of the requirement: lowercase,
+    # and underscores converted to dashes. The value is the requirement itself,
+    # as it should be added.
+    # (This is order-preserving since dicts are ordered by first insertion.)
+    new_reqs: dict[str, str] = {}
 
     for dep in all_requirements:
         canonicalized = dep.replace("_", "-").lower()
-        if canonicalized in added_reqs:
-            continue
-        new_value.append(dep)
-        added_reqs.add(canonicalized)
-    return new_value
+        if canonicalized in new_reqs:
+            # In order to break ties deterministically, we prioritize the requirement
+            # which is alphanumerically lowest. This happens to prioritize the "-"
+            # character over "_".
+            # Example: given "importlib_metadata" and "importlib-metadata", we will
+            # keep "importlib-metadata" because it is alphabetically lower.
+            previous_req = new_reqs[canonicalized]
+            if dep < previous_req:
+                new_reqs[canonicalized] = dep
+        else:
+            new_reqs[canonicalized] = dep
+    return list(new_reqs.values())
 
 
 def format_dependencies(all_dependencies: List, name: str) -> List:
