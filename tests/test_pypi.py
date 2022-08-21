@@ -1308,13 +1308,14 @@ def test_cpp_language_extra():
 
 
 def test_sort_reqs():
-    assert sort_reqs(["pandas >=1.0", "numpy", "python"]) == [
-        "python",
-        "numpy",
-        "pandas >=1.0",
-    ]
-    assert sort_reqs(["pandas >=1.0", "numpy", "python >=3.8"]) == [
-        "python >=3.8",
-        "numpy",
-        "pandas >=1.0",
-    ]
+    # There are currently two acceptable sortings. Original ordering or alphabetical.
+    # In either sorting, 'python' always comes first.
+    original_deps = ["pandas >=1.0", "numpy", "python", "scipy"]
+    original_deps_38 = ["pandas >=1.0", "numpy", "python >=3.8", "scipy"]
+    sorted_deps_orig = ["python", "pandas >=1.0", "numpy", "scipy"]
+    sorted_deps_alpha = ["python", "numpy", "pandas >=1.0", "scipy"]
+    sorted_deps_orig_38 = ["python >=3.8", "pandas >=1.0", "numpy", "scipy"]
+    sorted_deps_alpha_38 = ["python >=3.8", "numpy", "pandas >=1.0", "scipy"]
+
+    assert sort_reqs(original_deps) in [sorted_deps_orig, sorted_deps_alpha]
+    assert sort_reqs(original_deps_38) in [sorted_deps_orig_38, sorted_deps_alpha_38]
