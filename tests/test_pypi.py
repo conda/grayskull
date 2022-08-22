@@ -16,7 +16,6 @@ from grayskull.cli.parser import parse_pkg_name_version
 from grayskull.config import Configuration
 from grayskull.strategy.py_base import (
     clean_deps_for_conda_forge,
-    ensure_pep440,
     generic_py_ver_to,
     get_compilers,
     get_entry_points_from_sdist,
@@ -1180,20 +1179,6 @@ def test_get_test_imports_clean_modules():
     ) == ["_pytest", "_pytest._code"]
 
 
-def test_ensure_pep440():
-    assert ensure_pep440("pytest ~=5.3.2") == "pytest >=5.3.2,<5.4.dev0"
-
-
-def test_pep440_recipe():
-    recipe = create_python_recipe("codalab=0.5.26", is_strict_cf=False)[0]
-    assert recipe["requirements"]["host"] == ["python >=3.6", "pip"]
-
-
-def test_pep440_in_recipe_pypi():
-    recipe = create_python_recipe("kedro=0.17.6", is_strict_cf=False)[0]
-    assert sorted(recipe["requirements"]["run"])[0] == "anyconfig >=0.10.0,<0.11.dev0"
-
-
 def test_create_recipe_from_local_sdist(pkg_pytest):
     recipe = create_python_recipe(pkg_pytest, from_local_sdist=True)[0]
     assert recipe["source"]["url"] == f"file://{pkg_pytest}"
@@ -1206,17 +1191,6 @@ def test_create_recipe_from_local_sdist(pkg_pytest):
 def test_400_for_python_selector():
     recipe = create_python_recipe("pyquil", version="3.0.1")[0]
     assert recipe["build"]["skip"].selector == "py>=400 or py2k"
-
-
-def test_update_requirements_with_pin_mixed_numpy_pin_compatible():
-    requirements = {
-        "build": ["<{ compiler('c') }}"],
-        "host": ["cython", "numpy", "pip", "python"],
-        "run": ["numpy >=1.19.1,<2.0.0", "pyparsing >=2.4.7, <3.0.0", "python"],
-    }
-    update_requirements_with_pin(requirements)
-    assert "<{ pin_compatible('numpy') }}" in requirements["run"]
-    assert "numpy" not in requirements["run"]
 
 
 def test_notice_file():

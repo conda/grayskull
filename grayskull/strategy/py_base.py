@@ -15,6 +15,7 @@ from urllib.parse import urlparse
 import requests
 import tomli
 from colorama import Fore, Style
+from packaging.specifiers import SpecifierSet
 from packaging.utils import canonicalize_version
 from packaging.version import Version
 from pkginfo import UnpackedSDist
@@ -61,10 +62,16 @@ def clean_deps_for_conda_forge(list_deps: List, py_ver_min: PyVer) -> List:
             match_del = ("==", match_del[1])
         major = int(match_del[1][0])
         minor = int(match_del[1][1:].replace("k", "0") or 0)
-        current_py = PyVer(major=major, minor=minor)
+        py_ver_min = Version(f"{py_ver_min.major}.{py_ver_min.minor}")
+        current_py = SpecifierSet(f"{match_del[0]}{major}.{minor}")
         log.debug(f"Evaluating: {py_ver_min}{match_del}{current_py} -- {dependency}")
-        if eval(f"py_ver_min{match_del[0]}current_py"):
-            result_deps.append(dependency)
+        if py_ver_min in current_py:
+            if Version(f"{major}.{minor}") in SpecifierSet(
+                f"<{py_ver_min.major}.{py_ver_min.minor}"
+            ):
+                result_deps.append(dependency.split("#")[0].strip())
+            else:
+                result_deps.append(dependency)
     return result_deps
 
 
@@ -730,6 +737,11 @@ def ensure_pep440(pkg: str) -> str:
     split_pkg = pkg.strip().split(" ")
     if len(split_pkg) <= 1:
         return pkg
+    selector = ""
+    if "#" in split_pkg:
+        hash_index = split_pkg.index("#")
+        selector = f"  {' '.join(split_pkg[hash_index:])}"
+        split_pkg = split_pkg[:hash_index]
     constrain_pkg = "".join(split_pkg[1:])
     list_constrains = constrain_pkg.split(",")
     full_constrain = []
@@ -741,7 +753,7 @@ def ensure_pep440(pkg: str) -> str:
         else:
             full_constrain.append(constrain.strip())
     all_constrains = ",".join(full_constrain)
-    return f"{split_pkg[0]} {all_constrains}"
+    return f"{split_pkg[0]} {all_constrains}{selector}"
 
 
 def next_incompatible_version(version: str) -> str:
