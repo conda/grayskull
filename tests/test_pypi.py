@@ -822,11 +822,13 @@ def test_zipp_recipe_tags_on_deps():
     config = Configuration(name="zipp", version="3.0.0")
     recipe = GrayskullFactory.create_recipe("pypi", config)
     assert recipe["build"]["noarch"]
-    assert recipe["requirements"]["host"] == [
-        "python >=3.6",
-        "pip",
-        "setuptools-scm >=3.4.1",
-    ]
+    assert sorted(recipe["requirements"]["host"]) == sorted(
+        [
+            "python >=3.6",
+            "pip",
+            "setuptools-scm >=3.4.1",
+        ]
+    )
 
 
 @pytest.mark.parametrize(
@@ -973,16 +975,18 @@ def test_panel_entry_points(tmpdir):
 def test_deps_comments():
     config = Configuration(name="kubernetes_asyncio", version="11.2.0")
     recipe = GrayskullFactory.create_recipe("pypi", config)
-    assert recipe["requirements"]["run"] == [
-        "python",
-        "aiohttp >=2.3.10,<4.0.0",
-        "certifi >=14.05.14",
-        "python-dateutil >=2.5.3",
-        "pyyaml >=3.12",
-        "setuptools >=21.0.0",
-        "six >=1.9.0",
-        "urllib3 >=1.24.2",
-    ]
+    assert sorted(recipe["requirements"]["run"]) == sorted(
+        [
+            "python",
+            "aiohttp >=2.3.10,<4.0.0",
+            "certifi >=14.05.14",
+            "python-dateutil >=2.5.3",
+            "pyyaml >=3.12",
+            "setuptools >=21.0.0",
+            "six >=1.9.0",
+            "urllib3 >=1.24.2",
+        ]
+    )
 
 
 @pytest.mark.github
@@ -1013,19 +1017,23 @@ def test_multiples_exit_setup():
 
 def test_sequence_inside_another_in_dependencies():
     recipe = create_python_recipe("unittest2=1.1.0", is_strict_cf=True)[0]
-    assert recipe["requirements"]["host"] == [
-        "python >=3.6",
-        "argparse",
-        "pip",
-        "six >=1.4",
-        "traceback2",
-    ]
-    assert recipe["requirements"]["run"] == [
-        "python >=3.6",
-        "argparse",
-        "six >=1.4",
-        "traceback2",
-    ]
+    assert sorted(recipe["requirements"]["host"]) == sorted(
+        [
+            "python >=3.6",
+            "argparse",
+            "pip",
+            "six >=1.4",
+            "traceback2",
+        ]
+    )
+    assert sorted(recipe["requirements"]["run"]) == sorted(
+        [
+            "python >=3.6",
+            "argparse",
+            "six >=1.4",
+            "traceback2",
+        ]
+    )
 
 
 def test_recipe_with_just_py_modules():
@@ -1300,13 +1308,14 @@ def test_cpp_language_extra():
 
 
 def test_sort_reqs():
-    assert sort_reqs(["pandas >=1.0", "numpy", "python"]) == [
-        "python",
-        "numpy",
-        "pandas >=1.0",
-    ]
-    assert sort_reqs(["pandas >=1.0", "numpy", "python >=3.8"]) == [
-        "python >=3.8",
-        "numpy",
-        "pandas >=1.0",
-    ]
+    # There are currently two acceptable sortings. Original ordering or alphabetical.
+    # In either sorting, 'python' always comes first.
+    original_deps = ["pandas >=1.0", "numpy", "python", "scipy"]
+    original_deps_38 = ["pandas >=1.0", "numpy", "python >=3.8", "scipy"]
+    sorted_deps_orig = ["python", "pandas >=1.0", "numpy", "scipy"]
+    sorted_deps_alpha = ["python", "numpy", "pandas >=1.0", "scipy"]
+    sorted_deps_orig_38 = ["python >=3.8", "pandas >=1.0", "numpy", "scipy"]
+    sorted_deps_alpha_38 = ["python >=3.8", "numpy", "pandas >=1.0", "scipy"]
+
+    assert sort_reqs(original_deps) in [sorted_deps_orig, sorted_deps_alpha]
+    assert sort_reqs(original_deps_38) in [sorted_deps_orig_38, sorted_deps_alpha_38]
