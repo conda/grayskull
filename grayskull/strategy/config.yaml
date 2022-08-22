@@ -182,6 +182,10 @@ ib_insync:
   conda_forge: ib-insync
   import_name: ib_insync
 
+installer:
+  conda_forge: python-installer
+  import_name: installer
+
 intake-astro:
   conda_forge: intake-accumulo
   import_name: intake_astro
