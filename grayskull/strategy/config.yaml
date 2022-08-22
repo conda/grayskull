@@ -181,7 +181,7 @@ iam_units:
 ib_insync:
   conda_forge: ib-insync
   import_name: ib_insync
-  
+
 installer:
   conda_forge: python-installer
   import_name: installer
