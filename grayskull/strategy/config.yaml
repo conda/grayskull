@@ -447,6 +447,11 @@ enum34:
   avoid_selector: true
 
 pywin32:
-  conda_forge: pywin32
+  conda_forge: pywin32-on-windows
   import_name: pywin
+  avoid_selector: true
+
+exceptiongroup:
+  conda_forge: exceptiongroup
+  import_name: exceptiongroup
   avoid_selector: true
