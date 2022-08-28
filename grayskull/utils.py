@@ -237,6 +237,11 @@ def _clean_yaml(recipe, all_obj_to_delete=None):
 
 
 def merge_list_item(destination: dict, add: dict, key: str) -> None:
+    """Modify the list 'destination[key]' to include missing elements from 'add[key]'.
+
+    Duplicated elements are removed. The order of the elements is preserved.
+    In case 'key' is undefined or empty in both lists, 'destination' is unmodified.
+    """
     result = []
     destination_list = destination.get(key, [])
     add_list = add.get(key, [])
