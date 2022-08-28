@@ -237,10 +237,14 @@ def _clean_yaml(recipe, all_obj_to_delete=None):
 
 
 def merge_list_item(destination: dict, add: dict, key: str) -> None:
-    lst = set(destination.get(key, []))
-    lst |= set(add.get(key, []))
-    if lst:
-        destination[key] = list(lst)
+    result = []
+    destination_list = destination.get(key, [])
+    add_list = add.get(key, [])
+    for item in destination_list + add_list:
+        if item not in result:
+            result.append(item)
+    if len(result) > 0:
+        destination[key] = result
 
 
 def merge_dict_of_lists_item(destination: dict, add: dict, key: str) -> None:
