@@ -371,9 +371,9 @@ def get_metadata(recipe, config) -> dict:
     else:
         license_name = "Other"
     if not license_file:
-        license_file = ["PLEASE_ADD_LICENSE_FILE"]
-    if not license_name:
-        license_name = "Other"
+        license_file = "PLEASE_ADD_LICENSE_FILE"
+    elif len(license_file) == 1:
+        license_file = license_file[0]
 
     requirements_section = extract_requirements(metadata, config, recipe)
     optional_requirements = extract_optional_requirements(metadata, config)
