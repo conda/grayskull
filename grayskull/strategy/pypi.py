@@ -415,12 +415,17 @@ def get_metadata(recipe, config) -> dict:
             outputs.append(
                 {
                     "name": name,
-                    "requirements": output_req_section,
+                    "requirements": dict(output_req_section),
                 }
             )
+            output_req_section["run"] = [
+                s for s in output_req_section["run"] if "python" in s
+            ]
             for option, req_list in optional_requirements.items():
                 req_section = dict(output_req_section)
-                req_section["run"] = [f"{name} =={{{{ version }}}}"] + req_list
+                req_section["run"] = list(req_section.get("run", list()))
+                req_section["run"].append(f"{name} =={{{{ version }}}}")
+                req_section["run"].extend(req_list)
                 outputs.append(
                     {
                         "name": f"{name}-{option}",
