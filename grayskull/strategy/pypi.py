@@ -471,9 +471,19 @@ def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]
     for section in all_sections:
         if metadata.get(section):
             if section == "package":
-                set_global_jinja_var(recipe, "version", metadata["package"]["version"])
-                config.version = metadata["package"]["version"]
-                recipe["package"]["version"] = "<{ version }}"
+                package_metadata = dict(metadata[section])
+                if package_metadata["name"].lower() == config.name.lower():
+                    package_metadata.pop("name")
+                else:
+                    package_metadata["name"] = package_metadata["name"].replace(
+                        config.name, "<{ name|lower }}"
+                    )
+
+                set_global_jinja_var(recipe, "version", package_metadata["version"])
+                config.version = package_metadata["version"]
+                package_metadata["version"] = "<{ version }}"
+
+                recipe[section].update(package_metadata)
             elif section in recipe and isinstance(recipe[section], Section):
                 recipe[section].update(metadata[section])
             else:
