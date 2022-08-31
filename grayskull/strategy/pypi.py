@@ -408,15 +408,24 @@ def get_metadata(recipe, config) -> dict:
     outputs = []
     if optional_requirements:
         if config.extras_require_split:
+            output_req_section = dict(requirements_section)
+            requirements_section = {
+                k: v for k, v in requirements_section.items() if k == "host"
+            }
             outputs.append(
                 {
                     "name": name,
-                    "requirements": requirements_section,
+                    "requirements": dict(output_req_section),
                 }
             )
+            output_req_section["run"] = [
+                s for s in output_req_section["run"] if "python" in s
+            ]
             for option, req_list in optional_requirements.items():
-                req_section = dict(requirements_section)
-                req_section["run"] = [f"{name} =={{{{ version }}}}"] + req_list
+                req_section = dict(output_req_section)
+                req_section["run"] = list(req_section.get("run", list()))
+                req_section["run"].append(f"{name} =={{{{ version }}}}")
+                req_section["run"].extend(req_list)
                 outputs.append(
                     {
                         "name": f"{name}-{option}",
@@ -446,6 +455,7 @@ def get_metadata(recipe, config) -> dict:
         return {
             "package": package_section,
             "build": build_section,
+            "requirements": requirements_section,
             "outputs": outputs,
             "test": test_section,
             "about": about_section,
@@ -491,6 +501,11 @@ def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]
 
     if not config.is_arch:
         recipe["build"]["noarch"] = "python"
+        if "outputs" in recipe:
+            for output in recipe["outputs"]:
+                if "build" not in output:
+                    output["build"] = dict()
+                output["build"]["noarch"] = "python"
 
 
 def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]:

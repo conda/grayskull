@@ -289,6 +289,7 @@ def test_get_include_extra_requirements():
         "pyyaml >=5.3.1",
         "toolz >=0.8.2",
     ]
+    host_requirements = ["python >=3.8", "pip"]
 
     extras = dict()
     extras["array"] = ["numpy >=1.18"]
@@ -311,7 +312,8 @@ def test_get_include_extra_requirements():
     config = Configuration(name="dask", version="2022.6.1")
     recipe = GrayskullFactory.create_recipe("pypi", config)
     recipe["name"] == "dask"
-    assert "outputs" not in recipe
+    assert set(recipe["outputs"]) == set()
+    assert set(recipe["requirements"]["host"]) == set(host_requirements)
     assert set(recipe["requirements"]["run"]) == set(base_requirements)
     assert set(recipe["test"]["requires"]) == {"pip"}
 
@@ -319,13 +321,14 @@ def test_get_include_extra_requirements():
     config = Configuration(name="dask", version="2022.6.1", extras_require_all=True)
     recipe = GrayskullFactory.create_recipe("pypi", config)
     recipe["name"] == "dask"
-    assert "outputs" not in recipe
+    assert set(recipe["outputs"]) == set()
 
     expected = list(base_requirements)
     for name, req_lst in extras.items():
         if name != "complete":
             expected.append(f"Extra: {name}")
             expected.extend(req_lst)
+    assert set(recipe["requirements"]["host"]) == set(host_requirements)
     assert set_of_strings(recipe["requirements"]["run"]) == set(expected)
     assert set_of_strings(recipe["test"]["requires"]) == {"pip"}
 
@@ -339,13 +342,14 @@ def test_get_include_extra_requirements():
     )
     recipe = GrayskullFactory.create_recipe("pypi", config)
     recipe["name"] == "dask"
-    assert "outputs" not in recipe
+    assert set(recipe["outputs"]) == set()
 
     expected = list(base_requirements)
     for name, req_lst in extras.items():
         if name not in ("test", "complete"):
             expected.append(f"Extra: {name}")
             expected.extend(req_lst)
+    assert set(recipe["requirements"]["host"]) == set(host_requirements)
     assert set_of_strings(recipe["requirements"]["run"]) == set(expected)
     assert set_of_strings(recipe["test"]["requires"]) == {"pip", *extras["test"]}
 
@@ -355,7 +359,8 @@ def test_get_include_extra_requirements():
     )
     recipe = GrayskullFactory.create_recipe("pypi", config)
     recipe["name"] == "dask"
-    assert "outputs" not in recipe
+    assert set(recipe["outputs"]) == set()
+    assert set(recipe["requirements"]["host"]) == set(host_requirements)
     assert set_of_strings(recipe["requirements"]["run"]) == {
         *base_requirements,
         "Extra: array",
@@ -373,7 +378,8 @@ def test_get_include_extra_requirements():
     )
     recipe = GrayskullFactory.create_recipe("pypi", config)
     recipe["name"] == "dask"
-    assert "outputs" not in recipe
+    assert set(recipe["outputs"]) == set()
+    assert set(recipe["requirements"]["host"]) == set(host_requirements)
     assert set_of_strings(recipe["requirements"]["run"]) == set(base_requirements)
     assert set_of_strings(recipe["test"]["requires"]) == {"pip", *extras["test"]}
 
@@ -388,7 +394,8 @@ def test_get_include_extra_requirements():
     )
     recipe = GrayskullFactory.create_recipe("pypi", config)
     recipe["name"] == "dask"
-    assert "outputs" not in recipe
+    assert set(recipe["outputs"]) == set()
+    assert set(recipe["requirements"]["host"]) == set(host_requirements)
     assert set_of_strings(recipe["requirements"]["run"]) == set(base_requirements)
     assert set_of_strings(recipe["test"]["requires"]) == {"pip", *extras["test"]}
 
@@ -403,14 +410,19 @@ def test_get_include_extra_requirements():
     )
     recipe = GrayskullFactory.create_recipe("pypi", config)
     recipe["name"] == "dask-meta"
-    assert not list(recipe["requirements"].items())
+    assert set(recipe["requirements"]["host"]) == set(host_requirements)
+    assert not recipe["requirements"]["run"]
     assert len(recipe["outputs"]) == 6
 
     expected = dict()
     expected["dask"] = set(base_requirements)
     for name, req_lst in extras.items():
         if name != "test":
-            expected[f"dask-{name}"] = {"dask =={{ version }}", *req_lst}
+            expected[f"dask-{name}"] = {
+                "dask =={{ version }}",
+                "python >=3.8",
+                *req_lst,
+            }
     found = dict()
     for output in recipe["outputs"]:
         found[output["name"]] = set_of_strings(output["requirements"]["run"])
@@ -1226,6 +1238,7 @@ def test_section_order():
         "build",
         "requirements",
         "test",
+        "outputs",
         "about",
         "extra",
     ) == tuple(recipe.keys())
