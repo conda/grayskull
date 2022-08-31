@@ -42,7 +42,7 @@ setup(
         "rapidfuzz >=1.7.1",
         "progressbar2 >=3.53.0",
         "colorama",
-        "conda-souschef >=2.2.1",
+        "conda-souschef >=2.2.3",
         "pkginfo",
         "packaging >=21.3",
         "tomli",
