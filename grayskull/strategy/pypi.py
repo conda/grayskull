@@ -491,6 +491,11 @@ def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]
 
     if not config.is_arch:
         recipe["build"]["noarch"] = "python"
+        if "outputs" in recipe:
+            for output in recipe["outputs"]:
+                if "build" not in output:
+                    output["build"] = dict()
+                output["build"]["noarch"] = "python"
 
 
 def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]:
