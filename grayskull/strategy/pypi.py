@@ -408,14 +408,18 @@ def get_metadata(recipe, config) -> dict:
     outputs = []
     if optional_requirements:
         if config.extras_require_split:
+            output_req_section = dict(requirements_section)
+            requirements_section = {
+                k: v for k, v in requirements_section.items() if k == "host"
+            }
             outputs.append(
                 {
                     "name": name,
-                    "requirements": requirements_section,
+                    "requirements": output_req_section,
                 }
             )
             for option, req_list in optional_requirements.items():
-                req_section = dict(requirements_section)
+                req_section = dict(output_req_section)
                 req_section["run"] = [f"{name} =={{{{ version }}}}"] + req_list
                 outputs.append(
                     {
@@ -446,6 +450,7 @@ def get_metadata(recipe, config) -> dict:
         return {
             "package": package_section,
             "build": build_section,
+            "requirements": requirements_section,
             "outputs": outputs,
             "test": test_section,
             "about": about_section,
