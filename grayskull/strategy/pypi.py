@@ -408,30 +408,28 @@ def get_metadata(recipe, config) -> dict:
     outputs = []
     if optional_requirements:
         if config.extras_require_split:
+            # First output is the package itself. Inherits all top-level
+            # recipe sections like 'requirements', 'build', 'test'.
+            outputs.append({"name": name})
+
+            # Other outputs are empty and only add extra dependencies. Does
+            # not inherit any top-level section.
             output_req_section = dict(requirements_section)
-            requirements_section = {
-                k: v for k, v in requirements_section.items() if k == "host"
-            }
-            outputs.append(
-                {
-                    "name": name,
-                    "requirements": dict(output_req_section),
-                }
-            )
             output_req_section["run"] = [
-                s for s in output_req_section["run"] if "python" in s
+                s for s in output_req_section.get("run", []) if "python" in s
             ]
             for option, req_list in optional_requirements.items():
                 req_section = dict(output_req_section)
-                req_section["run"] = list(req_section.get("run", list()))
+                req_section["run"] = list(req_section["run"])
                 req_section["run"].append(f"{name} =={{{{ version }}}}")
                 req_section["run"].extend(req_list)
-                outputs.append(
-                    {
-                        "name": f"{name}-{option}",
-                        "requirements": req_section,
-                    }
-                )
+                output = {
+                    "name": f"{name}-{option}",
+                    "requirements": req_section,
+                }
+                if test_section:
+                    output["test"] = test_section
+                outputs.append(output)
         else:
             # Sort options in terms of inclusion
             optional_requirements_items = list()
@@ -451,7 +449,7 @@ def get_metadata(recipe, config) -> dict:
                 requirements_section["run"] += [f"# Extra: {option}"] + req_list
 
     if outputs:
-        package_section = {"name": name + "-meta", "version": metadata["version"]}
+        package_section = {"name": name, "version": metadata["version"]}
         return {
             "package": package_section,
             "build": build_section,
@@ -503,6 +501,8 @@ def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]
         recipe["build"]["noarch"] = "python"
         if "outputs" in recipe:
             for output in recipe["outputs"]:
+                if output["name"].lower() == config.name.lower():
+                    continue  # inherits top-level sections
                 if "build" not in output:
                     output["build"] = dict()
                 output["build"]["noarch"] = "python"
