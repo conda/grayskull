@@ -418,7 +418,7 @@ def test_get_include_extra_requirements():
     for name, req_lst in extras.items():
         if name != "test":
             expected[f"dask-{name}"] = {
-                "dask =={{ version }}",
+                "{{ pin_subpackage('dask', exact=True) }}",
                 "python >=3.8",
                 *req_lst,
             }

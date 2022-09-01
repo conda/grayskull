@@ -421,7 +421,9 @@ def get_metadata(recipe, config) -> dict:
             for option, req_list in optional_requirements.items():
                 req_section = dict(output_req_section)
                 req_section["run"] = list(req_section["run"])
-                req_section["run"].append(f"{name} =={{{{ version }}}}")
+                req_section["run"].append(
+                    f"{{{{ pin_subpackage('{name}', exact=True) }}}}"
+                )
                 req_section["run"].extend(req_list)
                 output = {
                     "name": f"{name}-{option}",
