@@ -455,3 +455,7 @@ exceptiongroup:
   conda_forge: exceptiongroup
   import_name: exceptiongroup
   avoid_selector: true
+
+scikit-learn:
+  conda_forge: scikit-learn
+  import_name: sklearn
