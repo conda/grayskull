@@ -1,0 +1,106 @@
+[build-system]
+# Minimum requirements for the build system to execute.
+requires = [
+    "setuptools==59.2.0",
+    "wheel==0.37.0",
+    "Cython>=0.29.30,<3.0",
+]
+
+
+[tool.towncrier]
+    # Do no set this since it is hard to import numpy inside the source directory
+    # the name is hardcoded. Use "--version 1.18.0" to set the version
+    single_file = false
+    filename = "doc/source/release/{version}-notes.rst"
+    directory = "doc/release/upcoming_changes/"
+    issue_format = "`gh-{issue} <https://github.com/numpy/numpy/pull/{issue}>`__"
+    template = "doc/release/upcoming_changes/template.rst"
+    underlines = "~="
+    all_bullets = false
+
+
+    [[tool.towncrier.type]]
+        directory = "highlight"
+        name = "Highlights"
+        showcontent = true
+
+    [[tool.towncrier.type]]
+        directory = "new_function"
+        name = "New functions"
+        showcontent = true
+
+    [[tool.towncrier.type]]
+        directory = "deprecation"
+        name = "Deprecations"
+        showcontent = true
+
+    [[tool.towncrier.type]]
+        directory = "future"
+        name = "Future Changes"
+        showcontent = true
+
+    [[tool.towncrier.type]]
+        directory = "expired"
+        name = "Expired deprecations"
+        showcontent = true
+
+    [[tool.towncrier.type]]
+        directory = "compatibility"
+        name = "Compatibility notes"
+        showcontent = true
+
+    [[tool.towncrier.type]]
+        directory = "c_api"
+        name = "C API changes"
+        showcontent = true
+
+    [[tool.towncrier.type]]
+        directory = "new_feature"
+        name = "New Features"
+        showcontent = true
+
+    [[tool.towncrier.type]]
+        directory = "improvement"
+        name = "Improvements"
+        showcontent = true
+
+    [[tool.towncrier.type]]
+        directory = "performance"
+        name = "Performance improvements and changes"
+        showcontent = true
+
+    [[tool.towncrier.type]]
+        directory = "change"
+        name = "Changes"
+        showcontent = true
+
+
+[tool.cibuildwheel]
+skip = "cp36-* cp37-* pp37-* *-manylinux_i686 *_ppc64le *_s390x *-musllinux*"
+build-verbosity = "3"
+before-build = "bash {project}/tools/wheels/cibw_before_build.sh {project}"
+before-test = "pip install -r {project}/test_requirements.txt"
+test-command = "bash {project}/tools/wheels/cibw_test_command.sh {project}"
+
+[tool.cibuildwheel.linux]
+manylinux-x86_64-image = "manylinux2014"
+manylinux-aarch64-image = "manylinux2014"
+environment = { CFLAGS="-std=c99 -fno-strict-aliasing", LDFLAGS="-Wl,--strip-debug", OPENBLAS64_="/usr/local", NPY_USE_BLAS_ILP64="1", RUNNER_OS="Linux" }
+
+[tool.cibuildwheel.macos]
+# For universal2 wheels, we will need to fuse them manually
+# instead of going through cibuildwheel
+# This is because cibuildwheel tries to make a fat wheel
+# https://github.com/multi-build/multibuild/blame/devel/README.rst#L541-L565
+# for more info
+archs = "x86_64 arm64"
+test-skip = "*_arm64 *_universal2:arm64"
+# MACOS linker doesn't support stripping symbols
+environment = { CFLAGS="-std=c99 -fno-strict-aliasing", OPENBLAS64_="/usr/local", NPY_USE_BLAS_ILP64="1", CC="clang", CXX = "clang++" }
+
+[tool.cibuildwheel.windows]
+environment = { OPENBLAS64_="openblas", OPENBLAS="", NPY_USE_BLAS_ILP64="1", CFLAGS="", LDFLAGS="" }
+
+[[tool.cibuildwheel.overrides]]
+select = "*-win32"
+environment = { OPENBLAS64_="", OPENBLAS="openblas", NPY_USE_BLAS_ILP64="0", CFLAGS="-m32", LDFLAGS="-m32" }
