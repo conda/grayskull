@@ -154,6 +154,10 @@ google:
   conda_forge: googlesearch
   import_name: googlesearch
 
+google-cloud-bigquery:
+  conda_forge: google-cloud-bigquery-core
+  import_name: google.cloud.bigquery
+
 graphviz:
   import_name: graphviz
   conda_forge: python-graphviz
