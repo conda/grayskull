@@ -10,6 +10,6 @@ exclude .pre-commit-config.yaml
 exclude .flake8
 exclude .coveragerc
 exclude .isort.cfg
-exclude tests/
+prune tests/
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
