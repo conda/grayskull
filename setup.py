@@ -11,7 +11,7 @@ else:
 
 setup(
     name="grayskull",
-    packages=find_packages(),
+    packages=find_packages(exclude=("tests",)),
     entry_points={
         "console_scripts": [
             "grayskull = grayskull.__main__:main",
