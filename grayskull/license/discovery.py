@@ -270,7 +270,7 @@ def _get_api_github_url(github_url: str, version: Optional[str] = None) -> str:
 
 def search_license_folder(
     path: Union[str, Path], default: Optional[str] = None
-) -> Optional[ShortLicense]:
+) -> list[ShortLicense]:
     """Search for the license in the given folder
 
     :param path: Sdist folder
@@ -283,12 +283,11 @@ def search_license_folder(
     )
     all_licences = []
     for folder_path, dirnames, filenames in os.walk(str(path)):
-        if os.path.basename(folder_path).startswith("."):
-            continue
         dirnames[:] = [
             folder
             for folder in dirnames
             if folder not in ("doc", "theme", "themes", "docs")
+            and not folder.startswith(".")
         ]
         for one_file in filenames:
             if re_search.match(one_file):

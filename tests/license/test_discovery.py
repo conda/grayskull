@@ -124,6 +124,21 @@ def test_search_license_folder(pkg_pytest):
     assert license_folder.name == "MIT"
 
 
+def test_search_license_folder_hidden_folder(tmp_path, license_pytest_5_3_1):
+    d = tmp_path / "mypackage"
+    d.mkdir()
+    license_path = d / "LICENSE"
+    license_path.write_text(license_pytest_5_3_1)
+    # Following licences under hidden directory should be ignored
+    egg_info = d / ".eggs" / "setuptools_scm-7.0.5-py3.10.egg" / "EGG-INFO"
+    egg_info.mkdir(parents=True)
+    for lic in (d / ".eggs" / "LICENSE", egg_info / "LICENSE"):
+        lic.write_text(license_pytest_5_3_1)
+    all_licenses = search_license_folder(tmp_path)
+    assert len(all_licenses) == 1
+    assert all_licenses[0].path == str(license_path)
+
+
 @pytest.mark.xfail(
     reason="This test may fail because github has limitation regarding the"
     " number of requisitions we can do to their api."
