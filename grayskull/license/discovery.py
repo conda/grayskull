@@ -270,7 +270,7 @@ def _get_api_github_url(github_url: str, version: Optional[str] = None) -> str:
 
 def search_license_folder(
     path: Union[str, Path], default: Optional[str] = None
-) -> list[ShortLicense]:
+) -> List[ShortLicense]:
     """Search for the license in the given folder
 
     :param path: Sdist folder
