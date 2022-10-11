@@ -18,6 +18,7 @@ class Configuration:
             PyVer(3, 8),
             PyVer(3, 9),
             PyVer(3, 10),
+            PyVer(3, 11),
         ]
     )
     py_cf_supported: List[PyVer] = field(
@@ -27,6 +28,7 @@ class Configuration:
             PyVer(3, 8),
             PyVer(3, 9),
             PyVer(3, 10),
+            PyVer(3, 11),
         ]
     )
     is_strict_cf: bool = False

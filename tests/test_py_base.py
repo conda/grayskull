@@ -1,7 +1,9 @@
 from grayskull.__main__ import create_python_recipe
+from grayskull.config import Configuration
 from grayskull.strategy.py_base import (
     clean_deps_for_conda_forge,
     ensure_pep440,
+    generic_py_ver_to,
     update_requirements_with_pin,
 )
 from grayskull.utils import PyVer
@@ -42,3 +44,11 @@ def test_clean_deps_for_conda_forge_remove_py_selector():
     assert clean_deps_for_conda_forge(
         ["dulwich >=0.19.3  # [py>=35]"], PyVer(3, 6)
     ) == ["dulwich >=0.19.3"]
+
+
+def test_python_requires_upper_bound():
+    py_ver = generic_py_ver_to(
+        {"requires_python": ">=3.7,<=3.10"},
+        Configuration(name="algviz", is_strict_cf=False),
+    )
+    assert py_ver == ">=3.7,<3.11"

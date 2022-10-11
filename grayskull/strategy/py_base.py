@@ -143,11 +143,12 @@ def get_name_version_from_requires_dist(string_parse: str) -> Tuple[str, str]:
 
 
 def generic_py_ver_to(
-    metadata: dict, config, is_selector: bool = False
+    metadata: dict, config: Configuration, is_selector: bool = False
 ) -> Optional[str]:  # sourcery no-metrics
     """Generic function which abstract the parse of the requires_python
     present in the PyPi metadata. Basically it can generate the selectors
     for Python or the constrained version if it is a `noarch: python` python package"""
+    # TODO: Refactor the entire function to use LooseVersion instead of custom PyVer
     if not metadata.get("requires_python"):
         return None
     req_python = re.findall(
@@ -158,7 +159,9 @@ def generic_py_ver_to(
         return None
 
     py_ver_enabled = config.get_py_version_available(req_python)
-    small_py3_version = config.get_oldest_py3_version(list(py_ver_enabled.keys()))
+    small_py3_version = config.get_oldest_py3_version(
+        [k for k, v in py_ver_enabled.items() if v]
+    )
     all_py = list(py_ver_enabled.values())
     if all(all_py):
         return None
