@@ -148,6 +148,7 @@ def generic_py_ver_to(
     """Generic function which abstract the parse of the requires_python
     present in the PyPi metadata. Basically it can generate the selectors
     for Python or the constrained version if it is a `noarch: python` python package"""
+    # TODO: Refactor the entire function to use LooseVersion instead of custom PyVer
     if not metadata.get("requires_python"):
         return None
     req_python = re.findall(
@@ -180,13 +181,7 @@ def generic_py_ver_to(
                 minor = f"{py_ver.minor:02d}" if py_ver.major >= 4 else py_ver.minor
                 return f"# [py<{py_ver.major}{minor}]"
             else:
-                result = f">={py_ver.major}.{py_ver.minor}"
-                if len(req_python) > 1:
-                    return (
-                        f"{result},"
-                        f"{''.join(req_python[-1][:2])}.{''.join(req_python[-1][2:])}"
-                    )
-                return result
+                return f">={py_ver.major}.{py_ver.minor}"
         elif any(all_py[pos:]) is False:
             if is_selector:
                 py2k = ""

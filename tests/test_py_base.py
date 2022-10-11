@@ -49,6 +49,6 @@ def test_clean_deps_for_conda_forge_remove_py_selector():
 def test_python_requires_upper_bound():
     py_ver = generic_py_ver_to(
         {"requires_python": ">=3.7,<=3.10"},
-        Configuration(name="algviz", is_strict_cf=True),
+        Configuration(name="algviz", is_strict_cf=False),
     )
-    assert py_ver == ">=3.7,<=3.10"
+    assert py_ver == ">=3.7,<3.11"
