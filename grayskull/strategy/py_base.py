@@ -143,7 +143,7 @@ def get_name_version_from_requires_dist(string_parse: str) -> Tuple[str, str]:
 
 
 def generic_py_ver_to(
-    metadata: dict, config, is_selector: bool = False
+    metadata: dict, config: Configuration, is_selector: bool = False
 ) -> Optional[str]:  # sourcery no-metrics
     """Generic function which abstract the parse of the requires_python
     present in the PyPi metadata. Basically it can generate the selectors
@@ -158,7 +158,9 @@ def generic_py_ver_to(
         return None
 
     py_ver_enabled = config.get_py_version_available(req_python)
-    small_py3_version = config.get_oldest_py3_version(list(py_ver_enabled.keys()))
+    small_py3_version = config.get_oldest_py3_version(
+        [k for k, v in py_ver_enabled.items() if v]
+    )
     all_py = list(py_ver_enabled.values())
     if all(all_py):
         return None
@@ -178,7 +180,13 @@ def generic_py_ver_to(
                 minor = f"{py_ver.minor:02d}" if py_ver.major >= 4 else py_ver.minor
                 return f"# [py<{py_ver.major}{minor}]"
             else:
-                return f">={py_ver.major}.{py_ver.minor}"
+                result = f">={py_ver.major}.{py_ver.minor}"
+                if len(req_python) > 1:
+                    return (
+                        f"{result},"
+                        f"{''.join(req_python[-1][:2])}.{''.join(req_python[-1][2:])}"
+                    )
+                return result
         elif any(all_py[pos:]) is False:
             if is_selector:
                 py2k = ""
