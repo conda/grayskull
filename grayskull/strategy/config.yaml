@@ -1,3 +1,7 @@
+art:
+  conda_forge: ascii-art
+  import_name: art
+
 Boruta:
   conda_forge: boruta_py
   import_name: boruta
