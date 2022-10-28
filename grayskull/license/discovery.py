@@ -9,7 +9,7 @@ from operator import itemgetter
 from pathlib import Path
 from subprocess import check_output
 from tempfile import mkdtemp
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Union
 
 import requests
 from colorama import Fore
@@ -183,6 +183,7 @@ def search_license_file(
     git_url: Optional[str] = None,
     version: Optional[str] = None,
     license_name_metadata: Optional[str] = None,
+    folders_exclude_search: Tuple[str] = tuple(),
 ) -> List[ShortLicense]:
     """Search for the license file. First it will try to find it in the given
     folder, after that it will search on the github api and for the last it will
@@ -197,7 +198,9 @@ def search_license_file(
     if license_name_metadata:
         license_name_metadata = get_short_license_id(license_name_metadata)
 
-    all_license_sdist = search_license_folder(folder_path, license_name_metadata)
+    all_license_sdist = search_license_folder(
+        folder_path, license_name_metadata, folders_exclude_search
+    )
     for license_sdist in all_license_sdist:
         license_sdist.is_packaged = True
         license_sdist.path = os.path.relpath(license_sdist.path, folder_path)
@@ -216,7 +219,9 @@ def search_license_file(
     if github_license:
         return [github_license]
 
-    repo_license = search_license_repo(git_url, version, license_name_metadata)
+    repo_license = search_license_repo(
+        git_url, version, license_name_metadata, folders_exclude_search
+    )
     if repo_license:
         return repo_license
     return [ShortLicense(license_name_metadata, None, False)]
@@ -269,7 +274,9 @@ def _get_api_github_url(github_url: str, version: Optional[str] = None) -> str:
 
 
 def search_license_folder(
-    path: Union[str, Path], default: Optional[str] = None
+    path: Union[str, Path],
+    default: Optional[str] = None,
+    folders_exclude_search: Tuple[str] = tuple(),
 ) -> List[ShortLicense]:
     """Search for the license in the given folder
 
@@ -277,6 +284,9 @@ def search_license_folder(
     :param default: Default value for the license type
     :return: License information
     """
+    folders_exclude_search = set(
+        list(folders_exclude_search) + ["doc", "theme", "themes", "docs"]
+    )
     re_search = re.compile(
         r"(\bcopyright\b|\bnotice\b|\blicense[s]*\b|\bcopying\b|\bcopyleft\b)",
         re.IGNORECASE,
@@ -286,8 +296,7 @@ def search_license_folder(
         dirnames[:] = [
             folder
             for folder in dirnames
-            if folder not in ("doc", "theme", "themes", "docs")
-            and not folder.startswith(".")
+            if folder not in folders_exclude_search and not folder.startswith(".")
         ]
         for one_file in filenames:
             if re_search.match(one_file):
@@ -299,13 +308,17 @@ def search_license_folder(
 
 
 def search_license_repo(
-    git_url: str, version: Optional[str], default: Optional[str] = None
+    git_url: str,
+    version: Optional[str],
+    default: Optional[str] = None,
+    folders_exclude_search: Tuple[str] = tuple(),
 ) -> Optional[List[ShortLicense]]:
     """Search for the license file in the given github repository
 
     :param git_url: GitHub URL
     :param version: Package version
     :param default: Default value for the license type
+    :param folders_exclude_search: Folders names to be excluded from search for licences
     :return: License information
     """
     git_url = re.sub(r"/$", ".git", git_url)
@@ -320,9 +333,13 @@ def search_license_repo(
             f" url: {git_url}, version: {version}. Exception: {err}"
         )
         if not version.startswith("v"):
-            return search_license_repo(git_url, f"v{version}", default)
+            return search_license_repo(
+                git_url, f"v{version}", default, folders_exclude_search
+            )
         return None
-    return search_license_folder(str(tmp_dir), default)
+    return search_license_folder(
+        str(tmp_dir), default, folders_exclude_search=folders_exclude_search
+    )
 
 
 def _get_git_cmd(git_url: str, version: str, dest) -> List[str]:

@@ -47,6 +47,7 @@ class Configuration:
     extras_require_exclude: Tuple[str] = tuple()
     extras_require_all: bool = False
     extras_require_split: bool = False
+    licence_exclude_folders: Tuple[str] = tuple()
 
     def get_oldest_py3_version(self, list_py_ver: List[PyVer]) -> PyVer:
         list_py_ver = sorted(list_py_ver)

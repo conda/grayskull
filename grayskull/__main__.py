@@ -168,6 +168,13 @@ def main(args=None):
         help="Create a separate conda package for each extra requirements."
         " Ignored when no extra requirements are selected.",
     )
+    pypi_cmds.add_argument(
+        "--licence-exclude-folders",
+        default=tuple(),
+        nargs="*",
+        dest="licence_exclude_folders",
+        help="Exclude folders when searching for licence.",
+    )
 
     args = parser.parse_args(args)
 
@@ -225,6 +232,7 @@ def generate_recipes_from_list(list_pkgs, args):
                 extras_require_exclude=tuple(args.extras_require_exclude),
                 extras_require_all=args.extras_require_all,
                 extras_require_split=args.extras_require_split,
+                licence_exclude_folders=args.licence_exclude_folders,
             )
         except requests.exceptions.HTTPError as err:
             print_msg(f"{Fore.RED}Package seems to be missing.\nException: {err}\n\n")
