@@ -85,6 +85,7 @@ def test_change_pypi_url(mocker):
         extras_require_exclude=tuple(),
         extras_require_all=False,
         extras_require_split=False,
+        licence_exclude_folders=tuple(),
     )
 
 
