@@ -139,6 +139,24 @@ def test_search_license_folder_hidden_folder(tmp_path, license_pytest_5_3_1):
     assert all_licenses[0].path == str(license_path)
 
 
+def test_search_licence_exclude_folders(tmp_path, license_pytest_5_3_1):
+    folder = tmp_path / "location-exclude-folder"
+    folder.mkdir()
+    folder_exclude = folder / "folder_exclude"
+    folder_exclude.mkdir()
+    (folder_exclude / "LICENSE").write_text("LICENCE TO EXCLUDE")
+    folder_search = folder / "folder_search"
+    folder_search.mkdir()
+    (folder_search / "LICENSE").write_text("LICENCE TO BE FOUND")
+    all_licences = search_license_folder(str(folder))
+    assert len(all_licences) == 2
+    all_licences = search_license_folder(
+        str(folder), folders_exclude_search=("folder_exclude",)
+    )
+    assert len(all_licences) == 1
+    assert all_licences[0].path == str(folder_search / "LICENSE")
+
+
 @pytest.mark.xfail(
     reason="This test may fail because github has limitation regarding the"
     " number of requisitions we can do to their api."
