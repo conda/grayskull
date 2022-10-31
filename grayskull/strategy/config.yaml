@@ -2,6 +2,10 @@ art:
   conda_forge: ascii-art
   import_name: art
 
+bilby-pipe:
+  conda_forge: bilby_pipe
+  import_name: bilby_pipe
+
 Boruta:
   conda_forge: boruta_py
   import_name: boruta
@@ -282,6 +286,10 @@ ortools:
   conda_forge: ortools-python
   import_name: ortools
 
+p-astro:
+  conda_forge: p_astro
+  import_name: ligo.p_astro
+
 pandas_flavor:
   conda_forge: pandas-flavor
   import_name: pandas_flavor
@@ -393,6 +401,10 @@ sounddevice:
 spherical-functions:
   conda_forge: spherical_functions
   import_name: spherical_functions
+
+sphinx-rtd-theme:
+  conda_forge: sphinx_rtd_theme
+  import_name: sphinx_rtd_theme
 
 stjudecloud-oliver:
   conda_forge: oliver
