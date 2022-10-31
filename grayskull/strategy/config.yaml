@@ -479,3 +479,8 @@ exceptiongroup:
 scikit-learn:
   conda_forge: scikit-learn
   import_name: sklearn
+
+importlib-metadata:
+  conda-forge: importlib-metadata
+  import_name: importlib-metadata
+  avoid_selector: true
