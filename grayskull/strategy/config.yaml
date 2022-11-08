@@ -485,6 +485,6 @@ importlib-metadata:
   import_name: importlib-metadata
   avoid_selector: true
 
-jupyter-client
+jupyter-client:
   conda-forge: jupyter_client
   import_name: jupyter_client
