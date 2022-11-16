@@ -363,7 +363,7 @@ def get_metadata(recipe, config) -> dict:
         print_msg(f"License file: {Fore.LIGHTMAGENTA_EX}{license_file}")
     if all_license_name:
         all_license_name = list(filter(None, all_license_name))
-        license_name = " & ".join(all_license_name)
+        license_name = " AND ".join(all_license_name)
         if len(all_license_name) > 1:
             print_msg(
                 f"{Fore.RED}Multiple licenses detected!"
