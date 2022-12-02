@@ -480,7 +480,7 @@ scikit-learn:
   conda_forge: scikit-learn
   import_name: sklearn
 
-importlib-metadata:
+importlib_metadata:
   conda_forge: importlib-metadata
   import_name: importlib-metadata
   avoid_selector: true
