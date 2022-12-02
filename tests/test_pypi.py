@@ -1238,7 +1238,7 @@ def test_notice_file_different_licence():
             "apache-airflow-providers-databricks", version="3.1.0"
         )
     assert set(recipe["about"]["license_file"]) == {"NOTICE", "LICENSE"}
-    assert recipe["about"]["license"] in ["MIT & Apache-2.0", "Apache-2.0 & MIT"]
+    assert recipe["about"]["license"] in ["MIT AND Apache-2.0", "Apache-2.0 AND MIT"]
 
 
 def test_console_script_toml_format():

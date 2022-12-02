@@ -480,11 +480,11 @@ scikit-learn:
   conda_forge: scikit-learn
   import_name: sklearn
 
-importlib-metadata:
-  conda-forge: importlib-metadata
+importlib_metadata:
+  conda_forge: importlib-metadata
   import_name: importlib-metadata
   avoid_selector: true
 
 jupyter-client:
-  conda-forge: jupyter_client
+  conda_forge: jupyter_client
   import_name: jupyter_client
