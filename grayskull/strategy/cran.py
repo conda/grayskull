@@ -5,22 +5,19 @@ import sys
 import tarfile
 import zipfile
 from os.path import basename
-from pathlib import Path
 from tempfile import mkdtemp
-from typing import List
 
 import requests
 import yaml
 from souschef.jinja_expression import set_global_jinja_var
-from souschef.recipe import Recipe
 from yaml import SafeDumper
 
+from grayskull.cli.stdout import print_msg
 from grayskull.config import Configuration
 from grayskull.strategy.abstract_strategy import AbstractStrategy
 from grayskull.utils import sha256_checksum
 
 log = logging.getLogger(__name__)
-CRAN_CONFIG = Path(os.path.dirname(__file__)) / "config.yaml"
 
 ALL_SECTIONS = (
     "package",
@@ -34,31 +31,41 @@ ALL_SECTIONS = (
     "extra",
 )
 
-cran_url = "https://cran.r-project.org"
-
 
 class CranStrategy(AbstractStrategy):
+    CRAN_URL = "https://cran.r-project.org"
+    SET_POSIX = "{{% set posix = 'm2-' if win else '' %}}"
+    SET_NATIVE = "{{% set native = 'm2w64-' if win else '' %}}"
+    POSIX_NATIVE = f"\n{SET_POSIX}\n{SET_NATIVE}"
+
     @staticmethod
     def fetch_data(recipe, config, sections=None):
-        return update_recipe(recipe, config, sections or ALL_SECTIONS)
+        metadata, r_recipe_end_comment = get_cran_metadata(
+            config, CranStrategy.CRAN_URL
+        )
+        recipe.add_section(metadata)
+        set_global_jinja_var(recipe, "version", metadata["package"]["version"])
+        config.version = metadata["package"]["version"]
+        recipe["package"]["version"] = "<{ version }}"
+        recipe["test"]["commands"] = [
+            f"$R -e \"library('{config.name}')\"  # [not win]",
+            f'"%R%" -e "library(\'{config.name}\')"  # [win]',
+        ]
+        recipe.inline_comment = CranStrategy.POSIX_NATIVE
+        recipe.inline_comment = r_recipe_end_comment
+        return recipe
 
 
-# Convert the data extracted from the description file into a dictionary
 def dict_from_cran_lines(lines):
+    """Convert the data extracted from the description file into a dictionary"""
     d = {}
     for line in lines:
         if not line:
             continue
         try:
-            if ": " in line:
-                (k, v) = line.split(": ", 1)
-            else:
-                # Sometimes fields are included but left blank, e.g.:
-                #   - Enhances in data.tree
-                #   - Suggests in corpcor
-                (k, v) = line.split(":", 1)
+            (k, v) = line.split(": ", 1) if ": " in line else line.split(":", 1)
         except ValueError:
-            sys.exit("Error: Could not parse metadata (%s)" % line)
+            sys.exit(f"Error: Could not parse metadata ({line})")
         d[k] = v
     d["orig_lines"] = lines
     return d
@@ -95,31 +102,28 @@ def remove_package_line_continuations(chunk):
 
     for (i, line) in enumerate(chunk):
         if line.startswith(continuation):
-            line = " " + line.lstrip()
+            line = f" {line.lstrip()}"
             if accumulating_continuations:
                 assert had_continuation
                 continued_line += line
-                chunk[i] = None
             else:
                 accumulating_continuations = True
                 continued_ix = i - 1
                 continued_line = chunk[continued_ix] + line
                 had_continuation = True
-                chunk[i] = None
-        else:
-            if accumulating_continuations:
-                assert had_continuation
-                chunk[continued_ix] = continued_line
-                accumulating_continuations = False
-                continued_line = None
-                continued_ix = None
+            chunk[i] = None
+        elif accumulating_continuations:
+            assert had_continuation
+            chunk[continued_ix] = continued_line
+            accumulating_continuations = False
+            continued_line = None
+            continued_ix = None
 
     if had_continuation:
         # Remove the None(s).
         chunk = [c for c in chunk if c]
 
     chunk.append("")
-
     return chunk
 
 
@@ -141,23 +145,25 @@ def yaml_quote_string(string):
     )
 
 
-# Due to how the metadata is rendered there can be
-# significant areas of repeated newlines.
-# This collapses them and also strips any trailing spaces.
 def clear_whitespace(string):
+    """Due to how the metadata is rendered there can be
+    significant areas of repeated newlines.
+    This collapses them and also strips any trailing spaces.
+    """
     lines = []
     last_line = ""
     for line in string.splitlines():
         line = line.rstrip()
-        if not (line == "" and last_line == ""):
+        if line or last_line:
             lines.append(line)
         last_line = line
     return "\n".join(lines)
 
 
-# Reads the description file contents and formats them by
-# running other functions on the content and returns the dictionary.
 def read_description_contents(fp):
+    """Reads the description file contents and formats them by
+    running other functions on the content and returns the dictionary.
+    """
     bytes_ = fp.read()
     text = bytes_.decode("utf-8", errors="replace")
     text = clear_whitespace(text)
@@ -165,10 +171,9 @@ def read_description_contents(fp):
     return dict_from_cran_lines(lines)
 
 
-# Extracting the DESCRIPTION file from the downloaded package.
-def get_archive_metadata(path, verbose=True):
-    if verbose:
-        print("Reading package metadata from %s" % path)
+def get_archive_metadata(path):
+    """Extracting the DESCRIPTION file from the downloaded package."""
+    print_msg(f"Reading package metadata from {path}")
     if basename(path) == "DESCRIPTION":
         with open(path, "rb") as fp:
             return read_description_contents(fp)
@@ -185,19 +190,18 @@ def get_archive_metadata(path, verbose=True):
                     fp = zf.open(member, "r")
                     return read_description_contents(fp)
     else:
-        sys.exit("Cannot extract a DESCRIPTION from file %s" % path)
-    sys.exit("%s does not seem to be a CRAN package (no DESCRIPTION) file" % path)
+        sys.exit(f"Cannot extract a DESCRIPTION from file {path}")
+    sys.exit(f"{path} does not seem to be a CRAN package (no DESCRIPTION) file")
 
 
-def get_cran_archive_versions(cran_url, session, package, verbose=True):
-    if verbose:
-        print(f"Fetching archived versions for package {package} from {cran_url}")
-    r = session.get(cran_url + "/src/contrib/Archive/" + package + "/")
+def get_cran_archive_versions(cran_url, session, package):
+    print_msg(f"Fetching archived versions for package {package} from {cran_url}")
+    r = session.get(f"{cran_url}/src/contrib/Archive/{package}/")
     try:
         r.raise_for_status()
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 404:
-            print("No archive directory for package %s" % package)
+            print_msg(f"No archive directory for package {package}")
             return []
         raise
     versions = []
@@ -210,18 +214,18 @@ def get_cran_archive_versions(cran_url, session, package, verbose=True):
     return [v for dt, v in sorted(versions, reverse=True)]
 
 
-# Fetch the entire CRAN index and store it.
-def get_cran_index(cran_url, verbose=True):
-    if verbose:
-        print("Fetching main index from %s" % cran_url)
-    r = requests.get(cran_url + "/src/contrib/")
+def get_cran_index(cran_url):
+    """Fetch the entire CRAN index and store it."""
+    print_msg(f"Fetching main index from {cran_url}")
+    r = requests.get(f"{cran_url}/src/contrib/")
     r.raise_for_status()
+
     records = {}
     for p in re.findall(r'<td><a href="([^"]+)">\1</a></td>', r.text):
         if p.endswith(".tar.gz") and "_" in p:
             name, version = p.rsplit(".", 2)[0].split("_", 1)
             records[name.lower()] = (name, version)
-    r = requests.get(cran_url + "/src/contrib/Archive/")
+    r = requests.get(f"{cran_url}/src/contrib/Archive/")
     r.raise_for_status()
     for p in re.findall(r'<td><a href="([^"]+)/">\1/</a></td>', r.text):
         if re.match(r"^[A-Za-z]", p):
@@ -230,31 +234,30 @@ def get_cran_index(cran_url, verbose=True):
 
 
 def get_available_binaries(cran_url, details):
-    url = cran_url + "/" + details["dir"]
+    url = f"{cran_url}/" + details["dir"]
     response = requests.get(url)
     response.raise_for_status()
     ext = details["ext"]
     for filename in re.findall(r'<a href="([^"]*)">\1</a>', response.text):
         if filename.endswith(ext):
-            pkg, _, ver = filename.rpartition("_")
-            ver, _, _ = ver.rpartition(ext)
+            pkg, *_, ver = filename.rpartition("_")
+            ver, *_ = ver.rpartition(ext)
             details["binaries"].setdefault(pkg, []).append((ver, url + filename))
 
 
-# Look for the package in the stored CRAN index.
-def get_cran_metadata(recipe, config: Configuration) -> dict:
+def get_cran_metadata(config: Configuration, cran_url: str) -> tuple[dict, str]:
     """Method responsible for getting CRAN metadata.
+    Look for the package in the stored CRAN index.
     :return: CRAN metadata"""
-    # get_archive_metadata(path, verbose=True)
     cran_index = get_cran_index(cran_url)
     if config.name.lower() not in cran_index:
-        sys.exit("Package %s not found" % config.name)
+        sys.exit(f"Package {config.name} not found")
     package, cran_version = cran_index[config.name.lower()]
-    print(package)
-    print(cran_version)
-    tarball_name = package + "_" + cran_version + ".tar.gz"
-    download_url = cran_url + "/src/contrib/" + tarball_name
-    print(download_url)
+    print_msg(package)
+    print_msg(cran_version)
+    tarball_name = f"{package}_{cran_version}.tar.gz"
+    download_url = f"{cran_url}/src/contrib/{tarball_name}"
+    print_msg(download_url)
     response = requests.get(download_url)
     response.raise_for_status()
     download_file = os.path.join(
@@ -263,11 +266,11 @@ def get_cran_metadata(recipe, config: Configuration) -> dict:
     with open(download_file, "wb") as f:
         f.write(response.content)
     metadata = get_archive_metadata(download_file)
-    global r_recipe_end_comment
     r_recipe_end_comment = "\n".join(
-        ["# %s" % line for line in metadata["orig_lines"] if line]
+        [f"# {line}" for line in metadata["orig_lines"] if line]
     )
-    print(r_recipe_end_comment)
+
+    print_msg(r_recipe_end_comment)
 
     imports = []
     # Extract 'imports' from metadata.
@@ -284,12 +287,12 @@ def get_cran_metadata(recipe, config: Configuration) -> dict:
             imports.append(f"r-{r[0].strip()} {constrain.strip()}")
 
     # Every CRAN package will always depend on the R base package.
-    # Hence the 'r-base' package is always present
+    # Hence, the 'r-base' package is always present
     # in the host and run requirements.
     imports.append("r-base")
     imports.sort()  # this is not a requirement in conda but good for readability
 
-    d = {
+    return {
         "package": {
             "name": "r-" + metadata.get("Package"),
             "version": metadata.get("Version"),
@@ -318,26 +321,4 @@ def get_cran_metadata(recipe, config: Configuration) -> dict:
             "dev_url": metadata.get("dev_url"),
             "license": metadata.get("License"),
         },
-    }
-    return d
-
-
-# add posix and native at the top
-set_posix = "{{% set posix = 'm2-' if win else '' %}}"
-set_native = "{{% set native = 'm2w64-' if win else '' %}}"
-posix_native = "\n" + set_posix + "\n" + set_native
-
-
-def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]):
-    """Update one specific section."""
-    metadata = get_cran_metadata(recipe, config)
-    recipe.add_section(metadata)
-    set_global_jinja_var(recipe, "version", metadata["package"]["version"])
-    config.version = metadata["package"]["version"]
-    recipe["package"]["version"] = "<{ version }}"
-    recipe["test"]["commands"] = [
-        f"$R -e \"library('{config.name}')\"  # [not win]",
-        f'"%R%" -e "library(\'{config.name}\')"  # [win]',
-    ]
-    recipe.inline_comment = posix_native
-    recipe.inline_comment = r_recipe_end_comment
+    }, r_recipe_end_comment

@@ -200,21 +200,21 @@ def main(args=None):
         dest="extras_require_test",
         help="Extra requirements to run tests.",
     )
-    pypi_cmds.add_argument(
+    pypi_parser.add_argument(
         "--tag",
         "-t",
         default=None,
         dest="github_release_tag",
         help="If tag is specified, grayskull will build from release tag",
     )
-    pypi_cmds.add_argument(
+    pypi_parser.add_argument(
         "--extras-require-all",
         default=False,
         action="store_true",
         dest="extras_require_all",
         help="Include all extra requirements.",
     )
-    pypi_cmds.add_argument(
+    pypi_parser.add_argument(
         "--extras-require-include",
         default=tuple(),
         type=str,
@@ -222,7 +222,7 @@ def main(args=None):
         dest="extras_require_include",
         help="Include these extra requirements.",
     )
-    pypi_cmds.add_argument(
+    pypi_parser.add_argument(
         "--extras-require-exclude",
         default=tuple(),
         type=str,
@@ -230,7 +230,7 @@ def main(args=None):
         dest="extras_require_exclude",
         help="Exclude these extra requirements (overrides include).",
     )
-    pypi_cmds.add_argument(
+    pypi_parser.add_argument(
         "--extras-require-split",
         default=False,
         action="store_true",
@@ -238,7 +238,7 @@ def main(args=None):
         help="Create a separate conda package for each extra requirements."
         " Ignored when no extra requirements are selected.",
     )
-    pypi_cmds.add_argument(
+    pypi_parser.add_argument(
         "--licence-exclude-folders",
         default=tuple(),
         nargs="*",
@@ -288,8 +288,7 @@ def generate_recipes_from_list(list_pkgs, args):
             f"#### Initializing recipe for "
             f"{Fore.BLUE}{pkg_name}{pypi_label} {Fore.GREEN}####\n"
         )
-        is_pkg_file = Path(pkg_name).is_file() and (not from_local_sdist)
-        if is_pkg_file:
+        if Path(pkg_name).is_file() and (not from_local_sdist):
             args.output = pkg_name
         try:
             recipe, config = create_python_recipe(
@@ -335,17 +334,16 @@ def create_python_recipe(pkg_name, sections_populate=None, **kwargs):
 
 
 def generate_r_recipes_from_list(list_pkgs, args):
+    cran_label = " (cran)"
     for pkg_name in list_pkgs:
         logging.debug(f"Starting grayskull for pkg: {pkg_name}")
         from_local_sdist = origin_is_local_sdist(pkg_name)
-        cran_label = " (cran)"
         print_msg(
             f"{Fore.GREEN}\n\n"
             f"#### Initializing recipe for "
             f"{Fore.BLUE}{pkg_name}{cran_label} {Fore.GREEN}####\n"
         )
-        is_pkg_file = Path(pkg_name).is_file() and (not from_local_sdist)
-        if is_pkg_file:
+        if Path(pkg_name).is_file() and (not from_local_sdist):
             args.output = pkg_name
         try:
             recipe, config = create_r_recipe(
@@ -366,7 +364,6 @@ def generate_r_recipes_from_list(list_pkgs, args):
             f"\n{Fore.GREEN}#### Recipe generated on "
             f"{os.path.realpath(args.output)} for {pkg_name} ####\n\n"
         )
-
 
 
 def create_r_recipe(pkg_name, sections_populate=None, **kwargs):

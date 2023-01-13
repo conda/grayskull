@@ -127,7 +127,7 @@ def test_part_reload_recipe(tmpdir, index, name, version):
     folder = tmpdir.mkdir("reload_recipe")
     recipe_path = folder / "recipe.yaml"
     recipe.save(str(recipe_path))
-    cli.main(["pypi", str(recipe_path), "--sections", "requirements"])
+    cli.main([index, str(recipe_path), "--sections", "requirements"])
 
     recipe = Recipe(load_file=str(recipe_path))
     assert host == [str(v) for v in recipe["requirements"]["host"] if v]
