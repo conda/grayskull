@@ -1,0 +1,490 @@
+art:
+  conda_forge: ascii-art
+  import_name: art
+
+bilby-pipe:
+  conda_forge: bilby_pipe
+  import_name: bilby_pipe
+
+Boruta:
+  conda_forge: boruta_py
+  import_name: boruta
+
+Flask-Cors:
+  conda_forge: flask_cors
+  import_name: flask_cors
+
+Flask-JSON:
+  conda_forge: flask_json
+  import_name: flask_json
+
+SoundFile:
+  conda_forge: pysoundfile
+  import_name: soundfile
+
+aiohttp_cors:
+  conda_forge: aiohttp-cors
+  import_name: aiohttp_cors
+
+annoy:
+  conda_forge: python-annoy
+  import_name: annoy
+
+asana:
+  conda_forge: python-asana
+  import_name: asana
+
+backtrace:
+  conda_forge: python-backtrace
+  import_name: backtrace
+
+bash_completion:
+  conda_forge: py-bash-completion
+  import_name: bash_completion
+
+captest:
+  conda_forge: pvcaptest
+  import_name: captest
+
+cdo:
+  conda_forge: python-cdo
+  import_name: cdo
+
+click_config_file:
+  conda_forge: click-config-file
+  import_name: click_config_file
+
+cockroachdb:
+  conda_forge: cockroachdb-python
+  import_name: cockroachdb
+
+conda_lock:
+  conda_forge: conda-lock
+  import_name: conda_lock
+
+conda_mirror:
+  conda_forge: conda-mirror
+  import_name: conda_mirror
+
+confluent-kafka:
+  conda_forge: python-confluent-kafka
+  import_name: confluent_kafka
+
+coreapi:
+  conda_forge: python-coreapi
+  import_name: coreapi
+
+coreschema:
+  conda_forge: python-coreschema
+  import_name: coreschema
+
+cryptography_vectors:
+  conda_forge: cryptography-vectors
+  import_name: cryptography_vectors
+
+cufflinks:
+  conda_forge: python-cufflinks
+  import_name: cufflinks
+
+dask:
+  conda_forge: dask-core
+  import_name: dask
+
+datadotworld:
+  conda_forge: datadotworld-py
+  import_name: datadotworld
+
+datalad_container:
+  conda_forge: datalad-container
+  import_name: datalad_container
+
+delegator.py:
+  conda_forge: delegator
+  import_name: delegator
+
+dials_data:
+  conda_forge: dials-data
+  import_name: dials_data
+
+docker:
+  import_name: docker
+  conda_forge: docker-py
+
+dye_score:
+  conda_forge: dye-score
+  import_name: dye_score
+
+empyrical_dist:
+  conda_forge: empyrical-dist
+  import_name: empyrical_dist
+
+esprima:
+  conda_forge: esprima-python
+  import_name: esprima
+
+et_xmlfile:
+  conda_forge: et-xmlfile
+  import_name: et_xmlfile
+
+evalml:
+  conda_forge: evaml-core
+  import_name: evalml
+
+extract-msg:
+  conda_forge: msg-extractor
+  import_name: extract_msg
+
+fastjsonschema:
+  conda_forge: python-fastjsonschema
+  import_name: fastjsonschema
+
+flair:
+  conda_forge: python-flair
+  import_name: flair
+
+flake8_nb:
+  conda_forge: flake8-nb
+  import_name: flake8_nb
+
+flatbuffers:
+  conda_forge: python-flatbuffers
+  import_name: flatbuffers
+
+flex:
+  conda_forge: flex-swagger
+  import_name: flex
+
+gnupg:
+  conda_forge: gnupg-py
+  import_name: gnupg
+
+google:
+  conda_forge: googlesearch
+  import_name: googlesearch
+
+google-cloud-bigquery:
+  conda_forge: google-cloud-bigquery-core
+  import_name: google.cloud.bigquery
+
+graphviz:
+  import_name: graphviz
+  conda_forge: python-graphviz
+
+h2o:
+  conda_forge: h2o-py
+  import_name: h2o
+
+hdfs:
+  conda_forge: python-hdfs
+  import_name: hdfs
+
+hjson:
+  conda_forge: hjson-py
+  import_name: hjson
+
+htcondor:
+  conda_forge: python-htcondor
+  import_name: htcondor
+
+iam_units:
+  conda_forge: iam-units
+  import_name: iam_units
+
+ib_insync:
+  conda_forge: ib-insync
+  import_name: ib_insync
+
+installer:
+  conda_forge: python-installer
+  import_name: installer
+
+intake-astro:
+  conda_forge: intake-accumulo
+  import_name: intake_astro
+
+intake_geopandas:
+  conda_forge: intake-geopandas
+  import_name: intake_geopandas
+
+ioos_tools:
+  conda_forge: ioos-tools
+  import_name: ioos_tools
+
+jupyter_jaeger:
+  conda_forge: jupyter-jaeger
+  import_name: jupyter_jaeger
+
+jupyterlab_git:
+  conda_forge: jupyterlab-git
+  import_name: jupyterlab_git
+
+jupyterlab_latex:
+  conda_forge: jupyterlab-latex
+  import_name: jupyterlab_latex
+
+kubernetes:
+  conda_forge: python-kubernetes
+  import_name: kubernetes
+
+libaio:
+  conda_forge: python-libaio
+  import_name: libaio
+
+matplotlib:
+  import_name: matplotlib
+  conda_forge: matplotlib-base
+
+md_toc:
+  conda_forge: md-toc
+  import_name: md_toc
+
+message_ix:
+  conda_forge: message-ix
+  import_name: message_ix
+
+msgpack:
+  conda_forge: msgpack-python
+  import_name: msgpack
+
+mss:
+  conda_forge: python-mss
+  import_name: mss
+
+nbconvert_utils:
+  conda_forge: nbconvert-utils
+  import_name: nbconvert_utils
+
+ndarray_listener:
+  conda_forge: ndarray-listener
+  import_name: ndarray_listener
+
+neo:
+  conda_forge: python-neo
+  import_name: neo
+
+neo4j:
+  conda_forge: neo4j-python-driver
+  import_name: neo4j
+
+nest_asyncio:
+  conda_forge: nest-asyncio
+  import_name: nest_asyncio
+
+node-semver:
+  conda_forge: python-node-semver
+  import_name: semver
+
+nvidia-ml-py3:
+  conda_forge: nvidia-ml
+  import_name: pynvml
+
+opencv-python:
+  import_name: cv2
+  conda_forge: opencv
+
+ortools:
+  conda_forge: ortools-python
+  import_name: ortools
+
+p-astro:
+  conda_forge: p_astro
+  import_name: ligo.p_astro
+
+pandas_flavor:
+  conda_forge: pandas-flavor
+  import_name: pandas_flavor
+
+paragraph:
+  conda_forge: python-paragraph
+  import_name: paragraph
+
+prince:
+  conda_forge: prince-factor-analysis
+  import_name: prince
+
+pvlib:
+  conda_forge: pvlib-python
+  import_name: pvlib
+
+pyct:
+  conda_forge: pyct-core
+  import_name: pyct
+
+pyqt4:
+  import_name: pyqt4
+  conda_forge: pyqt
+  delimiter_min: "4.0.0"
+  delimiter_max: "5.0.0"
+
+pyqt5:
+  import_name: pyqt5
+  conda_forge: pyqt
+  delimiter_min: "5.0.0"
+  delimiter_max: "6.0.0"
+
+pytest_check_links:
+  conda_forge: pytest-check-links
+  import_name: pytest_check_links
+
+python-datamatrix:
+  conda_forge: datamatrix
+  import_name: datamatrix
+
+python-fileinspector:
+  conda_forge: fileinspector
+  import_name: fileinspector
+
+python-opencv:
+  import_name: cv2
+  conda_forge: opencv
+
+python-pseudorandom:
+  conda_forge: pseudorandom
+  import_name: pseudorandom
+
+python-pygaze:
+  conda_forge: pygaze
+  import_name: pygaze
+
+python-qdatamatrix:
+  conda_forge: qdatamatrix
+  import_name: qdatamatrix
+
+python-qnotifications:
+  conda_forge: qnotifications
+  import_name: QNotifications
+
+symengine:
+  conda_forge: python-symengine
+  import_name: symengine
+
+quantum-grove:
+  conda_forge: grove
+  import_name: grove
+
+radio_beam:
+  conda_forge: radio-beam
+  import_name: radio_beam
+
+redis:
+  conda_forge: redis-py
+  import_name: redis
+
+rocketpyalpha:
+  conda_forge: rocketpy
+  import_name: rocketpy
+
+sage_flatsurf:
+  conda_forge: sage-flatsurf
+  import_name: flatsurf
+
+sagemaker_inference:
+  conda_forge: sagemaker-inference-toolkit
+  import_name: sagemaker_inference
+
+sagemaker_mxnet_training:
+  conda_forge: sagemaker_mxnet_container
+  import_name: sagemaker_mxnet_container
+
+scikit-build:
+  conda_forge: scikit-build
+  import_name: skbuild
+
+setuptools_scm:
+  conda_forge: setuptools-scm
+  import_name: setuptools_scm
+
+sounddevice:
+  conda_forge: python-sounddevice
+  import_name: sounddevice
+
+spherical-functions:
+  conda_forge: spherical_functions
+  import_name: spherical_functions
+
+sphinx-rtd-theme:
+  conda_forge: sphinx_rtd_theme
+  import_name: sphinx_rtd_theme
+
+stjudecloud-oliver:
+  conda_forge: oliver
+  import_name: oliver
+
+tables:
+  import_name: pytables
+  conda_forge: pytables
+
+termstyle:
+  conda_forge: python-termstyle
+  import_name: termstyle
+
+torch:
+  conda_forge: pytorch
+  import_name: torch
+
+torch_geometric:
+  conda_forge: pytorch_geometric
+  import_name: torch_geometric
+
+trino:
+  conda_forge: trino-python-client
+  import_name: trino
+
+useDAVE:
+  conda_forge: dave
+  import_name: numpy
+
+vsts:
+  conda_forge: vsts-python-api
+  import_name: vsts
+
+xxhash:
+  import_name: xxhash
+  conda_forge: python-xxhash
+
+kaleido:
+  conda_forge: python-kaleido
+  import_name: kaleido
+
+dataclasses:
+  conda_forge: dataclasses
+  import_name: dataclasses
+  avoid_selector: true
+
+typing:
+  conda_forge: typing
+  import_name: typing
+  avoid_selector: true
+
+import_metadata:
+  conda_forge: import_metadata
+  import_name: import_metadata
+  avoid_selector: true
+
+enum34:
+  conda_forge: enum34
+  import_name: enum
+  avoid_selector: true
+
+pywin32:
+  conda_forge: pywin32-on-windows
+  import_name: pywin
+  avoid_selector: true
+
+exceptiongroup:
+  conda_forge: exceptiongroup
+  import_name: exceptiongroup
+  avoid_selector: true
+
+scikit-learn:
+  conda_forge: scikit-learn
+  import_name: sklearn
+
+importlib_metadata:
+  conda_forge: importlib-metadata
+  import_name: importlib-metadata
+  avoid_selector: true
+
+jupyter-client:
+  conda_forge: jupyter_client
+  import_name: jupyter_client
