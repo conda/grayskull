@@ -27,3 +27,4 @@ dependencies:
   - tomli
   - tomli-w
   - libcblas
+  - beautifulsoup4

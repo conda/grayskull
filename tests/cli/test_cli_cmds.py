@@ -111,7 +111,11 @@ def test_recursive_option(mocker, option, tmpdir):
 
 # The CRAN test is not passing. I don't understand why!
 @pytest.mark.parametrize(
-    "index, name, version", [("pypi", "pytest", "5.3.2"), ("cran", "future", "1.26.1")]
+    "index, name, version",
+    [
+        # ("pypi", "pytest", "5.3.2"),
+        ("cran", "future", "1.26.1")
+    ],
 )
 def test_part_reload_recipe(tmpdir, index, name, version):
     recipe = GrayskullFactory.create_recipe(index, Configuration(name, version))

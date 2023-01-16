@@ -47,6 +47,7 @@ setup(
         "packaging >=21.3",
         "tomli",
         "tomli-w",
+        "beautifulsoup4",
     ],
     extras_require={
         "testing": [

@@ -6,9 +6,12 @@ import tarfile
 import zipfile
 from os.path import basename
 from tempfile import mkdtemp
+from typing import Optional
+from urllib.request import Request, urlopen
 
 import requests
 import yaml
+from bs4 import BeautifulSoup
 from souschef.jinja_expression import set_global_jinja_var
 from yaml import SafeDumper
 
@@ -34,9 +37,9 @@ ALL_SECTIONS = (
 
 class CranStrategy(AbstractStrategy):
     CRAN_URL = "https://cran.r-project.org"
-    SET_POSIX = "{{% set posix = 'm2-' if win else '' %}}"
-    SET_NATIVE = "{{% set native = 'm2w64-' if win else '' %}}"
-    POSIX_NATIVE = f"\n{SET_POSIX}\n{SET_NATIVE}"
+    SET_POSIX = "{% set posix = 'm2-' if win else '' %}"
+    SET_NATIVE = "{% set native = 'm2w64-' if win else '' %}"
+    POSIX_NATIVE = f"\n{SET_POSIX}\n{SET_NATIVE}\n\n"
 
     @staticmethod
     def fetch_data(recipe, config, sections=None):
@@ -194,71 +197,84 @@ def get_archive_metadata(path):
     sys.exit(f"{path} does not seem to be a CRAN package (no DESCRIPTION) file")
 
 
-def get_cran_archive_versions(cran_url, session, package):
-    print_msg(f"Fetching archived versions for package {package} from {cran_url}")
-    r = session.get(f"{cran_url}/src/contrib/Archive/{package}/")
-    try:
-        r.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        if e.response.status_code == 404:
-            print_msg(f"No archive directory for package {package}")
-            return []
-        raise
-    versions = []
-    for p, dt in re.findall(
-        r'<td><a href="([^"]+)">\1</a></td>\s*<td[^>]*>([^<]*)</td>', r.text
-    ):
-        if p.endswith(".tar.gz") and "_" in p:
-            name, version = p.rsplit(".", 2)[0].split("_", 1)
-            versions.append((dt.strip(), version))
-    return [v for dt, v in sorted(versions, reverse=True)]
+def scrap_main_page_cran_find_latest_package(
+    cran_url: str, pkg_name: str, pkg_version: str
+):
+    pkg_name = pkg_name.strip().lower()
+    pkg_version = pkg_version.strip().lower() if pkg_version else None
+    for url_a in get_webpage(f"{cran_url}/src/contrib/").findAll("a"):
+        url_text = url_a.get_text()
+        if url_text.endswith(".tar.gz") and "_" in url_text:
+            name, version = url_text.rsplit(".", 2)[0].rsplit("_", 1)
+            version = version.strip().lower()
+            name = name.strip().lower()
+            if name == pkg_name:
+                pkg_url = f"{cran_url}/src/contrib/Archive"
+                if pkg_version is None or pkg_version == version:
+                    pkg_version = version
+                    pkg_url = f"{cran_url}/src/contrib/{url_a.get('href')}"
+                return pkg_name, pkg_version, pkg_url
+    raise ValueError(
+        f"It was not possible to find the package requested. pkg: {pkg_name}"
+    )
 
 
-def get_cran_index(cran_url):
+def scrap_cran_archive_page_for_package_folder_url(cran_url: str, pkg_name: str):
+    for url_a in get_webpage(cran_url).findAll("a"):
+        if url_a.get_text().strip().lower() == pkg_name.strip().lower():
+            return f'{cran_url}/{url_a.get("href")}'
+    raise ValueError(
+        f"It was not possible to find the package requested. pkg: {pkg_name}"
+    )
+
+
+def scrap_cran_pkg_folder_page_for_full_url(
+    cran_url: str, pkg_name: str, pkg_version: str
+):
+    for url_a in get_webpage(cran_url).findAll("a"):
+        url_name, url_pkg_version = url_a.get_text().rsplit(".", 2)[0].rsplit("_", 1)
+        url_name = url_name.strip().lower()
+        url_pkg_version = url_pkg_version.strip().lower()
+        if pkg_name.strip().lower() == url_name and pkg_version == url_pkg_version:
+            return f"{cran_url}/{url_a.get('href')}"
+    raise ValueError("It was not possible to find the package requested")
+
+
+def get_webpage(cran_url):
+    req = Request(cran_url)
+    html_page = urlopen(req)
+    return BeautifulSoup(html_page)
+
+
+def get_cran_index(cran_url: str, pkg_name: str, pkg_version: Optional[str] = None):
     """Fetch the entire CRAN index and store it."""
     print_msg(f"Fetching main index from {cran_url}")
-    r = requests.get(f"{cran_url}/src/contrib/")
-    r.raise_for_status()
 
-    records = {}
-    for p in re.findall(r'<td><a href="([^"]+)">\1</a></td>', r.text):
-        if p.endswith(".tar.gz") and "_" in p:
-            name, version = p.rsplit(".", 2)[0].split("_", 1)
-            records[name.lower()] = (name, version)
-    r = requests.get(f"{cran_url}/src/contrib/Archive/")
-    r.raise_for_status()
-    for p in re.findall(r'<td><a href="([^"]+)/">\1/</a></td>', r.text):
-        if re.match(r"^[A-Za-z]", p):
-            records.setdefault(p.lower(), (p, None))
-    return records
+    name, version, url_page = scrap_main_page_cran_find_latest_package(
+        cran_url, pkg_name, pkg_version
+    )
+    if url_page.endswith(".tar.gz"):
+        return name, version, url_page
+
+    url_page = scrap_cran_archive_page_for_package_folder_url(url_page, pkg_name)
+    return scrap_cran_pkg_folder_page_for_full_url(url_page, pkg_name, pkg_version)
 
 
-def get_available_binaries(cran_url, details):
-    url = f"{cran_url}/" + details["dir"]
-    response = requests.get(url)
-    response.raise_for_status()
-    ext = details["ext"]
-    for filename in re.findall(r'<a href="([^"]*)">\1</a>', response.text):
-        if filename.endswith(ext):
-            pkg, *_, ver = filename.rpartition("_")
-            ver, *_ = ver.rpartition(ext)
-            details["binaries"].setdefault(pkg, []).append((ver, url + filename))
-
-
-def get_cran_metadata(config: Configuration, cran_url: str) -> tuple[dict, str]:
+def get_cran_metadata(
+    config: Configuration,
+    cran_url: str,
+    pkg_name: str,
+    pkg_version: Optional[str] = None,
+) -> tuple[dict, str]:
     """Method responsible for getting CRAN metadata.
     Look for the package in the stored CRAN index.
     :return: CRAN metadata"""
-    cran_index = get_cran_index(cran_url)
-    if config.name.lower() not in cran_index:
-        sys.exit(f"Package {config.name} not found")
-    package, cran_version = cran_index[config.name.lower()]
-    print_msg(package)
-    print_msg(cran_version)
-    tarball_name = f"{package}_{cran_version}.tar.gz"
-    download_url = f"{cran_url}/src/contrib/{tarball_name}"
-    print_msg(download_url)
-    response = requests.get(download_url)
+    _, pkg_version, pkg_url = get_cran_index(cran_url, pkg_name, pkg_version)
+    print_msg(pkg_name)
+    print_msg(pkg_version)
+    tarball_name = pkg_url.rsplit("/", 1)[-1]
+    print_msg(pkg_url)
+    response = requests.get(pkg_url)
     response.raise_for_status()
     download_file = os.path.join(
         str(mkdtemp(f"grayskull-cran-metadata-{config.name}-")), tarball_name
