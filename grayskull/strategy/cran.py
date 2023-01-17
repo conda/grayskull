@@ -248,7 +248,7 @@ def get_cran_index(cran_url: str, pkg_name: str, pkg_version: Optional[str] = No
     )
 
 
-def get_cran_metadata(config: Configuration, cran_url: str) -> tuple[dict, str]:
+def get_cran_metadata(config: Configuration, cran_url: str):
     """Method responsible for getting CRAN metadata.
     Look for the package in the stored CRAN index.
     :return: CRAN metadata"""
