@@ -4,19 +4,18 @@ import re
 import sys
 import tarfile
 import zipfile
+from copy import deepcopy
 from os.path import basename
 from tempfile import mkdtemp
 from typing import Optional
 from urllib.request import Request, urlopen
 
 import requests
-import yaml
 from bs4 import BeautifulSoup
-from souschef.jinja_expression import set_global_jinja_var
-from yaml import SafeDumper
 
 from grayskull.cli.stdout import print_msg
 from grayskull.config import Configuration
+from grayskull.license.discovery import match_license
 from grayskull.strategy.abstract_strategy import AbstractStrategy
 from grayskull.utils import sha256_checksum
 
@@ -46,16 +45,18 @@ class CranStrategy(AbstractStrategy):
         metadata, r_recipe_end_comment = get_cran_metadata(
             config, CranStrategy.CRAN_URL
         )
-        recipe.add_section(metadata)
-        set_global_jinja_var(recipe, "version", metadata["package"]["version"])
-        config.version = metadata["package"]["version"]
-        recipe["package"]["version"] = "<{ version }}"
-        recipe["test"]["commands"] = [
-            f"$R -e \"library('{config.name}')\"  # [not win]",
-            f'"%R%" -e "library(\'{config.name}\')"  # [win]',
-        ]
-        recipe.inline_comment = CranStrategy.POSIX_NATIVE
-        recipe.inline_comment = r_recipe_end_comment
+        sections = sections or ALL_SECTIONS
+
+        for sec in sections:
+            metadata_section = metadata.get(sec)
+            if metadata_section:
+                recipe[sec] = metadata_section
+
+        # recipe.add_section(metadata)
+        # set_global_jinja_var(recipe, "version", metadata["package"]["version"])
+
+        # recipe.inline_comment = CranStrategy.POSIX_NATIVE
+        # recipe.inline_comment = r_recipe_end_comment
         return recipe
 
 
@@ -128,24 +129,6 @@ def remove_package_line_continuations(chunk):
 
     chunk.append("")
     return chunk
-
-
-def yaml_quote_string(string):
-    """
-    Quote a string for use in YAML.
-
-    We can't just use yaml.dump because it adds ellipses to the end of the
-    string, and it in general doesn't handle being placed inside an existing
-    document very well.
-
-    Note that this function is NOT general.
-    """
-    return (
-        yaml.dump(string, Dumper=SafeDumper)
-        .replace("\n...\n", "")
-        .replace("\n", "\n  ")
-        .rstrip("\n ")
-    )
 
 
 def clear_whitespace(string):
@@ -221,7 +204,7 @@ def scrap_main_page_cran_find_latest_package(
 
 def scrap_cran_archive_page_for_package_folder_url(cran_url: str, pkg_name: str):
     for url_a in get_webpage(cran_url).findAll("a"):
-        if url_a.get_text().strip().lower() == pkg_name.strip().lower():
+        if url_a.get_text().strip().lower() == f"{pkg_name.strip().lower()}/":
             return f'{cran_url}/{url_a.get("href")}'
     raise ValueError(
         f"It was not possible to find the package requested. pkg: {pkg_name}"
@@ -232,18 +215,25 @@ def scrap_cran_pkg_folder_page_for_full_url(
     cran_url: str, pkg_name: str, pkg_version: str
 ):
     for url_a in get_webpage(cran_url).findAll("a"):
-        url_name, url_pkg_version = url_a.get_text().rsplit(".", 2)[0].rsplit("_", 1)
+        try:
+            url_name, url_pkg_version = (
+                url_a.get_text().rsplit(".", 2)[0].rsplit("_", 1)
+            )
+        except ValueError:
+            continue
         url_name = url_name.strip().lower()
         url_pkg_version = url_pkg_version.strip().lower()
         if pkg_name.strip().lower() == url_name and pkg_version == url_pkg_version:
-            return f"{cran_url}/{url_a.get('href')}"
+            return (
+                f"{cran_url}{'' if cran_url.endswith('/') else '/'}{url_a.get('href')}"
+            )
     raise ValueError("It was not possible to find the package requested")
 
 
 def get_webpage(cran_url):
     req = Request(cran_url)
     html_page = urlopen(req)
-    return BeautifulSoup(html_page)
+    return BeautifulSoup(html_page, features="html.parser")
 
 
 def get_cran_index(cran_url: str, pkg_name: str, pkg_version: Optional[str] = None):
@@ -257,18 +247,21 @@ def get_cran_index(cran_url: str, pkg_name: str, pkg_version: Optional[str] = No
         return name, version, url_page
 
     url_page = scrap_cran_archive_page_for_package_folder_url(url_page, pkg_name)
-    return scrap_cran_pkg_folder_page_for_full_url(url_page, pkg_name, pkg_version)
+    return (
+        name,
+        version,
+        scrap_cran_pkg_folder_page_for_full_url(url_page, pkg_name, pkg_version),
+    )
 
 
-def get_cran_metadata(
-    config: Configuration,
-    cran_url: str,
-    pkg_name: str,
-    pkg_version: Optional[str] = None,
-) -> tuple[dict, str]:
+def get_cran_metadata(config: Configuration, cran_url: str) -> tuple[dict, str]:
     """Method responsible for getting CRAN metadata.
     Look for the package in the stored CRAN index.
     :return: CRAN metadata"""
+    if config.name.startswith("r-"):
+        config.name = config.name[2:]
+    pkg_name = config.name
+    pkg_version = str(config.version) if config.version else None
     _, pkg_version, pkg_url = get_cran_index(cran_url, pkg_name, pkg_version)
     print_msg(pkg_name)
     print_msg(pkg_version)
@@ -310,31 +303,34 @@ def get_cran_metadata(
 
     return {
         "package": {
-            "name": "r-" + metadata.get("Package"),
-            "version": metadata.get("Version"),
+            "name": f'r-{metadata.get("Package")}',
+            "version": "{{ version }}",
         },
         "source": {
             "sha256": sha256_checksum(download_file),
-            "url": "{{ cran_mirror }}/src/contrib/"
-            + "{{ package }}_{{ cran_version }}.tar.gz",
+            "url": pkg_url.replace(pkg_version, "{{ version }}"),
         },
         "build": {
             "entry_points": metadata.get("entry_points"),
             "rpaths": ["lib/R/lib/", "lib/"],
         },
         "requirements": {
-            "build": "",
-            "run": imports,
-            "host": imports,
+            "run": deepcopy(imports),
+            "host": deepcopy(imports),
         },
         "test": {
             "imports": metadata.get("tests"),
+            "commands": [
+                f"$R -e \"library('{config.name}')\"  # [not win]",
+                f'"%R%" -e "library(\'{config.name}\')"  # [win]',
+            ],
         },
         "about": {
             "home": metadata["URL"],
             "summary": metadata.get("Description"),
             "doc_url": metadata.get("doc_url"),
             "dev_url": metadata.get("dev_url"),
-            "license": metadata.get("License"),
+            "license": match_license(metadata.get("License", "")).get("licenseId")
+            or metadata.get("License", ""),
         },
     }, r_recipe_end_comment

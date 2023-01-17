@@ -18,8 +18,8 @@ def webpage_magic_mock():
     mock_url_foo = MagicMock()
     mock_url_foo.get_text.return_value = "OTHER_PACKAGE_2.0.1.tar.gz"
     mock_url_bar = MagicMock()
-    mock_url_bar.get_text.return_value = "PKG_NAME"
-    mock_url_bar.get.return_value = "PKG_NAME_URL_BAR"
+    mock_url_bar.get_text.return_value = "PKG_NAME/"
+    mock_url_bar.get.return_value = "PKG_NAME_URL_BAR/"
     mock_webpage.findAll.return_value = [mock_url_foo, mock_url_bar, mock_url]
     return mock_webpage
 
@@ -54,7 +54,7 @@ def test_scrap_cran_archive_page_for_package_folder_url(
     mock_get_webpage.return_value = webpage_magic_mock
     assert (
         scrap_cran_archive_page_for_package_folder_url("CRAN_URL", "PKG_NAME")
-        == "CRAN_URL/PKG_NAME_URL_BAR"
+        == "CRAN_URL/PKG_NAME_URL_BAR/"
     )
 
 
