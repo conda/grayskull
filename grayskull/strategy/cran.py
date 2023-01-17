@@ -306,6 +306,7 @@ def get_cran_metadata(config: Configuration, cran_url: str) -> tuple[dict, str]:
         },
         "build": {
             "number": 0,
+            "script": "R CMD INSTALL --build .",
             "entry_points": metadata.get("entry_points"),
             "rpaths": ["lib/R/lib/", "lib/"],
         },
