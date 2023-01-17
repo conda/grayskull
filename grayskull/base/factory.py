@@ -41,6 +41,8 @@ class GrayskullFactory(ABC):
         else:
             pkg_name = pkg_name or config.name
             recipe = Recipe(name=pkg_name, version=config.version)
+        if config.name.startswith(("<{", "{{", "r-{{", "r-<{")):
+            config.name = get_global_jinja_var(recipe, "name")
         GrayskullFactory.REGISTERED_STRATEGY[repo_type.lower()].fetch_data(
             recipe, config, sections=sections_populate
         )

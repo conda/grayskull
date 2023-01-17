@@ -51,12 +51,6 @@ class CranStrategy(AbstractStrategy):
             metadata_section = metadata.get(sec)
             if metadata_section:
                 recipe[sec] = metadata_section
-
-        # recipe.add_section(metadata)
-        # set_global_jinja_var(recipe, "version", metadata["package"]["version"])
-
-        # recipe.inline_comment = CranStrategy.POSIX_NATIVE
-        # recipe.inline_comment = r_recipe_end_comment
         return recipe
 
 
@@ -303,20 +297,21 @@ def get_cran_metadata(config: Configuration, cran_url: str) -> tuple[dict, str]:
 
     return {
         "package": {
-            "name": f'r-{metadata.get("Package")}',
+            "name": "r-{{ name }}",
             "version": "{{ version }}",
         },
         "source": {
-            "sha256": sha256_checksum(download_file),
             "url": pkg_url.replace(pkg_version, "{{ version }}"),
+            "sha256": sha256_checksum(download_file),
         },
         "build": {
+            "number": 0,
             "entry_points": metadata.get("entry_points"),
             "rpaths": ["lib/R/lib/", "lib/"],
         },
         "requirements": {
-            "run": deepcopy(imports),
             "host": deepcopy(imports),
+            "run": deepcopy(imports),
         },
         "test": {
             "imports": metadata.get("tests"),
