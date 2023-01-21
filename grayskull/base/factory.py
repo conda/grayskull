@@ -2,15 +2,18 @@ import re
 from abc import ABC
 from pathlib import Path
 
+from souschef.ingredient import Ingredient
 from souschef.jinja_expression import get_global_jinja_var
 from souschef.recipe import Recipe
 
+from grayskull.strategy.cran import CranStrategy
 from grayskull.strategy.pypi import PypiStrategy
 
 
 class GrayskullFactory(ABC):
     REGISTERED_STRATEGY = {
         "pypi": PypiStrategy,
+        "cran": CranStrategy,
     }
 
     @staticmethod
@@ -23,11 +26,23 @@ class GrayskullFactory(ABC):
             )
         if Path(config.name).is_file() and not config.from_local_sdist:
             recipe = Recipe(load_file=config.name)
-            config.name = _get_name(recipe)
-            config.version = _get_version(recipe)
+            recipe_name = _get_name(recipe)
+            recipe_version = _get_version(recipe)
+            config.name = (
+                recipe_name.value
+                if isinstance(recipe_name, Ingredient)
+                else recipe_name
+            )
+            config.version = (
+                recipe_version.value
+                if isinstance(recipe_version, Ingredient)
+                else recipe_version
+            )
         else:
             pkg_name = pkg_name or config.name
             recipe = Recipe(name=pkg_name, version=config.version)
+        if config.name.startswith(("<{", "{{", "r-{{", "r-<{")):
+            config.name = get_global_jinja_var(recipe, "name")
         GrayskullFactory.REGISTERED_STRATEGY[repo_type.lower()].fetch_data(
             recipe, config, sections=sections_populate
         )
@@ -49,7 +64,10 @@ def __get_var(recipe, val):
         re_jinja_var = re.match(r"\s*<{\s*(\w+)", recipe["package"][val].value)
         if re_jinja_var:
             jinja_var = re_jinja_var.groups()[0]
-            return get_global_jinja_var(recipe, jinja_var)
+            try:
+                return get_global_jinja_var(recipe, jinja_var)
+            except ValueError:
+                return None
     return recipe["package"][val]
 
 

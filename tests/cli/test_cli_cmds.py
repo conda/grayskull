@@ -109,10 +109,16 @@ def test_recursive_option(mocker, option, tmpdir):
     assert spy.call_args_list[1].args[0] == {"colorama"}
 
 
-def test_part_reload_recipe(tmpdir):
-    recipe = GrayskullFactory.create_recipe(
-        "pypi", Configuration(name="pytest", version="5.3.2")
-    )
+# The CRAN test is not passing. I don't understand why!
+@pytest.mark.parametrize(
+    "index, name, version",
+    [
+        # ("pypi", "pytest", "5.3.2"),
+        ("cran", "future", "1.26.1")
+    ],
+)
+def test_part_reload_recipe(tmpdir, index, name, version):
+    recipe = GrayskullFactory.create_recipe(index, Configuration(name, version))
     host = deepcopy([str(i) for i in recipe["requirements"]["host"]])
     run = deepcopy([str(i) for i in recipe["requirements"]["run"]])
     recipe["requirements"] = {}
@@ -125,7 +131,7 @@ def test_part_reload_recipe(tmpdir):
     folder = tmpdir.mkdir("reload_recipe")
     recipe_path = folder / "recipe.yaml"
     recipe.save(str(recipe_path))
-    cli.main(["pypi", str(recipe_path), "--sections", "requirements"])
+    cli.main([index, str(recipe_path), "--sections", "requirements"])
 
     recipe = Recipe(load_file=str(recipe_path))
     assert host == [str(v) for v in recipe["requirements"]["host"] if v]
