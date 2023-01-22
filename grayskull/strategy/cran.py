@@ -12,6 +12,7 @@ from urllib.request import Request, urlopen
 
 import requests
 from bs4 import BeautifulSoup
+from souschef.jinja_expression import set_global_jinja_var
 
 from grayskull.cli.stdout import print_msg
 from grayskull.config import Configuration
@@ -51,6 +52,9 @@ class CranStrategy(AbstractStrategy):
             metadata_section = metadata.get(sec)
             if metadata_section:
                 recipe[sec] = metadata_section
+        if metadata.get("need_compiler", False):
+            set_global_jinja_var(recipe, "posix", 'm2-" if win else "')
+            set_global_jinja_var(recipe, "native", 'm2w64-" if win else "')
         return recipe
 
 
@@ -259,15 +263,7 @@ def get_cran_metadata(config: Configuration, cran_url: str):
     _, pkg_version, pkg_url = get_cran_index(cran_url, pkg_name, pkg_version)
     print_msg(pkg_name)
     print_msg(pkg_version)
-    tarball_name = pkg_url.rsplit("/", 1)[-1]
-    print_msg(pkg_url)
-    response = requests.get(pkg_url)
-    response.raise_for_status()
-    download_file = os.path.join(
-        str(mkdtemp(f"grayskull-cran-metadata-{config.name}-")), tarball_name
-    )
-    with open(download_file, "wb") as f:
-        f.write(response.content)
+    download_file = download_cran_pkg(config, pkg_url)
     metadata = get_archive_metadata(download_file)
     r_recipe_end_comment = "\n".join(
         [f"# {line}" for line in metadata["orig_lines"] if line]
@@ -295,7 +291,7 @@ def get_cran_metadata(config: Configuration, cran_url: str):
     imports.append("r-base")
     imports.sort()  # this is not a requirement in conda but good for readability
 
-    return {
+    dict_metadata = {
         "package": {
             "name": "r-{{ name }}",
             "version": "{{ version }}",
@@ -306,11 +302,13 @@ def get_cran_metadata(config: Configuration, cran_url: str):
         },
         "build": {
             "number": 0,
+            "merge_build_host": True,
             "script": "R CMD INSTALL --build .",
             "entry_points": metadata.get("entry_points"),
             "rpaths": ["lib/R/lib/", "lib/"],
         },
         "requirements": {
+            "build": [],
             "host": deepcopy(imports),
             "run": deepcopy(imports),
         },
@@ -329,4 +327,33 @@ def get_cran_metadata(config: Configuration, cran_url: str):
             "license": match_license(metadata.get("License", "")).get("licenseId")
             or metadata.get("License", ""),
         },
-    }, r_recipe_end_comment
+    }
+    if metadata.get("NeedsCompilation", "no").lower() == "yes":
+        dict_metadata["need_compiler"] = True
+        dict_metadata["requirements"]["build"].extend(
+            [
+                "cross-r-base {{ r_base }}  # [build_platform != target_platform]",
+                "autoconf  # [unix]",
+                "{{ compiler('c') }}  # [unix]",
+                "{{ compiler('m2w64_c') }}  # [win]",
+                "{{ compiler('cxx') }}  # [unix]",
+                "{{ compiler('m2w64_cxx') }}  # [win]",
+                "posix  # [win]",
+            ]
+        )
+    if not dict_metadata["requirements"]["build"]:
+        del dict_metadata["requirements"]["build"]
+    return dict_metadata, r_recipe_end_comment
+
+
+def download_cran_pkg(config, pkg_url):
+    tarball_name = pkg_url.rsplit("/", 1)[-1]
+    print_msg(pkg_url)
+    response = requests.get(pkg_url)
+    response.raise_for_status()
+    download_file = os.path.join(
+        str(mkdtemp(f"grayskull-cran-metadata-{config.name}-")), tarball_name
+    )
+    with open(download_file, "wb") as f:
+        f.write(response.content)
+    return download_file
