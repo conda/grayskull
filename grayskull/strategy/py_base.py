@@ -691,7 +691,14 @@ def merge_deps_toml_setup(setup_deps: list, toml_deps: list) -> list:
     all_deps = defaultdict(list)
     for dep in toml_deps + setup_deps:
         if dep.strip():
-            all_deps[re_split.split(dep)[0]].append(dep)
+            dep_name = re_split.split(dep)[0]
+            if dep_name not in all_deps:
+                if dep_name.replace("_", "-") in all_deps:
+                    dep_name = dep_name.replace("_", "-")
+                elif dep_name.replace("-", "_") in all_deps:
+                    dep_name = dep_name.replace("-", "_")
+            all_deps[dep_name].append(dep)
+
     return [deps[0] for deps in all_deps.values()]
 
 

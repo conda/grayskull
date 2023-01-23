@@ -8,7 +8,6 @@ from grayskull.strategy.py_base import (
     generic_py_ver_to,
     get_sdist_metadata,
     merge_deps_toml_setup,
-    merge_setup_toml_metadata,
     update_requirements_with_pin,
 )
 from grayskull.utils import PyVer
@@ -57,11 +56,6 @@ def test_python_requires_upper_bound():
         Configuration(name="algviz", is_strict_cf=False),
     )
     assert py_ver == ">=3.7,<3.11"
-
-
-def test_merge_setup_toml_metadata():
-    result = merge_setup_toml_metadata({}, {})
-    assert result
 
 
 def test_merge_deps_toml_setup():
