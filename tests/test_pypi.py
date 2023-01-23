@@ -600,7 +600,7 @@ def test_injection_distutils_pytest():
         ]
     )
     assert sorted(data["setup_requires"]) == sorted(
-        ["setuptools>=40.0", "setuptools_scm"]
+        ["setuptools-scm", "setuptools>=40.0", "wheel"]
     )
     assert not data.get("compilers")
 
@@ -853,7 +853,9 @@ def test_zipp_recipe_tags_on_deps():
         [
             "python >=3.6",
             "pip",
+            "setuptools >=42",
             "setuptools-scm >=3.4.1",
+            "wheel",
         ]
     )
 

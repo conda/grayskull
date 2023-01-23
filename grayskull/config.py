@@ -101,10 +101,10 @@ class Configuration:
 
     def __post_init__(self):
         if self.from_local_sdist:
-            self.local_sdist = self.name
+            self.local_sdist = self.local_sdist or self.name
         if self.url_pypi_metadata != "https://pypi.org/pypi/{pkg_name}/json":
-            preffix = "" if self.url_pypi_metadata.endswith("/") else "/"
-            self.url_pypi_metadata += f"{preffix}{{pkg_name}}/json"
+            prefix = "" if self.url_pypi_metadata.endswith("/") else "/"
+            self.url_pypi_metadata += f"{prefix}{{pkg_name}}/json"
         pkg_repo, pkg_name, pkg_version = parse_pkg_name_version(self.name)
         if pkg_repo:
             prefix = "" if pkg_repo.endswith("/") else "/"

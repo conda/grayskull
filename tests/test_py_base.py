@@ -1,9 +1,13 @@
+from pathlib import Path
+
 from grayskull.__main__ import create_python_recipe
 from grayskull.config import Configuration
 from grayskull.strategy.py_base import (
     clean_deps_for_conda_forge,
     ensure_pep440,
     generic_py_ver_to,
+    get_sdist_metadata,
+    merge_deps_toml_setup,
     update_requirements_with_pin,
 )
 from grayskull.utils import PyVer
@@ -52,3 +56,64 @@ def test_python_requires_upper_bound():
         Configuration(name="algviz", is_strict_cf=False),
     )
     assert py_ver == ">=3.7,<3.11"
+
+
+def test_merge_deps_toml_setup():
+    assert merge_deps_toml_setup(["abc>1.0.0", "gh"], ["abc >1.0.0", "def"]) == [
+        "abc >1.0.0",
+        "def",
+        "gh",
+    ]
+
+
+def test_get_sdist_metadata_toml_files_windrose():
+    windrose_path = Path(__file__).parent / "data" / "pkgs" / "windrose-1.8.1.tar"
+
+    sdist_metadata = get_sdist_metadata(
+        str(windrose_path),
+        Configuration(
+            name="windrose",
+            version="1.8.1",
+            from_local_sdist=True,
+            local_sdist=str(windrose_path),
+        ),
+    )
+    assert sdist_metadata["setup_requires"] == [
+        "setuptools>=41.2",
+        "setuptools_scm",
+        "wheel",
+    ]
+
+
+def test_get_sdist_metadata_toml_files_BLACK():
+    smithy_path = Path(__file__).parent / "data" / "pkgs" / "black-22.12.0.zip"
+    sdist_metadata = get_sdist_metadata(
+        str(smithy_path),
+        Configuration(
+            name="black",
+            version="22.12.0",
+            from_local_sdist=True,
+            local_sdist=str(smithy_path),
+        ),
+    )
+    assert sdist_metadata["license"] == "MIT"
+    assert sdist_metadata["entry_points"]["console_scripts"] == [
+        "black = black:patched_main",
+        "blackd = blackd:patched_main [d]",
+    ]
+    assert sdist_metadata["setup_requires"] == [
+        "hatchling>=1.8.0",
+        "hatch-vcs",
+        "hatch-fancy-pypi-readme",
+        "python >=3.7",
+    ]
+    assert sdist_metadata["install_requires"] == [
+        "click>=8.0.0",
+        "mypy_extensions>=0.4.3",
+        "pathspec>=0.9.0",
+        "platformdirs>=2",
+        "tomli>=1.1.0; python_full_version < '3.11.0a7'",
+        "typed-ast>=1.4.2; python_version < '3.8' and implementation_name == 'cpython'",
+        "typing_extensions>=3.10.0.0; python_version < '3.10'",
+        "python >=3.7",
+    ]
