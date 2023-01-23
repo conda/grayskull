@@ -3,7 +3,7 @@ import hashlib
 import logging
 import os
 import re
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 from difflib import SequenceMatcher
 from functools import lru_cache
 from glob import glob
@@ -259,3 +259,7 @@ def merge_dict_of_lists_item(destination: dict, add: dict, key: str) -> None:
         merge_list_item(sub_destination, sub_add, sub_key)
     if sub_destination:
         destination[key] = sub_destination
+
+
+def nested_dict():
+    return defaultdict(nested_dict)

@@ -3,9 +3,11 @@ import os
 import re
 import shutil
 import sys
+from collections import defaultdict
 from contextlib import contextmanager
 from copy import deepcopy
 from distutils import core
+from glob import glob
 from pathlib import Path
 from subprocess import check_output
 from tempfile import mkdtemp
@@ -23,6 +25,7 @@ from pkginfo import UnpackedSDist
 from grayskull.cli.stdout import manage_progressbar, print_msg
 from grayskull.config import Configuration
 from grayskull.license.discovery import ShortLicense, search_license_file
+from grayskull.strategy.py_toml import get_all_toml_info
 from grayskull.utils import (
     PyVer,
     get_vendored_dependencies,
@@ -683,6 +686,47 @@ def download_sdist_pkg(sdist_url: str, dest: str, name: Optional[str] = None):
                 bar.update(min(progress_val, total_size))
 
 
+def merge_deps_toml_setup(setup_deps: list, toml_deps: list) -> list:
+    re_split = re.compile(r"\s+|>|=|<|~|!")
+    all_deps = defaultdict(list)
+    for dep in toml_deps + setup_deps:
+        if dep.strip():
+            all_deps[re_split.split(dep)[0]].append(dep)
+    return [deps[0] for deps in all_deps.values()]
+
+
+def merge_setup_toml_metadata(setup_metadata: dict, pyproject_metadata: dict) -> dict:
+    setup_metadata = defaultdict(dict, setup_metadata)
+    if not pyproject_metadata:
+        return setup_metadata
+    if pyproject_metadata["about"]["license"]:
+        setup_metadata["license"] = pyproject_metadata["about"]["license"]
+    if pyproject_metadata["about"]["summary"]:
+        setup_metadata["summary"] = pyproject_metadata["about"]["summary"]
+    if pyproject_metadata["about"]["home"]:
+        setup_metadata["projects_url"]["Homepage"] = pyproject_metadata["about"]["home"]
+    if pyproject_metadata["build"]["entry_points"]:
+        setup_metadata["entry_points"]["console_scripts"] = pyproject_metadata["build"][
+            "entry_points"
+        ]
+    if pyproject_metadata["test"]["requires"]:
+        setup_metadata["extras_require"]["testing"] = merge_deps_toml_setup(
+            setup_metadata["extras_require"].get("testing", []),
+            pyproject_metadata["test"]["requires"],
+        )
+    if pyproject_metadata["requirements"]["host"]:
+        setup_metadata["setup_requires"] = merge_deps_toml_setup(
+            setup_metadata.get("setup_requires", []),
+            pyproject_metadata["requirements"]["host"],
+        )
+    if pyproject_metadata["requirements"]["run"]:
+        setup_metadata["install_requires"] = merge_deps_toml_setup(
+            setup_metadata.get("install_requires", []),
+            pyproject_metadata["requirements"]["run"],
+        )
+    return setup_metadata
+
+
 def get_sdist_metadata(
     sdist_url: str, config: Configuration, with_source: bool = False
 ) -> dict:
@@ -705,6 +749,17 @@ def get_sdist_metadata(
             config.files_to_copy.append(path_pkg)
     log.debug(f"Unpacking {path_pkg} to {temp_folder}")
     shutil.unpack_archive(path_pkg, temp_folder)
+
+    print_msg("Checking for pyproject.toml")
+    pyproject_toml = glob(f"{temp_folder}/**/pyproject.toml", recursive=True)
+    pyproject_metadata = {}
+    if pyproject_toml:
+        pyproject_toml = Path(pyproject_toml[0])
+        print_msg(f"pyproject.toml found in {pyproject_toml}")
+        pyproject_metadata = get_all_toml_info(pyproject_toml)
+    else:
+        print_msg("pyproject.toml not found.")
+
     print_msg("Recovering information from setup.py")
     with injection_distutils(temp_folder) as metadata:
         metadata["sdist_path"] = temp_folder
@@ -725,7 +780,7 @@ def get_sdist_metadata(
         dist = UnpackedSDist(path_pkg_info[0].parent)
         for key in ("name", "version", "summary", "author"):
             metadata[key] = getattr(dist, key, None)
-    return metadata
+    return merge_setup_toml_metadata(metadata, pyproject_metadata)
 
 
 def ensure_pep440_in_req_list(list_req: List[str]) -> List[str]:
