@@ -126,6 +126,9 @@ def rm_duplicated_deps(all_requirements: Union[list, set, None]) -> Optional[lis
     new_reqs: dict[str, str] = {}
     re_split = re.compile(r"\s+|>|=|<|~|!|#")
     for dep in all_requirements:
+        if dep.strip().startswith(("{{", "<{")):
+            new_reqs[dep] = dep
+            continue
         dep_name = re_split.split(dep.strip())[0].strip()
         canonicalized = dep_name.replace("_", "-").lower()
         if canonicalized in new_reqs:
