@@ -124,9 +124,10 @@ def rm_duplicated_deps(all_requirements: Union[list, set, None]) -> Optional[lis
     # as it should be added.
     # (This is order-preserving since dicts are ordered by first insertion.)
     new_reqs: dict[str, str] = {}
-
+    re_split = re.compile(r"\s+|>|=|<|~|!|#")
     for dep in all_requirements:
-        canonicalized = dep.replace("_", "-").lower()
+        dep_name = re_split.split(dep.strip())[0].strip()
+        canonicalized = dep_name.replace("_", "-").lower()
         if canonicalized in new_reqs:
             # In order to break ties deterministically, we prioritize the requirement
             # which is alphanumerically lowest. This happens to prioritize the "-"
@@ -134,7 +135,7 @@ def rm_duplicated_deps(all_requirements: Union[list, set, None]) -> Optional[lis
             # Example: given "importlib_metadata" and "importlib-metadata", we will
             # keep "importlib-metadata" because it is alphabetically lower.
             previous_req = new_reqs[canonicalized]
-            if dep < previous_req:
+            if len(dep) > len(previous_req) or "-" in dep_name:
                 new_reqs[canonicalized] = dep
         else:
             new_reqs[canonicalized] = dep

@@ -74,8 +74,11 @@ def pypi_metadata_with_extras():
 
 def test_extract_pypi_requirements(pypi_metadata, recipe_config):
     recipe, config = recipe_config
+    pypi_metadata["info"]["setup_requires"] = ["tomli >1.0.0 ; python_version >=3.11"]
     pypi_reqs = extract_requirements(pypi_metadata["info"], config, recipe)
-    assert sorted(pypi_reqs["host"]) == sorted(["python", "pip"])
+    assert sorted(pypi_reqs["host"]) == sorted(
+        ["python", "pip", "tomli >1.0.0  # [py>=311]"]
+    )
     assert sorted(pypi_reqs["run"]) == sorted(
         [
             "python",
