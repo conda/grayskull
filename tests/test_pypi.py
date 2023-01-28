@@ -142,11 +142,10 @@ def test_get_extra_from_requires_dist():
 @pytest.fixture(scope="module")
 def dask_sdist_metadata():
     config = Configuration(name="dask")
-    metadata = get_sdist_metadata(
+    return get_sdist_metadata(
         "https://pypi.io/packages/source/d/dask/dask-2022.6.1.tar.gz",
         config,
     )
-    return metadata
 
 
 def test_get_extra_requirements(dask_sdist_metadata):
@@ -294,7 +293,7 @@ def test_get_include_extra_requirements():
     ]
     host_requirements = ["python >=3.8", "pip"]
 
-    extras = dict()
+    extras = {}
     extras["array"] = ["numpy >=1.18"]
     extras["distributed"] = ["distributed ==2022.6.1"]
     extras["diagnostics"] = ["bokeh >=2.4.2", "jinja2"]
@@ -417,7 +416,7 @@ def test_get_include_extra_requirements():
     assert set(recipe["requirements"]["run"]) == set(base_requirements)
     assert len(recipe["outputs"]) == 6
 
-    expected = dict()
+    expected = {}
     for name, req_lst in extras.items():
         if name != "test":
             expected[f"dask-{name}"] = {
@@ -425,7 +424,7 @@ def test_get_include_extra_requirements():
                 "python >=3.8",
                 *req_lst,
             }
-    found = dict()
+    found = {}
     for output in recipe["outputs"]:
         if output["name"] == "dask":
             assert "requirements" not in output
