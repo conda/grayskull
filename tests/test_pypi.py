@@ -180,17 +180,17 @@ def test_extract_optional_requirements(dask_sdist_metadata):
     assert not received
 
     all_optional_reqs = {
-        "array": {"numpy >= 1.18"},
+        "array": {"numpy >=1.18"},
         "complete": {
-            "distributed == 2022.6.1",
-            "pandas >= 1.0",
-            "numpy >= 1.18",
-            "bokeh >= 2.4.2",
+            "distributed ==2022.6.1",
+            "pandas >=1.0",
+            "numpy >=1.18",
+            "bokeh >=2.4.2",
             "jinja2",
         },
-        "dataframe": {"numpy >= 1.18", "pandas >= 1.0"},
-        "diagnostics": {"bokeh >= 2.4.2", "jinja2"},
-        "distributed": {"distributed == 2022.6.1"},
+        "dataframe": {"numpy >=1.18", "pandas >=1.0"},
+        "diagnostics": {"bokeh >=2.4.2", "jinja2"},
+        "distributed": {"distributed ==2022.6.1"},
         "test": {"pytest-xdist", "pre-commit", "pytest-rerunfailures", "pytest"},
     }
 
