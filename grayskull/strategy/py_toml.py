@@ -7,6 +7,48 @@ import tomli
 from grayskull.utils import nested_dict
 
 
+def add_poetry_metadata(metadata: dict, toml_metadata: dict) -> dict:
+    if not is_poetry_present(toml_metadata):
+        return metadata
+
+    def flat_deps(dict_deps: dict) -> list:
+        result = []
+        for pkg_name, version in dict_deps.items():
+            if isinstance(version, dict):
+                version_spec = version["version"].strip()
+                del version["version"]
+                version = (
+                    f"{version_spec}{' ; '.join(f'{k} {v}' for k,v in version.items())}"
+                )
+            version = f"=={version}" if version and version[0].isdigit() else version
+            result.append(f"{pkg_name} {version}".strip())
+        return result
+
+    poetry_metadata = toml_metadata["tool"]["poetry"]
+    if poetry_run := flat_deps(poetry_metadata.get("dependencies", {})):
+        if not metadata["requirements"]["run"]:
+            metadata["requirements"]["run"] = []
+        metadata["requirements"]["run"].extend(poetry_run)
+
+    host_metadata = metadata["requirements"].get("host", [])
+    if "poetry" not in host_metadata and "poetry-core" not in host_metadata:
+        metadata["requirements"]["host"] = host_metadata + ["poetry-core"]
+
+    test_metadata = metadata["test"].get("requires", []) or []
+    if (
+        test_deps := poetry_metadata.get("group", {})
+        .get("test", {})
+        .get("dependencies", {})
+    ):
+        test_deps = flat_deps(test_deps)
+        metadata["test"]["requires"] = test_metadata + test_deps
+    return metadata
+
+
+def is_poetry_present(toml_metadata: dict) -> bool:
+    return "poetry" in toml_metadata.get("tool", {})
+
+
 def get_all_toml_info(path_toml: Union[Path, str]) -> dict:
     with open(path_toml, "rb") as f:
         toml_metadata = tomli.load(f)
@@ -41,4 +83,7 @@ def get_all_toml_info(path_toml: Union[Path, str]) -> dict:
         metadata["about"]["dev_url"] = all_urls.get("Source", None)
         metadata["about"]["home"] = all_urls.get("Homepage", None)
     metadata["about"]["summary"] = toml_metadata["project"].get("description")
+
+    add_poetry_metadata(metadata, toml_metadata)
+
     return metadata

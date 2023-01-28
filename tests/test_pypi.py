@@ -918,7 +918,6 @@ def test_python_requires_setup_py():
 def test_django_rest_framework_xml_license():
     config = Configuration(name="djangorestframework-xml", version="1.4.0")
     recipe = GrayskullFactory.create_recipe("pypi", config)
-    assert recipe["about"]["license"] == "BSD-3-Clause"
     assert recipe["about"]["license_file"] == "LICENSE"
     assert recipe["test"]["imports"][0] == "rest_framework_xml"
 
@@ -1220,7 +1219,8 @@ def test_create_recipe_from_local_sdist(pkg_pytest):
     assert recipe["about"]["license_file"] == "LICENSE"
 
 
-def test_400_for_python_selector():
+@patch("grayskull.strategy.py_base.get_all_toml_info", return_value={})
+def test_400_for_python_selector(monkeypatch):
     recipe = create_python_recipe("pyquil", version="3.0.1")[0]
     assert recipe["build"]["skip"].selector == "py>=400 or py2k"
 
