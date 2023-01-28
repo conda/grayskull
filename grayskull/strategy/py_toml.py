@@ -19,8 +19,11 @@ def get_all_toml_info(path_toml: Union[Path, str]) -> dict:
     if isinstance(license, dict):
         license = license.get("text", "")
     metadata["about"]["license"] = license
+    optional_deps = toml_metadata["project"].get("optional-dependencies", {})
     metadata["test"]["requires"] = (
-        toml_metadata["project"].get("optional-dependencies", {}).get("testing", [])
+        optional_deps.get("testing", [])
+        or optional_deps.get("test", [])
+        or optional_deps.get("tests", [])
     )
 
     if toml_metadata["project"].get("requires-python"):
@@ -34,8 +37,7 @@ def get_all_toml_info(path_toml: Union[Path, str]) -> dict:
             toml_metadata["project"].get("scripts", {}).items()
         ):
             metadata["build"]["entry_points"].append(f"{entry_name} = {entry_path}")
-    all_urls = toml_metadata["project"].get("urls")
-    if all_urls:
+    if all_urls := toml_metadata["project"].get("urls"):
         metadata["about"]["dev_url"] = all_urls.get("Source", None)
         metadata["about"]["home"] = all_urls.get("Homepage", None)
     metadata["about"]["summary"] = toml_metadata["project"].get("description")

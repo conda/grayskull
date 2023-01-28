@@ -165,7 +165,10 @@ def skip_pypi_requirement(list_extra: List) -> bool:
     :param list_extra: list with all extra requirements
     :return: True if we should skip the requirement
     """
-    return any(extra[1] == "extra" or extra[3] == "testing" for extra in list_extra)
+    return any(
+        extra[1] == "extra" or extra[3] in ["testing", "test", "tests"]
+        for extra in list_extra
+    )
 
 
 def merge_requires_dist(pypi_metadata: dict, sdist_metadata: dict) -> List:
