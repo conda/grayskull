@@ -519,18 +519,19 @@ def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]
     host_req = format_dependencies(setup_requires or [], config.name)
     if not requires_dist and not host_req and not metadata.get("requires_python"):
         if config.is_strict_cf:
+            py_constrain = (
+                f" >={config.py_cf_supported[0].major}"
+                f".{config.py_cf_supported[0].minor}"
+            )
             return {
-                "host": ["python", "pip"],
-                "run": [
-                    f"python"
-                    f" >={config.py_cf_supported[0].major}"
-                    f".{config.py_cf_supported[0].minor}"
-                ],
+                "host": [f"python {py_constrain}", "pip"],
+                "run": [f"python {py_constrain}"],
             }
         else:
             return {"host": ["python", "pip"], "run": ["python"]}
 
     run_req = get_run_req_from_requires_dist(requires_dist, config)
+    host_req = get_run_req_from_requires_dist(host_req, config)
     build_req = [f"<{{ compiler('{c}') }}}}" for c in metadata.get("compilers", [])]
     if build_req:
         config.is_arch = True
@@ -617,7 +618,7 @@ def extract_optional_requirements(metadata: dict, config) -> Dict[str, List[str]
     for key in sorted(keys):
         requirements = metadata["extras_require"].get(key)
         if requirements:
-            result[key] = requirements
+            result[key] = format_dependencies(requirements, metadata["name"])
     return result
 
 

@@ -74,8 +74,11 @@ def pypi_metadata_with_extras():
 
 def test_extract_pypi_requirements(pypi_metadata, recipe_config):
     recipe, config = recipe_config
+    pypi_metadata["info"]["setup_requires"] = ["tomli >1.0.0 ; python_version >=3.11"]
     pypi_reqs = extract_requirements(pypi_metadata["info"], config, recipe)
-    assert sorted(pypi_reqs["host"]) == sorted(["python", "pip"])
+    assert sorted(pypi_reqs["host"]) == sorted(
+        ["python", "pip", "tomli >1.0.0  # [py>=311]"]
+    )
     assert sorted(pypi_reqs["run"]) == sorted(
         [
             "python",
@@ -177,17 +180,17 @@ def test_extract_optional_requirements(dask_sdist_metadata):
     assert not received
 
     all_optional_reqs = {
-        "array": {"numpy >= 1.18"},
+        "array": {"numpy >=1.18"},
         "complete": {
-            "distributed == 2022.6.1",
-            "pandas >= 1.0",
-            "numpy >= 1.18",
-            "bokeh >= 2.4.2",
+            "distributed ==2022.6.1",
+            "pandas >=1.0",
+            "numpy >=1.18",
+            "bokeh >=2.4.2",
             "jinja2",
         },
-        "dataframe": {"numpy >= 1.18", "pandas >= 1.0"},
-        "diagnostics": {"bokeh >= 2.4.2", "jinja2"},
-        "distributed": {"distributed == 2022.6.1"},
+        "dataframe": {"numpy >=1.18", "pandas >=1.0"},
+        "diagnostics": {"bokeh >=2.4.2", "jinja2"},
+        "distributed": {"distributed ==2022.6.1"},
         "test": {"pytest-xdist", "pre-commit", "pytest-rerunfailures", "pytest"},
     }
 
