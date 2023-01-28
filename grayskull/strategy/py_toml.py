@@ -12,10 +12,17 @@ def add_poetry_metadata(metadata: dict, toml_metadata: dict) -> dict:
         return metadata
 
     def flat_deps(dict_deps: dict) -> list:
-        return [
-            f"{k} {'==' if v.strip()[0].isdigit() else ''}{v}"
-            for k, v in dict_deps.items()
-        ]
+        result = []
+        for pkg_name, version in dict_deps.items():
+            if isinstance(version, dict):
+                version_spec = version["version"].strip()
+                del version["version"]
+                version = (
+                    f"{version_spec}{' ; '.join(f'{k} {v}' for k,v in version.items())}"
+                )
+            version = f"=={version}" if version and version[0].isdigit() else version
+            result.append(f"{pkg_name} {version}".strip())
+        return result
 
     poetry_metadata = toml_metadata["tool"]["poetry"]
     if poetry_run := flat_deps(poetry_metadata.get("dependencies", {})):

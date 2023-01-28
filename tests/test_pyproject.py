@@ -72,8 +72,8 @@ def test_add_poetry_metadata():
     toml_metadata = {
         "tool": {
             "poetry": {
-                "dependencies": ["tomli >=1.0.0", "requests"],
-                "group": {"test": {"dependencies": ["tox >=1.0.0", "pytest"]}},
+                "dependencies": {"tomli": ">=1.0.0", "requests": ""},
+                "group": {"test": {"dependencies": {"tox": ">=1.0.0", "pytest": ""}}},
             }
         }
     }
