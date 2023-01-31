@@ -13,6 +13,7 @@ from typing import List, Optional, Union
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
+from souschef.recipe import Recipe
 from souschef.section import Section
 
 log = logging.getLogger(__name__)
@@ -176,7 +177,7 @@ def format_dependencies(all_dependencies: List, name: str) -> List:
 
 
 def generate_recipe(
-    recipe,
+    recipe: Recipe,
     config,
     folder_path: Union[str, Path] = ".",
 ):
@@ -185,7 +186,10 @@ def generate_recipe(
 
     :param folder_path: Path to the folder
     """
-    pkg_name = config.name
+    if recipe["package"]["name"].value.startswith("r-{{"):
+        pkg_name = f"r-{config.name}"
+    else:
+        pkg_name = config.name
     if origin_is_github(pkg_name):
         pkg_name = pkg_name.split("/")[-1]
     if Path(folder_path).is_file():
