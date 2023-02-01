@@ -561,8 +561,9 @@ def discover_license(metadata: dict) -> List[ShortLicense]:
     the license.
     """
     git_url = metadata.get("dev_url")
-    if not git_url and urlparse(metadata.get("project_url", "")).netloc == "github.com":
-        git_url = metadata.get("project_url")
+    project_url = metadata.get("project_urls", "") or metadata.get("project_url", "")
+    if not git_url and urlparse(project_url).netloc == "github.com":
+        git_url = project_url
     # "url" is always present but sometimes set to None
     if not git_url and urlparse((metadata.get("url") or "")).netloc == "github.com":
         git_url = metadata.get("url")
