@@ -277,7 +277,7 @@ def get_pypi_metadata(config: Configuration) -> dict:
         "requires_dist": info.get("requires_dist", []),
         "requires_python": info.get("requires_python", None),
         "summary": info.get("summary"),
-        "project_url": info.get("project_url"),
+        "project_urls": info.get("project_urls") or info.get("project_url"),
         "doc_url": info.get("docs_url"),
         "dev_url": project_urls.get("Source"),
         "url": info.get("home_page"),

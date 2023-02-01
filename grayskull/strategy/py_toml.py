@@ -54,35 +54,39 @@ def get_all_toml_info(path_toml: Union[Path, str]) -> dict:
         toml_metadata = tomli.load(f)
     toml_metadata = defaultdict(dict, toml_metadata)
     metadata = nested_dict()
-
+    toml_project = toml_metadata.get("project", {}) or {}
     metadata["requirements"]["host"] = toml_metadata["build-system"].get("requires", [])
-    metadata["requirements"]["run"] = toml_metadata["project"].get("dependencies", [])
-    license = toml_metadata["project"].get("license")
+    metadata["requirements"]["run"] = toml_project.get("dependencies", [])
+    license = toml_project.get("license")
     if isinstance(license, dict):
         license = license.get("text", "")
     metadata["about"]["license"] = license
-    optional_deps = toml_metadata["project"].get("optional-dependencies", {})
+    optional_deps = toml_project.get("optional-dependencies", {})
     metadata["test"]["requires"] = (
         optional_deps.get("testing", [])
         or optional_deps.get("test", [])
         or optional_deps.get("tests", [])
     )
 
-    if toml_metadata["project"].get("requires-python"):
-        py_constrain = f"python {toml_metadata['project']['requires-python']}"
+    tom_urls = toml_project.get("urls", {})
+    if homepage := tom_urls.get("Homepage"):
+        metadata["about"]["home"] = homepage
+    if dev_url := tom_urls.get("Source"):
+        metadata["about"]["dev_url"] = dev_url
+
+    if toml_project.get("requires-python"):
+        py_constrain = f"python {toml_project['requires-python']}"
         metadata["requirements"]["host"].append(py_constrain)
         metadata["requirements"]["run"].append(py_constrain)
 
-    if toml_metadata["project"].get("scripts"):
+    if toml_project.get("scripts"):
         metadata["build"]["entry_points"] = []
-        for entry_name, entry_path in (
-            toml_metadata["project"].get("scripts", {}).items()
-        ):
+        for entry_name, entry_path in toml_project.get("scripts", {}).items():
             metadata["build"]["entry_points"].append(f"{entry_name} = {entry_path}")
-    if all_urls := toml_metadata["project"].get("urls"):
+    if all_urls := toml_project.get("urls"):
         metadata["about"]["dev_url"] = all_urls.get("Source", None)
         metadata["about"]["home"] = all_urls.get("Homepage", None)
-    metadata["about"]["summary"] = toml_metadata["project"].get("description")
+    metadata["about"]["summary"] = toml_project.get("description")
 
     add_poetry_metadata(metadata, toml_metadata)
 
