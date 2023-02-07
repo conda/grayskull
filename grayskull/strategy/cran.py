@@ -102,7 +102,7 @@ def remove_package_line_continuations(chunk):
 
     chunk.append("")
 
-    for (i, line) in enumerate(chunk):
+    for i, line in enumerate(chunk):
         if line.startswith(continuation):
             line = f" {line.lstrip()}"
             if accumulating_continuations:
