@@ -59,12 +59,12 @@ setup(
             "setuptools-scm",
         ]
     },
-    url="https://github.com/conda-incubator/grayskull",
+    url="https://github.com/conda/grayskull",
     license="MIT",
     author="Marcelo Duarte Trevisani",
     author_email="marceloduartetrevisani@gmail.com",
     description="Project to generate recipes for conda packages.",
     long_description_content_type="text/markdown",
     long_description=readme,
-    project_urls={"Source": "https://github.com/conda-incubator/grayskull"},
+    project_urls={"Source": "https://github.com/conda/grayskull"},
 )

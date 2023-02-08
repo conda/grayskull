@@ -22,7 +22,7 @@ It is also possible to clone the Grayskull repository and install it using ``pip
 
 ::
 
-   git clone https://github.com/conda-incubator/grayskull.git
+   git clone https://github.com/conda/grayskull.git
    cd grayskull
    pip install -e .
 

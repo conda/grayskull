@@ -1,8 +1,8 @@
 # Grayskull
 -------------
-![Tests](https://github.com/conda-incubator/grayskull/workflows/Tests/badge.svg?branch=master) ![Checkers](https://github.com/conda-incubator/grayskull/workflows/Checkers/badge.svg?branch=master) ![Deployment (PyPI)](https://github.com/conda-incubator/grayskull/workflows/Upload%20Package%20to%20PyPI/badge.svg)
+[![Tests](https://github.com/conda/grayskull/actions/workflows/tests.yml/badge.svg)](https://github.com/conda/grayskull/actions/workflows/tests.yml) [![Deployment (PyPI)](https://github.com/conda/grayskull/actions/workflows/publish_pypi.yml/badge.svg)](https://github.com/conda/grayskull/actions/workflows/publish_pypi.yml)
 
-[![codecov](https://codecov.io/gh/conda-incubator/grayskull/branch/master/graph/badge.svg)](https://codecov.io/gh/conda-incubator/grayskull) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) ![](https://img.shields.io/badge/python-3.7+-blue.svg) ![](https://img.shields.io/github/license/conda-incubator/grayskull.svg) [![PyPI version](https://badge.fury.io/py/grayskull.svg)](https://badge.fury.io/py/grayskull) [![Conda Version](https://img.shields.io/conda/vn/conda-forge/grayskull.svg)](https://anaconda.org/conda-forge/grayskull) [![Gitter](https://badges.gitter.im/conda_grayskull/community.svg)](https://gitter.im/conda_grayskull/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/conda-incubator/grayskull.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/conda-incubator/grayskull/context:python)
+[![codecov](https://codecov.io/gh/conda/grayskull/branch/master/graph/badge.svg)](https://codecov.io/gh/conda/grayskull) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) ![](https://img.shields.io/badge/python-3.7+-blue.svg) ![](https://img.shields.io/github/license/conda/grayskull.svg) [![PyPI version](https://badge.fury.io/py/grayskull.svg)](https://badge.fury.io/py/grayskull) [![Conda Version](https://img.shields.io/conda/vn/conda-forge/grayskull.svg)](https://anaconda.org/conda-forge/grayskull) [![Gitter](https://badges.gitter.im/conda_grayskull/community.svg)](https://gitter.im/conda_grayskull/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 -------------
 <span align="center">
@@ -37,7 +37,7 @@ conda install -c conda-forge grayskull
 
 It is also possible to clone this repo and install it using `pip`:
 ```bash
-git clone https://github.com/conda-incubator/grayskull.git
+git clone https://github.com/conda/grayskull.git
 cd grayskull
 pip install -e .
 ```
@@ -57,7 +57,7 @@ and inside this folder the generated recipe will be present (`meta.yaml`).
 
 * Example with `pytest` (`grayskull pypi pytest`):
 
-![Grayskull CLI](https://github.com/conda-incubator/grayskull/raw/main/images/cli_example_grayskull.gif)
+![Grayskull CLI](https://github.com/conda/grayskull/raw/main/images/cli_example_grayskull.gif)
 
 If your package is a GitHub repository just replace the package name with the GitHub repository URL. <br>
 For example: <br>
