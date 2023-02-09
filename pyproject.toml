@@ -1,3 +1,64 @@
+[build-system]
+requires = [
+    "setuptools >=61",
+    "setuptools_scm[toml]>=6.2",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "grayskull"
+authors = [
+    {name = "Marcelo Duarte Trevisani", email = "marceloduartetrevisani@gmail.com"},
+]
+description = "Project to generate recipes for conda packages"
+readme = "README.md"
+keywords = ["conda"]
+license = {text = "MIT"}
+dynamic = ["version"]
+requires-python = ">=3.8"
+dependencies = [
+    "beautifulsoup4",
+    "colorama",
+    "conda-souschef >=2.2.3",
+    "packaging >=21.3",
+    "pip",
+    "pkginfo",
+    "progressbar2 >=3.53.0",
+    "rapidfuzz >=1.7.1",
+    "requests",
+    "ruamel.yaml >=0.16.10",
+    "ruamel.yaml.jinja2",
+    "setuptools >=30.3.0",
+    "stdlib-list",
+    "tomli",
+    "tomli-w",
+]
+
+[project.optional-dependencies]
+testing = [
+    "mock",
+    "pytest",
+    "pytest-console-scripts",
+    "pytest-cov",
+    "pytest-mock",
+    "setuptools-scm",
+]
+
+[project.scripts]
+grayskull = "grayskull.__main__:main"
+greyskull = "grayskull.__main__:main"
+conda-grayskull = "grayskull.__main__:main"
+conda-greyskull = "grayskull.__main__:main"
+
+[project.urls]
+Source = "https://github.com/conda/grayskull"
+
+[tool.setuptools.packages.find]
+include = ["grayskull", "grayskull.*"]
+
+[tool.setuptools_scm]
+write_to = "grayskull/_version.py"
+
 [tool.black]
 target-version=["py310"]
 exclude='''
@@ -16,10 +77,3 @@ exclude='''
   | tests/data
 )/
 '''
-
-[build-system]
-requires = ["setuptools>=30.3.0", "wheel", "setuptools_scm"]
-build-backend = "setuptools.build_meta"
-
-[tools.setuptools_scm]
-write_to="grayskull/_version.py"
