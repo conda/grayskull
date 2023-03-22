@@ -1,10 +1,10 @@
+import re
 from collections import defaultdict
 from pathlib import Path
-from typing import Union, Dict, Optional, Tuple
-import re
+from typing import Dict, Optional, Tuple, Union
 
-import tomli
 import semver
+import tomli
 
 from grayskull.utils import nested_dict
 
@@ -21,11 +21,14 @@ VERSION_REGEX = re.compile(
     re.VERBOSE,
 )
 
+
 class InvalidVersion(BaseException):
     pass
 
+
 class InvalidPoetryDependency(BaseException):
     pass
+
 
 def parse_version(version: str) -> Dict[str, Optional[str]]:
     """
@@ -35,20 +38,21 @@ def parse_version(version: str) -> Dict[str, Optional[str]]:
     match = VERSION_REGEX.search(version)
     if not match:
         raise InvalidVersion(f"Could not parse version {version}.")
-    
+
     return {
-        key: None if value is None else int(value) for key, value in match.groupdict().items()
+        key: None if value is None else int(value)
+        for key, value in match.groupdict().items()
     }
+
 
 def vdict_to_vinfo(version_dict: Dict[str, Optional[str]]) -> semver.VersionInfo:
     """
     Coerces version dictionary to a semver.VersionInfo object. If minor or patch
     numbers are missing, 0 is substituted in their place.
     """
-    ver = {
-        key: 0 if value is None else value for key, value in version_dict.items()
-    }
+    ver = {key: 0 if value is None else value for key, value in version_dict.items()}
     return semver.VersionInfo(**ver)
+
 
 def coerce_to_semver(version: str) -> str:
     """
@@ -58,6 +62,7 @@ def coerce_to_semver(version: str) -> str:
         return version
 
     return str(vdict_to_vinfo(parse_version(version)))
+
 
 def get_caret_ceiling(target: str) -> str:
     """
@@ -100,6 +105,7 @@ def get_caret_ceiling(target: str) -> str:
     else:
         return str(target_vinfo.bump_major())
 
+
 def get_tilde_ceiling(target: str) -> str:
     """
     Accepts a Poetry tilde target and returns the exclusive version ceiling.
@@ -107,8 +113,9 @@ def get_tilde_ceiling(target: str) -> str:
     target_dict = parse_version(target)
     if target_dict["minor"]:
         return str(vdict_to_vinfo(target_dict).bump_minor())
-    
+
     return str(vdict_to_vinfo(target_dict).bump_major())
+
 
 def encode_poetry_version(poetry_specifier: str) -> str:
     """
@@ -116,12 +123,12 @@ def encode_poetry_version(poetry_specifier: str) -> str:
 
     Example: ^1 => >=1.0.0,<2.0.0
     """
-    poetry_clauses = poetry_specifier.split(',')
+    poetry_clauses = poetry_specifier.split(",")
 
     conda_clauses = []
     for poetry_clause in poetry_clauses:
         poetry_clause = poetry_clause.replace(" ", "")
-        if poetry_clause.startswith('^'):
+        if poetry_clause.startswith("^"):
             # handle ^ operator
             target = poetry_clause[1:]
             floor = coerce_to_semver(target)
@@ -130,7 +137,7 @@ def encode_poetry_version(poetry_specifier: str) -> str:
             conda_clauses.append("<" + ceiling)
             continue
 
-        if poetry_clause.startswith('~'):
+        if poetry_clause.startswith("~"):
             # handle ~ operator
             target = poetry_clause[1:]
             floor = coerce_to_semver(target)
@@ -143,6 +150,7 @@ def encode_poetry_version(poetry_specifier: str) -> str:
         conda_clauses.append(poetry_clause)
 
     return ",".join(conda_clauses)
+
 
 def encode_poetry_deps(poetry_deps: dict) -> Tuple[list, list]:
     run = []
@@ -163,9 +171,12 @@ def encode_poetry_deps(poetry_deps: dict) -> Tuple[list, list]:
             run.append(f"{dep_name} {conda_version}")
             continue
 
-        raise InvalidPoetryDependency(f"Expected Poetry dependency specification to be of type str or dict, received {type(dep_spec).__name__}")
-    
+        raise InvalidPoetryDependency(
+            f"Expected Poetry dependency specification to be of type str or dict, received {type(dep_spec).__name__}"
+        )
+
     return run, run_constrained
+
 
 def add_poetry_metadata(metadata: dict, toml_metadata: dict) -> dict:
     if not is_poetry_present(toml_metadata):
@@ -188,7 +199,9 @@ def add_poetry_metadata(metadata: dict, toml_metadata: dict) -> dict:
     if "poetry" not in host_metadata and "poetry-core" not in host_metadata:
         metadata["requirements"]["host"] = host_metadata + ["poetry-core"]
 
-    poetry_test_deps = poetry_metadata.get("group", {}).get("test", {}).get("dependencies", {})
+    poetry_test_deps = (
+        poetry_metadata.get("group", {}).get("test", {}).get("dependencies", {})
+    )
     # add required test dependencies and ignore optional test dependencies, as
     # there doesn't appear to be a way to specify them in Conda recipe metadata.
     test_reqs, _ = encode_poetry_deps(poetry_test_deps)

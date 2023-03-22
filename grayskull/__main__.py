@@ -20,6 +20,7 @@ from grayskull.utils import generate_recipe, origin_is_github, origin_is_local_s
 init(autoreset=True)
 logging.basicConfig(format="%(levelname)s:%(message)s")
 
+
 def init_parser():
     # create the top-level parser
     parser = argparse.ArgumentParser(description="Grayskull - Conda recipe generator")

@@ -733,7 +733,9 @@ def merge_setup_toml_metadata(setup_metadata: dict, pyproject_metadata: dict) ->
             pyproject_metadata["requirements"]["run"],
         )
     if pyproject_metadata["requirements"]["run_constrained"]:
-        setup_metadata["requirements_run_constrained"] = pyproject_metadata["requirements"]["run_constrained"]
+        setup_metadata["requirements_run_constrained"] = pyproject_metadata[
+            "requirements"
+        ]["run_constrained"]
     return setup_metadata
 
 

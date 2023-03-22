@@ -1,19 +1,29 @@
 """Unit and integration tests for recipifying Poetry projects."""
 
-import pytest
-from pathlib import Path
 import filecmp
+from pathlib import Path
 
-from grayskull.__main__ import init_parser, generate_recipes_from_list
-from grayskull.utils import generate_recipe
-from grayskull.strategy.py_toml import add_poetry_metadata, get_all_toml_info, InvalidVersion, get_caret_ceiling, get_tilde_ceiling, parse_version, encode_poetry_version
+import pytest
+
+from grayskull.__main__ import generate_recipes_from_list, init_parser
 from grayskull.config import Configuration
+from grayskull.strategy.py_toml import (
+    InvalidVersion,
+    add_poetry_metadata,
+    encode_poetry_version,
+    get_all_toml_info,
+    get_caret_ceiling,
+    get_tilde_ceiling,
+    parse_version,
+)
+from grayskull.utils import generate_recipe
+
 
 def test_parse_version():
-    assert parse_version("0") == { "major": 0, "minor": None, "patch": None }
-    assert parse_version("1") == { "major": 1, "minor": None, "patch": None }
-    assert parse_version("1.2") == { "major": 1, "minor": 2, "patch": None }
-    assert parse_version("1.2.3") == { "major": 1, "minor": 2, "patch": 3 }
+    assert parse_version("0") == {"major": 0, "minor": None, "patch": None}
+    assert parse_version("1") == {"major": 1, "minor": None, "patch": None}
+    assert parse_version("1.2") == {"major": 1, "minor": 2, "patch": None}
+    assert parse_version("1.2.3") == {"major": 1, "minor": 2, "patch": 3}
 
     with pytest.raises(InvalidVersion):
         parse_version("asdf")
@@ -77,7 +87,9 @@ def test_add_poetry_metadata():
         "tool": {
             "poetry": {
                 "dependencies": {"tomli": ">=1.0.0", "requests": ">=1.0.0"},
-                "group": {"test": {"dependencies": {"tox": ">=1.0.0", "pytest": ">=1.0.0"}}},
+                "group": {
+                    "test": {"dependencies": {"tox": ">=1.0.0", "pytest": ">=1.0.0"}}
+                },
             }
         }
     }
@@ -91,10 +103,18 @@ def test_add_poetry_metadata():
     assert add_poetry_metadata(metadata, toml_metadata) == {
         "requirements": {
             "host": ["pkg_host1 >=1.0.0", "pkg_host2", "poetry-core"],
-            "run": ["pkg_run1", "pkg_run2 >=2.0.0", "tomli >=1.0.0", "requests >=1.0.0"],
+            "run": [
+                "pkg_run1",
+                "pkg_run2 >=2.0.0",
+                "tomli >=1.0.0",
+                "requests >=1.0.0",
+            ],
         },
-        "test": {"requires": ["mock", "pkg_test >=1.0.0", "tox >=1.0.0", "pytest >=1.0.0"]},
+        "test": {
+            "requires": ["mock", "pkg_test >=1.0.0", "tox >=1.0.0", "pytest >=1.0.0"]
+        },
     }
+
 
 def test_poetry_dependencies():
     toml_path = Path(__file__).parent / "data" / "poetry" / "poetry.toml"
@@ -109,9 +129,12 @@ def test_poetry_dependencies():
         "urllib3 >=1.26.0,<2.0.0",
     ]
 
+
 def test_poetry_langchain_snapshot(tmpdir):
     """Snapshot test that asserts correct recipifying of an example Poetry project."""
-    snapshot_path = Path(__file__).parent / "data" / "poetry" / "langchain-expected.yaml"
+    snapshot_path = (
+        Path(__file__).parent / "data" / "poetry" / "langchain-expected.yaml"
+    )
     output_path = tmpdir / "langchain" / "meta.yaml"
 
     parser = init_parser()
@@ -119,4 +142,3 @@ def test_poetry_langchain_snapshot(tmpdir):
 
     generate_recipes_from_list(args.pypi_packages, args)
     assert filecmp.cmp(snapshot_path, output_path, shallow=False)
-    

@@ -4,6 +4,7 @@ from pathlib import Path
 
 from grayskull.strategy.py_toml import get_all_toml_info
 
+
 def test_get_all_toml_info():
     toml_path = Path(__file__).parent / "data" / "tox" / "tox.toml"
 
