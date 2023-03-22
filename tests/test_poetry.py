@@ -6,7 +6,6 @@ from pathlib import Path
 import pytest
 
 from grayskull.__main__ import generate_recipes_from_list, init_parser
-from grayskull.config import Configuration
 from grayskull.strategy.py_toml import (
     InvalidVersion,
     add_poetry_metadata,
@@ -16,7 +15,6 @@ from grayskull.strategy.py_toml import (
     get_tilde_ceiling,
     parse_version,
 )
-from grayskull.utils import generate_recipe
 
 
 def test_parse_version():

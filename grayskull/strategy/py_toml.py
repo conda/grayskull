@@ -84,9 +84,9 @@ def get_caret_ceiling(target: str) -> str:
         target_dict = parse_version(target)
 
         if target_dict["major"] == 0:
-            if target_dict["minor"] == None:
+            if target_dict["minor"] is None:
                 target_dict["major"] += 1
-            elif target_dict["patch"] == None:
+            elif target_dict["patch"] is None:
                 target_dict["minor"] += 1
             else:
                 target_dict["patch"] += 1
@@ -160,7 +160,7 @@ def encode_poetry_deps(poetry_deps: dict) -> Tuple[list, list]:
 
         if isinstance(dep_spec, dict):
             conda_version = encode_poetry_version(dep_spec["version"])
-            if dep_spec.get("optional", False) == True:
+            if dep_spec.get("optional", False) is True:
                 run_constrained.append(f"{dep_name} {conda_version}")
             else:
                 run.append(f"{dep_name} {conda_version}")
@@ -172,7 +172,8 @@ def encode_poetry_deps(poetry_deps: dict) -> Tuple[list, list]:
             continue
 
         raise InvalidPoetryDependency(
-            f"Expected Poetry dependency specification to be of type str or dict, received {type(dep_spec).__name__}"
+            "Expected Poetry dependency specification to be of type str or dict, "
+            f"received {type(dep_spec).__name__}"
         )
 
     return run, run_constrained
