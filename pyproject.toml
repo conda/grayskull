@@ -29,6 +29,7 @@ dependencies = [
     "ruamel.yaml >=0.16.10",
     "ruamel.yaml.jinja2",
     "setuptools >=30.3.0",
+    "semver~=2.13.0",
     "stdlib-list",
     "tomli",
     "tomli-w",

@@ -107,6 +107,7 @@ def merge_pypi_sdist_metadata(
         "extras_require": get_val("extras_require"),
         "requires_dist": requires_dist,
         "sdist_path": get_val("sdist_path"),
+        "requirements_run_constrained": get_val("requirements_run_constrained")
     }
 
 
@@ -382,10 +383,14 @@ def get_metadata(recipe, config) -> dict:
     requirements_section = extract_requirements(metadata, config, recipe)
     optional_requirements = extract_optional_requirements(metadata, config)
     for key in requirements_section:
+        log.error(key)
+        log.error(requirements_section[key])
         requirements_section[key] = normalize_requirements_list(
             requirements_section[key], config
         )
     for key in optional_requirements:
+        log.error(key)
+        log.error(optional_requirements[key])
         optional_requirements[key] = normalize_requirements_list(
             optional_requirements[key], config
         )
@@ -571,6 +576,11 @@ def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]
             "run": rm_duplicated_deps(sort_reqs(map(lambda x: x.lower(), run_req))),
         }
     )
+
+    if "requirements_run_constrained" in metadata and metadata["requirements_run_constrained"]:
+        result.update({
+            "run_constrained": metadata["requirements_run_constrained"]
+        })
     update_requirements_with_pin(result)
     return result
 
