@@ -383,14 +383,10 @@ def get_metadata(recipe, config) -> dict:
     requirements_section = extract_requirements(metadata, config, recipe)
     optional_requirements = extract_optional_requirements(metadata, config)
     for key in requirements_section:
-        log.error(key)
-        log.error(requirements_section[key])
         requirements_section[key] = normalize_requirements_list(
             requirements_section[key], config
         )
     for key in optional_requirements:
-        log.error(key)
-        log.error(optional_requirements[key])
         optional_requirements[key] = normalize_requirements_list(
             optional_requirements[key], config
         )
