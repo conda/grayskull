@@ -573,10 +573,7 @@ def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]
         }
     )
 
-    if (
-        "requirements_run_constrained" in metadata
-        and metadata["requirements_run_constrained"]
-    ):
+    if metadata.get("requirements_run_constrained", None):
         result.update({"run_constrained": metadata["requirements_run_constrained"]})
     update_requirements_with_pin(result)
     return result
