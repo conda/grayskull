@@ -8,7 +8,7 @@ import pytest
 from colorama import Fore, Style
 from souschef.recipe import Recipe
 
-from grayskull.__main__ import create_python_recipe
+from grayskull.main import create_python_recipe
 from grayskull.base.factory import GrayskullFactory
 from grayskull.base.pkg_info import normalize_pkg_name
 from grayskull.cli import CLIConfig

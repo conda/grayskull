@@ -1,6 +1,6 @@
 from souschef.recipe import Recipe
 
-from grayskull.__main__ import main
+from grayskull.main import main
 
 
 def test_loop_deps_nipy_and_maintainers(tmpdir, mocker):
