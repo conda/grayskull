@@ -1,5 +1,6 @@
 import re
 from collections import defaultdict
+from functools import singledispatch
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Union
 
@@ -152,30 +153,36 @@ def encode_poetry_version(poetry_specifier: str) -> str:
     return ",".join(conda_clauses)
 
 
+@singledispatch
+def get_constrained_dep(dep_spec, dep_name):
+    raise InvalidPoetryDependency(
+        "Expected Poetry dependency specification to be of type str or dict, "
+        f"received {type(dep_spec).__name__}"
+    )
+
+
+@get_constrained_dep.register
+def __get_constrained_dep_dict(dep_spec: dict, dep_name: str):
+    conda_version = encode_poetry_version(dep_spec["version"])
+    return f"{dep_name} {conda_version}"
+
+
+@get_constrained_dep.register
+def __get_constrained_dep_str(dep_spec: str, dep_name: str):
+    conda_version = encode_poetry_version(dep_spec)
+    return f"{dep_name} {conda_version}"
+
+
 def encode_poetry_deps(poetry_deps: dict) -> Tuple[list, list]:
     run = []
     run_constrained = []
     for dep_name, dep_spec in poetry_deps.items():
-        dep_name = dep_name.strip()
-
-        if isinstance(dep_spec, dict):
-            conda_version = encode_poetry_version(dep_spec["version"])
-            if dep_spec.get("optional", False) is True:
-                run_constrained.append(f"{dep_name} {conda_version}")
-            else:
-                run.append(f"{dep_name} {conda_version}")
-            continue
-
-        if isinstance(dep_spec, str):
-            conda_version = encode_poetry_version(dep_spec)
-            run.append(f"{dep_name} {conda_version}")
-            continue
-
-        raise InvalidPoetryDependency(
-            "Expected Poetry dependency specification to be of type str or dict, "
-            f"received {type(dep_spec).__name__}"
-        )
-
+        constrained_dep = get_constrained_dep(dep_spec, dep_name)
+        try:
+            assert dep_spec.get("optional", False)
+            run_constrained.append(constrained_dep)
+        except (AttributeError, AssertionError):
+            run.append(constrained_dep)
     return run, run_constrained
 
 
