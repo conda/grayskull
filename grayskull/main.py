@@ -22,7 +22,6 @@ logging.basicConfig(format="%(levelname)s:%(message)s")
 
 
 def build_parser():
-
     # create the top-level parser
     parser = argparse.ArgumentParser(description="Grayskull - Conda recipe generator")
     subparsers = parser.add_subparsers(help="sub-command help")
