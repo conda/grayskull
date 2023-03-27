@@ -4,6 +4,6 @@ Command Line
 ```{eval-rst}
 .. argparse::
    :module: grayskull.main
-   :func: build_parser
+   :func: init_parser
    :prog: grayskull
 ```
