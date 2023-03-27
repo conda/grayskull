@@ -20,6 +20,7 @@ Grayskull Documentation
    :caption: Contents:
 
    user_guide
+   cli
    developer_guide
 
 
