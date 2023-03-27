@@ -21,10 +21,7 @@ init(autoreset=True)
 logging.basicConfig(format="%(levelname)s:%(message)s")
 
 
-def main(args=None):
-    if not args:
-        args = sys.argv[1:] or ["--help"]
-
+def init_parser():
     # create the top-level parser
     parser = argparse.ArgumentParser(description="Grayskull - Conda recipe generator")
     subparsers = parser.add_subparsers(help="sub-command help")
@@ -246,6 +243,14 @@ def main(args=None):
         help="Exclude folders when searching for licence.",
     )
 
+    return parser
+
+
+def main(args=None):
+    if not args:
+        args = sys.argv[1:] or ["--help"]
+
+    parser = init_parser()
     args = parser.parse_args(args)
 
     if args.version:

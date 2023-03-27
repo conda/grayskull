@@ -1,24 +1,12 @@
+"""Unit and integration tests for recipifying Tox projects."""
+
 from pathlib import Path
 
-from grayskull.strategy.py_toml import add_poetry_metadata, get_all_toml_info
-
-
-def test_get_all_toml_info_poetry():
-    toml_path = Path(__file__).parent / "data" / "pyproject" / "poetry.toml"
-    result = get_all_toml_info(toml_path)
-
-    assert result["test"]["requires"] == ["cachy ==0.3.0", "deepdiff ^6.2"]
-    assert result["requirements"]["host"] == ["setuptools>=1.1.0", "poetry-core"]
-    assert result["requirements"]["run"] == [
-        "python ^3.7",
-        "cleo ^2.0.0",
-        "html5lib ^1.0",
-        "urllib3 ^1.26.0",
-    ]
+from grayskull.strategy.py_toml import get_all_toml_info
 
 
 def test_get_all_toml_info():
-    toml_path = Path(__file__).parent / "data" / "pyproject" / "tox.toml"
+    toml_path = Path(__file__).parent / "data" / "tox" / "tox.toml"
 
     result = get_all_toml_info(toml_path)
     assert result["build"]["entry_points"] == ["tox = tox.run:run"]
@@ -66,28 +54,3 @@ def test_get_all_toml_info():
         'typing-extensions>=4.4; python_version < "3.8"',
         "python >=3.7",
     ]
-
-
-def test_add_poetry_metadata():
-    toml_metadata = {
-        "tool": {
-            "poetry": {
-                "dependencies": {"tomli": ">=1.0.0", "requests": ""},
-                "group": {"test": {"dependencies": {"tox": ">=1.0.0", "pytest": ""}}},
-            }
-        }
-    }
-    metadata = {
-        "requirements": {
-            "host": ["pkg_host1 >=1.0.0", "pkg_host2"],
-            "run": ["pkg_run1", "pkg_run2 >=2.0.0"],
-        },
-        "test": {"requires": ["mock", "pkg_test >=1.0.0"]},
-    }
-    assert add_poetry_metadata(metadata, toml_metadata) == {
-        "requirements": {
-            "host": ["pkg_host1 >=1.0.0", "pkg_host2", "poetry-core"],
-            "run": ["pkg_run1", "pkg_run2 >=2.0.0", "tomli >=1.0.0", "requests"],
-        },
-        "test": {"requires": ["mock", "pkg_test >=1.0.0", "tox >=1.0.0", "pytest"]},
-    }
