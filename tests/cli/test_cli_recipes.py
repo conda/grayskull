@@ -4,7 +4,7 @@ from grayskull.main import main
 
 
 def test_loop_deps_nipy_and_maintainers(tmpdir, mocker):
-    mocker.patch("grayskull.__main__.get_git_current_user", return_value="GIT_USER")
+    mocker.patch("grayskull.main.get_git_current_user", return_value="GIT_USER")
     out_folder = tmpdir.mkdir("out")
     main(["pypi", "nipy=0.4.2", "-o", str(out_folder), "--download"])
     nipy_folder = out_folder / "nipy"

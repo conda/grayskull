@@ -884,7 +884,7 @@ def test_ipytest_recipe_license():
 
 
 def test_get_test_entry_points():
-    assert get_test_entry_points("grayskull = grayskull.__main__:main") == [
+    assert get_test_entry_points("grayskull = grayskull.main:main") == [
         "grayskull --help"
     ]
     assert get_test_entry_points(
