@@ -24,6 +24,7 @@ jobs:
         run: |
           pip install -e .[docs]
           pip install -r docs/requirements.txt  # redundant?
+          cd docs
           make html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
