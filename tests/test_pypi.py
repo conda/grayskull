@@ -8,12 +8,12 @@ import pytest
 from colorama import Fore, Style
 from souschef.recipe import Recipe
 
-from grayskull.main import create_python_recipe
 from grayskull.base.factory import GrayskullFactory
 from grayskull.base.pkg_info import normalize_pkg_name
 from grayskull.cli import CLIConfig
 from grayskull.cli.parser import parse_pkg_name_version
 from grayskull.config import Configuration
+from grayskull.main import create_python_recipe
 from grayskull.strategy.py_base import (
     clean_deps_for_conda_forge,
     generic_py_ver_to,

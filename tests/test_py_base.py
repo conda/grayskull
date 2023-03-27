@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from grayskull.main import create_python_recipe
 from grayskull.config import Configuration
+from grayskull.main import create_python_recipe
 from grayskull.strategy.py_base import (
     clean_deps_for_conda_forge,
     ensure_pep440,
