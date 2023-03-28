@@ -5,7 +5,7 @@ import pytest
 from souschef.recipe import Recipe
 
 import grayskull
-from grayskull import __main__ as cli
+from grayskull import main as cli
 from grayskull.base.factory import GrayskullFactory
 from grayskull.config import Configuration
 
