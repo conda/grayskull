@@ -132,8 +132,9 @@ def get_url_filename(metadata: dict, default: Optional[str] = None) -> str:
 
     for pkg_url in metadata["urls"]:
         if pkg_url["packagetype"] == "sdist":
+            name = metadata["info"]["name"]
             version = metadata["info"]["version"]
-            return pkg_url["filename"].replace(version, "{{ version }}")
+            return pkg_url["filename"].replace(name, "{{ name }}").replace(version, "{{ version }}")
     return default
 
 
