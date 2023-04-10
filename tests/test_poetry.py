@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from grayskull.__main__ import generate_recipes_from_list, init_parser
+from grayskull.main import generate_recipes_from_list, init_parser
 from grayskull.strategy.py_toml import (
     InvalidVersion,
     add_poetry_metadata,

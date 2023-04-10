@@ -5,7 +5,7 @@ import pytest
 from souschef.recipe import Recipe
 
 import grayskull
-from grayskull import __main__ as cli
+from grayskull import main as cli
 from grayskull.base.factory import GrayskullFactory
 from grayskull.config import Configuration
 
@@ -64,11 +64,11 @@ def test_license_discovery(tmpdir):
 
 
 def test_change_pypi_url(mocker):
-    mocker.patch("grayskull.__main__.generate_recipe", return_value=None)
+    mocker.patch("grayskull.main.generate_recipe", return_value=None)
     mocker.patch(
-        "grayskull.__main__.create_python_recipe", return_value=({"extra": {}}, None)
+        "grayskull.main.create_python_recipe", return_value=({"extra": {}}, None)
     )
-    mocker.patch("grayskull.__main__.add_extra_section", return_value=None)
+    mocker.patch("grayskull.main.add_extra_section", return_value=None)
     spy = mocker.spy(cli, "create_python_recipe")
 
     cli.main(["pypi", "pytest=5.3.2", "--pypi-url=http://url_pypi.com/abc"])

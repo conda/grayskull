@@ -8,12 +8,12 @@ import pytest
 from colorama import Fore, Style
 from souschef.recipe import Recipe
 
-from grayskull.__main__ import create_python_recipe
 from grayskull.base.factory import GrayskullFactory
 from grayskull.base.pkg_info import normalize_pkg_name
 from grayskull.cli import CLIConfig
 from grayskull.cli.parser import parse_pkg_name_version
 from grayskull.config import Configuration
+from grayskull.main import create_python_recipe
 from grayskull.strategy.py_base import (
     clean_deps_for_conda_forge,
     generic_py_ver_to,
@@ -884,7 +884,7 @@ def test_ipytest_recipe_license():
 
 
 def test_get_test_entry_points():
-    assert get_test_entry_points("grayskull = grayskull.__main__:main") == [
+    assert get_test_entry_points("grayskull = grayskull.main:main") == [
         "grayskull --help"
     ]
     assert get_test_entry_points(

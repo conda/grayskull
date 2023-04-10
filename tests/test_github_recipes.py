@@ -1,7 +1,7 @@
 import pytest
 from souschef.jinja_expression import get_global_jinja_var
 
-from grayskull.__main__ import create_python_recipe
+from grayskull.main import create_python_recipe
 from grayskull.strategy.pypi import adjust_source_url_to_include_placeholders
 
 

@@ -1,19 +1,16 @@
 [build-system]
-requires = [
-    "setuptools >=61",
-    "setuptools_scm[toml]>=6.2",
-]
+requires = ["setuptools >=61", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "grayskull"
 authors = [
-    {name = "Marcelo Duarte Trevisani", email = "marceloduartetrevisani@gmail.com"},
+    { name = "Marcelo Duarte Trevisani", email = "marceloduartetrevisani@gmail.com" },
 ]
 description = "Project to generate recipes for conda packages"
 readme = "README.md"
 keywords = ["conda"]
-license = {text = "Apache-2.0"}
+license = { text = "Apache-2.0" }
 dynamic = ["version"]
 requires-python = ">=3.8"
 dependencies = [
@@ -45,11 +42,19 @@ testing = [
     "setuptools-scm",
 ]
 
+docs = [
+    "furo",
+    "sphinx",
+    "sphinx-argparse",
+    "myst-parser",
+    "mdit-py-plugins>=0.3.0",
+]
+
 [project.scripts]
-grayskull = "grayskull.__main__:main"
-greyskull = "grayskull.__main__:main"
-conda-grayskull = "grayskull.__main__:main"
-conda-greyskull = "grayskull.__main__:main"
+grayskull = "grayskull.main:main"
+greyskull = "grayskull.main:main"
+conda-grayskull = "grayskull.main:main"
+conda-greyskull = "grayskull.main:main"
 
 [project.urls]
 Source = "https://github.com/conda/grayskull"
@@ -61,8 +66,8 @@ include = ["grayskull", "grayskull.*"]
 write_to = "grayskull/_version.py"
 
 [tool.black]
-target-version=["py310"]
-exclude='''
+target-version = ["py310"]
+exclude = '''
 /(
     \.eggs
   | \.git
