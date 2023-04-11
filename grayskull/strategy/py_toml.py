@@ -259,6 +259,7 @@ def get_all_toml_info(path_toml: Union[Path, str]) -> dict:
         metadata["about"]["dev_url"] = all_urls.get("Source", None)
         metadata["about"]["home"] = all_urls.get("Homepage", None)
     metadata["about"]["summary"] = toml_project.get("description")
+    metadata["name"] = toml_project.get("name")
 
     add_poetry_metadata(metadata, toml_metadata)
 
