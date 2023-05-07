@@ -74,6 +74,10 @@ dask:
   conda_forge: dask-core
   import_name: dask
 
+data-morph-ai:
+  conda_forge: data-morph-ai
+  import_name: data_morph
+
 datadotworld:
   conda_forge: datadotworld-py
   import_name: datadotworld
