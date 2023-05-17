@@ -14,7 +14,8 @@ from typing import List, Optional, Tuple, Union
 import requests
 from colorama import Fore
 from rapidfuzz import process
-from rapidfuzz.fuzz import token_set_ratio, token_sort_ratio
+from rapidfuzz.distance import OSA
+from rapidfuzz.fuzz import partial_ratio, token_set_ratio, token_sort_ratio
 
 from grayskull.cli.stdout import print_msg
 from grayskull.license.data import get_all_licenses  # noqa
@@ -72,13 +73,19 @@ def match_license(name: str) -> dict:
         return {}
     name = re.sub(r"\s+license\s*", "", name.strip(), flags=re.IGNORECASE)
 
-    best_matches = process.extract(name, _get_all_license_choice(all_licenses))
+    best_matches = process.extract(
+        name, _get_all_license_choice(all_licenses), scorer=partial_ratio
+    )
+    best_matches = process.extract(name, [lc for lc, *_ in best_matches])
     spdx_license = best_matches[0]
-    if spdx_license[1] != 100:
+
+    if spdx_license[1] < 100:
         best_matches = [lic[0] for lic in best_matches if not lic[0].endswith("-only")]
 
         if best_matches:
-            best_matches = process.extract(name, best_matches, scorer=token_set_ratio)
+            best_matches = process.extract(
+                name, best_matches, scorer=OSA.normalized_similarity
+            )
             spdx_license = best_matches[0]
             best_matches = [lic[0] for lic in best_matches if lic[1] >= spdx_license[1]]
             if len(best_matches) > 1:

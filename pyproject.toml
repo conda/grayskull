@@ -21,7 +21,7 @@ dependencies = [
     "pip",
     "pkginfo",
     "progressbar2 >=3.53.0",
-    "rapidfuzz >=1.7.1",
+    "rapidfuzz >=3.0.0",
     "requests",
     "ruamel.yaml >=0.16.10",
     "ruamel.yaml.jinja2",
