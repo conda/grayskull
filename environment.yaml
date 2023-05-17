@@ -28,4 +28,4 @@ dependencies:
   - tomli-w
   - libcblas
   - beautifulsoup4
-  - semver
+  - semver >=3.0.0,<4.0.0
