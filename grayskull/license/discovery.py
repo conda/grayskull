@@ -92,13 +92,17 @@ def match_license(name: str) -> dict:
                 spdx_license = process.extractOne(
                     name, best_matches, scorer=token_sort_ratio
                 )
+    if spdx_license[1] != 100 and spdx_license[0].startswith("MIT"):
+        spdx_license = "MIT"
+    else:
+        spdx_license = spdx_license[0]
 
     log.info(
         f"Best match for license {name} was {spdx_license}.\n"
         f"Best matches: {best_matches}"
     )
 
-    return _get_license(spdx_license[0], all_licenses)
+    return _get_license(spdx_license, all_licenses)
 
 
 def get_short_license_id(name: str) -> str:
