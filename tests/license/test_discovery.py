@@ -58,12 +58,18 @@ def test_get_opensource_license_data():
     assert len(get_opensource_license_data()) >= 50
 
 
-def test_short_license_id():
-    assert get_short_license_id("MIT License") == "MIT"
-    assert get_short_license_id("Expat") == "MIT"
-    assert get_short_license_id("GPL 2.0") == "GPL-2.0-or-later"
-    assert get_short_license_id("2-Clause BSD License") == "BSD-2-Clause"
-    assert get_short_license_id("3-Clause BSD License") == "BSD-3-Clause"
+@pytest.mark.parametrize(
+    "licence_name, short_licence",
+    [
+        ("MIT License", "MIT"),
+        ("Expat", "MIT"),
+        ("GPL 2.0", "GPL-2.0-or-later"),
+        ("2-Clause BSD License", "BSD-2-Clause"),
+        ("3-Clause BSD License", "BSD-3-Clause"),
+    ],
+)
+def test_short_license_id(licence_name, short_licence):
+    assert get_short_license_id(licence_name) == short_licence
 
 
 def test_get_other_names_from_opensource():
