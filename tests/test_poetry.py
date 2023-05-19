@@ -12,6 +12,7 @@ from grayskull.strategy.py_toml import (
     encode_poetry_version,
     get_all_toml_info,
     get_caret_ceiling,
+    get_constrained_dep,
     get_tilde_ceiling,
     parse_version,
 )
@@ -155,3 +156,12 @@ def test_poetry_langchain_snapshot(tmpdir):
 
     generate_recipes_from_list(args.pypi_packages, args)
     assert filecmp.cmp(snapshot_path, output_path, shallow=False)
+
+
+def test_get_constrained_dep_version_not_present():
+    assert (
+        get_constrained_dep(
+            {"git": "https://codeberg.org/hjacobs/pytest-kind.git"}, "pytest-kind"
+        )
+        == "pytest-kind"
+    )
