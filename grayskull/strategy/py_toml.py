@@ -163,8 +163,8 @@ def get_constrained_dep(dep_spec, dep_name):
 
 @get_constrained_dep.register
 def __get_constrained_dep_dict(dep_spec: dict, dep_name: str):
-    conda_version = encode_poetry_version(dep_spec["version"])
-    return f"{dep_name} {conda_version}"
+    conda_version = encode_poetry_version(dep_spec.get("version", ""))
+    return f"{dep_name} {conda_version}".strip()
 
 
 @get_constrained_dep.register
