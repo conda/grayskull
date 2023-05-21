@@ -707,7 +707,7 @@ def merge_setup_toml_metadata(setup_metadata: dict, pyproject_metadata: dict) ->
     setup_metadata = defaultdict(dict, setup_metadata)
     if not pyproject_metadata:
         return setup_metadata
-    setup_metadata["name"] = pyproject_metadata["name"]
+    setup_metadata["name"] = setup_metadata.get("name") or pyproject_metadata["name"]
     if pyproject_metadata["about"]["license"]:
         setup_metadata["license"] = pyproject_metadata["about"]["license"]
     if pyproject_metadata["about"]["summary"]:
