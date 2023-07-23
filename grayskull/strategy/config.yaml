@@ -492,3 +492,7 @@ importlib_metadata:
 jupyter-client:
   conda_forge: jupyter_client
   import_name: jupyter_client
+
+flit_core:
+  conda_forge: flit-core
+  import_name: flit-core
