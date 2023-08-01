@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import re
+from copy import deepcopy
 from dataclasses import dataclass
 from functools import lru_cache
 from operator import itemgetter
@@ -72,6 +73,7 @@ def match_license(name: str) -> dict:
     if not all_licenses:
         return {}
     name = re.sub(r"\s+license\s*", "", name.strip(), flags=re.IGNORECASE)
+    name = name.strip()
 
     best_matches = process.extract(
         name, _get_all_license_choice(all_licenses), scorer=partial_ratio
@@ -86,12 +88,25 @@ def match_license(name: str) -> dict:
             best_matches = process.extract(
                 name, best_matches, scorer=OSA.normalized_similarity
             )
+            original_matches = deepcopy(best_matches)
+
+            if name.startswith("GPL"):
+                original_matches = [
+                    m for m in original_matches if m[0].startswith("GPL")
+                ]
             spdx_license = best_matches[0]
-            best_matches = [lic[0] for lic in best_matches if lic[1] >= spdx_license[1]]
+            best_matches = [
+                lic[0] for lic in original_matches if lic[1] >= spdx_license[1]
+            ]
             if len(best_matches) > 1:
                 spdx_license = process.extractOne(
                     name, best_matches, scorer=token_sort_ratio
                 )
+            if original_matches[0][1] < 0.55:
+                spdx_license = process.extractOne(
+                    name, [m[0] for m in original_matches], scorer=token_sort_ratio
+                )
+
     if spdx_license[1] != 100 and spdx_license[0].startswith("MIT"):
         spdx_license = "MIT"
     else:
