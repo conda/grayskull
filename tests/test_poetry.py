@@ -152,7 +152,9 @@ def test_poetry_langchain_snapshot(tmpdir):
     output_path = tmpdir / "langchain" / "meta.yaml"
 
     parser = init_parser()
-    args = parser.parse_args(["pypi", "langchain==0.0.119", "-o", str(tmpdir)])
+    args = parser.parse_args(
+        ["pypi", "langchain==0.0.119", "-o", str(tmpdir), "-m", "AddYourGitHubIdHere"]
+    )
 
     generate_recipes_from_list(args.pypi_packages, args)
     assert filecmp.cmp(snapshot_path, output_path, shallow=False)
