@@ -1,12 +1,12 @@
 exclude: docs
 repos:
 -   repo: https://github.com/psf/black
-    rev: 23.3.0
+    rev: 23.7.0
     hooks:
     -   id: black
         args: [--safe, --quiet]
 -   repo: https://github.com/asottile/blacken-docs
-    rev: 1.13.0
+    rev: 1.15.0
     hooks:
     -   id: blacken-docs
         additional_dependencies: [black==22.6.0]
@@ -34,7 +34,7 @@ repos:
         -   id: isort
             exclude: tests/data
 -   repo: https://github.com/PyCQA/flake8
-    rev: 6.0.0
+    rev: 6.1.0
     hooks:
     -   id: flake8
         exclude: tests/data
