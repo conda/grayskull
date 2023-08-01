@@ -59,7 +59,7 @@ def coerce_to_semver(version: str) -> str:
     """
     Coerces a version string to a semantic version.
     """
-    if semver.VersionInfo.isvalid(version):
+    if semver.VersionInfo.is_valid(version):
         return version
 
     return str(vdict_to_vinfo(parse_version(version)))
@@ -81,7 +81,7 @@ def get_caret_ceiling(target: str) -> str:
     coercing it to semver and then bumping the major version.
     Example: 1 => 2.0.0, 1.2 => 2.0.0, 1.2.3 => 2.0.0
     """
-    if not semver.VersionInfo.isvalid(target):
+    if not semver.VersionInfo.is_valid(target):
         target_dict = parse_version(target)
 
         if target_dict["major"] == 0:
@@ -163,8 +163,8 @@ def get_constrained_dep(dep_spec, dep_name):
 
 @get_constrained_dep.register
 def __get_constrained_dep_dict(dep_spec: dict, dep_name: str):
-    conda_version = encode_poetry_version(dep_spec["version"])
-    return f"{dep_name} {conda_version}"
+    conda_version = encode_poetry_version(dep_spec.get("version", ""))
+    return f"{dep_name} {conda_version}".strip()
 
 
 @get_constrained_dep.register

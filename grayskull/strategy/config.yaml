@@ -90,6 +90,10 @@ dask:
   conda_forge: dask-core
   import_name: dask
 
+data-morph-ai:
+  conda_forge: data-morph-ai
+  import_name: data_morph
+
 datadotworld:
   conda_forge: datadotworld-py
   import_name: datadotworld
@@ -488,3 +492,7 @@ importlib_metadata:
 jupyter-client:
   conda_forge: jupyter_client
   import_name: jupyter_client
+
+flit_core:
+  conda_forge: flit-core
+  import_name: flit-core

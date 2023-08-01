@@ -13,7 +13,7 @@ dependencies:
   - stdlib-list
   - pip
   - setuptools >=30.3.0
-  - rapidfuzz >=1.9.1
+  - rapidfuzz >=3.0.0
   - progressbar2 >=3.53.0
   - colorama
   - mock
@@ -28,4 +28,4 @@ dependencies:
   - tomli-w
   - libcblas
   - beautifulsoup4
-  - semver
+  - semver >=3.0.0,<4.0.0
