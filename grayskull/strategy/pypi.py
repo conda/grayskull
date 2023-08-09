@@ -59,7 +59,7 @@ class PypiStrategy(AbstractStrategy):
     def fetch_data(recipe, config, sections=None):
         update_recipe(recipe, config, sections or ALL_SECTIONS)
         if not (recipe["build"] and recipe["build"]["script"]):
-            recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
+            recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation"
 
 
 def merge_pypi_sdist_metadata(
