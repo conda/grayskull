@@ -390,7 +390,7 @@ def get_license_type(path_license: str, default: Optional[str] = None) -> Option
     :param default: Default value for the license type
     :return: License type
     """
-    with open(path_license, "r", errors='ignore') as license_file:
+    with open(path_license, "r", errors="ignore") as license_file:
         license_content = license_file.read()
     find_apache = re.findall(
         r"apache\.org\/licenses\/LICENSE\-([0-9])\.([0-9])",
