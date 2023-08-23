@@ -496,3 +496,7 @@ jupyter-client:
 flit_core:
   conda_forge: flit-core
   import_name: flit-core
+
+gssapi:
+  conda_forge: python-gssapi
+  import_name: gssapi
