@@ -8,6 +8,7 @@ from grayskull.strategy.py_base import (
     generic_py_ver_to,
     get_sdist_metadata,
     merge_deps_toml_setup,
+    split_deps,
     update_requirements_with_pin,
 )
 from grayskull.utils import PyVer
@@ -117,3 +118,15 @@ def test_get_sdist_metadata_toml_files_BLACK():
         "typing_extensions>=3.10.0.0; python_version < '3.10'",
         "python >=3.7",
     ]
+
+
+def test_split_deps_without_comma():
+    assert split_deps(">=1.8.0<3.0.0,!=2.0.1") == [">=1.8.0", "<3.0.0", "!=2.0.1"]
+
+
+def test_split_deps():
+    assert split_deps(">=1.8.0,<3.0.0,!=2.0.1") == [">=1.8.0", "<3.0.0", "!=2.0.1"]
+
+
+def test_split_deps_space():
+    assert split_deps(">=1.8.0 <3.0.0 !=2.0.1") == [">=1.8.0", "<3.0.0", "!=2.0.1"]

@@ -13,7 +13,7 @@ build:
   entry_points:
     - langchain-server = langchain.server:main
   noarch: python
-  script: {{ PYTHON }} -m pip install . -vv
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
   number: 0
 
 requirements:

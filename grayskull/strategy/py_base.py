@@ -707,6 +707,7 @@ def merge_setup_toml_metadata(setup_metadata: dict, pyproject_metadata: dict) ->
     setup_metadata = defaultdict(dict, setup_metadata)
     if not pyproject_metadata:
         return setup_metadata
+    setup_metadata["name"] = setup_metadata.get("name") or pyproject_metadata["name"]
     if pyproject_metadata["about"]["license"]:
         setup_metadata["license"] = pyproject_metadata["about"]["license"]
     if pyproject_metadata["about"]["summary"]:
@@ -792,11 +793,27 @@ def get_sdist_metadata(
         dist = UnpackedSDist(path_pkg_info[0].parent)
         for key in ("name", "version", "summary", "author"):
             metadata[key] = getattr(dist, key, None)
+
     return merge_setup_toml_metadata(metadata, pyproject_metadata)
 
 
 def ensure_pep440_in_req_list(list_req: List[str]) -> List[str]:
     return [ensure_pep440(pkg) for pkg in list_req]
+
+
+def split_deps(deps: str) -> List[str]:
+    deps = deps.split(",")
+    result = []
+    for d in deps:
+        constrain = ""
+        for val in re.split(r"([><!=~^]+)", d):
+            if not val:
+                continue
+            if {">", "<", "=", "!", "~", "^"} & set(val):
+                constrain = val.strip()
+            else:
+                result.append(f"{constrain}{val.strip()}")
+    return result
 
 
 def ensure_pep440(pkg: str) -> str:
@@ -813,7 +830,7 @@ def ensure_pep440(pkg: str) -> str:
         selector = f"  {' '.join(split_pkg[hash_index:])}"
         split_pkg = split_pkg[:hash_index]
     constrain_pkg = "".join(split_pkg[1:])
-    list_constrains = constrain_pkg.split(",")
+    list_constrains = split_deps(constrain_pkg)
     full_constrain = []
     for constrain in list_constrains:
         if "~=" in constrain:
