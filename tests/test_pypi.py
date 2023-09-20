@@ -43,6 +43,7 @@ from grayskull.strategy.pypi import (
     normalize_requirements_list,
     remove_selectors_pkgs_if_needed,
     sort_reqs,
+    update_recipe,
 )
 from grayskull.utils import PyVer, format_dependencies, generate_recipe
 
@@ -1326,3 +1327,18 @@ def test_sort_reqs():
 
     assert sort_reqs(original_deps) in [sorted_deps_orig, sorted_deps_alpha]
     assert sort_reqs(original_deps_38) in [sorted_deps_orig_38, sorted_deps_alpha_38]
+
+
+@patch("grayskull.strategy.pypi.get_metadata")
+def test_metadata_pypi_none_value(mock_get_data):
+    mock_get_data.return_value = {
+        "package": {"name": "pypylon", "version": "1.2.3"},
+        "build": {"test": [None]},
+    }
+    recipe = Recipe(name="pypylon")
+    update_recipe(
+        recipe,
+        Configuration(name="pypylon", repo_github="https://github.com/basler/pypylon"),
+        ("package", "build"),
+    )
+    assert recipe["build"]["test"] == []

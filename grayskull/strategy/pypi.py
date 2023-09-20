@@ -480,12 +480,23 @@ def get_metadata(recipe, config) -> dict:
         }
 
 
+def remove_all_inner_nones(metadata: Dict) -> Dict:
+    """Remove all inner None values from a dictionary."""
+    for k, v in metadata.items():
+        if not isinstance(v, list):
+            continue
+        metadata[k] = [i for i in v if i is not None]
+    return metadata
+
+
 def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]):
     """Update one specific section."""
     from souschef.section import Section
 
     metadata = get_metadata(recipe, config)
+
     for section in all_sections:
+        metadata[section] = remove_all_inner_nones(metadata.get(section, {}))
         if metadata.get(section):
             if section == "package":
                 package_metadata = dict(metadata[section])
