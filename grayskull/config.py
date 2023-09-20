@@ -32,7 +32,9 @@ class Configuration:
         ]
     )
     is_strict_cf: bool = False
-    pkg_need_c_compiler: Tuple = field(default_factory=lambda: ("cython",))
+    pkg_need_c_compiler: Tuple = field(
+        default_factory=lambda: ("cython", "cython-blis", "blis")
+    )
     pkg_need_cxx_compiler: Tuple = field(default_factory=lambda: ("pybind11",))
     url_pypi_metadata: str = "https://pypi.org/pypi/{pkg_name}/json"
     download: bool = False
