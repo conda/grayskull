@@ -504,3 +504,7 @@ gssapi:
 jsii:
   conda_forge: python-jsii
   import_name: jsii
+
+blis:
+  conda_forge: cython-blis
+  import_name: blis
