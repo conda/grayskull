@@ -41,6 +41,7 @@ from grayskull.strategy.pypi import (
     get_url_filename,
     merge_pypi_sdist_metadata,
     normalize_requirements_list,
+    remove_all_inner_nones,
     remove_selectors_pkgs_if_needed,
     sort_reqs,
     update_recipe,
@@ -1342,3 +1343,16 @@ def test_metadata_pypi_none_value(mock_get_data):
         ("package", "build"),
     )
     assert recipe["build"]["test"] == []
+
+
+@pytest.mark.parametrize(
+    "param, result",
+    [
+        ({"test": [None, None, None]}, {"test": []}),
+        ({"test": [None, "foo", None]}, {"test": ["foo"]}),
+        ({"test": [None, "foo", None, "bar", None]}, {"test": ["foo", "bar"]}),
+        ({"test": [None, "foo", None, "bar", None, None]}, {"test": ["foo", "bar"]}),
+    ],
+)
+def test_remove_all_inner_none(param, result):
+    assert remove_all_inner_nones(param) == result
