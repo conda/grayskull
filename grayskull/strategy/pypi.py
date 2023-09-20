@@ -84,7 +84,6 @@ def merge_pypi_sdist_metadata(
         source_section["url"] = adjust_source_url_to_include_placeholders(
             source_section["url"], get_val("version")
         )
-
     return {
         "author": get_val("author"),
         "name": get_val("name"),
