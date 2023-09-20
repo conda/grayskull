@@ -167,3 +167,34 @@ def test_get_constrained_dep_version_not_present():
         )
         == "pytest-kind"
     )
+
+
+def test_entrypoints():
+    poetry = {
+        "requirements": {"host": ["setuptools"], "run": ["python"]},
+        "build": {},
+        "test": {},
+    }
+    toml_metadata = {
+        "tool": {
+            "poetry": {
+                "scripts": {
+                    "grayskull": "grayskull.main:main",
+                    "grayskull-recipe": "grayskull.main:recipe",
+                }
+            }
+        }
+    }
+    assert add_poetry_metadata(poetry, toml_metadata) == {
+        "requirements": {
+            "host": ["setuptools", "poetry-core"],
+            "run": ["python"],
+        },
+        "build": {
+            "entry_points": [
+                "grayskull = grayskull.main:main",
+                "grayskull-recipe = grayskull.main:recipe",
+            ]
+        },
+        "test": {},
+    }

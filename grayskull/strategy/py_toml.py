@@ -204,6 +204,12 @@ def add_poetry_metadata(metadata: dict, toml_metadata: dict) -> dict:
         metadata["requirements"]["run_constrained"].extend(req_run_constrained)
 
     host_metadata = metadata["requirements"].get("host", [])
+    if toml_metadata["tool"].get("poetry", {}).get("scripts"):
+        metadata["build"]["entry_points"] = []
+        for entry_name, entry_path in toml_metadata["tool"]["poetry"][
+            "scripts"
+        ].items():
+            metadata["build"]["entry_points"].append(f"{entry_name} = {entry_path}")
     if "poetry" not in host_metadata and "poetry-core" not in host_metadata:
         metadata["requirements"]["host"] = host_metadata + ["poetry-core"]
 
