@@ -1,3 +1,4 @@
+import itertools
 import json
 import logging
 import os
@@ -530,6 +531,25 @@ def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]
                 output["build"]["noarch"] = "python"
 
 
+def check_noarch_python_for_new_deps(
+    host_req: List, run_req: List, config: Configuration
+):
+    if not config.is_arch:
+        return
+    for dep in itertools.chain(host_req, run_req):
+        dep = dep.strip()
+        only_name = re.split(r"[~^<>=!#\s+]+", dep)[0].strip()
+        if (
+            "# [" in dep
+            or dep.startswith("<{")
+            or only_name in config.pkg_need_c_compiler
+            or only_name in config.pkg_need_cxx_compiler
+        ):
+            config.is_arch = True
+            return
+    config.is_arch = False
+
+
 def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]:
     """Extract the requirements for `build`, `host` and `run`"""
     name = metadata["name"]
@@ -575,6 +595,7 @@ def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]
     if config.is_strict_cf:
         host_req = remove_selectors_pkgs_if_needed(host_req)
         run_req = remove_selectors_pkgs_if_needed(run_req)
+        check_noarch_python_for_new_deps(host_req, run_req, config)
     result = {}
     if build_req:
         result = {
