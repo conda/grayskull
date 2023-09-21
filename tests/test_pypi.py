@@ -32,6 +32,7 @@ from grayskull.strategy.py_base import (
 )
 from grayskull.strategy.pypi import (
     PypiStrategy,
+    check_noarch_python_for_new_deps,
     compose_test_section,
     extract_optional_requirements,
     extract_requirements,
@@ -1356,3 +1357,15 @@ def test_metadata_pypi_none_value(mock_get_data):
 )
 def test_remove_all_inner_none(param, result):
     assert remove_all_inner_nones(param) == result
+
+
+def test_check_noarch_python_for_new_deps():
+    config = Configuration(
+        is_strict_cf=True, name="abcd", version="0.1.0", is_arch=True
+    )
+    check_noarch_python_for_new_deps(
+        ["python >=3.6", "pip"],
+        ["dataclasses >=3.6", "python >=3.6"],
+        config,
+    )
+    assert config.is_arch is False
