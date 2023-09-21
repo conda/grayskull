@@ -227,6 +227,25 @@ def is_poetry_present(toml_metadata: dict) -> bool:
     return "poetry" in toml_metadata.get("tool", {})
 
 
+def is_flit_present(toml_metadata: dict) -> bool:
+    return "flit" in toml_metadata.get("tool", {})
+
+
+def add_flit_metadata(metadata: dict, toml_metadata: dict) -> dict:
+    if not is_flit_present(toml_metadata):
+        return metadata
+
+    flit_metadata = toml_metadata["tool"]["flit"]
+    flit_scripts = flit_metadata.get("scripts", {})
+    for entry_name, entry_path in flit_scripts.items():
+        if "build" not in metadata:
+            metadata["build"] = {}
+        if "entry_points" not in metadata["build"]:
+            metadata["build"]["entry_points"] = []
+        metadata["build"]["entry_points"].append(f"{entry_name} = {entry_path}")
+    return metadata
+
+
 def get_all_toml_info(path_toml: Union[Path, str]) -> dict:
     with open(path_toml, "rb") as f:
         toml_metadata = tomli.load(f)
@@ -268,5 +287,6 @@ def get_all_toml_info(path_toml: Union[Path, str]) -> dict:
     metadata["name"] = metadata.get("name") or toml_project.get("name")
 
     add_poetry_metadata(metadata, toml_metadata)
+    add_flit_metadata(metadata, toml_metadata)
 
     return metadata
