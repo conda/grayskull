@@ -60,8 +60,40 @@ def pypi_metadata():
 
 
 @pytest.fixture
+def freeze_py_cf_supported():
+    return [
+        PyVer(3, 6),
+        PyVer(3, 7),
+        PyVer(3, 8),
+        PyVer(3, 9),
+        PyVer(3, 10),
+        PyVer(3, 11),
+    ]
+
+
+@pytest.fixture
 def recipe_config():
-    config = Configuration(name="pytest")
+    config = Configuration(
+        name="pytest",
+        py_cf_supported=[
+            PyVer(3, 6),
+            PyVer(3, 7),
+            PyVer(3, 8),
+            PyVer(3, 9),
+            PyVer(3, 10),
+            PyVer(3, 11),
+            PyVer(3, 12),
+        ],
+        supported_py=[
+            PyVer(2, 7),
+            PyVer(3, 6),
+            PyVer(3, 7),
+            PyVer(3, 8),
+            PyVer(3, 9),
+            PyVer(3, 10),
+            PyVer(3, 11),
+        ],
+    )
     recipe = Recipe(name="pytest")
     return recipe, config
 
@@ -1048,8 +1080,12 @@ def test_multiples_exit_setup():
     assert create_python_recipe("pyproj=2.6.1")[0]
 
 
-def test_sequence_inside_another_in_dependencies():
-    recipe = create_python_recipe("unittest2=1.1.0", is_strict_cf=True)[0]
+def test_sequence_inside_another_in_dependencies(freeze_py_cf_supported):
+    recipe = create_python_recipe(
+        "unittest2=1.1.0",
+        is_strict_cf=True,
+        py_cf_supported=freeze_py_cf_supported,
+    )[0]
     assert sorted(recipe["requirements"]["host"]) == sorted(
         [
             "python >=3.6",
@@ -1174,8 +1210,12 @@ def test_replace_slash_in_imports():
     assert ["asgi_lifespan"] == recipe["test"]["imports"]
 
 
-def test_add_python_min_to_strict_conda_forge():
-    recipe = create_python_recipe("dgllife=0.2.8", is_strict_cf=True)[0]
+def test_add_python_min_to_strict_conda_forge(freeze_py_cf_supported):
+    recipe = create_python_recipe(
+        "dgllife=0.2.8",
+        is_strict_cf=True,
+        py_cf_supported=freeze_py_cf_supported,
+    )[0]
     assert recipe["build"]["noarch"] == "python"
     assert recipe["requirements"]["host"][0] == "python >=3.6"
     assert "python >=3.6" in recipe["requirements"]["run"]
@@ -1304,8 +1344,13 @@ def test_remove_selectors_pkgs_if_needed_with_recipe():
     )
 
 
-def test_noarch_python_min_constrain():
-    recipe, _ = create_python_recipe("humre", is_strict_cf=True, version="0.1.1")
+def test_noarch_python_min_constrain(freeze_py_cf_supported):
+    recipe, _ = create_python_recipe(
+        "humre",
+        is_strict_cf=True,
+        version="0.1.1",
+        py_cf_supported=freeze_py_cf_supported,
+    )
     assert recipe["requirements"]["run"] == ["python >=3.6"]
 
 
