@@ -7,7 +7,6 @@ from typing import List, Optional
 
 import requests
 from colorama import Fore, Style, init
-from colorama.ansi import clear_screen
 
 import grayskull
 from grayskull.base.factory import GrayskullFactory
@@ -273,7 +272,6 @@ def main(args=None):
     CLIConfig().list_missing_deps = args.list_missing_deps
 
     print_msg(Style.RESET_ALL)
-    print_msg(clear_screen())
 
     if getattr(args, "pypi_packages", None):
         generate_recipes_from_list(args.pypi_packages, args)
