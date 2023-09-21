@@ -96,7 +96,10 @@ def init_parser():
     # create parser for pypi
     pypi_parser = subparsers.add_parser("pypi", help="Options to generate PyPI recipes")
     pypi_parser.add_argument(
-        "pypi_packages", nargs="+", help="Specify the PyPI packages name.", default=[]
+        "pypi_packages",
+        nargs="+",
+        help="Specify the PyPI packages name. Grayskull can also accept a github url.",
+        default=[],
     )
     pypi_parser.add_argument(
         "--download",
