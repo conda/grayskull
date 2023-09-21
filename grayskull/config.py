@@ -24,7 +24,6 @@ class Configuration:
     )
     py_cf_supported: List[PyVer] = field(
         default_factory=lambda: [
-            PyVer(3, 6),
             PyVer(3, 7),
             PyVer(3, 8),
             PyVer(3, 9),
