@@ -118,6 +118,10 @@ dye_score:
   conda_forge: dye-score
   import_name: dye_score
 
+eccodes:
+  conda_forge: python-eccodes
+  import_name: eccodes
+
 empyrical_dist:
   conda_forge: empyrical-dist
   import_name: empyrical_dist
