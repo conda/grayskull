@@ -126,7 +126,7 @@ def test_extract_pypi_requirements(pypi_metadata, recipe_config):
             "pathlib2 >=2.2.0  # [py<36]",
             "importlib-metadata >=0.12  # [py<38]",
             "atomicwrites >=1.0  # [win]",
-            "colorama   # [win]",
+            "colorama  # [win]",
         ]
     )
 

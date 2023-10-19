@@ -125,13 +125,20 @@ def rm_duplicated_deps(all_requirements: Union[list, set, None]) -> Optional[lis
     # as it should be added.
     # (This is order-preserving since dicts are ordered by first insertion.)
     new_reqs: dict[str, str] = {}
-    re_split = re.compile(r"\s+|>|=|<|~|!|#")
+    re_split = re.compile(r"\s+(|>|=|<|~|!|#)+")
     for dep in all_requirements:
         if dep.strip().startswith(("{{", "<{")):
             new_reqs[dep] = dep
             continue
-        dep_name = re_split.split(dep.strip())[0].strip()
+        dep_name, *constrains = re_split.split(dep.strip())
+        dep_name = dep_name.strip()
+        constrains = [
+            c.strip()
+            for c in constrains
+            if c.strip() not in {"=*", "==*", "*", "*.*", "*.*.*", ""}
+        ]
         canonicalized = dep_name.replace("_", "-").lower()
+        constrains.insert(0, dep_name)
         if canonicalized in new_reqs:
             # In order to break ties deterministically, we prioritize the requirement
             # which is alphanumerically lowest. This happens to prioritize the "-"
@@ -140,10 +147,10 @@ def rm_duplicated_deps(all_requirements: Union[list, set, None]) -> Optional[lis
             # keep "importlib-metadata" because it is alphabetically lower.
             previous_req = new_reqs[canonicalized]
             if len(dep) > len(previous_req) or "-" in dep_name:
-                new_reqs[canonicalized] = dep
+                new_reqs[canonicalized] = " ".join(constrains)
         else:
-            new_reqs[canonicalized] = dep
-    return list(new_reqs.values())
+            new_reqs[canonicalized] = " ".join(constrains)
+    return [re.sub(r"\s+(#)", "  \\1", v.strip()) for v in new_reqs.values()]
 
 
 def format_dependencies(all_dependencies: List, name: str) -> List:
@@ -162,7 +169,7 @@ def format_dependencies(all_dependencies: List, name: str) -> List:
     for req in all_dependencies:
         match_req = re_deps.match(req)
         deps_name = req
-        if deps_name.replace("-", "_") == name.replace("-", "_"):
+        if name is not None and deps_name.replace("-", "_") == name.replace("-", "_"):
             continue
         if match_req:
             match_req = match_req.groups()
