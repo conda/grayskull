@@ -125,7 +125,7 @@ def rm_duplicated_deps(all_requirements: Union[list, set, None]) -> Optional[lis
     # as it should be added.
     # (This is order-preserving since dicts are ordered by first insertion.)
     new_reqs: dict[str, str] = {}
-    re_split = re.compile(r"\s+|>|=|<|~|!|#")
+    re_split = re.compile(r"\s+(|>|=|<|~|!|#)+")
     for dep in all_requirements:
         if dep.strip().startswith(("{{", "<{")):
             new_reqs[dep] = dep
@@ -133,7 +133,9 @@ def rm_duplicated_deps(all_requirements: Union[list, set, None]) -> Optional[lis
         dep_name, *constrains = re_split.split(dep.strip())
         dep_name = dep_name.strip()
         constrains = [
-            c.strip() for c in constrains if c.strip() not in {"*", "*.*", "*.*.*"}
+            c.strip()
+            for c in constrains
+            if c.strip() not in {"=*", "==*", "*", "*.*", "*.*.*"}
         ]
         canonicalized = dep_name.replace("_", "-").lower()
         constrains.insert(0, dep_name)
@@ -167,7 +169,7 @@ def format_dependencies(all_dependencies: List, name: str) -> List:
     for req in all_dependencies:
         match_req = re_deps.match(req)
         deps_name = req
-        if deps_name.replace("-", "_") == name.replace("-", "_"):
+        if name is not None and deps_name.replace("-", "_") == name.replace("-", "_"):
             continue
         if match_req:
             match_req = match_req.groups()
