@@ -135,7 +135,7 @@ def rm_duplicated_deps(all_requirements: Union[list, set, None]) -> Optional[lis
         constrains = [
             c.strip()
             for c in constrains
-            if c.strip() not in {"=*", "==*", "*", "*.*", "*.*.*"}
+            if c.strip() not in {"=*", "==*", "*", "*.*", "*.*.*", ""}
         ]
         canonicalized = dep_name.replace("_", "-").lower()
         constrains.insert(0, dep_name)
@@ -150,7 +150,7 @@ def rm_duplicated_deps(all_requirements: Union[list, set, None]) -> Optional[lis
                 new_reqs[canonicalized] = " ".join(constrains)
         else:
             new_reqs[canonicalized] = " ".join(constrains)
-    return list(new_reqs.values())
+    return [re.sub(r"\s+(#)", "  \\1", v.strip()) for v in new_reqs.values()]
 
 
 def format_dependencies(all_dependencies: List, name: str) -> List:
