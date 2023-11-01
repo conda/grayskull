@@ -64,6 +64,7 @@ def test_get_opensource_license_data():
         ("MIT License", "MIT"),
         ("Expat", "MIT"),
         ("GPL 2.0", "GPL-2.0-or-later"),
+        ("GPLv3", "GPL-3.0-or-later"),
         ("2-Clause BSD License", "BSD-2-Clause"),
         ("3-Clause BSD License", "BSD-3-Clause"),
     ],
