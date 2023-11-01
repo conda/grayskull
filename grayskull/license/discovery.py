@@ -82,7 +82,20 @@ def match_license(name: str) -> dict:
     spdx_license = best_matches[0]
 
     if spdx_license[1] < 100:
-        best_matches = [lic[0] for lic in best_matches if not lic[0].endswith("-only")]
+        # Prefer "-or-later" licenses over the "-only"
+        later_licenses = {
+            lic[0].replace("-or-later", "")
+            for lic in best_matches
+            if lic[0].endswith("-or-later")
+        }
+        best_matches = [
+            lic[0]
+            for lic in best_matches
+            if not (
+                lic[0].endswith("-only")
+                and lic[0].replace("-only", "") in later_licenses
+            )
+        ]
 
         if best_matches:
             best_matches = process.extract(
@@ -102,7 +115,7 @@ def match_license(name: str) -> dict:
                 spdx_license = process.extractOne(
                     name, best_matches, scorer=token_sort_ratio
                 )
-            if original_matches[0][1] < 0.55:
+            if original_matches and original_matches[0][1] < 0.55:
                 spdx_license = process.extractOne(
                     name, [m[0] for m in original_matches], scorer=token_sort_ratio
                 )
