@@ -42,6 +42,10 @@ bash_completion:
   conda_forge: py-bash-completion
   import_name: bash_completion
 
+build:
+  conda_forge: python-build
+  import_name: build
+
 captest:
   conda_forge: pvcaptest
   import_name: captest
