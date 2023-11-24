@@ -12,9 +12,10 @@ jobs:
   run:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        py_ver: ["3.8", "3.9", "3.10", "3.11"]
+        py_ver: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     env:
       OS: ${{ matrix.os }}
       PYTHON: ${{ matrix.py_ver }}
