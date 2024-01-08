@@ -24,6 +24,10 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.width = 600
 
 
+#  PURL fields               scheme      type           name
+RE_PEP725_PURL = re.compile(r"[a-z]+\:[\.a-z0-9_-]+\/[\.a-z0-9_-]+", re.IGNORECASE)
+
+
 @lru_cache(maxsize=10)
 def get_std_modules() -> List:
     from stdlib_list import stdlib_list
@@ -167,6 +171,9 @@ def format_dependencies(all_dependencies: List, name: str) -> List:
     re_remove_tags = re.compile(r"\s*(\[.*\])", re.DOTALL)
     re_remove_comments = re.compile(r"\s+#.*", re.DOTALL)
     for req in all_dependencies:
+        if RE_PEP725_PURL.match(req):
+            formatted_dependencies.append(req)
+            continue
         match_req = re_deps.match(req)
         deps_name = req
         if name is not None and deps_name.replace("-", "_") == name.replace("-", "_"):
@@ -218,11 +225,6 @@ def generate_recipe(
         name = file_to_recipe.split(os.path.sep)[-1]
         if os.path.isfile(file_to_recipe):
             copyfile(file_to_recipe, os.path.join(recipe_folder, name))
-
-
-def get_clean_yaml(recipe_yaml: CommentedMap) -> CommentedMap:
-    clean_yaml(recipe_yaml)
-    return add_new_lines_after_section(recipe_yaml)
 
 
 def add_new_lines_after_section(recipe_yaml: CommentedMap) -> CommentedMap:

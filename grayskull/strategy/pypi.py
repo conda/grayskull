@@ -111,6 +111,7 @@ def merge_pypi_sdist_metadata(
         "requires_dist": requires_dist,
         "sdist_path": get_val("sdist_path"),
         "requirements_run_constrained": get_val("requirements_run_constrained"),
+        "__build_requirements_placeholder": get_val("__build_requirements_placeholder"),
     }
 
 
@@ -556,6 +557,8 @@ def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]
     requires_dist = format_dependencies(metadata.get("requires_dist", []), name)
     setup_requires = metadata.get("setup_requires", [])
     host_req = format_dependencies(setup_requires or [], config.name)
+    build_requires = metadata.get("__build_requirements_placeholder", [])
+    build_req = format_dependencies(build_requires or [], config.name)
     if not requires_dist and not host_req and not metadata.get("requires_python"):
         if config.is_strict_cf:
             py_constrain = (
@@ -571,7 +574,9 @@ def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]
 
     run_req = get_run_req_from_requires_dist(requires_dist, config)
     host_req = get_run_req_from_requires_dist(host_req, config)
-    build_req = [f"<{{ compiler('{c}') }}}}" for c in metadata.get("compilers", [])]
+    build_req = build_req or [
+        f"<{{ compiler('{c}') }}}}" for c in metadata.get("compilers", [])
+    ]
     if build_req:
         config.is_arch = True
 
