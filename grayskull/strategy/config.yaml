@@ -118,6 +118,10 @@ docker:
   import_name: docker
   conda_forge: docker-py
 
+duckdb:
+  import_name: duckdb
+  conda_forge: python-duckdb
+
 dye_score:
   conda_forge: dye-score
   import_name: dye_score
