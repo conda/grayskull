@@ -90,6 +90,10 @@ cufflinks:
   conda_forge: python-cufflinks
   import_name: cufflinks
 
+dashing:
+  conda_forge: python-dashing
+  import_name: dashing
+
 dask:
   conda_forge: dask-core
   import_name: dask
