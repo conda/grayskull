@@ -164,25 +164,43 @@ def get_constrained_dep(dep_spec, dep_name):
 @get_constrained_dep.register
 def __get_constrained_dep_dict(dep_spec: dict, dep_name: str):
     conda_version = encode_poetry_version(dep_spec.get("version", ""))
-    return f"{dep_name} {conda_version}".strip()
+    python_selector = ""
+    if "python" in dep_spec:
+        if m := re.match(r">=(\d)\.(\d+),<(\d)\.(\d+)", dep_spec["python"]):
+            python_selector = (
+                f"  # [py>={m.group(1)}{m.group(2)} and py<{m.group(3)}{m.group(4)}]"
+            )
+        elif m := re.match(r">=(\d)\.(\d+)", dep_spec["python"]):
+            python_selector = f"  # [py>={m.group(1)}{m.group(2)}]"
+        else:
+            raise ValueError(
+                f"Unsupported Python version expression: {dep_spec['python']}"
+            )
+    yield f"{dep_name} {conda_version}{python_selector}".strip()
+
+
+@get_constrained_dep.register
+def __get_constrained_dep_list(dep_spec: list, dep_name: str):
+    for dep_spec_item in dep_spec:
+        yield from get_constrained_dep(dep_spec_item, dep_name)
 
 
 @get_constrained_dep.register
 def __get_constrained_dep_str(dep_spec: str, dep_name: str):
     conda_version = encode_poetry_version(dep_spec)
-    return f"{dep_name} {conda_version}"
+    yield f"{dep_name} {conda_version}"
 
 
 def encode_poetry_deps(poetry_deps: dict) -> Tuple[list, list]:
     run = []
     run_constrained = []
     for dep_name, dep_spec in poetry_deps.items():
-        constrained_dep = get_constrained_dep(dep_spec, dep_name)
-        try:
-            assert dep_spec.get("optional", False)
-            run_constrained.append(constrained_dep)
-        except (AttributeError, AssertionError):
-            run.append(constrained_dep)
+        for constrained_dep in get_constrained_dep(dep_spec, dep_name):
+            try:
+                assert dep_spec.get("optional", False)
+                run_constrained.append(constrained_dep)
+            except (AttributeError, AssertionError):
+                run.append(constrained_dep)
     return run, run_constrained
 
 
