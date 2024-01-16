@@ -12,17 +12,16 @@ source:
 build:
   entry_points:
     - langchain-server = langchain.server:main
-  noarch: python
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
   number: 0
 
 requirements:
   host:
-    - python >=3.8,<4.0
+    - python
     - poetry-core
     - pip
   run:
-    - python >=3.8.1,<4.0
+    - python
     - pydantic >=1.0.0,<2.0.0
     - sqlalchemy >=1.0.0,<2.0.0
     - requests >=2.0.0,<3.0.0
@@ -44,14 +43,14 @@ requirements:
     - beautifulsoup4 >=4.0.0,<5.0.0
     - pytorch >=1.0.0,<2.0.0
     - jinja2 >=3.0.0,<4.0.0
-    - tiktoken >=0.0.0,<1.0.0
+    - tiktoken >=0.0.0,<1.0.0  # [py>=39 and py<400]
     - pinecone-client >=2.0.0,<3.0.0
     - weaviate-client >=3.0.0,<4.0.0
     - google-api-python-client 2.70.0
     - wolframalpha 5.0.0
     - anthropic >=0.2.2,<0.3.0
-    - qdrant-client >=1.0.4,<2.0.0
-    - tensorflow-text >=2.11.0,<3.0.0
+    - qdrant-client >=1.0.4,<2.0.0  # [py>=38]
+    - tensorflow-text >=2.11.0,<3.0.0  # [py>=310 and py<400]
     - cohere >=3.0.0,<4.0.0
     - openai >=0.0.0,<1.0.0
     - nlpcloud >=1.0.0,<2.0.0

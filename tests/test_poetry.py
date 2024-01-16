@@ -141,6 +141,8 @@ def test_poetry_dependencies():
         "cleo >=2.0.0,<3.0.0",
         "html5lib >=1.0.0,<2.0.0",
         "urllib3 >=1.26.0,<2.0.0",
+        "scikit-learn >=1.0.2,<2.0.0  # [py>=37 and py<38]",
+        "scikit-learn >=1.2.0,<2.0.0  # [py>=38 and py<312]",
     ]
 
 
