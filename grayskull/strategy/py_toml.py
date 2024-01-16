@@ -172,6 +172,9 @@ def __get_constrained_dep_dict(dep_spec: dict, dep_name: str):
             )
         elif m := re.match(r">=(\d)\.(\d+)", dep_spec["python"]):
             python_selector = f"  # [py>={m.group(1)}{m.group(2)}]"
+        elif m := re.match(r"\^(\d)\.(\d+)", dep_spec["python"]):
+            next_major = (int(m.group(1)) + 1) * 100
+            python_selector = f"  # [py>={m.group(1)}{m.group(2)} and py<{next_major}]"
         else:
             raise ValueError(
                 f"Unsupported Python version expression: {dep_spec['python']}"
