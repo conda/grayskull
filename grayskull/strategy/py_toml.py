@@ -246,6 +246,56 @@ def add_flit_metadata(metadata: dict, toml_metadata: dict) -> dict:
     return metadata
 
 
+def is_pep725_present(toml_metadata: dict):
+    return "external" in toml_metadata
+
+
+def get_pep725_mapping(purl: str):
+    """This function maps a PURL to the name in the conda ecosystem. It is expected
+    that this will be provided on a per-ecosystem basis (such as by conda-forge)"""
+
+    package_mapping = {
+        "virtual:compiler/c": "{{ compiler('c') }}",
+        "virtual:compiler/cpp": "{{ compiler('cxx') }}",
+        "virtual:compiler/fortran": "{{ compiler('fortran') }}",
+        "virtual:compiler/rust": "{{ compiler('rust') }}",
+        "virtual:interface/blas": "{{ blas }}",
+    }
+    return package_mapping.get(purl, purl)
+
+
+def add_pep725_metadata(metadata: dict, toml_metadata: dict):
+    if not is_pep725_present(toml_metadata):
+        return metadata
+
+    externals = toml_metadata["external"]
+    # each of these is a list of PURLs. For each one we find,
+    # we need to map it to the the conda ecosystem
+    requirements = metadata.get("requirements", {})
+    section_map = (
+        ("build", "build-requires"),
+        ("host", "host-requires"),
+        ("run", "dependencies"),
+    )
+    for conda_section, pep725_section in section_map:
+        requirements[conda_section] = [
+            get_pep725_mapping(purl) for purl in externals.get(pep725_section, [])
+        ]
+        # TODO: handle optional dependencies properly
+        optional_features = toml_metadata.get(f"optional-{pep725_section}", {})
+        for feature_name, feature_deps in optional_features.items():
+            requirements[conda_section].append(
+                f'# OPTIONAL dependencies from feature "{feature_name}"'
+            )
+            requirements[conda_section].extend(feature_deps)
+        if not requirements[conda_section]:
+            del requirements[conda_section]
+
+    if requirements:
+        metadata["requirements"] = requirements
+    return metadata
+
+
 def get_all_toml_info(path_toml: Union[Path, str]) -> dict:
     with open(path_toml, "rb") as f:
         toml_metadata = tomli.load(f)
@@ -288,5 +338,6 @@ def get_all_toml_info(path_toml: Union[Path, str]) -> dict:
 
     add_poetry_metadata(metadata, toml_metadata)
     add_flit_metadata(metadata, toml_metadata)
+    add_pep725_metadata(metadata, toml_metadata)
 
     return metadata

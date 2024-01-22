@@ -27,6 +27,7 @@ from grayskull.config import Configuration
 from grayskull.license.discovery import ShortLicense, search_license_file
 from grayskull.strategy.py_toml import get_all_toml_info
 from grayskull.utils import (
+    RE_PEP725_PURL,
     PyVer,
     get_vendored_dependencies,
     merge_dict_of_lists_item,
@@ -546,10 +547,12 @@ def update_requirements_with_pin(requirements: dict):
         return [p for p in list_pkgs if pkg != p.strip().split(" ", 1)[0]]
 
     for pkg in requirements["host"]:
-        pkg_name = RE_DEPS_NAME.match(pkg).group(0)
-        if pkg_name in PIN_PKG_COMPILER.keys():
-            requirements["run"] = clean_list_pkg(pkg_name, requirements["run"])
-            requirements["run"].append(PIN_PKG_COMPILER[pkg_name])
+        pkg_name_match = RE_DEPS_NAME.match(pkg)
+        if pkg_name_match:
+            pkg_name = pkg_name_match.group(0)
+            if pkg_name in PIN_PKG_COMPILER.keys():
+                requirements["run"] = clean_list_pkg(pkg_name, requirements["run"])
+                requirements["run"].append(PIN_PKG_COMPILER[pkg_name])
 
 
 def discover_license(metadata: dict) -> List[ShortLicense]:
@@ -733,6 +736,14 @@ def merge_setup_toml_metadata(setup_metadata: dict, pyproject_metadata: dict) ->
             setup_metadata.get("install_requires", []),
             pyproject_metadata["requirements"]["run"],
         )
+    # this is not a valid setup_metadata field, but we abuse it to pass it
+    # through to the conda recipe generator downstream. It's because setup.py
+    # does not have a notion of build vs. host requirements. It only has
+    # equivalents to host and run.
+    if pyproject_metadata["requirements"]["build"]:
+        setup_metadata["__build_requirements_placeholder"] = pyproject_metadata[
+            "requirements"
+        ]["build"]
     if pyproject_metadata["requirements"]["run_constrained"]:
         setup_metadata["requirements_run_constrained"] = pyproject_metadata[
             "requirements"
@@ -802,9 +813,8 @@ def ensure_pep440_in_req_list(list_req: List[str]) -> List[str]:
 
 
 def split_deps(deps: str) -> List[str]:
-    deps = deps.split(",")
     result = []
-    for d in deps:
+    for d in deps.split(","):
         constrain = ""
         for val in re.split(r"([><!=~^]+)", d):
             if not val:
@@ -817,9 +827,10 @@ def split_deps(deps: str) -> List[str]:
 
 
 def ensure_pep440(pkg: str) -> str:
-    if not pkg:
+    if not pkg or RE_PEP725_PURL.match(pkg):
         return pkg
-    if pkg.strip().startswith("<{") or pkg.strip().startswith("{{"):
+    pkg = pkg.strip()
+    if any([pkg.startswith(pattern) for pattern in ("<{", "{{")]):
         return pkg
     split_pkg = pkg.strip().split(" ")
     if len(split_pkg) <= 1:
