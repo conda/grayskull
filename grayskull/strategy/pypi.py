@@ -104,12 +104,13 @@ def merge_pypi_sdist_metadata(
             pypi_metadata.get("requires_python")
             or sdist_metadata.get("python_requires")
         ),
-        "doc_url": get_val("doc_url"),
+        "docs_url": get_val("docs_url"),
         "dev_url": get_val("dev_url"),
         "license": get_val("license"),
         "setup_requires": get_val("setup_requires"),
         "extra_requires": get_val("extra_requires"),
         "project_url": get_val("project_url"),
+        "project_urls": get_val("project_urls"),
         "extras_require": get_val("extras_require"),
         "requires_dist": requires_dist,
         "sdist_path": get_val("sdist_path"),
@@ -272,8 +273,9 @@ class PypiMetadata(TypedDict):
     requires_dist: list[str]
     requires_python: str | None
     summary: str | None
+    project_url: str | None
     project_urls: dict[str, str]
-    doc_url: str | None
+    docs_url: str | None
     dev_url: str | None
     url: str | None
     license: str | None
@@ -312,7 +314,6 @@ def get_pypi_metadata(config: Configuration) -> PypiMetadata:
             json.dump(metadata, f, indent=4)
         config.files_to_copy.append(download_file)
     info = metadata["info"]
-    project_urls = info.get("project_urls") or {}
     log.info(f"Package: {config.name}=={info['version']}")
     log.debug(f"Full PyPI metadata:\n{metadata}")
     sdist_url = get_sdist_url_from_pypi(metadata)
@@ -324,9 +325,11 @@ def get_pypi_metadata(config: Configuration) -> PypiMetadata:
         requires_dist=info.get("requires_dist", []),
         requires_python=info.get("requires_python"),
         summary=info.get("summary"),
-        project_urls=info.get("project_urls") or info.get("project_url", {}),
-        doc_url=info.get("docs_url"),
-        dev_url=project_urls.get("Source"),
+        project_url=info.get("project_url"),
+        project_urls=info.get("project_urls") or {},
+        docs_url=info.get("docs_url"),
+        home_page=info.get("home_page"),
+        dev_url=info.get("dev_url"),
         url=info.get("home_page"),
         license=info.get("license"),
         source=SourceSection(
@@ -454,11 +457,36 @@ def get_metadata(recipe, config) -> dict:
     test_requirements = optional_requirements.pop(config.extras_require_test, [])
     test_section = compose_test_section(metadata, test_requirements)
 
+    # Compute home, doc_url, and dev_url for the "about" section
+
+    if metadata.get("project_urls") and metadata["project_urls"].get("Homepage"):
+        home = metadata["project_urls"]["Homepage"]
+    elif metadata.get("project_url"):
+        home = metadata["project_url"]
+    elif metadata.get("url"):
+        home = metadata["url"]
+    else:
+        home = None
+
+    if metadata.get("project_urls") and metadata["project_urls"].get("Documentation"):
+        doc_url = metadata["project_urls"]["Documentation"]
+    elif metadata.get("docs_url"):
+        doc_url = metadata["docs_url"]
+    else:
+        doc_url = None
+
+    if metadata.get("project_urls") and metadata["project_urls"].get("Source"):
+        dev_url = metadata["project_urls"]["Source"]
+    elif metadata.get("dev_url"):
+        dev_url = metadata["dev_url"]
+    else:
+        dev_url = None
+
     about_section = {
-        "home": metadata["url"] if metadata.get("url") else metadata.get("project_url"),
+        "home": home,
         "summary": metadata.get("summary"),
-        "doc_url": metadata.get("doc_url"),
-        "dev_url": metadata.get("dev_url"),
+        "doc_url": doc_url,
+        "dev_url": dev_url,
         "license": license_name,
         "license_file": license_file,
     }
