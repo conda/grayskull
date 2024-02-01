@@ -418,7 +418,7 @@ def get_metadata(recipe, config) -> dict:
         doc_url = metadata["docs_url"]
     else:
         doc_url = None
-        
+
     if metadata.get("project_urls") and metadata["project_urls"].get("Source"):
         dev_url = metadata["project_urls"]["Source"]
     elif metadata.get("dev_url"):
