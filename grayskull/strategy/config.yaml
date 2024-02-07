@@ -194,6 +194,10 @@ h2o:
   conda_forge: h2o-py
   import_name: h2o
 
+h3:
+  conda_forge: h3-py
+  import_name: h3
+
 hdfs:
   conda_forge: python-hdfs
   import_name: hdfs
