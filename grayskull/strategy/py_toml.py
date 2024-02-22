@@ -327,9 +327,9 @@ def add_pep725_metadata(metadata: dict, toml_metadata: dict):
     )
     for conda_section, pep725_section in section_map:
         requirements.setdefault(conda_section, [])
-        requirements[conda_section].extend([
-            get_pep725_mapping(purl) for purl in externals.get(pep725_section, [])
-        ])
+        requirements[conda_section].extend(
+            [get_pep725_mapping(purl) for purl in externals.get(pep725_section, [])]
+        )
         # TODO: handle optional dependencies properly
         optional_features = toml_metadata.get(f"optional-{pep725_section}", {})
         for feature_name, feature_deps in optional_features.items():
