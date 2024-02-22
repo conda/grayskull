@@ -260,6 +260,54 @@ def get_pep725_mapping(purl: str):
         "virtual:compiler/fortran": "{{ compiler('fortran') }}",
         "virtual:compiler/rust": "{{ compiler('rust') }}",
         "virtual:interface/blas": "{{ blas }}",
+        "pkg:generic/boost": "boost-cpp",
+        "pkg:generic/brial": "brial",
+        "pkg:generic/cddlib": "cddlib",
+        "pkg:generic/cliquer": "cliquer",
+        "pkg:generic/ecl": "ecl",
+        "pkg:generic/eclib": "eclib",
+        "pkg:generic/ecm": "ecm",
+        "pkg:generic/fflas-ffpack": "fflas-ffpack",
+        "pkg:generic/fplll": "fplll",
+        "pkg:generic/flint": "libflint",
+        "pkg:generic/libgd": "libgd",
+        "pkg:generic/gap": "gap-defaults",
+        "pkg:generic/gfan": "gfan",
+        "pkg:generic/gmp": "gmp",
+        "pkg:generic/giac": "giac",
+        "pkg:generic/givaro": "givaro",
+        "pkg:generic/pkg-config": "pkg-config",
+        "pkg:generic/glpk": "glpk",
+        "pkg:generic/gsl": "gsl",
+        "pkg:generic/iml": "iml",
+        "pkg:generic/lcalc": "lcalc",
+        "pkg:generic/libbraiding": "libbraiding",
+        "pkg:generic/libhomfly": "libhomfly",
+        "pkg:generic/lrcalc": "lrcalc",
+        "pkg:generic/libpng": "libpng",
+        "pkg:generic/linbox": "linbox",
+        "pkg:generic/m4ri": "m4ri",
+        "pkg:generic/m4rie": "m4rie",
+        "pkg:generic/mpc": "mpc",
+        "pkg:generic/mpfi": "mpfi",
+        "pkg:generic/mpfr": "mpfr",
+        "pkg:generic/maxima": "maxima",
+        "pkg:generic/nauty": "nauty",
+        "pkg:generic/ntl": "ntl",
+        "pkg:generic/pari": "pari",
+        "pkg:generic/pari-elldata": "pari-elldata",
+        "pkg:generic/pari-galdata": "pari-galdata",
+        "pkg:generic/pari-seadata": "pari-seadata",
+        "pkg:generic/palp": "palp",
+        "pkg:generic/planarity": "planarity",
+        "pkg:generic/ppl": "ppl",
+        "pkg:generic/primesieve": "primesieve",
+        "pkg:generic/primecount": "primecount",
+        "pkg:generic/qhull": "qhull",
+        "pkg:generic/rw": "rw",
+        "pkg:generic/singular": "singular",
+        "pkg:generic/symmetrica": "symmetrica",
+        "pkg:generic/sympow": "sympow",
     }
     return package_mapping.get(purl, purl)
 
@@ -278,9 +326,10 @@ def add_pep725_metadata(metadata: dict, toml_metadata: dict):
         ("run", "dependencies"),
     )
     for conda_section, pep725_section in section_map:
-        requirements[conda_section] = [
+        requirements.setdefault(conda_section, [])
+        requirements[conda_section].extend([
             get_pep725_mapping(purl) for purl in externals.get(pep725_section, [])
-        ]
+        ])
         # TODO: handle optional dependencies properly
         optional_features = toml_metadata.get(f"optional-{pep725_section}", {})
         for feature_name, feature_deps in optional_features.items():
