@@ -176,6 +176,7 @@ def __get_constrained_dep_str(dep_spec: str, dep_name: str):
 def encode_poetry_deps(poetry_deps: dict) -> Tuple[list, list]:
     run = []
     run_constrained = []
+
     def build_deps(spec, name):
         constrained_dep = get_constrained_dep(spec, name)
         try:
