@@ -176,13 +176,21 @@ def __get_constrained_dep_str(dep_spec: str, dep_name: str):
 def encode_poetry_deps(poetry_deps: dict) -> Tuple[list, list]:
     run = []
     run_constrained = []
-    for dep_name, dep_spec in poetry_deps.items():
-        constrained_dep = get_constrained_dep(dep_spec, dep_name)
+    def build_deps(spec, name):
+        constrained_dep = get_constrained_dep(spec, name)
         try:
-            assert dep_spec.get("optional", False)
+            assert spec.get("optional", False)
             run_constrained.append(constrained_dep)
         except (AttributeError, AssertionError):
             run.append(constrained_dep)
+
+    for dep_name, dep_spec in poetry_deps.items():
+        if isinstance(dep_spec, list):
+            for spec in dep_spec:
+                build_deps(spec, dep_name)
+        else:
+            build_deps(dep_spec, dep_name)
+
     return run, run_constrained
 
 
