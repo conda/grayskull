@@ -306,6 +306,10 @@ opencv-python:
   import_name: cv2
   conda_forge: opencv
 
+opencv-python-headless:
+  import_name: cv2
+  conda_forge: opencv
+
 ortools:
   conda_forge: ortools-python
   import_name: ortools
