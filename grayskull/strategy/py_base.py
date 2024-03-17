@@ -564,7 +564,7 @@ def discover_license(metadata: dict) -> List[ShortLicense]:
     the license.
     """
     git_url = metadata.get("dev_url")
-    project_url = metadata.get("project_urls", "") or metadata.get("project_url", "")
+    project_url = metadata.get("project_url", "")
     if not git_url and urlparse(project_url).netloc == "github.com":
         git_url = project_url
     # "url" is always present but sometimes set to None
@@ -716,7 +716,7 @@ def merge_setup_toml_metadata(setup_metadata: dict, pyproject_metadata: dict) ->
     if pyproject_metadata["about"]["summary"]:
         setup_metadata["summary"] = pyproject_metadata["about"]["summary"]
     if pyproject_metadata["about"]["home"]:
-        setup_metadata["projects_url"]["Homepage"] = pyproject_metadata["about"]["home"]
+        setup_metadata["project_urls"]["Homepage"] = pyproject_metadata["about"]["home"]
     if pyproject_metadata["build"]["entry_points"]:
         setup_metadata["entry_points"]["console_scripts"] = pyproject_metadata["build"][
             "entry_points"
