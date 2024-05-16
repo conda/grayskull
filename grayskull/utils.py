@@ -7,10 +7,12 @@ from collections import defaultdict, namedtuple
 from difflib import SequenceMatcher
 from functools import lru_cache
 from glob import glob
+from io import StringIO
 from pathlib import Path
 from shutil import copyfile
 from typing import List, Optional, Union
 
+from conda_recipe_manager.parser.recipe_parser_convert import RecipeParserConvert
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from souschef.recipe import Recipe
@@ -194,11 +196,13 @@ def generate_recipe(
     recipe: Recipe,
     config,
     folder_path: Union[str, Path] = ".",
+    use_v1_format: bool = False,
 ):
     """Write the recipe in a location. It will create a folder with the
     package name and the recipe will be there.
 
     :param folder_path: Path to the folder
+    :param use_v1_format: If set to True, return a recipe in the V1 format
     """
     if recipe["package"]["name"].value.startswith("r-{{"):
         pkg_name = f"r-{config.name}"
@@ -215,16 +219,38 @@ def generate_recipe(
         logging.debug(f"Generating recipe on: {recipe_dir}")
         if not recipe_dir.is_dir():
             recipe_dir.mkdir()
-        recipe_path = recipe_dir / "meta.yaml"
+        recipe_path = recipe_dir / "recipe.yaml" if use_v1_format else "meta.yaml"
         recipe_folder = recipe_dir
         add_new_lines_after_section(recipe.yaml)
 
     clean_yaml(recipe)
-    recipe.save(recipe_path)
+    if use_v1_format:
+        # Write the converted recipe straight to disk to avoid having convert-back
+        # to a data-type that will not be used past this point.
+        upgrade_v0_recipe_to_v1(recipe, recipe_path)
+    else:
+        recipe.save(recipe_path)
     for file_to_recipe in config.files_to_copy:
         name = file_to_recipe.split(os.path.sep)[-1]
         if os.path.isfile(file_to_recipe):
             copyfile(file_to_recipe, os.path.join(recipe_folder, name))
+
+
+def upgrade_v0_recipe_to_v1(recipe: Recipe, recipe_path: Path) -> None:
+    """
+    Takes a V0 (pre CEP-13) recipe and converts it to a V1 (post CEP-13) recipe file.
+    Upgraded recipes are saved to the provided file path.
+    :param recipe: Recipe data structure to convert
+    :param recipe_path: Path to write the converted recipe file
+    """
+    recipe_stream = StringIO()
+    yaml.dump(recipe.yaml, recipe_stream)
+    recipe_content = recipe_stream.getvalue()
+    recipe_stream.close()
+
+    recipe_converter = RecipeParserConvert(recipe_content)
+    v1_content, _, _ = recipe_converter.render_to_v1_recipe_format()
+    recipe_path.write_text(v1_content, encoding="utf-8")
 
 
 def add_new_lines_after_section(recipe_yaml: CommentedMap) -> CommentedMap:

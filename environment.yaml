@@ -29,3 +29,4 @@ dependencies:
   - libcblas
   - beautifulsoup4
   - semver >=3.0.0,<4.0.0
+  # - conda-recipe-manager >=0.2.0
