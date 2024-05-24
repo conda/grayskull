@@ -312,20 +312,28 @@ def generate_recipes_from_list(list_pkgs, args):
         try:
             # TODO: Remove before 3.0 release
             if args.url_pypi_metadata_deprecated and args.url_pypi_metadata:
-                raise RuntimeError("--pypi-url is deprecated in favor of --pypi-url-metadata and may not be passed in conjunction with --pypi-url-metadata")
+                raise RuntimeError(
+                    "--pypi-url is deprecated in favor of --pypi-url-metadata and may not be passed in conjunction with --pypi-url-metadata"
+                )
 
             # TODO: Remove before 3.0 release
             if args.url_pypi_metadata_deprecated is not None:
-                logging.warning("--pypi-url is deprecated; use --pypi-url-metadata instead")
+                logging.warning(
+                    "--pypi-url is deprecated; use --pypi-url-metadata instead"
+                )
                 args.url_pypi_metadata = args.url_pypi_metadata_deprecated
-            
+
             # If a PYPI mirror is selected, but the metadata URL is not
             # explicitly passed, assume the mirror can handle the standard
             # metadata endpoint and coerce the metadata URL appropriately in a
             # way that respects the DEFAULT settings from config.
-            if (args.url_pypi_mirror.rstrip("/") != DEFAULT_PYPI_URL) and (args.url_pypi_metadata.rstrip("/") == DEFAULT_PYPI_META_URL):
-                args.url_pypi_metadata = DEFAULT_PYPI_META_URL.replace(DEFAULT_PYPI_URL, args.url_pypi_mirror.rstrip("/"))
-            
+            if (args.url_pypi_mirror.rstrip("/") != DEFAULT_PYPI_URL) and (
+                args.url_pypi_metadata.rstrip("/") == DEFAULT_PYPI_META_URL
+            ):
+                args.url_pypi_metadata = DEFAULT_PYPI_META_URL.replace(
+                    DEFAULT_PYPI_URL, args.url_pypi_mirror.rstrip("/")
+                )
+
             recipe, config = create_python_recipe(
                 pkg_name,
                 is_strict_cf=args.is_strict_conda_forge,

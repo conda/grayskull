@@ -108,7 +108,9 @@ class Configuration:
 
     def __post_init__(self):
         if not self.url_pypi_metadata.endswith("/{pkg_name}/json"):
-            self.url_pypi_metadata = self.url_pypi_metadata.rstrip("/") + "/{pkg_name}/json"
+            self.url_pypi_metadata = (
+                self.url_pypi_metadata.rstrip("/") + "/{pkg_name}/json"
+            )
         if self.from_local_sdist:
             self.local_sdist = self.local_sdist or self.name
         pkg_repo, pkg_name, pkg_version = parse_pkg_name_version(self.name)
