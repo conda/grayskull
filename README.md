@@ -76,6 +76,27 @@ grayskull pypi ./pytest-5.3.5.tar.gz
 Note that such a recipe isn't really portable as it will depend on the local path of the
 sdist file. It can be useful if you want to automatically generate a conda package.
 
+### Use Grayskull with an internal package index
+
+Grayskull can create recipes that point to any Python Package Index. Supply the `--pypi-mirror-url` keyword.
+
+* Example:
+```bash
+grayskull pypi --pypi-mirror-url https://pypi.example.com pytest
+```
+
+The above will source packages from `https://pypi.example.com/packages/source/...`
+
+This assumes that the mirror follows the same API as pypi _including_ hosting metadata at the `/pypi/{package_name}/json` endpoint.
+To specify an alternate metadata location use the `--pypi-metadata-url` option.
+
+* Example:
+```bash
+grayskull pypi --pypi-mirror-url https://pypi.example.com --pypi-metadata-url https://pypi_meta.example.com pytest
+```
+
+> *Note:* `--pypi-metadata-url` is a replacement for `--pypi-url`; `--pypi-url` is deprecated and will be removed in a future release.
+
 ### Online Grayskull
 
 It is also possible to use Grayskull without any installation. You can go to this website [marcelotrevisani.com/grayskull](https://www.marcelotrevisani.com/grayskull) and inform the name and the version (optional) of the package and it will create the recipe for you.

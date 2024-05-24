@@ -247,14 +247,14 @@ def get_pypi_metadata(config: Configuration) -> dict:
     """
     print_msg("Recovering metadata from pypi...")
     if config.version:
-        url_pypi = config.url_pypi_metadata.format(
+        url_pypi_metadata = config.url_pypi_metadata.format(
             pkg_name=f"{config.name}/{config.version}"
         )
     else:
         log.info(f"Version for {config.name} not specified.\nGetting the latest one.")
-        url_pypi = config.url_pypi_metadata.format(pkg_name=config.name)
+        url_pypi_metadata = config.url_pypi_metadata.format(pkg_name=config.name)
 
-    metadata = requests.get(url=url_pypi, timeout=5)
+    metadata = requests.get(url=url_pypi_metadata, timeout=5)
     if metadata.status_code != 200:
         raise requests.HTTPError(
             f"It was not possible to recover package metadata for {config.name}.\n"
@@ -288,7 +288,7 @@ def get_pypi_metadata(config: Configuration) -> dict:
         "url": info.get("home_page"),
         "license": info.get("license"),
         "source": {
-            "url": "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/"
+            "url": config.url_pypi + "/packages/source/{{ name[0] }}/{{ name }}/"
             f"{get_url_filename(metadata)}",
             "sha256": get_sha256_from_pypi_metadata(metadata),
         },
