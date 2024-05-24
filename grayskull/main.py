@@ -164,7 +164,10 @@ def init_parser():
         "--pypi-metadata-url",
         default=DEFAULT_PYPI_META_URL,
         dest="url_pypi_metadata",
-        help="Pypi url server metadata endpoint; will be appended with '{pkgname}/json'",
+        help=(
+            "Pypi url server metadata endpoint;"
+            + "will be appended with '{pkgname}/json'"
+        ),
     )
     pypi_parser.add_argument(
         "--pypi-mirror-url",
@@ -313,7 +316,8 @@ def generate_recipes_from_list(list_pkgs, args):
             # TODO: Remove before 3.0 release
             if args.url_pypi_metadata_deprecated and args.url_pypi_metadata:
                 raise RuntimeError(
-                    "--pypi-url is deprecated in favor of --pypi-url-metadata and may not be passed in conjunction with --pypi-url-metadata"
+                    "--pypi-url is deprecated in favor of --pypi-url-metadata "
+                    + "and may not be passed in conjunction with --pypi-url-metadata"
                 )
 
             # TODO: Remove before 3.0 release
