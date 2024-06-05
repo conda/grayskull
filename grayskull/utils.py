@@ -248,6 +248,7 @@ def upgrade_v0_recipe_to_v1(recipe: Recipe, recipe_path: Path) -> None:
     recipe_content = recipe_stream.getvalue()
     recipe_stream.close()
 
+    recipe_content = RecipeParserConvert.pre_process_recipe_text(recipe_content)
     recipe_converter = RecipeParserConvert(recipe_content)
     v1_content, _, _ = recipe_converter.render_to_v1_recipe_format()
     recipe_path.write_text(v1_content, encoding="utf-8")
