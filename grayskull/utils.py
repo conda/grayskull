@@ -7,10 +7,9 @@ from collections import defaultdict, namedtuple
 from difflib import SequenceMatcher
 from functools import lru_cache
 from glob import glob
-from io import StringIO
 from pathlib import Path
 from shutil import copyfile
-from typing import List, Optional, Union
+from typing import Final, List, Optional, Union
 
 from conda_recipe_manager.parser.recipe_parser_convert import RecipeParserConvert
 from ruamel.yaml import YAML
@@ -224,31 +223,29 @@ def generate_recipe(
         add_new_lines_after_section(recipe.yaml)
 
     clean_yaml(recipe)
+    recipe.save(recipe_path)
     if use_v1_format:
-        # Write the converted recipe straight to disk to avoid having convert-back
-        # to a data-type that will not be used past this point.
-        upgrade_v0_recipe_to_v1(recipe, recipe_path)
-    else:
-        recipe.save(recipe_path)
+        upgrade_v0_recipe_to_v1(recipe_path)
     for file_to_recipe in config.files_to_copy:
         name = file_to_recipe.split(os.path.sep)[-1]
         if os.path.isfile(file_to_recipe):
             copyfile(file_to_recipe, os.path.join(recipe_folder, name))
 
 
-def upgrade_v0_recipe_to_v1(recipe: Recipe, recipe_path: Path) -> None:
+def upgrade_v0_recipe_to_v1(recipe_path: Path) -> None:
     """
     Takes a V0 (pre CEP-13) recipe and converts it to a V1 (post CEP-13) recipe file.
     Upgraded recipes are saved to the provided file path.
-    :param recipe: Recipe data structure to convert
-    :param recipe_path: Path to write the converted recipe file
-    """
-    recipe_stream = StringIO()
-    yaml.dump(recipe.yaml, recipe_stream)
-    recipe_content = recipe_stream.getvalue()
-    recipe_stream.close()
 
-    recipe_content = RecipeParserConvert.pre_process_recipe_text(recipe_content)
+    NOTE: As of writing, we need ruamel to dump the text to a file first so we can
+          get the original recipe file as a string. This is a workaround until we
+          can get ruamel to dump to a string stream without blowing up on the
+          JINJA plugin.
+    :param recipe_path: Path to that contains the original recipe file to modify.
+    """
+    recipe_content: Final[str] = RecipeParserConvert.pre_process_recipe_text(
+        recipe_path.read_text()
+    )
     recipe_converter = RecipeParserConvert(recipe_content)
     v1_content, _, _ = recipe_converter.render_to_v1_recipe_format()
     recipe_path.write_text(v1_content, encoding="utf-8")
