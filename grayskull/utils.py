@@ -108,6 +108,12 @@ def origin_is_local_sdist(name: str) -> bool:
     )
 
 
+def origin_is_tree(name: str) -> bool:
+    """Return True if it is a directory"""
+    path = Path(name)
+    return path.is_dir()
+
+
 def sha256_checksum(filename, block_size=65536):
     sha256 = hashlib.sha256()
     with open(filename, "rb") as f:
@@ -214,7 +220,7 @@ def generate_recipe(
         recipe_dir = Path(folder_path) / pkg_name
         logging.debug(f"Generating recipe on: {recipe_dir}")
         if not recipe_dir.is_dir():
-            recipe_dir.mkdir()
+            recipe_dir.mkdir(parents=True)
         recipe_path = recipe_dir / "meta.yaml"
         recipe_folder = recipe_dir
         add_new_lines_after_section(recipe.yaml)
