@@ -69,7 +69,7 @@ class PyBuild(AbstractStrategy):
                 (*build_system_requires, *requires_for_build)
             )
 
-            requirements = [Requirement(r) for r in distribution.requires]
+            requirements = [Requirement(r) for r in distribution.requires or []]
             active_requirements = [
                 str(r).rsplit(";", 1)[0]
                 for r in requirements
@@ -100,9 +100,9 @@ class PyBuild(AbstractStrategy):
             ]
 
             recipe["build"]["noarch"] = "python"
-            recipe["build"][
-                "script"
-            ] = "{{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation"
+            recipe["build"]["script"] = (
+                "{{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation"
+            )
             # XXX also --no-index?
 
             # distribution.metadata.keys() for grayskull is
