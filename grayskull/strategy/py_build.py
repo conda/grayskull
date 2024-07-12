@@ -40,6 +40,8 @@ class PyBuild(AbstractStrategy):
             # there a dict API?) Subtract "has non-extra marker" dependencies from
             # this set.
             #
+            # Easier API is deprecated pkg_resources.Distribution().requires(extras=())
+            #
             # for e in scm.metadata.get_all('provides-extra'):
             #   print (e, [x for x in r if x.marker and x.marker.evaluate({'extra':e})])
             #
