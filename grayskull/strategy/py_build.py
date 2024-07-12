@@ -3,18 +3,18 @@ Use pypa/build to get project metadata from a checkout. Create a recipe suitable
 for inlinining into the first-party project source tree.
 """
 
+import logging
 import tempfile
 from importlib.metadata import PathDistribution
 from pathlib import Path
 
+import build
 from packaging.markers import Marker
 from packaging.metadata import Metadata
 from souschef.recipe import Recipe
 
-import build
 from grayskull.config import Configuration
 from grayskull.strategy.abstract_strategy import AbstractStrategy
-import logging
 
 log = logging.getLogger(__name__)
 
@@ -53,7 +53,9 @@ class PyBuild(AbstractStrategy):
                 log.warning("Package name not found in first line of recipe")
 
             config.version = distribution.version
-            requires_dist = distribution.requires  # includes extras as markers e.g. ; extra == 'testing'. Evaluate using Marker().
+            requires_dist = (
+                distribution.requires
+            )  # includes extras as markers e.g. ; extra == 'testing'. Evaluate using Marker().
             entry_points = (
                 distribution.entry_points
             )  # list(EntryPoint(name, value, group)
