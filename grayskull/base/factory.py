@@ -7,9 +7,10 @@ from souschef.jinja_expression import get_global_jinja_var
 from souschef.recipe import Recipe
 
 from grayskull.strategy.cran import CranStrategy
+
 try:
     from grayskull.strategy.py_build import PyBuild
-except ImportError: # requires conda
+except ImportError:  # requires conda
     PyBuild = None
 from grayskull.strategy.pypi import PypiStrategy
 
