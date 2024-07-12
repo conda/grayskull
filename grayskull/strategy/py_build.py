@@ -8,12 +8,12 @@ import tempfile
 from importlib.metadata import PathDistribution
 from pathlib import Path
 
+import build
 from conda.exceptions import InvalidMatchSpec
 from conda.models.match_spec import MatchSpec
 from packaging.requirements import Requirement
 from souschef.recipe import Recipe
 
-import build
 from grayskull.config import Configuration
 from grayskull.strategy.abstract_strategy import AbstractStrategy
 from grayskull.strategy.pypi import compose_test_section
