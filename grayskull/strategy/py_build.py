@@ -100,9 +100,9 @@ class PyBuild(AbstractStrategy):
             ]
 
             recipe["build"]["noarch"] = "python"
-            recipe["build"]["script"] = (
-                "{{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation"
-            )
+            recipe["build"][
+                "script"
+            ] = "{{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation"
             # XXX also --no-index?
 
             # distribution.metadata.keys() for grayskull is
