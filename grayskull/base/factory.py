@@ -7,16 +7,21 @@ from souschef.jinja_expression import get_global_jinja_var
 from souschef.recipe import Recipe
 
 from grayskull.strategy.cran import CranStrategy
-from grayskull.strategy.py_build import PyBuild
+try:
+    from grayskull.strategy.py_build import PyBuild
+except ImportError: # requires conda
+    PyBuild = None
 from grayskull.strategy.pypi import PypiStrategy
 
 
 class GrayskullFactory(ABC):
     REGISTERED_STRATEGY = {
         "pypi": PypiStrategy,
-        "pybuild": PyBuild,
         "cran": CranStrategy,
     }
+
+    if PyBuild:
+        REGISTERED_STRATEGY["pybuild"] = PyBuild
 
     @staticmethod
     def create_recipe(repo_type: str, config, pkg_name=None, sections_populate=None):
