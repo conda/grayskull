@@ -8,12 +8,12 @@ import tempfile
 from importlib.metadata import PathDistribution
 from pathlib import Path
 
-import build
 from conda.exceptions import InvalidMatchSpec
 from conda.models.match_spec import MatchSpec
 from packaging.requirements import Requirement
 from souschef.recipe import Recipe
 
+import build
 from grayskull.config import Configuration
 from grayskull.strategy.abstract_strategy import AbstractStrategy
 from grayskull.strategy.pypi import compose_test_section
@@ -35,6 +35,18 @@ class PyBuild(AbstractStrategy):
             # If those are already installed, we can get the extras requirements
             # without invoking pip e.g. setuptools_scm[toml]
             print("Requires for build:", build_system_requires, requires_for_build)
+
+            # Example of finding extra dependencies for a distribution 'scm' (is
+            # there a dict API?) Subtract "has non-extra marker" dependencies from
+            # this set.
+            #
+            # for e in scm.metadata.get_all('provides-extra'):
+            #   print (e, [x for x in r if x.marker and x.marker.evaluate({'extra':e})])
+            #
+            #     docs [<Requirement('entangled-cli[rich]; extra == "docs"')>, <Requirement('mkdocs; extra == "docs"')>, <Requirement('mkdocs-entangled-plugin; extra == "docs"')>, <Requirement('mkdocs-material; extra == "docs"')>, <Requirement('mkdocstrings[python]; extra == "docs"')>, <Requirement('pygments; extra == "docs"')>]
+            #     rich [<Requirement('rich; extra == "rich"')>]
+            #     test [<Requirement('build; extra == "test"')>, <Requirement('pytest; extra == "test"')>, <Requirement('rich; extra == "test"')>, <Requirement('wheel; extra == "test"')>]
+            #     toml []
 
             # build the project's metadata "dist-info" directory
             metadata_path = Path(project.metadata_path(output_directory=output))
