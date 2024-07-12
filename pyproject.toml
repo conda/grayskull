@@ -51,9 +51,12 @@ docs = [
     "mdit-py-plugins>=0.3.0",
 ]
 
+# both spellings of gray/grey
 [project.scripts]
-grayskull = "grayskull.main:main"
-conda-greyskull = "grayskull.main:main"
+grayskull = "grayskull.__main__:main"
+greyskull = "grayskull.__main__:main"
+conda-grayskull = "grayskull.__main__:main"
+conda-greyskull = "grayskull.__main__:main"
 
 [project.urls]
 Source = "https://github.com/conda/grayskull"
