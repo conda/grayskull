@@ -53,10 +53,10 @@ docs = [
 
 # both spellings of gray/grey
 [project.scripts]
-grayskull = "grayskull.__main__:main"
-greyskull = "grayskull.__main__:main"
-conda-grayskull = "grayskull.__main__:main"
-conda-greyskull = "grayskull.__main__:main"
+grayskull = "grayskull.main:main"
+greyskull = "grayskull.main:main"
+conda-grayskull = "grayskull.main:main"
+conda-greyskull = "grayskull.main:main"
 
 [project.urls]
 Source = "https://github.com/conda/grayskull"
