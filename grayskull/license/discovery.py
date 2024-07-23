@@ -98,6 +98,9 @@ def match_license(name: str) -> dict:
     name = re.sub(r"\s+license\s*", "", name.strip(), flags=re.IGNORECASE)
     name = name.strip()
 
+    if name in _get_all_license_choice(all_licenses):
+        return _get_license(name, all_licenses)
+
     exact_match = _match_scrambled_exact(name, _get_all_license_choice(all_licenses))
     if exact_match:
         best_matches = [(exact_match, 100, 0)]
