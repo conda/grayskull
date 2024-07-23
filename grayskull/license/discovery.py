@@ -85,6 +85,9 @@ def match_license(name: str) -> dict:
     name = re.sub(r"\s+license\s*", "", name.strip(), flags=re.IGNORECASE)
     name = name.strip()
 
+    if name in _get_all_license_choice(all_licenses):
+        return _get_license(name, all_licenses)
+
     best_matches = process.extract(
         name, _get_all_license_choice(all_licenses), scorer=partial_ratio
     )
