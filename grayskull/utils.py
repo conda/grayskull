@@ -9,8 +9,9 @@ from functools import lru_cache
 from glob import glob
 from pathlib import Path
 from shutil import copyfile
-from typing import List, Optional, Union
+from typing import Final, List, Optional, Union
 
+from conda_recipe_manager.parser.recipe_parser_convert import RecipeParserConvert
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from souschef.recipe import Recipe
@@ -194,11 +195,13 @@ def generate_recipe(
     recipe: Recipe,
     config,
     folder_path: Union[str, Path] = ".",
+    use_v1_format: bool = False,
 ):
     """Write the recipe in a location. It will create a folder with the
     package name and the recipe will be there.
 
     :param folder_path: Path to the folder
+    :param use_v1_format: If set to True, return a recipe in the V1 format
     """
     if recipe["package"]["name"].value.startswith("r-{{"):
         pkg_name = f"r-{config.name}"
@@ -215,16 +218,37 @@ def generate_recipe(
         logging.debug(f"Generating recipe on: {recipe_dir}")
         if not recipe_dir.is_dir():
             recipe_dir.mkdir()
-        recipe_path = recipe_dir / "meta.yaml"
+        recipe_path = recipe_dir / "recipe.yaml" if use_v1_format else "meta.yaml"
         recipe_folder = recipe_dir
         add_new_lines_after_section(recipe.yaml)
 
     clean_yaml(recipe)
     recipe.save(recipe_path)
+    if use_v1_format:
+        upgrade_v0_recipe_to_v1(recipe_path)
     for file_to_recipe in config.files_to_copy:
         name = file_to_recipe.split(os.path.sep)[-1]
         if os.path.isfile(file_to_recipe):
             copyfile(file_to_recipe, os.path.join(recipe_folder, name))
+
+
+def upgrade_v0_recipe_to_v1(recipe_path: Path) -> None:
+    """
+    Takes a V0 (pre CEP-13) recipe and converts it to a V1 (post CEP-13) recipe file.
+    Upgraded recipes are saved to the provided file path.
+
+    NOTE: As of writing, we need ruamel to dump the text to a file first so we can
+          get the original recipe file as a string. This is a workaround until we
+          can get ruamel to dump to a string stream without blowing up on the
+          JINJA plugin.
+    :param recipe_path: Path to that contains the original recipe file to modify.
+    """
+    recipe_content: Final[str] = RecipeParserConvert.pre_process_recipe_text(
+        recipe_path.read_text()
+    )
+    recipe_converter = RecipeParserConvert(recipe_content)
+    v1_content, _, _ = recipe_converter.render_to_v1_recipe_format()
+    recipe_path.write_text(v1_content, encoding="utf-8")
 
 
 def add_new_lines_after_section(recipe_yaml: CommentedMap) -> CommentedMap:

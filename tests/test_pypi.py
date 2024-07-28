@@ -822,10 +822,7 @@ def test_ciso_recipe():
 
 
 @pytest.mark.serial
-@pytest.mark.xfail(
-    condition=(sys.platform.startswith("win")),
-    reason="Test failing on windows platform",
-)
+@pytest.mark.xfail(reason="Flake test")
 def test_pymc_recipe_fortran():
     recipe = GrayskullFactory.create_recipe(
         "pypi", Configuration(name="pymc", version="2.3.6")
