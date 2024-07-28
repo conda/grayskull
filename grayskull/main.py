@@ -92,6 +92,15 @@ def init_parser():
         help="If sections are specified, grayskull will populate just the sections "
         "informed.",
     )
+    cran_parser.add_argument(
+        "--use-v1-format",
+        "-u",
+        default=False,
+        action="store_true",
+        dest="use_v1_format",
+        help="Returns a recipe file in the V1 format, used by rattler-build."
+        " NOTE: This is experimental.",
+    )
     # create parser for pypi
     pypi_parser = subparsers.add_parser("pypi", help="Options to generate PyPI recipes")
     pypi_parser.add_argument(
@@ -260,6 +269,15 @@ def init_parser():
         dest="licence_exclude_folders",
         help="Exclude folders when searching for licence.",
     )
+    pypi_parser.add_argument(
+        "--use-v1-format",
+        "-u",
+        default=False,
+        action="store_true",
+        dest="use_v1_format",
+        help="Returns a recipe file in the V1 format, used by rattler-build."
+        " NOTE: This is experimental.",
+    )
 
     return parser
 
@@ -361,7 +379,7 @@ def generate_recipes_from_list(list_pkgs, args):
         if args.sections_populate is None or "extra" in args.sections_populate:
             add_extra_section(recipe, args.maintainers)
 
-        generate_recipe(recipe, config, args.output)
+        generate_recipe(recipe, config, args.output, args.use_v1_format)
         print_msg(
             f"\n{Fore.GREEN}#### Recipe generated on "
             f"{os.path.realpath(args.output)} for {pkg_name} ####\n\n"
@@ -407,7 +425,7 @@ def generate_r_recipes_from_list(list_pkgs, args):
         if args.sections_populate is None or "extra" in args.sections_populate:
             add_extra_section(recipe, args.maintainers)
 
-        generate_recipe(recipe, config, args.output)
+        generate_recipe(recipe, config, args.output, args.use_v1_format)
         print_msg(
             f"\n{Fore.GREEN}#### Recipe generated on "
             f"{os.path.realpath(args.output)} for {pkg_name} ####\n\n"
