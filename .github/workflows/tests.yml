@@ -12,15 +12,16 @@ jobs:
   run:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        py_ver: ["3.8", "3.9", "3.10", "3.11"]
+        py_ver: ["3.11", "3.12"]
     env:
       OS: ${{ matrix.os }}
       PYTHON: ${{ matrix.py_ver }}
     steps:
     - uses: actions/checkout@master
-    - uses: conda-incubator/setup-miniconda@v2
+    - uses: conda-incubator/setup-miniconda@v3.0.4
       with:
         auto-update-conda: true
         channels: conda-forge,defaults
@@ -66,7 +67,7 @@ jobs:
                 --junit-xml=Linux-py${{ matrix.py_ver }}-parallel.xml \
                 --junit-prefix=Linux-py${{ matrix.py_ver }}-parallel
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v4.5.0
       with:
         files: ./coverage-serial.xml,./coverage-parallel.xml
         directory: .
