@@ -15,6 +15,7 @@ dynamic = ["version"]
 requires-python = ">=3.8"
 dependencies = [
     "beautifulsoup4",
+    "build",                  # conda install python-build
     "colorama",
     "conda-souschef >=2.2.3",
     "packaging >=21.3",
@@ -50,6 +51,7 @@ docs = [
     "mdit-py-plugins>=0.3.0",
 ]
 
+# both spellings of gray/grey
 [project.scripts]
 grayskull = "grayskull.main:main"
 greyskull = "grayskull.main:main"

@@ -14,7 +14,12 @@ from grayskull.base.github import get_git_current_user
 from grayskull.cli import CLIConfig
 from grayskull.cli.stdout import print_msg
 from grayskull.config import Configuration
-from grayskull.utils import generate_recipe, origin_is_github, origin_is_local_sdist
+from grayskull.utils import (
+    generate_recipe,
+    origin_is_github,
+    origin_is_local_sdist,
+    origin_is_tree,
+)
 
 init(autoreset=True)
 logging.basicConfig(format="%(levelname)s:%(message)s")
@@ -301,10 +306,13 @@ def generate_recipes_from_list(list_pkgs, args):
     for pkg_name in list_pkgs:
         logging.debug(f"Starting grayskull for pkg: {pkg_name}")
         from_local_sdist = origin_is_local_sdist(pkg_name)
+        from_tree = origin_is_tree(pkg_name)
         if origin_is_github(pkg_name):
             pypi_label = ""
         elif from_local_sdist:
             pypi_label = " (local)"
+        elif from_tree:
+            pypi_label = " (tree)"
         else:
             pypi_label = " (pypi)"
         print_msg(
@@ -322,6 +330,7 @@ def generate_recipes_from_list(list_pkgs, args):
                 url_pypi_metadata=args.url_pypi_metadata,
                 sections_populate=args.sections_populate,
                 from_local_sdist=from_local_sdist,
+                from_tree=from_tree,
                 extras_require_test=args.extras_require_test,
                 github_release_tag=args.github_release_tag,
                 extras_require_include=tuple(args.extras_require_include),
@@ -351,7 +360,9 @@ def create_python_recipe(pkg_name, sections_populate=None, **kwargs):
     config = Configuration(name=pkg_name, **kwargs)
     return (
         GrayskullFactory.create_recipe(
-            "pypi", config, sections_populate=sections_populate
+            "pybuild" if config.from_tree else "pypi",
+            config,
+            sections_populate=sections_populate,
         ),
         config,
     )

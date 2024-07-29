@@ -42,6 +42,7 @@ class Configuration:
     is_arch: bool = False
     repo_github: Optional[str] = None
     from_local_sdist: bool = False
+    from_tree: bool = False
     local_sdist: Optional[str] = None
     missing_deps: set = field(default_factory=set)
     extras_require_test: Optional[str] = None

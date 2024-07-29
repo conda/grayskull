@@ -109,6 +109,12 @@ def origin_is_local_sdist(name: str) -> bool:
     )
 
 
+def origin_is_tree(name: str) -> bool:
+    """Return True if it is a directory"""
+    path = Path(name)
+    return path.is_dir()
+
+
 def sha256_checksum(filename, block_size=65536):
     sha256 = hashlib.sha256()
     with open(filename, "rb") as f:
