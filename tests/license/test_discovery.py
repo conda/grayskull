@@ -81,7 +81,6 @@ def test_short_license_id(licence_name, short_licence):
     "license_id", [lic["licenseId"] for lic in get_all_licenses_from_spdx()]
 )
 def test_short_license_id_map_to_self(license_id: str):
-    print(license_id)
     assert get_short_license_id(license_id) == license_id
 
 
