@@ -347,9 +347,14 @@ def get_metadata(recipe, config) -> dict:
     """Method responsible to get the whole metadata available. It will
     merge metadata from multiple sources (pypi, setup.py, setup.cfg)
     """
-    name = config.name
     sdist_metadata, pypi_metadata = get_origin_wise_metadata(config)
     metadata = merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata, config)
+    if config.from_local_sdist:
+        # Overwrite package name from sdist filename with name from metadata
+        # sdist filename is normalized by setuptools since version 69.3.0
+        # See https://github.com/pypa/setuptools/issues/3593
+        config.name = metadata["name"]
+    name = config.name
     log.debug(f"Data merged from pypi, setup.cfg and setup.py: {metadata}")
     if metadata.get("scripts") is not None:
         config.is_arch = True
@@ -505,6 +510,9 @@ def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]
             if section == "package":
                 package_metadata = dict(metadata[section])
                 if package_metadata["name"].lower() == config.name.lower():
+                    if config.from_local_sdist:
+                        # Initial name set in the recipe came from the sdist filename
+                        set_global_jinja_var(recipe, "name", package_metadata["name"])
                     package_metadata.pop("name")
                 else:
                     package_metadata["name"] = package_metadata["name"].replace(

@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 import pytest
 from colorama import Fore, Style
+from souschef.jinja_expression import get_global_jinja_var
 from souschef.recipe import Recipe
 
 from grayskull.base.factory import GrayskullFactory
@@ -1257,6 +1258,8 @@ def test_create_recipe_from_local_sdist(pkg_pytest):
     assert recipe["about"]["summary"] == "pytest: simple powerful testing with Python"
     assert recipe["about"]["license"] == "MIT"
     assert recipe["about"]["license_file"] == "LICENSE"
+    assert get_global_jinja_var(recipe, "name") == "pytest"
+    assert get_global_jinja_var(recipe, "version") == "5.3.5"
 
 
 @patch("grayskull.strategy.py_base.get_all_toml_info", return_value={})
