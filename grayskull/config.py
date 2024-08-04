@@ -4,6 +4,9 @@ from typing import Dict, List, Optional, Tuple
 from grayskull.cli.parser import parse_pkg_name_version
 from grayskull.utils import PyVer
 
+DEFAULT_PYPI_URL = "https://pypi.org"
+DEFAULT_PYPI_META_URL = "https://pypi.org/pypi"
+
 
 @dataclass
 class Configuration:
@@ -37,7 +40,8 @@ class Configuration:
         default_factory=lambda: ("cython", "cython-blis", "blis")
     )
     pkg_need_cxx_compiler: Tuple = field(default_factory=lambda: ("pybind11",))
-    url_pypi_metadata: str = "https://pypi.org/pypi/{pkg_name}/json"
+    url_pypi: str = DEFAULT_PYPI_URL
+    url_pypi_metadata: str = DEFAULT_PYPI_META_URL
     download: bool = False
     is_arch: bool = False
     repo_github: Optional[str] = None
@@ -103,11 +107,12 @@ class Configuration:
         return py_ver_enabled
 
     def __post_init__(self):
+        if not self.url_pypi_metadata.endswith("/{pkg_name}/json"):
+            self.url_pypi_metadata = (
+                self.url_pypi_metadata.rstrip("/") + "/{pkg_name}/json"
+            )
         if self.from_local_sdist:
             self.local_sdist = self.local_sdist or self.name
-        if self.url_pypi_metadata != "https://pypi.org/pypi/{pkg_name}/json":
-            prefix = "" if self.url_pypi_metadata.endswith("/") else "/"
-            self.url_pypi_metadata += f"{prefix}{{pkg_name}}/json"
         pkg_repo, pkg_name, pkg_version = parse_pkg_name_version(self.name)
         if pkg_repo:
             prefix = "" if pkg_repo.endswith("/") else "/"

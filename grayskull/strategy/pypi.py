@@ -247,14 +247,14 @@ def get_pypi_metadata(config: Configuration) -> dict:
     """
     print_msg("Recovering metadata from pypi...")
     if config.version:
-        url_pypi = config.url_pypi_metadata.format(
+        url_pypi_metadata = config.url_pypi_metadata.format(
             pkg_name=f"{config.name}/{config.version}"
         )
     else:
         log.info(f"Version for {config.name} not specified.\nGetting the latest one.")
-        url_pypi = config.url_pypi_metadata.format(pkg_name=config.name)
+        url_pypi_metadata = config.url_pypi_metadata.format(pkg_name=config.name)
 
-    metadata = requests.get(url=url_pypi, timeout=5)
+    metadata = requests.get(url=url_pypi_metadata, timeout=5)
     if metadata.status_code != 200:
         raise requests.HTTPError(
             f"It was not possible to recover package metadata for {config.name}.\n"
@@ -288,7 +288,7 @@ def get_pypi_metadata(config: Configuration) -> dict:
         "url": info.get("home_page"),
         "license": info.get("license"),
         "source": {
-            "url": "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/"
+            "url": config.url_pypi + "/packages/source/{{ name[0] }}/{{ name }}/"
             f"{get_url_filename(metadata)}",
             "sha256": get_sha256_from_pypi_metadata(metadata),
         },
@@ -347,9 +347,14 @@ def get_metadata(recipe, config) -> dict:
     """Method responsible to get the whole metadata available. It will
     merge metadata from multiple sources (pypi, setup.py, setup.cfg)
     """
-    name = config.name
     sdist_metadata, pypi_metadata = get_origin_wise_metadata(config)
     metadata = merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata, config)
+    if config.from_local_sdist:
+        # Overwrite package name from sdist filename with name from metadata
+        # sdist filename is normalized by setuptools since version 69.3.0
+        # See https://github.com/pypa/setuptools/issues/3593
+        config.name = metadata["name"]
+    name = config.name
     log.debug(f"Data merged from pypi, setup.cfg and setup.py: {metadata}")
     if metadata.get("scripts") is not None:
         config.is_arch = True
@@ -505,6 +510,9 @@ def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]
             if section == "package":
                 package_metadata = dict(metadata[section])
                 if package_metadata["name"].lower() == config.name.lower():
+                    if config.from_local_sdist:
+                        # Initial name set in the recipe came from the sdist filename
+                        set_global_jinja_var(recipe, "name", package_metadata["name"])
                     package_metadata.pop("name")
                 else:
                     package_metadata["name"] = package_metadata["name"].replace(

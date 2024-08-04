@@ -15,7 +15,9 @@ def data_dir() -> str:
 @fixture(scope="session")
 def pkg_pytest(tmpdir_factory) -> str:
     folder = tmpdir_factory.mktemp("test-download-pkg")
-    dest_pkg = str(folder / "PYTEST-PKG.tar.gz")
+    # Use different package name and version for the sdist archive on purpose
+    # Correct info should be extracted from the metadata and not filename
+    dest_pkg = str(folder / "PYTEST-PKG-1.0.0.tar.gz")
     download_sdist_pkg(
         "https://pypi.io/packages/source/p/pytest/pytest-5.3.5.tar.gz", dest_pkg
     )
