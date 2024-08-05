@@ -1,17 +1,17 @@
 exclude: docs
 repos:
 -   repo: https://github.com/psf/black
-    rev: 23.12.1
+    rev: 24.8.0
     hooks:
     -   id: black
         args: [--safe, --quiet]
 -   repo: https://github.com/asottile/blacken-docs
-    rev: 1.16.0
+    rev: 1.18.0
     hooks:
     -   id: blacken-docs
         additional_dependencies: [black==22.6.0]
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
     -   id: trailing-whitespace
     -   id: end-of-file-fixer
@@ -34,7 +34,7 @@ repos:
         -   id: isort
             exclude: tests/data
 -   repo: https://github.com/PyCQA/flake8
-    rev: 7.0.0
+    rev: 7.1.1
     hooks:
     -   id: flake8
         exclude: tests/data
