@@ -125,3 +125,9 @@ def test_rm_duplicated_deps():
     assert rm_duplicated_deps([]) is None
     # my-crazy-pkg is preferred because "my-crazy-pkg" < "my_craZy-pkg":
     assert rm_duplicated_deps(["my_craZy-pkg", "my-crazy-pkg"]) == ["my-crazy-pkg"]
+
+
+def test_rm_dupliate_deps_with_star():
+    assert rm_duplicated_deps(["typing-extensions", "typing_extensions *"]) == [
+        "typing_extensions"
+    ]

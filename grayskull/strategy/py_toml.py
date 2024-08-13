@@ -204,6 +204,12 @@ def add_poetry_metadata(metadata: dict, toml_metadata: dict) -> dict:
         metadata["requirements"]["run_constrained"].extend(req_run_constrained)
 
     host_metadata = metadata["requirements"].get("host", [])
+    if toml_metadata["tool"].get("poetry", {}).get("scripts"):
+        metadata["build"]["entry_points"] = []
+        for entry_name, entry_path in toml_metadata["tool"]["poetry"][
+            "scripts"
+        ].items():
+            metadata["build"]["entry_points"].append(f"{entry_name} = {entry_path}")
     if "poetry" not in host_metadata and "poetry-core" not in host_metadata:
         metadata["requirements"]["host"] = host_metadata + ["poetry-core"]
 
@@ -219,6 +225,124 @@ def add_poetry_metadata(metadata: dict, toml_metadata: dict) -> dict:
 
 def is_poetry_present(toml_metadata: dict) -> bool:
     return "poetry" in toml_metadata.get("tool", {})
+
+
+def is_flit_present(toml_metadata: dict) -> bool:
+    return "flit" in toml_metadata.get("tool", {})
+
+
+def add_flit_metadata(metadata: dict, toml_metadata: dict) -> dict:
+    if not is_flit_present(toml_metadata):
+        return metadata
+
+    flit_metadata = toml_metadata["tool"]["flit"]
+    flit_scripts = flit_metadata.get("scripts", {})
+    for entry_name, entry_path in flit_scripts.items():
+        if "build" not in metadata:
+            metadata["build"] = {}
+        if "entry_points" not in metadata["build"]:
+            metadata["build"]["entry_points"] = []
+        metadata["build"]["entry_points"].append(f"{entry_name} = {entry_path}")
+    return metadata
+
+
+def is_pep725_present(toml_metadata: dict):
+    return "external" in toml_metadata
+
+
+def get_pep725_mapping(purl: str):
+    """This function maps a PURL to the name in the conda ecosystem. It is expected
+    that this will be provided on a per-ecosystem basis (such as by conda-forge)"""
+
+    package_mapping = {
+        "virtual:compiler/c": "{{ compiler('c') }}",
+        "virtual:compiler/cpp": "{{ compiler('cxx') }}",
+        "virtual:compiler/fortran": "{{ compiler('fortran') }}",
+        "virtual:compiler/rust": "{{ compiler('rust') }}",
+        "virtual:interface/blas": "{{ blas }}",
+        "pkg:generic/boost": "boost-cpp",
+        "pkg:generic/brial": "brial",
+        "pkg:generic/cddlib": "cddlib",
+        "pkg:generic/cliquer": "cliquer",
+        "pkg:generic/ecl": "ecl",
+        "pkg:generic/eclib": "eclib",
+        "pkg:generic/ecm": "ecm",
+        "pkg:generic/fflas-ffpack": "fflas-ffpack",
+        "pkg:generic/fplll": "fplll",
+        "pkg:generic/flint": "libflint",
+        "pkg:generic/libgd": "libgd",
+        "pkg:generic/gap": "gap-defaults",
+        "pkg:generic/gfan": "gfan",
+        "pkg:generic/gmp": "gmp",
+        "pkg:generic/giac": "giac",
+        "pkg:generic/givaro": "givaro",
+        "pkg:generic/pkg-config": "pkg-config",
+        "pkg:generic/glpk": "glpk",
+        "pkg:generic/gsl": "gsl",
+        "pkg:generic/iml": "iml",
+        "pkg:generic/lcalc": "lcalc",
+        "pkg:generic/libbraiding": "libbraiding",
+        "pkg:generic/libhomfly": "libhomfly",
+        "pkg:generic/lrcalc": "lrcalc",
+        "pkg:generic/libpng": "libpng",
+        "pkg:generic/linbox": "linbox",
+        "pkg:generic/m4ri": "m4ri",
+        "pkg:generic/m4rie": "m4rie",
+        "pkg:generic/mpc": "mpc",
+        "pkg:generic/mpfi": "mpfi",
+        "pkg:generic/mpfr": "mpfr",
+        "pkg:generic/maxima": "maxima",
+        "pkg:generic/nauty": "nauty",
+        "pkg:generic/ntl": "ntl",
+        "pkg:generic/pari": "pari",
+        "pkg:generic/pari-elldata": "pari-elldata",
+        "pkg:generic/pari-galdata": "pari-galdata",
+        "pkg:generic/pari-seadata": "pari-seadata",
+        "pkg:generic/palp": "palp",
+        "pkg:generic/planarity": "planarity",
+        "pkg:generic/ppl": "ppl",
+        "pkg:generic/primesieve": "primesieve",
+        "pkg:generic/primecount": "primecount",
+        "pkg:generic/qhull": "qhull",
+        "pkg:generic/rw": "rw",
+        "pkg:generic/singular": "singular",
+        "pkg:generic/symmetrica": "symmetrica",
+        "pkg:generic/sympow": "sympow",
+    }
+    return package_mapping.get(purl, purl)
+
+
+def add_pep725_metadata(metadata: dict, toml_metadata: dict):
+    if not is_pep725_present(toml_metadata):
+        return metadata
+
+    externals = toml_metadata["external"]
+    # each of these is a list of PURLs. For each one we find,
+    # we need to map it to the the conda ecosystem
+    requirements = metadata.get("requirements", {})
+    section_map = (
+        ("build", "build-requires"),
+        ("host", "host-requires"),
+        ("run", "dependencies"),
+    )
+    for conda_section, pep725_section in section_map:
+        requirements.setdefault(conda_section, [])
+        requirements[conda_section].extend(
+            [get_pep725_mapping(purl) for purl in externals.get(pep725_section, [])]
+        )
+        # TODO: handle optional dependencies properly
+        optional_features = toml_metadata.get(f"optional-{pep725_section}", {})
+        for feature_name, feature_deps in optional_features.items():
+            requirements[conda_section].append(
+                f'# OPTIONAL dependencies from feature "{feature_name}"'
+            )
+            requirements[conda_section].extend(feature_deps)
+        if not requirements[conda_section]:
+            del requirements[conda_section]
+
+    if requirements:
+        metadata["requirements"] = requirements
+    return metadata
 
 
 def get_all_toml_info(path_toml: Union[Path, str]) -> dict:
@@ -262,5 +386,7 @@ def get_all_toml_info(path_toml: Union[Path, str]) -> dict:
     metadata["name"] = metadata.get("name") or toml_project.get("name")
 
     add_poetry_metadata(metadata, toml_metadata)
+    add_flit_metadata(metadata, toml_metadata)
+    add_pep725_metadata(metadata, toml_metadata)
 
     return metadata

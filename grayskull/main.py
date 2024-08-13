@@ -7,14 +7,13 @@ from typing import List, Optional
 
 import requests
 from colorama import Fore, Style, init
-from colorama.ansi import clear_screen
 
 import grayskull
 from grayskull.base.factory import GrayskullFactory
 from grayskull.base.github import get_git_current_user
 from grayskull.cli import CLIConfig
 from grayskull.cli.stdout import print_msg
-from grayskull.config import Configuration
+from grayskull.config import DEFAULT_PYPI_META_URL, DEFAULT_PYPI_URL, Configuration
 from grayskull.utils import generate_recipe, origin_is_github, origin_is_local_sdist
 
 init(autoreset=True)
@@ -93,10 +92,22 @@ def init_parser():
         help="If sections are specified, grayskull will populate just the sections "
         "informed.",
     )
+    cran_parser.add_argument(
+        "--use-v1-format",
+        "-u",
+        default=False,
+        action="store_true",
+        dest="use_v1_format",
+        help="Returns a recipe file in the V1 format, used by rattler-build."
+        " NOTE: This is experimental.",
+    )
     # create parser for pypi
     pypi_parser = subparsers.add_parser("pypi", help="Options to generate PyPI recipes")
     pypi_parser.add_argument(
-        "pypi_packages", nargs="+", help="Specify the PyPI packages name.", default=[]
+        "pypi_packages",
+        nargs="+",
+        help="Specify the PyPI packages name. Grayskull can also accept a github url.",
+        default=[],
     )
     pypi_parser.add_argument(
         "--download",
@@ -159,10 +170,26 @@ def init_parser():
         help="It will generate the recipes strict for the conda-forge channel.",
     )
     pypi_parser.add_argument(
-        "--pypi-url",
-        default="https://pypi.org/pypi/",
+        "--pypi-metadata-url",
+        default=DEFAULT_PYPI_META_URL,
         dest="url_pypi_metadata",
-        help="Pypi url server",
+        help=(
+            "Pypi url server metadata endpoint;"
+            + "will be appended with '{pkgname}/json'"
+        ),
+    )
+    pypi_parser.add_argument(
+        "--pypi-mirror-url",
+        default=DEFAULT_PYPI_URL,
+        dest="url_pypi_mirror",
+        help="Pypi mirror URL; assumed to have same API as pypi.org",
+    )
+    # TODO: Remove before 3.0 release
+    pypi_parser.add_argument(
+        "--pypi-url",
+        default=None,
+        dest="url_pypi_metadata_deprecated",
+        help="DEPRECATED: use --pypi-metadata-url instead",
     )
     pypi_parser.add_argument(
         "--recursive",
@@ -242,6 +269,15 @@ def init_parser():
         dest="licence_exclude_folders",
         help="Exclude folders when searching for licence.",
     )
+    pypi_parser.add_argument(
+        "--use-v1-format",
+        "-u",
+        default=False,
+        action="store_true",
+        dest="use_v1_format",
+        help="Returns a recipe file in the V1 format, used by rattler-build."
+        " NOTE: This is experimental.",
+    )
 
     return parser
 
@@ -270,7 +306,6 @@ def main(args=None):
     CLIConfig().list_missing_deps = args.list_missing_deps
 
     print_msg(Style.RESET_ALL)
-    print_msg(clear_screen())
 
     if getattr(args, "pypi_packages", None):
         generate_recipes_from_list(args.pypi_packages, args)
@@ -296,11 +331,37 @@ def generate_recipes_from_list(list_pkgs, args):
         if Path(pkg_name).is_file() and (not from_local_sdist):
             args.output = pkg_name
         try:
+            # TODO: Remove before 3.0 release
+            if args.url_pypi_metadata_deprecated and args.url_pypi_metadata:
+                raise RuntimeError(
+                    "--pypi-url is deprecated in favor of --pypi-url-metadata "
+                    + "and may not be passed in conjunction with --pypi-url-metadata"
+                )
+
+            # TODO: Remove before 3.0 release
+            if args.url_pypi_metadata_deprecated is not None:
+                logging.warning(
+                    "--pypi-url is deprecated; use --pypi-url-metadata instead"
+                )
+                args.url_pypi_metadata = args.url_pypi_metadata_deprecated
+
+            # If a PYPI mirror is selected, but the metadata URL is not
+            # explicitly passed, assume the mirror can handle the standard
+            # metadata endpoint and coerce the metadata URL appropriately in a
+            # way that respects the DEFAULT settings from config.
+            if (args.url_pypi_mirror.rstrip("/") != DEFAULT_PYPI_URL) and (
+                args.url_pypi_metadata.rstrip("/") == DEFAULT_PYPI_META_URL
+            ):
+                args.url_pypi_metadata = DEFAULT_PYPI_META_URL.replace(
+                    DEFAULT_PYPI_URL, args.url_pypi_mirror.rstrip("/")
+                )
+
             recipe, config = create_python_recipe(
                 pkg_name,
                 is_strict_cf=args.is_strict_conda_forge,
                 download=args.download,
-                url_pypi_metadata=args.url_pypi_metadata,
+                url_pypi=args.url_pypi_mirror.rstrip("/"),
+                url_pypi_metadata=args.url_pypi_metadata.rstrip("/"),
                 sections_populate=args.sections_populate,
                 from_local_sdist=from_local_sdist,
                 extras_require_test=args.extras_require_test,
@@ -318,7 +379,7 @@ def generate_recipes_from_list(list_pkgs, args):
         if args.sections_populate is None or "extra" in args.sections_populate:
             add_extra_section(recipe, args.maintainers)
 
-        generate_recipe(recipe, config, args.output)
+        generate_recipe(recipe, config, args.output, args.use_v1_format)
         print_msg(
             f"\n{Fore.GREEN}#### Recipe generated on "
             f"{os.path.realpath(args.output)} for {pkg_name} ####\n\n"
@@ -364,7 +425,7 @@ def generate_r_recipes_from_list(list_pkgs, args):
         if args.sections_populate is None or "extra" in args.sections_populate:
             add_extra_section(recipe, args.maintainers)
 
-        generate_recipe(recipe, config, args.output)
+        generate_recipe(recipe, config, args.output, args.use_v1_format)
         print_msg(
             f"\n{Fore.GREEN}#### Recipe generated on "
             f"{os.path.realpath(args.output)} for {pkg_name} ####\n\n"

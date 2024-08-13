@@ -9,8 +9,9 @@ from functools import lru_cache
 from glob import glob
 from pathlib import Path
 from shutil import copyfile
-from typing import List, Optional, Union
+from typing import Final, List, Optional, Union
 
+from conda_recipe_manager.parser.recipe_parser_convert import RecipeParserConvert
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from souschef.recipe import Recipe
@@ -22,6 +23,10 @@ PyVer = namedtuple("PyVer", ["major", "minor"])
 yaml = YAML(typ="jinja2")
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.width = 600
+
+
+#  PURL fields               scheme      type           name
+RE_PEP725_PURL = re.compile(r"[a-z]+\:[\.a-z0-9_-]+\/[\.a-z0-9_-]+", re.IGNORECASE)
 
 
 @lru_cache(maxsize=10)
@@ -125,13 +130,20 @@ def rm_duplicated_deps(all_requirements: Union[list, set, None]) -> Optional[lis
     # as it should be added.
     # (This is order-preserving since dicts are ordered by first insertion.)
     new_reqs: dict[str, str] = {}
-    re_split = re.compile(r"\s+|>|=|<|~|!|#")
+    re_split = re.compile(r"\s+(|>|=|<|~|!|#)+")
     for dep in all_requirements:
         if dep.strip().startswith(("{{", "<{")):
             new_reqs[dep] = dep
             continue
-        dep_name = re_split.split(dep.strip())[0].strip()
+        dep_name, *constrains = re_split.split(dep.strip())
+        dep_name = dep_name.strip()
+        constrains = [
+            c.strip()
+            for c in constrains
+            if c.strip() not in {"=*", "==*", "*", "*.*", "*.*.*", ""}
+        ]
         canonicalized = dep_name.replace("_", "-").lower()
+        constrains.insert(0, dep_name)
         if canonicalized in new_reqs:
             # In order to break ties deterministically, we prioritize the requirement
             # which is alphanumerically lowest. This happens to prioritize the "-"
@@ -140,10 +152,10 @@ def rm_duplicated_deps(all_requirements: Union[list, set, None]) -> Optional[lis
             # keep "importlib-metadata" because it is alphabetically lower.
             previous_req = new_reqs[canonicalized]
             if len(dep) > len(previous_req) or "-" in dep_name:
-                new_reqs[canonicalized] = dep
+                new_reqs[canonicalized] = " ".join(constrains)
         else:
-            new_reqs[canonicalized] = dep
-    return list(new_reqs.values())
+            new_reqs[canonicalized] = " ".join(constrains)
+    return [re.sub(r"\s+(#)", "  \\1", v.strip()) for v in new_reqs.values()]
 
 
 def format_dependencies(all_dependencies: List, name: str) -> List:
@@ -160,9 +172,12 @@ def format_dependencies(all_dependencies: List, name: str) -> List:
     re_remove_tags = re.compile(r"\s*(\[.*\])", re.DOTALL)
     re_remove_comments = re.compile(r"\s+#.*", re.DOTALL)
     for req in all_dependencies:
+        if RE_PEP725_PURL.match(req):
+            formatted_dependencies.append(req)
+            continue
         match_req = re_deps.match(req)
         deps_name = req
-        if deps_name.replace("-", "_") == name.replace("-", "_"):
+        if name is not None and deps_name.replace("-", "_") == name.replace("-", "_"):
             continue
         if match_req:
             match_req = match_req.groups()
@@ -180,11 +195,13 @@ def generate_recipe(
     recipe: Recipe,
     config,
     folder_path: Union[str, Path] = ".",
+    use_v1_format: bool = False,
 ):
     """Write the recipe in a location. It will create a folder with the
     package name and the recipe will be there.
 
     :param folder_path: Path to the folder
+    :param use_v1_format: If set to True, return a recipe in the V1 format
     """
     if recipe["package"]["name"].value.startswith("r-{{"):
         pkg_name = f"r-{config.name}"
@@ -201,21 +218,37 @@ def generate_recipe(
         logging.debug(f"Generating recipe on: {recipe_dir}")
         if not recipe_dir.is_dir():
             recipe_dir.mkdir()
-        recipe_path = recipe_dir / "meta.yaml"
+        recipe_path = recipe_dir / "recipe.yaml" if use_v1_format else "meta.yaml"
         recipe_folder = recipe_dir
         add_new_lines_after_section(recipe.yaml)
 
     clean_yaml(recipe)
     recipe.save(recipe_path)
+    if use_v1_format:
+        upgrade_v0_recipe_to_v1(recipe_path)
     for file_to_recipe in config.files_to_copy:
         name = file_to_recipe.split(os.path.sep)[-1]
         if os.path.isfile(file_to_recipe):
             copyfile(file_to_recipe, os.path.join(recipe_folder, name))
 
 
-def get_clean_yaml(recipe_yaml: CommentedMap) -> CommentedMap:
-    clean_yaml(recipe_yaml)
-    return add_new_lines_after_section(recipe_yaml)
+def upgrade_v0_recipe_to_v1(recipe_path: Path) -> None:
+    """
+    Takes a V0 (pre CEP-13) recipe and converts it to a V1 (post CEP-13) recipe file.
+    Upgraded recipes are saved to the provided file path.
+
+    NOTE: As of writing, we need ruamel to dump the text to a file first so we can
+          get the original recipe file as a string. This is a workaround until we
+          can get ruamel to dump to a string stream without blowing up on the
+          JINJA plugin.
+    :param recipe_path: Path to that contains the original recipe file to modify.
+    """
+    recipe_content: Final[str] = RecipeParserConvert.pre_process_recipe_text(
+        recipe_path.read_text()
+    )
+    recipe_converter = RecipeParserConvert(recipe_content)
+    v1_content, _, _ = recipe_converter.render_to_v1_recipe_format()
+    recipe_path.write_text(v1_content, encoding="utf-8")
 
 
 def add_new_lines_after_section(recipe_yaml: CommentedMap) -> CommentedMap:

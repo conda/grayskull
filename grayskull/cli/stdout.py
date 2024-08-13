@@ -8,6 +8,7 @@ from colorama import Fore, Style
 
 from grayskull.base.pkg_info import is_pkg_available
 from grayskull.cli import WIDGET_BAR_DOWNLOAD, CLIConfig
+from grayskull.utils import RE_PEP725_PURL
 
 
 def print_msg(msg: str):
@@ -78,6 +79,11 @@ def print_requirements(
                 pkg_name = pkg.replace("<{", "{{")
                 options = ""
                 colour = Fore.GREEN
+            elif RE_PEP725_PURL.match(pkg):
+                pkg_name = pkg
+                options = ""
+                all_missing_deps.add(pkg)
+                colour = Fore.YELLOW
             elif search_result:
                 pkg_name, options = search_result.groups()
                 if is_pkg_available(pkg_name):
@@ -102,7 +108,15 @@ def print_requirements(
         print_msg(f"{key.capitalize()} requirements (optional):")
         print_req(req_list)
 
-    print_msg(f"\n{Fore.RED}RED{Style.RESET_ALL}: Missing packages")
+    print_msg(
+        f"\n{Fore.RED}RED{Style.RESET_ALL}: Package names not available on conda-forge"
+    )
+    print_msg(
+        (
+            f"{Fore.YELLOW}YELLOW{Style.RESET_ALL}: "
+            "PEP-725 PURLs that did not map to known package"
+        )
+    )
     print_msg(f"{Fore.GREEN}GREEN{Style.RESET_ALL}: Packages available on conda-forge")
 
     if CLIConfig().list_missing_deps:

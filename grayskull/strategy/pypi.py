@@ -1,7 +1,9 @@
+import itertools
 import json
 import logging
 import os
 import re
+from collections.abc import Mapping
 from pathlib import Path
 from tempfile import mkdtemp
 from typing import Dict, Iterable, List, Optional
@@ -83,7 +85,6 @@ def merge_pypi_sdist_metadata(
         source_section["url"] = adjust_source_url_to_include_placeholders(
             source_section["url"], get_val("version")
         )
-
     return {
         "author": get_val("author"),
         "name": get_val("name"),
@@ -110,6 +111,7 @@ def merge_pypi_sdist_metadata(
         "requires_dist": requires_dist,
         "sdist_path": get_val("sdist_path"),
         "requirements_run_constrained": get_val("requirements_run_constrained"),
+        "__build_requirements_placeholder": get_val("__build_requirements_placeholder"),
     }
 
 
@@ -250,14 +252,14 @@ def get_pypi_metadata(config: Configuration) -> dict:
     """
     print_msg("Recovering metadata from pypi...")
     if config.version:
-        url_pypi = config.url_pypi_metadata.format(
+        url_pypi_metadata = config.url_pypi_metadata.format(
             pkg_name=f"{config.name}/{config.version}"
         )
     else:
         log.info(f"Version for {config.name} not specified.\nGetting the latest one.")
-        url_pypi = config.url_pypi_metadata.format(pkg_name=config.name)
+        url_pypi_metadata = config.url_pypi_metadata.format(pkg_name=config.name)
 
-    metadata = requests.get(url=url_pypi, timeout=5)
+    metadata = requests.get(url=url_pypi_metadata, timeout=5)
     if metadata.status_code != 200:
         raise requests.HTTPError(
             f"It was not possible to recover package metadata for {config.name}.\n"
@@ -291,7 +293,7 @@ def get_pypi_metadata(config: Configuration) -> dict:
         "url": info.get("home_page"),
         "license": info.get("license"),
         "source": {
-            "url": "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/"
+            "url": config.url_pypi + "/packages/source/{{ name[0] }}/{{ name }}/"
             f"{get_url_filename(metadata)}",
             "sha256": get_sha256_from_pypi_metadata(metadata),
         },
@@ -350,9 +352,14 @@ def get_metadata(recipe, config) -> dict:
     """Method responsible to get the whole metadata available. It will
     merge metadata from multiple sources (pypi, setup.py, setup.cfg)
     """
-    name = config.name
     sdist_metadata, pypi_metadata = get_origin_wise_metadata(config)
     metadata = merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata, config)
+    if config.from_local_sdist:
+        # Overwrite package name from sdist filename with name from metadata
+        # sdist filename is normalized by setuptools since version 69.3.0
+        # See https://github.com/pypa/setuptools/issues/3593
+        config.name = metadata["name"]
+    name = config.name
     log.debug(f"Data merged from pypi, setup.cfg and setup.py: {metadata}")
     if metadata.get("scripts") is not None:
         config.is_arch = True
@@ -485,16 +492,32 @@ def get_metadata(recipe, config) -> dict:
         }
 
 
+def remove_all_inner_nones(metadata: Dict) -> Dict:
+    """Remove all inner None values from a dictionary."""
+    if not isinstance(metadata, Mapping):
+        return metadata
+    for k, v in metadata.items():
+        if not isinstance(v, list):
+            continue
+        metadata[k] = [i for i in v if i is not None]
+    return metadata
+
+
 def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]):
     """Update one specific section."""
     from souschef.section import Section
 
     metadata = get_metadata(recipe, config)
+
     for section in all_sections:
+        metadata[section] = remove_all_inner_nones(metadata.get(section, {}))
         if metadata.get(section):
             if section == "package":
                 package_metadata = dict(metadata[section])
                 if package_metadata["name"].lower() == config.name.lower():
+                    if config.from_local_sdist:
+                        # Initial name set in the recipe came from the sdist filename
+                        set_global_jinja_var(recipe, "name", package_metadata["name"])
                     package_metadata.pop("name")
                 else:
                     package_metadata["name"] = package_metadata["name"].replace(
@@ -522,12 +545,33 @@ def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]
                 output["build"]["noarch"] = "python"
 
 
+def check_noarch_python_for_new_deps(
+    host_req: List, run_req: List, config: Configuration
+):
+    if not config.is_arch:
+        return
+    for dep in itertools.chain(host_req, run_req):
+        dep = dep.strip()
+        only_name = re.split(r"[~^<>=!#\s+]+", dep)[0].strip()
+        if (
+            "# [" in dep
+            or dep.startswith("<{")
+            or only_name in config.pkg_need_c_compiler
+            or only_name in config.pkg_need_cxx_compiler
+        ):
+            config.is_arch = True
+            return
+    config.is_arch = False
+
+
 def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]:
     """Extract the requirements for `build`, `host` and `run`"""
     name = metadata["name"]
     requires_dist = format_dependencies(metadata.get("requires_dist", []), name)
     setup_requires = metadata.get("setup_requires", [])
     host_req = format_dependencies(setup_requires or [], config.name)
+    build_requires = metadata.get("__build_requirements_placeholder", [])
+    build_req = format_dependencies(build_requires or [], config.name)
     if not requires_dist and not host_req and not metadata.get("requires_python"):
         if config.is_strict_cf:
             py_constrain = (
@@ -543,7 +587,9 @@ def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]
 
     run_req = get_run_req_from_requires_dist(requires_dist, config)
     host_req = get_run_req_from_requires_dist(host_req, config)
-    build_req = [f"<{{ compiler('{c}') }}}}" for c in metadata.get("compilers", [])]
+    build_req = build_req or [
+        f"<{{ compiler('{c}') }}}}" for c in metadata.get("compilers", [])
+    ]
     if build_req:
         config.is_arch = True
 
@@ -567,6 +613,7 @@ def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]
     if config.is_strict_cf:
         host_req = remove_selectors_pkgs_if_needed(host_req)
         run_req = remove_selectors_pkgs_if_needed(run_req)
+        check_noarch_python_for_new_deps(host_req, run_req, config)
     result = {}
     if build_req:
         result = {

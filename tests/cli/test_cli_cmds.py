@@ -76,6 +76,7 @@ def test_change_pypi_url(mocker):
         "pytest=5.3.2",
         is_strict_cf=False,
         download=False,
+        url_pypi="https://pypi.org",
         url_pypi_metadata="http://url_pypi.com/abc",
         sections_populate=None,
         from_local_sdist=False,

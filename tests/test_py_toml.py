@@ -8,6 +8,8 @@ import pytest
 from grayskull.main import generate_recipes_from_list, init_parser
 from grayskull.strategy.py_toml import (
     InvalidVersion,
+    add_flit_metadata,
+    add_pep725_metadata,
     add_poetry_metadata,
     encode_poetry_version,
     get_all_toml_info,
@@ -16,6 +18,13 @@ from grayskull.strategy.py_toml import (
     get_tilde_ceiling,
     parse_version,
 )
+
+
+def test_add_flit_metadata():
+    metadata = {"build": {"entry_points": []}}
+    toml_metadata = {"tool": {"flit": {"scripts": {"key": "value"}}}}
+    result = add_flit_metadata(metadata, toml_metadata)
+    assert result == {"build": {"entry_points": ["key = value"]}}
 
 
 @pytest.mark.parametrize(
@@ -160,10 +169,63 @@ def test_poetry_langchain_snapshot(tmpdir):
     assert filecmp.cmp(snapshot_path, output_path, shallow=False)
 
 
-def test_get_constrained_dep_version_not_present():
+def test_poetry_get_constrained_dep_version_not_present():
     assert (
         get_constrained_dep(
             {"git": "https://codeberg.org/hjacobs/pytest-kind.git"}, "pytest-kind"
         )
         == "pytest-kind"
     )
+
+
+def test_poetry_entrypoints():
+    poetry = {
+        "requirements": {"host": ["setuptools"], "run": ["python"]},
+        "build": {},
+        "test": {},
+    }
+    toml_metadata = {
+        "tool": {
+            "poetry": {
+                "scripts": {
+                    "grayskull": "grayskull.main:main",
+                    "grayskull-recipe": "grayskull.main:recipe",
+                }
+            }
+        }
+    }
+    assert add_poetry_metadata(poetry, toml_metadata) == {
+        "requirements": {
+            "host": ["setuptools", "poetry-core"],
+            "run": ["python"],
+        },
+        "build": {
+            "entry_points": [
+                "grayskull = grayskull.main:main",
+                "grayskull-recipe = grayskull.main:recipe",
+            ]
+        },
+        "test": {},
+    }
+
+
+@pytest.mark.parametrize(
+    "conda_section, pep725_section",
+    [("build", "build-requires"), ("host", "host-requires"), ("run", "dependencies")],
+)
+@pytest.mark.parametrize(
+    "purl, purl_translated",
+    [
+        ("virtual:compiler/c", "{{ compiler('c') }}"),
+        ("pkg:alice/bob", "pkg:alice/bob"),
+    ],
+)
+def test_pep725_section_lookup(conda_section, pep725_section, purl, purl_translated):
+    toml_metadata = {
+        "external": {
+            pep725_section: [purl],
+        }
+    }
+    assert add_pep725_metadata({}, toml_metadata) == {
+        "requirements": {conda_section: [purl_translated]}
+    }

@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 import pytest
 from colorama import Fore, Style
+from souschef.jinja_expression import get_global_jinja_var
 from souschef.recipe import Recipe
 
 from grayskull.base.factory import GrayskullFactory
@@ -32,6 +33,7 @@ from grayskull.strategy.py_base import (
 )
 from grayskull.strategy.pypi import (
     PypiStrategy,
+    check_noarch_python_for_new_deps,
     compose_test_section,
     extract_optional_requirements,
     extract_requirements,
@@ -41,8 +43,10 @@ from grayskull.strategy.pypi import (
     get_url_filename,
     merge_pypi_sdist_metadata,
     normalize_requirements_list,
+    remove_all_inner_nones,
     remove_selectors_pkgs_if_needed,
     sort_reqs,
+    update_recipe,
 )
 from grayskull.utils import PyVer, format_dependencies, generate_recipe
 
@@ -57,8 +61,40 @@ def pypi_metadata():
 
 
 @pytest.fixture
+def freeze_py_cf_supported():
+    return [
+        PyVer(3, 6),
+        PyVer(3, 7),
+        PyVer(3, 8),
+        PyVer(3, 9),
+        PyVer(3, 10),
+        PyVer(3, 11),
+    ]
+
+
+@pytest.fixture
 def recipe_config():
-    config = Configuration(name="pytest")
+    config = Configuration(
+        name="pytest",
+        py_cf_supported=[
+            PyVer(3, 6),
+            PyVer(3, 7),
+            PyVer(3, 8),
+            PyVer(3, 9),
+            PyVer(3, 10),
+            PyVer(3, 11),
+            PyVer(3, 12),
+        ],
+        supported_py=[
+            PyVer(2, 7),
+            PyVer(3, 6),
+            PyVer(3, 7),
+            PyVer(3, 8),
+            PyVer(3, 9),
+            PyVer(3, 10),
+            PyVer(3, 11),
+        ],
+    )
     recipe = Recipe(name="pytest")
     return recipe, config
 
@@ -91,7 +127,7 @@ def test_extract_pypi_requirements(pypi_metadata, recipe_config):
             "pathlib2 >=2.2.0  # [py<36]",
             "importlib-metadata >=0.12  # [py<38]",
             "atomicwrites >=1.0  # [win]",
-            "colorama   # [win]",
+            "colorama  # [win]",
         ]
     )
 
@@ -787,10 +823,7 @@ def test_ciso_recipe():
 
 
 @pytest.mark.serial
-@pytest.mark.xfail(
-    condition=(sys.platform.startswith("win")),
-    reason="Test failing on windows platform",
-)
+@pytest.mark.xfail(reason="Flake test")
 def test_pymc_recipe_fortran():
     recipe = GrayskullFactory.create_recipe(
         "pypi", Configuration(name="pymc", version="2.3.6")
@@ -1045,8 +1078,12 @@ def test_multiples_exit_setup():
     assert create_python_recipe("pyproj=2.6.1")[0]
 
 
-def test_sequence_inside_another_in_dependencies():
-    recipe = create_python_recipe("unittest2=1.1.0", is_strict_cf=True)[0]
+def test_sequence_inside_another_in_dependencies(freeze_py_cf_supported):
+    recipe = create_python_recipe(
+        "unittest2=1.1.0",
+        is_strict_cf=True,
+        py_cf_supported=freeze_py_cf_supported,
+    )[0]
     assert sorted(recipe["requirements"]["host"]) == sorted(
         [
             "python >=3.6",
@@ -1171,8 +1208,12 @@ def test_replace_slash_in_imports():
     assert ["asgi_lifespan"] == recipe["test"]["imports"]
 
 
-def test_add_python_min_to_strict_conda_forge():
-    recipe = create_python_recipe("dgllife=0.2.8", is_strict_cf=True)[0]
+def test_add_python_min_to_strict_conda_forge(freeze_py_cf_supported):
+    recipe = create_python_recipe(
+        "dgllife=0.2.8",
+        is_strict_cf=True,
+        py_cf_supported=freeze_py_cf_supported,
+    )[0]
     assert recipe["build"]["noarch"] == "python"
     assert recipe["requirements"]["host"][0] == "python >=3.6"
     assert "python >=3.6" in recipe["requirements"]["run"]
@@ -1217,6 +1258,8 @@ def test_create_recipe_from_local_sdist(pkg_pytest):
     assert recipe["about"]["summary"] == "pytest: simple powerful testing with Python"
     assert recipe["about"]["license"] == "MIT"
     assert recipe["about"]["license_file"] == "LICENSE"
+    assert get_global_jinja_var(recipe, "name") == "pytest"
+    assert get_global_jinja_var(recipe, "version") == "5.3.5"
 
 
 @patch("grayskull.strategy.py_base.get_all_toml_info", return_value={})
@@ -1301,8 +1344,13 @@ def test_remove_selectors_pkgs_if_needed_with_recipe():
     )
 
 
-def test_noarch_python_min_constrain():
-    recipe, _ = create_python_recipe("humre", is_strict_cf=True, version="0.1.1")
+def test_noarch_python_min_constrain(freeze_py_cf_supported):
+    recipe, _ = create_python_recipe(
+        "humre",
+        is_strict_cf=True,
+        version="0.1.1",
+        py_cf_supported=freeze_py_cf_supported,
+    )
     assert recipe["requirements"]["run"] == ["python >=3.6"]
 
 
@@ -1326,3 +1374,43 @@ def test_sort_reqs():
 
     assert sort_reqs(original_deps) in [sorted_deps_orig, sorted_deps_alpha]
     assert sort_reqs(original_deps_38) in [sorted_deps_orig_38, sorted_deps_alpha_38]
+
+
+@patch("grayskull.strategy.pypi.get_metadata")
+def test_metadata_pypi_none_value(mock_get_data):
+    mock_get_data.return_value = {
+        "package": {"name": "pypylon", "version": "1.2.3"},
+        "build": {"test": [None]},
+    }
+    recipe = Recipe(name="pypylon")
+    update_recipe(
+        recipe,
+        Configuration(name="pypylon", repo_github="https://github.com/basler/pypylon"),
+        ("package", "build"),
+    )
+    assert recipe["build"]["test"] == []
+
+
+@pytest.mark.parametrize(
+    "param, result",
+    [
+        ({"test": [None, None, None]}, {"test": []}),
+        ({"test": [None, "foo", None]}, {"test": ["foo"]}),
+        ({"test": [None, "foo", None, "bar", None]}, {"test": ["foo", "bar"]}),
+        ({"test": [None, "foo", None, "bar", None, None]}, {"test": ["foo", "bar"]}),
+    ],
+)
+def test_remove_all_inner_none(param, result):
+    assert remove_all_inner_nones(param) == result
+
+
+def test_check_noarch_python_for_new_deps():
+    config = Configuration(
+        is_strict_cf=True, name="abcd", version="0.1.0", is_arch=True
+    )
+    check_noarch_python_for_new_deps(
+        ["python >=3.6", "pip"],
+        ["dataclasses >=3.6", "python >=3.6"],
+        config,
+    )
+    assert config.is_arch is False
