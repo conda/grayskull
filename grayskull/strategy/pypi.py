@@ -288,7 +288,7 @@ def get_pypi_metadata(config: Configuration) -> dict:
         "url": info.get("home_page"),
         "license": info.get("license"),
         "source": {
-            "url": config.url_pypi + "/packages/source/{{ name[0] }}/{{ name }}/"
+            "url": config.url_pypi + f"/packages/source/{config.name[0]}/{config.name}/"
             f"{get_url_filename(metadata)}",
             "sha256": get_sha256_from_pypi_metadata(metadata),
         },
