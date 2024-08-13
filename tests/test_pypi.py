@@ -681,7 +681,7 @@ def test_update_requirements_with_pin():
     assert req == {
         "build": ["<{ compiler('c') }}"],
         "host": ["python", "numpy"],
-        "run": ["python", "<{ pin_compatible('numpy') }}"],
+        "run": ["python", "numpy"],
     }
 
 
@@ -815,7 +815,7 @@ def test_ciso_recipe():
         ["cython", "numpy", "pip", "python"]
     )
     assert sorted(recipe["requirements"]["run"]) == sorted(
-        ["cython", "python", "<{ pin_compatible('numpy') }}"]
+        ["cython", "python", "numpy"]
     )
     assert recipe["test"]["commands"] == ["pip check"]
     assert recipe["test"]["requires"] == ["pip"]
@@ -834,7 +834,7 @@ def test_pymc_recipe_fortran():
     }
     assert set(recipe["requirements"]["host"]) == {"numpy", "python", "pip"}
     assert set(recipe["requirements"]["run"]) == {
-        "<{ pin_compatible('numpy') }}",
+        "numpy",
         "python",
     }
     assert not recipe["build"]["noarch"]

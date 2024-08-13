@@ -38,7 +38,7 @@ from grayskull.utils import (
 
 log = logging.getLogger(__name__)
 RE_DEPS_NAME = re.compile(r"^\s*([\.a-zA-Z0-9_-]+)", re.MULTILINE)
-PIN_PKG_COMPILER = {"numpy": "<{ pin_compatible('numpy') }}"}
+PIN_PKG_COMPILER = {}
 
 
 def search_setup_root(path_folder: Union[Path, str]) -> Path:
@@ -550,9 +550,10 @@ def update_requirements_with_pin(requirements: dict):
         pkg_name_match = RE_DEPS_NAME.match(pkg)
         if pkg_name_match:
             pkg_name = pkg_name_match.group(0)
-            if pkg_name in PIN_PKG_COMPILER.keys():
+            pkg_pin = PIN_PKG_COMPILER.get(pkg_name)
+            if pkg_pin is not None:
                 requirements["run"] = clean_list_pkg(pkg_name, requirements["run"])
-                requirements["run"].append(PIN_PKG_COMPILER[pkg_name])
+                requirements["run"].append(pkg_pin)
 
 
 def discover_license(metadata: dict) -> List[ShortLicense]:
