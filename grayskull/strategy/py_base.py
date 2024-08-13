@@ -38,7 +38,7 @@ from grayskull.utils import (
 
 log = logging.getLogger(__name__)
 RE_DEPS_NAME = re.compile(r"^\s*([\.a-zA-Z0-9_-]+)", re.MULTILINE)
-PIN_PKG_COMPILER = {"numpy": "<{ pin_compatible('numpy') }}"}
+PIN_PKG_COMPILER = {}
 
 
 def search_setup_root(path_folder: Union[Path, str]) -> Path:

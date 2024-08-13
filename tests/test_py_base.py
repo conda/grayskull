@@ -35,8 +35,7 @@ def test_update_requirements_with_pin_mixed_numpy_pin_compatible():
         "run": ["numpy >=1.19.1,<2.0.0", "pyparsing >=2.4.7, <3.0.0", "python"],
     }
     update_requirements_with_pin(requirements)
-    assert "<{ pin_compatible('numpy') }}" in requirements["run"]
-    assert "numpy" not in requirements["run"]
+    assert "numpy >=1.19.1,<2.0.0" in requirements["run"]
 
 
 def test_ensure_pep440_stripping_empty_spaces():
