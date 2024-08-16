@@ -120,6 +120,38 @@ def test_get_sdist_metadata_toml_files_BLACK():
     ]
 
 
+def test_get_sdist_metadata_packages_top_level():
+    """Check that packages can be retrieved from top_level.txt"""
+    # This package only includes a pyproject.toml (no setup.py)
+    # As setuptools is used, the module name can be retrieved
+    # from top_level.txt in the sdist
+    pkg_name = "tangods-achtung"
+    pkg_name_nor = pkg_name.replace("-", "_")
+    pkg_ver = "0.11.1"
+    sdist_metadata = get_sdist_metadata(
+        f"https://pypi.io/packages/source/t/{pkg_name}/{pkg_name_nor}-{pkg_ver}.tar.gz",
+        Configuration(name=pkg_name, version=pkg_ver),
+    )
+    assert sdist_metadata["name"] == pkg_name
+    assert sdist_metadata["packages"] == ["achtung"]
+
+
+def test_get_sdist_metadata_no_top_level():
+    """Regression test when top_level.txt doesn't exist"""
+    # This package only includes a pyproject.toml (no setup.py)
+    # As hatchling is used, there is no top_level.txt file
+    pkg_name = "gidgetlab-kit"
+    pkg_name_nor = pkg_name.replace("-", "_")
+    pkg_ver = "0.7.2"
+    sdist_metadata = get_sdist_metadata(
+        f"https://pypi.io/packages/source/g/{pkg_name}/{pkg_name_nor}-{pkg_ver}.tar.gz",
+        Configuration(name=pkg_name, version=pkg_ver),
+    )
+    assert sdist_metadata["name"] == pkg_name
+    # No solution to retrieve packages for now
+    assert sdist_metadata.get("packages") is None
+
+
 def test_split_deps_without_comma():
     assert split_deps(">=1.8.0<3.0.0,!=2.0.1") == [">=1.8.0", "<3.0.0", "!=2.0.1"]
 
