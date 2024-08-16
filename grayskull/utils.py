@@ -218,7 +218,9 @@ def generate_recipe(
         logging.debug(f"Generating recipe on: {recipe_dir}")
         if not recipe_dir.is_dir():
             recipe_dir.mkdir()
-        recipe_path = recipe_dir / "recipe.yaml" if use_v1_format else "meta.yaml"
+        recipe_path = (
+            recipe_dir / "recipe.yaml" if use_v1_format else recipe_dir / "meta.yaml"
+        )
         recipe_folder = recipe_dir
         add_new_lines_after_section(recipe.yaml)
 
