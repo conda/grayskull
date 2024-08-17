@@ -72,6 +72,7 @@ def _match_scrambled_exact(candidate, licenses) -> str | None:
     for license in licenses:
         if bag == set(re.findall(r"\w+", license.lower())):
             return license
+    return None
 
 
 def match_license(name: str) -> dict:
