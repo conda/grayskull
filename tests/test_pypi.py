@@ -809,13 +809,22 @@ def test_download_pkg_sdist(pkg_pytest):
 
 def test_ciso_recipe():
     recipe = GrayskullFactory.create_recipe(
-        "pypi", Configuration(name="ciso", version="0.1.0")
+        "pypi", Configuration(name="ciso", version="0.2.2")
     )
     assert sorted(recipe["requirements"]["host"]) == sorted(
-        ["cython", "numpy", "pip", "python"]
+        [
+            "cython >=3",
+            "numpy >=2.0.0rc1",
+            "oldest-supported-numpy",
+            "pip",
+            "python >=3.9",
+            "setuptools >=41.2",
+            "setuptools-scm",
+            "wheel",
+        ]
     )
     assert sorted(recipe["requirements"]["run"]) == sorted(
-        ["cython", "python", "<{ pin_compatible('numpy') }}"]
+        ["<{ pin_compatible('numpy') }}", "oldest-supported-numpy", "python >=3.9"]
     )
     assert recipe["test"]["commands"] == ["pip check"]
     assert recipe["test"]["requires"] == ["pip"]
