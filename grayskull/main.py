@@ -332,7 +332,10 @@ def generate_recipes_from_list(list_pkgs, args):
             args.output = pkg_name
         try:
             # TODO: Remove before 3.0 release
-            if args.url_pypi_metadata_deprecated and args.url_pypi_metadata:
+            if (
+                args.url_pypi_metadata_deprecated
+                and args.url_pypi_metadata != DEFAULT_PYPI_META_URL
+            ):
                 raise RuntimeError(
                     "--pypi-url is deprecated in favor of --pypi-url-metadata "
                     + "and may not be passed in conjunction with --pypi-url-metadata"
