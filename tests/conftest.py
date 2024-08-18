@@ -19,7 +19,7 @@ def pkg_pytest(tmpdir_factory) -> str:
     # Correct info should be extracted from the metadata and not filename
     dest_pkg = str(folder / "PYTEST-PKG-1.0.0.tar.gz")
     download_sdist_pkg(
-        "https://pypi.io/packages/source/p/pytest/pytest-5.3.5.tar.gz", dest_pkg
+        "https://pypi.org/packages/source/p/pytest/pytest-5.3.5.tar.gz", dest_pkg
     )
     shutil.unpack_archive(dest_pkg, str(folder))
     return dest_pkg

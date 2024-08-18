@@ -179,7 +179,7 @@ def test_get_extra_from_requires_dist():
 def dask_sdist_metadata():
     config = Configuration(name="dask")
     return get_sdist_metadata(
-        "https://pypi.io/packages/source/d/dask/dask-2022.6.1.tar.gz",
+        "https://pypi.org/packages/source/d/dask/dask-2022.6.1.tar.gz",
         config,
     )
 
@@ -283,7 +283,7 @@ def test_compose_test_section_with_console_scripts():
     config = Configuration(name="pytest", version="7.1.2")
     metadata1 = get_pypi_metadata(config)
     metadata2 = get_sdist_metadata(
-        "https://pypi.io/packages/source/p/pytest/pytest-7.1.2.tar.gz", config
+        "https://pypi.org/packages/source/p/pytest/pytest-7.1.2.tar.gz", config
     )
     metadata = merge_pypi_sdist_metadata(metadata1, metadata2, config)
     test_requirements = []
@@ -604,7 +604,7 @@ def test_get_sha256_from_pypi_metadata():
 def test_injection_distutils(name):
     config = Configuration(name="hypothesis")
     data = get_sdist_metadata(
-        "https://pypi.io/packages/source/h/hypothesis/hypothesis-5.5.1.tar.gz",
+        "https://pypi.org/packages/source/h/hypothesis/hypothesis-5.5.1.tar.gz",
         config,
     )
     assert sorted(data["install_requires"]) == sorted(
@@ -621,7 +621,7 @@ def test_injection_distutils(name):
 def test_injection_distutils_pytest():
     config = Configuration(name="pytest", version="5.3.2")
     data = get_sdist_metadata(
-        "https://pypi.io/packages/source/p/pytest/pytest-5.3.2.tar.gz", config
+        "https://pypi.org/packages/source/p/pytest/pytest-5.3.2.tar.gz", config
     )
     assert sorted(data["install_requires"]) == sorted(
         [
@@ -644,31 +644,42 @@ def test_injection_distutils_pytest():
 
 
 def test_injection_distutils_compiler_gsw():
-    config = Configuration(name="gsw", version="3.3.1")
+    config = Configuration(name="gsw", version="3.6.19")
     data = get_sdist_metadata(
-        "https://pypi.io/packages/source/g/gsw/gsw-3.3.1.tar.gz", config
+        "https://pypi.org/packages/source/g/gsw/gsw-3.6.19.tar.gz", config
     )
     assert data.get("compilers") == ["c"]
-    assert data["packages"] == ["gsw"]
+    assert data["name"] == "gsw"
 
 
 def test_injection_distutils_setup_reqs_ensure_list():
     pkg_name, pkg_ver = "pyinstaller-hooks-contrib", "2020.7"
     config = Configuration(name=pkg_name, version=pkg_ver)
     data = get_sdist_metadata(
-        f"https://pypi.io/packages/source/p/{pkg_name}/{pkg_name}-{pkg_ver}.tar.gz",
+        f"https://pypi.org/packages/source/p/{pkg_name}/{pkg_name}-{pkg_ver}.tar.gz",
         config,
     )
     assert data.get("setup_requires") == ["setuptools >= 30.3.0"]
 
 
 def test_merge_pypi_sdist_metadata():
-    config = Configuration(name="gsw", version="3.3.1")
+    config = Configuration(name="gsw", version="3.6.19")
     pypi_metadata = get_pypi_metadata(config)
     sdist_metadata = get_sdist_metadata(pypi_metadata["sdist_url"], config)
     merged_data = merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata, config)
     assert merged_data["compilers"] == ["c"]
-    assert sorted(merged_data["setup_requires"]) == sorted(["numpy"])
+    assert sorted(merged_data["setup_requires"]) == sorted(
+        [
+            "build",
+            'numpy<3,>=2.0.0rc1; python_version >= "3.9"',
+            'oldest-supported-numpy; python_version < "3.9"',
+            "pip>9.0.1",
+            "setuptools>=42",
+            "setuptools_scm[toml]>=3.4",
+            "wheel",
+            "python >=3.8",
+        ]
+    )
 
 
 def test_update_requirements_with_pin():
@@ -809,13 +820,22 @@ def test_download_pkg_sdist(pkg_pytest):
 
 def test_ciso_recipe():
     recipe = GrayskullFactory.create_recipe(
-        "pypi", Configuration(name="ciso", version="0.1.0")
+        "pypi", Configuration(name="ciso", version="0.2.2")
     )
     assert sorted(recipe["requirements"]["host"]) == sorted(
-        ["cython", "numpy", "pip", "python"]
+        [
+            "cython >=3",
+            "numpy >=2.0.0rc1",
+            "oldest-supported-numpy",
+            "pip",
+            "python >=3.9",
+            "setuptools >=41.2",
+            "setuptools-scm",
+            "wheel",
+        ]
     )
     assert sorted(recipe["requirements"]["run"]) == sorted(
-        ["cython", "python", "<{ pin_compatible('numpy') }}"]
+        ["<{ pin_compatible('numpy') }}", "oldest-supported-numpy", "python >=3.9"]
     )
     assert recipe["test"]["commands"] == ["pip check"]
     assert recipe["test"]["requires"] == ["pip"]
@@ -1112,7 +1132,7 @@ def test_recipe_extension():
     recipe = create_python_recipe("azure-identity=1.3.1")[0]
     assert (
         recipe["source"]["url"]
-        == "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/"
+        == "https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/"
         "azure-identity-{{ version }}.zip"
     )
 
@@ -1288,6 +1308,11 @@ def test_notice_file_different_licence():
     assert recipe["about"]["license"] in ["MIT AND Apache-2.0", "Apache-2.0 AND MIT"]
 
 
+# Need to find another package for this test
+@pytest.mark.skipif(
+    sys.version_info >= (3, 12),
+    reason="consolemd setup.py requires lower than python 3.12",
+)
 def test_console_script_toml_format():
     recipe, _ = create_python_recipe("consolemd", version="0.5.1")
     assert recipe["build"]["entry_points"] == ["consolemd = consolemd.cli:cli"]
