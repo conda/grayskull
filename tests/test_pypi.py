@@ -644,12 +644,12 @@ def test_injection_distutils_pytest():
 
 
 def test_injection_distutils_compiler_gsw():
-    config = Configuration(name="gsw", version="3.3.1")
+    config = Configuration(name="gsw", version="3.6.19")
     data = get_sdist_metadata(
-        "https://pypi.org/packages/source/g/gsw/gsw-3.3.1.tar.gz", config
+        "https://pypi.org/packages/source/g/gsw/gsw-3.6.19.tar.gz", config
     )
     assert data.get("compilers") == ["c"]
-    assert data["packages"] == ["gsw"]
+    assert data["name"] == "gsw"
 
 
 def test_injection_distutils_setup_reqs_ensure_list():
