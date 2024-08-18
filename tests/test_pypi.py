@@ -663,12 +663,23 @@ def test_injection_distutils_setup_reqs_ensure_list():
 
 
 def test_merge_pypi_sdist_metadata():
-    config = Configuration(name="gsw", version="3.3.1")
+    config = Configuration(name="gsw", version="3.6.19")
     pypi_metadata = get_pypi_metadata(config)
     sdist_metadata = get_sdist_metadata(pypi_metadata["sdist_url"], config)
     merged_data = merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata, config)
     assert merged_data["compilers"] == ["c"]
-    assert sorted(merged_data["setup_requires"]) == sorted(["numpy"])
+    assert sorted(merged_data["setup_requires"]) == sorted(
+        [
+            "build",
+            'numpy<3,>=2.0.0rc1; python_version >= "3.9"',
+            'oldest-supported-numpy; python_version < "3.9"',
+            "pip>9.0.1",
+            "setuptools>=42",
+            "setuptools_scm[toml]>=3.4",
+            "wheel",
+            "python >=3.8",
+        ]
+    )
 
 
 def test_update_requirements_with_pin():
