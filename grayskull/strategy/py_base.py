@@ -805,6 +805,16 @@ def get_sdist_metadata(
         for key in ("name", "version", "summary", "author"):
             metadata[key] = getattr(dist, key, None)
 
+    # "packages" refer to the modules you can import
+    # That might be different from the distribution name (PKG-INFO name)
+    # packages can be retrieved from setup.py but is usually not defined
+    # in pyproject.toml
+    # For setuptools, it is possible to get it from top_level.txt
+    if "packages" not in metadata or not metadata["packages"]:
+        top_level = list(Path(temp_folder).rglob("*.egg-info/top_level.txt"))
+        if top_level:
+            metadata["packages"] = top_level[0].read_text().split()
+
     return merge_setup_toml_metadata(metadata, pyproject_metadata)
 
 
