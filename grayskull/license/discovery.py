@@ -62,6 +62,19 @@ def get_all_licenses_from_spdx() -> List:
     ]
 
 
+def _match_scrambled_exact(candidate, licenses) -> str | None:
+    """
+    Return license with rearranged word order only.
+
+    Fancy scorer confuses BSD-3-Clause with DEC-3-Clause.
+    """
+    bag = set(re.findall(r"\w+", candidate.lower()))
+    for license in licenses:
+        if bag == set(re.findall(r"\w+", license.lower())):
+            return license
+    return None
+
+
 def match_license(name: str) -> dict:
     """Match if the given license name matches any license present on
     spdx.org
@@ -75,11 +88,16 @@ def match_license(name: str) -> dict:
     name = re.sub(r"\s+license\s*", "", name.strip(), flags=re.IGNORECASE)
     name = name.strip()
 
-    best_matches = process.extract(
-        name, _get_all_license_choice(all_licenses), scorer=partial_ratio
-    )
-    best_matches = process.extract(name, [lc for lc, *_ in best_matches])
-    spdx_license = best_matches[0]
+    exact_match = _match_scrambled_exact(name, _get_all_license_choice(all_licenses))
+    if exact_match:
+        best_matches = [(exact_match, 100, 0)]
+        spdx_license = best_matches[0]
+    else:
+        best_matches = process.extract(
+            name, _get_all_license_choice(all_licenses), scorer=partial_ratio
+        )
+        best_matches = process.extract(name, [lc for lc, *_ in best_matches])
+        spdx_license = best_matches[0]
 
     if spdx_license[1] < 100:
         # Prefer "-or-later" licenses over the "-only"
