@@ -1308,6 +1308,11 @@ def test_notice_file_different_licence():
     assert recipe["about"]["license"] in ["MIT AND Apache-2.0", "Apache-2.0 AND MIT"]
 
 
+# Need to find another package for this test
+@pytest.mark.skipif(
+    sys.version_info >= (3, 12),
+    reason="consolemd setup.py requires lower than python 3.12",
+)
 def test_console_script_toml_format():
     recipe, _ = create_python_recipe("consolemd", version="0.5.1")
     assert recipe["build"]["entry_points"] == ["consolemd = consolemd.cli:cli"]
