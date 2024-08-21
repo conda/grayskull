@@ -11,7 +11,6 @@ from pathlib import Path
 from shutil import copyfile
 from typing import Final, List, Optional, Union
 
-from conda_recipe_manager.parser.recipe_parser_convert import RecipeParserConvert
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from souschef.recipe import Recipe
@@ -245,6 +244,8 @@ def upgrade_v0_recipe_to_v1(recipe_path: Path) -> None:
           JINJA plugin.
     :param recipe_path: Path to that contains the original recipe file to modify.
     """
+    from conda_recipe_manager.parser.recipe_parser_convert import RecipeParserConvert
+
     recipe_content: Final[str] = RecipeParserConvert.pre_process_recipe_text(
         recipe_path.read_text()
     )
