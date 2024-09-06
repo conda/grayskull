@@ -40,7 +40,9 @@ def test_parse_version_success(version, major, minor, patch):
     assert parse_version(version) == {"major": major, "minor": minor, "patch": patch}
 
 
-@pytest.mark.parametrize("invalid_version", ["asdf", "", "."])
+@pytest.mark.parametrize(
+    "invalid_version", ["asdf", "", ".", "x.2.3", "1.x.3", "1.2.x"]
+)
 def test_parse_version_failure(invalid_version):
     with pytest.raises(InvalidVersion):
         parse_version(invalid_version)
