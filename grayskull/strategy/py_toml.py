@@ -31,7 +31,7 @@ class InvalidPoetryDependency(BaseException):
     pass
 
 
-def parse_version(version: str) -> Dict[str, Optional[str]]:
+def parse_version(version: str) -> Dict[str, Optional[int]]:
     """
     Parses a version string (not necessarily semver) to a dictionary with keys
     "major", "minor", and "patch". "minor" and "patch" are possibly None.
@@ -46,7 +46,7 @@ def parse_version(version: str) -> Dict[str, Optional[str]]:
     }
 
 
-def vdict_to_vinfo(version_dict: Dict[str, Optional[str]]) -> semver.VersionInfo:
+def vdict_to_vinfo(version_dict: Dict[str, Optional[int]]) -> semver.VersionInfo:
     """
     Coerces version dictionary to a semver.VersionInfo object. If minor or patch
     numbers are missing, 0 is substituted in their place.
@@ -154,7 +154,7 @@ def encode_poetry_version(poetry_specifier: str) -> str:
 
 
 @singledispatch
-def get_constrained_dep(dep_spec, dep_name):
+def get_constrained_dep(dep_spec: Union[str, dict], dep_name: str) -> str:
     raise InvalidPoetryDependency(
         "Expected Poetry dependency specification to be of type str or dict, "
         f"received {type(dep_spec).__name__}"
@@ -162,13 +162,13 @@ def get_constrained_dep(dep_spec, dep_name):
 
 
 @get_constrained_dep.register
-def __get_constrained_dep_dict(dep_spec: dict, dep_name: str):
+def __get_constrained_dep_dict(dep_spec: dict, dep_name: str) -> str:
     conda_version = encode_poetry_version(dep_spec.get("version", ""))
     return f"{dep_name} {conda_version}".strip()
 
 
 @get_constrained_dep.register
-def __get_constrained_dep_str(dep_spec: str, dep_name: str):
+def __get_constrained_dep_str(dep_spec: str, dep_name: str) -> str:
     conda_version = encode_poetry_version(dep_spec)
     return f"{dep_name} {conda_version}"
 
