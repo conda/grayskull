@@ -6,17 +6,19 @@ from pathlib import Path
 import pytest
 
 from grayskull.main import generate_recipes_from_list, init_parser
-from grayskull.strategy.py_toml import (
+from grayskull.strategy.parse_poetry_version import (
     InvalidVersion,
+    encode_poetry_version,
+    get_caret_ceiling,
+    get_tilde_ceiling,
+    parse_version,
+)
+from grayskull.strategy.py_toml import (
     add_flit_metadata,
     add_pep725_metadata,
     add_poetry_metadata,
-    encode_poetry_version,
     get_all_toml_info,
-    get_caret_ceiling,
     get_constrained_dep,
-    get_tilde_ceiling,
-    parse_version,
 )
 
 
