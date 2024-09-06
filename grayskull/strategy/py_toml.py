@@ -10,14 +10,14 @@ import tomli
 from grayskull.utils import nested_dict
 
 VERSION_REGEX = re.compile(
-    r"""[vV]?
+    r"""^[vV]?
         (?P<major>0|[1-9]\d*)
         (\.
         (?P<minor>0|[1-9]\d*)
         (\.
             (?P<patch>0|[1-9]\d*)
         )?
-        )?
+        )?$
     """,
     re.VERBOSE,
 )
