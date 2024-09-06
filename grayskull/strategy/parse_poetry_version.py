@@ -25,6 +25,15 @@ def parse_version(version: str) -> Dict[str, Optional[int]]:
     """
     Parses a version string (not necessarily semver) to a dictionary with keys
     "major", "minor", and "patch". "minor" and "patch" are possibly None.
+
+    >>> parse_version("0")
+    {'major': 0, 'minor': None, 'patch': None}
+    >>> parse_version("1")
+    {'major': 1, 'minor': None, 'patch': None}
+    >>> parse_version("1.2")
+    {'major': 1, 'minor': 2, 'patch': None}
+    >>> parse_version("1.2.3")
+    {'major': 1, 'minor': 2, 'patch': 3}
     """
     match = VERSION_REGEX.search(version)
     if not match:
@@ -72,6 +81,22 @@ def get_caret_ceiling(target: str) -> str:
     - If the major version is not 0, the ceiling is determined by
     coercing it to semver and then bumping the major version.
     Example: 1 => 2.0.0, 1.2 => 2.0.0, 1.2.3 => 2.0.0
+
+    # Examples from Poetry docs
+    >>> get_caret_ceiling("0")
+    '1.0.0'
+    >>> get_caret_ceiling("0.0")
+    '0.1.0'
+    >>> get_caret_ceiling("0.0.3")
+    '0.0.4'
+    >>> get_caret_ceiling("0.2.3")
+    '0.3.0'
+    >>> get_caret_ceiling("1")
+    '2.0.0'
+    >>> get_caret_ceiling("1.2")
+    '2.0.0'
+    >>> get_caret_ceiling("1.2.3")
+    '2.0.0'
     """
     if not semver.VersionInfo.is_valid(target):
         target_dict = parse_version(target)
@@ -102,6 +127,14 @@ def get_caret_ceiling(target: str) -> str:
 def get_tilde_ceiling(target: str) -> str:
     """
     Accepts a Poetry tilde target and returns the exclusive version ceiling.
+
+    # Examples from Poetry docs
+    >>> get_tilde_ceiling("1")
+    '2.0.0'
+    >>> get_tilde_ceiling("1.2")
+    '1.3.0'
+    >>> get_tilde_ceiling("1.2.3")
+    '1.3.0'
     """
     target_dict = parse_version(target)
     if target_dict["minor"]:
@@ -115,6 +148,52 @@ def encode_poetry_version(poetry_specifier: str) -> str:
     Encodes Poetry version specifier as a Conda version specifier.
 
     Example: ^1 => >=1.0.0,<2.0.0
+
+    # should be unchanged
+    >>> encode_poetry_version("1.*")
+    '1.*'
+    >>> encode_poetry_version(">=1,<2")
+    '>=1,<2'
+    >>> encode_poetry_version("==1.2.3")
+    '==1.2.3'
+    >>> encode_poetry_version("!=1.2.3")
+    '!=1.2.3'
+
+    # strip spaces
+    >>> encode_poetry_version(">= 1, < 2")
+    '>=1,<2'
+
+    # handle exact version specifiers correctly
+    >>> encode_poetry_version("1.2.3")
+    '1.2.3'
+    >>> encode_poetry_version("==1.2.3")
+    '==1.2.3'
+
+    # handle caret operator correctly
+    # examples from Poetry docs
+    >>> encode_poetry_version("^0")
+    '>=0.0.0,<1.0.0'
+    >>> encode_poetry_version("^0.0")
+    '>=0.0.0,<0.1.0'
+    >>> encode_poetry_version("^0.0.3")
+    '>=0.0.3,<0.0.4'
+    >>> encode_poetry_version("^0.2.3")
+    '>=0.2.3,<0.3.0'
+    >>> encode_poetry_version("^1")
+    '>=1.0.0,<2.0.0'
+    >>> encode_poetry_version("^1.2")
+    '>=1.2.0,<2.0.0'
+    >>> encode_poetry_version("^1.2.3")
+    '>=1.2.3,<2.0.0'
+
+    # handle tilde operator correctly
+    # examples from Poetry docs
+    >>> encode_poetry_version("~1")
+    '>=1.0.0,<2.0.0'
+    >>> encode_poetry_version("~1.2")
+    '>=1.2.0,<1.3.0'
+    >>> encode_poetry_version("~1.2.3")
+    '>=1.2.3,<1.3.0'
     """
     poetry_clauses = poetry_specifier.split(",")
 
