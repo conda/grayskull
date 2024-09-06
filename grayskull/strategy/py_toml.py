@@ -62,7 +62,9 @@ def coerce_to_semver(version: str) -> str:
     if semver.VersionInfo.is_valid(version):
         return version
 
-    return str(vdict_to_vinfo(parse_version(version)))
+    parsed_version = parse_version(version)
+    vinfo = vdict_to_vinfo(parsed_version)
+    return str(vinfo)
 
 
 def get_caret_ceiling(target: str) -> str:
