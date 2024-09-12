@@ -1,11 +1,3 @@
-art:
-  conda_forge: ascii-art
-  import_name: art
-
-bilby-pipe:
-  conda_forge: bilby_pipe
-  import_name: bilby_pipe
-
 Boruta:
   conda_forge: boruta_py
   import_name: boruta
@@ -30,6 +22,10 @@ annoy:
   conda_forge: python-annoy
   import_name: annoy
 
+art:
+  conda_forge: ascii-art
+  import_name: art
+
 asana:
   conda_forge: python-asana
   import_name: asana
@@ -41,6 +37,14 @@ backtrace:
 bash_completion:
   conda_forge: py-bash-completion
   import_name: bash_completion
+
+bilby-pipe:
+  conda_forge: bilby_pipe
+  import_name: bilby_pipe
+
+blis:
+  conda_forge: cython-blis
+  import_name: blis
 
 build:
   conda_forge: python-build
@@ -102,6 +106,11 @@ data-morph-ai:
   conda_forge: data-morph-ai
   import_name: data_morph
 
+dataclasses:
+  conda_forge: dataclasses
+  import_name: dataclasses
+  avoid_selector: true
+
 datadotworld:
   conda_forge: datadotworld-py
   import_name: datadotworld
@@ -138,6 +147,11 @@ empyrical_dist:
   conda_forge: empyrical-dist
   import_name: empyrical_dist
 
+enum34:
+  conda_forge: enum34
+  import_name: enum
+  avoid_selector: true
+
 esprima:
   conda_forge: esprima-python
   import_name: esprima
@@ -149,6 +163,11 @@ et_xmlfile:
 evalml:
   conda_forge: evaml-core
   import_name: evalml
+
+exceptiongroup:
+  conda_forge: exceptiongroup
+  import_name: exceptiongroup
+  avoid_selector: true
 
 extract-msg:
   conda_forge: msg-extractor
@@ -174,21 +193,29 @@ flex:
   conda_forge: flex-swagger
   import_name: flex
 
+flit_core:
+  conda_forge: flit-core
+  import_name: flit-core
+
 gnupg:
   conda_forge: gnupg-py
   import_name: gnupg
-
-google:
-  conda_forge: googlesearch
-  import_name: googlesearch
 
 google-cloud-bigquery:
   conda_forge: google-cloud-bigquery-core
   import_name: google.cloud.bigquery
 
+google:
+  conda_forge: googlesearch
+  import_name: googlesearch
+
 graphviz:
   import_name: graphviz
   conda_forge: python-graphviz
+
+gssapi:
+  conda_forge: python-gssapi
+  import_name: gssapi
 
 h2o:
   conda_forge: h2o-py
@@ -218,6 +245,16 @@ ib_insync:
   conda_forge: ib-insync
   import_name: ib_insync
 
+import_metadata:
+  conda_forge: import_metadata
+  import_name: import_metadata
+  avoid_selector: true
+
+importlib_metadata:
+  conda_forge: importlib-metadata
+  import_name: importlib-metadata
+  avoid_selector: true
+
 installer:
   conda_forge: python-installer
   import_name: installer
@@ -234,6 +271,14 @@ ioos_tools:
   conda_forge: ioos-tools
   import_name: ioos_tools
 
+jsii:
+  conda_forge: python-jsii
+  import_name: jsii
+
+jupyter-client:
+  conda_forge: jupyter_client
+  import_name: jupyter_client
+
 jupyter_jaeger:
   conda_forge: jupyter-jaeger
   import_name: jupyter_jaeger
@@ -245,6 +290,10 @@ jupyterlab_git:
 jupyterlab_latex:
   conda_forge: jupyterlab-latex
   import_name: jupyterlab_latex
+
+kaleido:
+  conda_forge: python-kaleido
+  import_name: kaleido
 
 kubernetes:
   conda_forge: python-kubernetes
@@ -282,13 +331,13 @@ ndarray_listener:
   conda_forge: ndarray-listener
   import_name: ndarray_listener
 
-neo:
-  conda_forge: python-neo
-  import_name: neo
-
 neo4j:
   conda_forge: neo4j-python-driver
   import_name: neo4j
+
+neo:
+  conda_forge: python-neo
+  import_name: neo
 
 nest_asyncio:
   conda_forge: nest-asyncio
@@ -302,11 +351,11 @@ nvidia-ml-py3:
   conda_forge: nvidia-ml
   import_name: pynvml
 
-opencv-python:
+opencv-python-headless:
   import_name: cv2
   conda_forge: opencv
 
-opencv-python-headless:
+opencv-python:
   import_name: cv2
   conda_forge: opencv
 
@@ -382,9 +431,10 @@ python-qnotifications:
   conda_forge: qnotifications
   import_name: QNotifications
 
-symengine:
-  conda_forge: python-symengine
-  import_name: symengine
+pywin32:
+  conda_forge: pywin32-on-windows
+  import_name: pywin
+  avoid_selector: true
 
 quantum-grove:
   conda_forge: grove
@@ -418,6 +468,10 @@ scikit-build:
   conda_forge: scikit-build
   import_name: skbuild
 
+scikit-learn:
+  conda_forge: scikit-learn
+  import_name: sklearn
+
 setuptools_scm:
   conda_forge: setuptools-scm
   import_name: setuptools_scm
@@ -437,6 +491,10 @@ sphinx-rtd-theme:
 stjudecloud-oliver:
   conda_forge: oliver
   import_name: oliver
+
+symengine:
+  conda_forge: python-symengine
+  import_name: symengine
 
 tables:
   import_name: pytables
@@ -458,6 +516,11 @@ trino:
   conda_forge: trino-python-client
   import_name: trino
 
+typing:
+  conda_forge: typing
+  import_name: typing
+  avoid_selector: true
+
 useDAVE:
   conda_forge: dave
   import_name: numpy
@@ -469,66 +532,3 @@ vsts:
 xxhash:
   import_name: xxhash
   conda_forge: python-xxhash
-
-kaleido:
-  conda_forge: python-kaleido
-  import_name: kaleido
-
-dataclasses:
-  conda_forge: dataclasses
-  import_name: dataclasses
-  avoid_selector: true
-
-typing:
-  conda_forge: typing
-  import_name: typing
-  avoid_selector: true
-
-import_metadata:
-  conda_forge: import_metadata
-  import_name: import_metadata
-  avoid_selector: true
-
-enum34:
-  conda_forge: enum34
-  import_name: enum
-  avoid_selector: true
-
-pywin32:
-  conda_forge: pywin32-on-windows
-  import_name: pywin
-  avoid_selector: true
-
-exceptiongroup:
-  conda_forge: exceptiongroup
-  import_name: exceptiongroup
-  avoid_selector: true
-
-scikit-learn:
-  conda_forge: scikit-learn
-  import_name: sklearn
-
-importlib_metadata:
-  conda_forge: importlib-metadata
-  import_name: importlib-metadata
-  avoid_selector: true
-
-jupyter-client:
-  conda_forge: jupyter_client
-  import_name: jupyter_client
-
-flit_core:
-  conda_forge: flit-core
-  import_name: flit-core
-
-gssapi:
-  conda_forge: python-gssapi
-  import_name: gssapi
-
-jsii:
-  conda_forge: python-jsii
-  import_name: jsii
-
-blis:
-  conda_forge: cython-blis
-  import_name: blis

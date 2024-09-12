@@ -1,26 +1,19 @@
 exclude: docs
 repos:
--   repo: https://github.com/psf/black
-    rev: 24.8.0
-    hooks:
-    -   id: black
-        args: [--safe, --quiet]
--   repo: https://github.com/asottile/blacken-docs
+-   repo: https://github.com/adamchainz/blacken-docs
     rev: 1.18.0
     hooks:
     -   id: blacken-docs
-        additional_dependencies: [black==22.6.0]
+        additional_dependencies: [black==22.12.0]
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
     hooks:
     -   id: trailing-whitespace
     -   id: end-of-file-fixer
-    -   id: fix-encoding-pragma
-        args: [--remove]
     -   id: check-yaml
         exclude: tests
     -   id: sort-simple-yaml
-        files: grayskull/pypi/config.yaml
+        files: config.yaml
     -   id: check-toml
     -   id: check-json
     -   id: check-merge-conflict
@@ -28,14 +21,11 @@ repos:
         args: [--autofix]
     -   id: debug-statements
         language_version: python3
--   repo: https://github.com/PyCQA/isort
-    rev: 5.13.2
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.4
     hooks:
-        -   id: isort
-            exclude: tests/data
--   repo: https://github.com/PyCQA/flake8
-    rev: 7.1.1
-    hooks:
-    -   id: flake8
-        exclude: tests/data
-        language_version: python3
+      # Run the linter
+      - id: ruff
+        args: [ --fix ]
+      # Run the formatter
+      - id: ruff-format

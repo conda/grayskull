@@ -111,7 +111,7 @@ def test_search_license_api_github(license_pytest_5_3_1: str):
     assert license_api.name == "MIT"
     assert license_api.path.endswith("LICENSE")
 
-    with open(license_api.path, "r") as f:
+    with open(license_api.path) as f:
         assert f.read() == license_pytest_5_3_1
 
 
