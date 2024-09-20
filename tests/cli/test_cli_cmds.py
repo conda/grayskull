@@ -41,7 +41,7 @@ def test_grayskull_without_options(capsys, monkeypatch):
     monkeypatch.setattr(sys, "argv", ["foo"])
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         cli.main([])
-    assert pytest_wrapped_e.type == SystemExit
+    assert pytest_wrapped_e.type is SystemExit
     captured = capsys.readouterr()
     assert "Grayskull - Conda recipe generator" in captured.out
 

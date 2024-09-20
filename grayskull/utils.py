@@ -60,7 +60,7 @@ def get_all_modules_imported_script(script_file: str) -> set:
     node_iter = ast.NodeVisitor()
     node_iter.visit_Import = visit_Import
     node_iter.visit_ImportFrom = visit_ImportFrom
-    with open(script_file, "r") as f:
+    with open(script_file) as f:
         node_iter.visit(ast.parse(f.read()))
     return modules
 

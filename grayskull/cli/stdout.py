@@ -112,10 +112,8 @@ def print_requirements(
         f"\n{Fore.RED}RED{Style.RESET_ALL}: Package names not available on conda-forge"
     )
     print_msg(
-        (
-            f"{Fore.YELLOW}YELLOW{Style.RESET_ALL}: "
-            "PEP-725 PURLs that did not map to known package"
-        )
+        f"{Fore.YELLOW}YELLOW{Style.RESET_ALL}: "
+        "PEP-725 PURLs that did not map to known package"
     )
     print_msg(f"{Fore.GREEN}GREEN{Style.RESET_ALL}: Packages available on conda-forge")
 

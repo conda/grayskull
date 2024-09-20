@@ -11,6 +11,6 @@ def get_all_licenses() -> List:
         full_path = os.path.join(data_folder, license_file)
         if not os.path.isfile(full_path) or license_file.endswith(".py"):
             continue
-        with open(full_path, "r") as f:
+        with open(full_path) as f:
             all_licenses.append((license_file, f.read()))
     return all_licenses
