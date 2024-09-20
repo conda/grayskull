@@ -1050,7 +1050,7 @@ def test_panel_entry_points(tmpdir):
     recipe = GrayskullFactory.create_recipe("pypi", config)
     generate_recipe(recipe, config, folder_path=str(tmpdir))
     recipe_path = str(tmpdir / "panel" / "meta.yaml")
-    with open(recipe_path, "r") as f:
+    with open(recipe_path) as f:
         content = f.read()
     assert "- panel = panel.cli:main" in content
 

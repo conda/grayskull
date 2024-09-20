@@ -208,7 +208,7 @@ def get_opensource_license(license_spdx: str) -> dict:
 
 
 def read_licence_cache():
-    with open(Path(__file__).parent / "licence_cache.json", "r") as licence_cache:
+    with open(Path(__file__).parent / "licence_cache.json") as licence_cache:
         return json.load(licence_cache)
 
 
@@ -421,7 +421,7 @@ def get_license_type(path_license: str, default: Optional[str] = None) -> Option
     :param default: Default value for the license type
     :return: License type
     """
-    with open(path_license, "r", errors="ignore") as license_file:
+    with open(path_license, errors="ignore") as license_file:
         license_content = license_file.read()
     find_apache = re.findall(
         r"apache\.org\/licenses\/LICENSE\-([0-9])\.([0-9])",
