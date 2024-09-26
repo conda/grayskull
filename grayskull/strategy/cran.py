@@ -76,23 +76,24 @@ def dict_from_cran_lines(lines):
 def remove_package_line_continuations(chunk):
     """
     >>> chunk = [
-        'Package: A3',
-        'Version: 0.9.2',
-        'Depends: R (>= 2.15.0), xtable, pbapply',
-        'Suggests: randomForest, e1071',
-        'Imports: MASS, R.methodsS3 (>= 1.5.2), R.oo (>= 1.15.8), R.utils (>=',
-        '        1.27.1), matrixStats (>= 0.8.12), R.filesets (>= 2.3.0), ',
-        '        sampleSelection, scatterplot3d, strucchange, systemfit',
-        'License: GPL (>= 2)',
-        'NeedsCompilation: no']
-    >>> remove_package_line_continuations(chunk)
+    ...     'Package: A3',
+    ...     'Version: 0.9.2',
+    ...     'Depends: R (>= 2.15.0), xtable, pbapply',
+    ...     'Suggests: randomForest, e1071',
+    ...     'Imports: MASS, R.methodsS3 (>= 1.5.2), R.oo (>= 1.15.8), R.utils (>=',
+    ...     '        1.27.1), matrixStats (>= 0.8.12), R.filesets (>= 2.3.0), ',
+    ...     '        sampleSelection, scatterplot3d, strucchange, systemfit',
+    ...     'License: GPL (>= 2)',
+    ...     'NeedsCompilation: no']
+    >>> remove_package_line_continuations(chunk)  # doctest: +NORMALIZE_WHITESPACE
     ['Package: A3',
      'Version: 0.9.2',
      'Depends: R (>= 2.15.0), xtable, pbapply',
      'Suggests: randomForest, e1071',
-     'Imports: MASS, R.methodsS3 (>= 1.5.2), R.oo (>= 1.15.8), R.utils (>= 1.27.1), matrixStats (>= 0.8.12), R.filesets (>= 2.3.0), sampleSelection, scatterplot3d, strucchange, systemfit, rgl,'
+     'Imports: MASS, R.methodsS3 (>= 1.5.2), R.oo (>= 1.15.8), R.utils (>= 1.27.1), matrixStats (>= 0.8.12), R.filesets (>= 2.3.0),  sampleSelection, scatterplot3d, strucchange, systemfit',
      'License: GPL (>= 2)',
-     'NeedsCompilation: no']
+     'NeedsCompilation: no',
+     '']
     """  # NOQA
     continuation = (" ", "\t")
     continued_ix = None

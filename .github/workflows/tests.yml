@@ -35,6 +35,21 @@ jobs:
         conda info --all
         conda list
 
+    - name: Running doctests
+      shell: bash -l {0}
+      run: |
+        pytest  grayskull \
+                -vv \
+                -n 0 \
+                --color=yes \
+                --cov=./ \
+                --cov-append \
+                --cov-report html:coverage-serial-html \
+                --cov-report xml:coverage-serial.xml \
+                --cov-config=.coveragerc \
+                --junit-xml=Linux-py${{ matrix.py_ver }}-serial.xml \
+                --junit-prefix=Linux-py${{ matrix.py_ver }}-serial
+
     - name: Running serial tests
       shell: bash -l {0}
       run: |
