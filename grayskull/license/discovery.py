@@ -10,7 +10,6 @@ from operator import itemgetter
 from pathlib import Path
 from subprocess import check_output
 from tempfile import mkdtemp
-from typing import List, Optional, Tuple, Union
 
 import requests
 from colorama import Fore
@@ -27,12 +26,12 @@ log = logging.getLogger(__name__)
 @dataclass
 class ShortLicense:
     name: str
-    path: Union[str, Path, None]
+    path: str | Path | None
     is_packaged: bool
 
 
 @lru_cache(maxsize=10)
-def get_all_licenses_from_spdx() -> List:
+def get_all_licenses_from_spdx() -> list:
     """Get all licenses available on spdx.org
 
     :return: List with all licenses information on spdx.org
@@ -163,7 +162,7 @@ def get_short_license_id(name: str) -> str:
     return recipe_license["licenseId"]
 
 
-def _get_license(license_id: str, all_licenses: List) -> dict:
+def _get_license(license_id: str, all_licenses: list) -> dict:
     """Search for the license identification in all licenses received
 
     :param license_id: license identification
@@ -175,7 +174,7 @@ def _get_license(license_id: str, all_licenses: List) -> dict:
             return one_license
 
 
-def _get_all_names_from_api(one_license: dict) -> List:
+def _get_all_names_from_api(one_license: dict) -> list:
     """Get the names and other names which each license has.
 
     :param one_license: License name
@@ -191,7 +190,7 @@ def _get_all_names_from_api(one_license: dict) -> List:
     return list(result)
 
 
-def get_other_names_from_opensource(license_spdx: str) -> List:
+def get_other_names_from_opensource(license_spdx: str) -> list:
     lic = get_opensource_license(license_spdx)
     return [_license["name"] for _license in lic.get("other_names", [])]
 
@@ -213,7 +212,7 @@ def read_licence_cache():
 
 
 @lru_cache(maxsize=10)
-def get_opensource_license_data() -> List:
+def get_opensource_license_data() -> list:
     try:
         response = requests.get(url="https://api.opensource.org/licenses/", timeout=5)
     except requests.exceptions.RequestException:
@@ -223,7 +222,7 @@ def get_opensource_license_data() -> List:
     return response.json()
 
 
-def _get_all_license_choice(all_licenses: List) -> List:
+def _get_all_license_choice(all_licenses: list) -> list:
     """Function responsible to get the whole licenses name
 
     :param all_licenses: list with all licenses
@@ -237,11 +236,11 @@ def _get_all_license_choice(all_licenses: List) -> List:
 
 def search_license_file(
     folder_path: str,
-    git_url: Optional[str] = None,
-    version: Optional[str] = None,
-    license_name_metadata: Optional[str] = None,
-    folders_exclude_search: Tuple[str] = tuple(),
-) -> List[ShortLicense]:
+    git_url: str | None = None,
+    version: str | None = None,
+    license_name_metadata: str | None = None,
+    folders_exclude_search: tuple[str] = tuple(),
+) -> list[ShortLicense]:
     """Search for the license file. First it will try to find it in the given
     folder, after that it will search on the github api and for the last it will
     clone the repository and it will search for the license there.
@@ -286,8 +285,8 @@ def search_license_file(
 
 @lru_cache(maxsize=13)
 def search_license_api_github(
-    github_url: str, version: Optional[str] = None, default: Optional[str] = "Other"
-) -> Optional[ShortLicense]:
+    github_url: str, version: str | None = None, default: str | None = "Other"
+) -> ShortLicense | None:
     """Search for the license asking in the github api
 
     :param github_url: GitHub URL
@@ -315,7 +314,7 @@ def search_license_api_github(
     )
 
 
-def _get_api_github_url(github_url: str, version: Optional[str] = None) -> str:
+def _get_api_github_url(github_url: str, version: str | None = None) -> str:
     """Try to presume the github url
 
     :param github_url: GitHub URL
@@ -331,10 +330,10 @@ def _get_api_github_url(github_url: str, version: Optional[str] = None) -> str:
 
 
 def search_license_folder(
-    path: Union[str, Path],
-    default: Optional[str] = None,
-    folders_exclude_search: Tuple[str] = tuple(),
-) -> List[ShortLicense]:
+    path: str | Path,
+    default: str | None = None,
+    folders_exclude_search: tuple[str] = tuple(),
+) -> list[ShortLicense]:
     """Search for the license in the given folder
 
     :param path: Sdist folder
@@ -366,10 +365,10 @@ def search_license_folder(
 
 def search_license_repo(
     git_url: str,
-    version: Optional[str],
-    default: Optional[str] = None,
-    folders_exclude_search: Tuple[str] = tuple(),
-) -> Optional[List[ShortLicense]]:
+    version: str | None,
+    default: str | None = None,
+    folders_exclude_search: tuple[str] = tuple(),
+) -> list[ShortLicense] | None:
     """Search for the license file in the given github repository
 
     :param git_url: GitHub URL
@@ -399,7 +398,7 @@ def search_license_repo(
     )
 
 
-def _get_git_cmd(git_url: str, version: str, dest) -> List[str]:
+def _get_git_cmd(git_url: str, version: str, dest) -> list[str]:
     """Return the full git command to clone the repository
 
     :param git_url: GitHub URL
@@ -413,7 +412,7 @@ def _get_git_cmd(git_url: str, version: str, dest) -> List[str]:
     return git_cmd + [git_url, str(dest)]
 
 
-def get_license_type(path_license: str, default: Optional[str] = None) -> Optional[str]:
+def get_license_type(path_license: str, default: str | None = None) -> str | None:
     """Function tries to match the license with one of the models present in
     grayskull/license/data
 

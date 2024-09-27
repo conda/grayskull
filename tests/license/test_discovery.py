@@ -1,5 +1,4 @@
 import os
-from typing import List
 from unittest.mock import patch
 
 import pytest
@@ -29,7 +28,7 @@ def license_pytest_path(data_dir) -> str:
 
 
 @fixture
-def spdx_org_license_mit() -> List:
+def spdx_org_license_mit() -> list:
     return [
         {
             "reference": "./MIT.html",

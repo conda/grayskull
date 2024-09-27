@@ -1,7 +1,6 @@
 from collections import defaultdict
 from functools import singledispatch
 from pathlib import Path
-from typing import Tuple, Union
 
 import tomli
 
@@ -14,7 +13,7 @@ class InvalidPoetryDependency(BaseException):
 
 
 @singledispatch
-def get_constrained_dep(dep_spec: Union[str, dict], dep_name: str) -> str:
+def get_constrained_dep(dep_spec: str | dict, dep_name: str) -> str:
     raise InvalidPoetryDependency(
         "Expected Poetry dependency specification to be of type str or dict, "
         f"received {type(dep_spec).__name__}"
@@ -33,7 +32,7 @@ def __get_constrained_dep_str(dep_spec: str, dep_name: str) -> str:
     return f"{dep_name} {conda_version}"
 
 
-def encode_poetry_deps(poetry_deps: dict) -> Tuple[list, list]:
+def encode_poetry_deps(poetry_deps: dict) -> tuple[list, list]:
     run = []
     run_constrained = []
     for dep_name, dep_spec in poetry_deps.items():
@@ -205,7 +204,7 @@ def add_pep725_metadata(metadata: dict, toml_metadata: dict):
     return metadata
 
 
-def get_all_toml_info(path_toml: Union[Path, str]) -> dict:
+def get_all_toml_info(path_toml: Path | str) -> dict:
     with open(path_toml, "rb") as f:
         toml_metadata = tomli.load(f)
     toml_metadata = defaultdict(dict, toml_metadata)
