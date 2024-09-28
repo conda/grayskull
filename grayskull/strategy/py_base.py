@@ -13,7 +13,6 @@ from glob import glob
 from pathlib import Path
 from subprocess import check_output
 from tempfile import mkdtemp
-from typing import Dict, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
 import requests
@@ -43,7 +42,7 @@ RE_DEPS_NAME = re.compile(r"^\s*([\.a-zA-Z0-9_-]+)", re.MULTILINE)
 PIN_PKG_COMPILER = {"numpy": "<{ pin_compatible('numpy') }}"}
 
 
-def search_setup_root(path_folder: Union[Path, str]) -> Path:
+def search_setup_root(path_folder: Path | str) -> Path:
     if setup_py := list(Path(path_folder).rglob("setup.py")):
         return setup_py[0]
     if setup_cfg := list(Path(path_folder).rglob("setup.cfg")):
@@ -52,7 +51,7 @@ def search_setup_root(path_folder: Union[Path, str]) -> Path:
         return pyproject_toml[0]
 
 
-def clean_deps_for_conda_forge(list_deps: List, py_ver_min: PyVer) -> List:
+def clean_deps_for_conda_forge(list_deps: list, py_ver_min: PyVer) -> list:
     """Remove dependencies which conda-forge is not supporting anymore.
     For example Python 2.7, Python version less than 3.6"""
     re_delimiter = re.compile(r"#\s+\[py\s*(?:([<>=!]+))?\s*(\d+)\]\s*$", re.DOTALL)
@@ -119,7 +118,7 @@ def parse_extra_metadata_to_selector(option: str, operation: str, value: str) ->
         return value_lower
 
 
-def get_extra_from_requires_dist(string_parse: str) -> Union[List]:
+def get_extra_from_requires_dist(string_parse: str) -> list:
     """Receives the extra metadata e parse it to get the option, operation
     and value.
 
@@ -133,7 +132,7 @@ def get_extra_from_requires_dist(string_parse: str) -> Union[List]:
     )
 
 
-def get_name_version_from_requires_dist(string_parse: str) -> Tuple[str, str]:
+def get_name_version_from_requires_dist(string_parse: str) -> tuple[str, str]:
     """Extract the name and the version from `requires_dist` present in
     PyPi`s metadata
 
@@ -150,7 +149,7 @@ def get_name_version_from_requires_dist(string_parse: str) -> Tuple[str, str]:
 
 def generic_py_ver_to(
     metadata: dict, config: Configuration, is_selector: bool = False
-) -> Optional[str]:  # sourcery no-metrics
+) -> str | None:  # sourcery no-metrics
     """Generic function which abstract the parse of the requires_python
     present in the PyPi metadata. Basically it can generate the selectors
     for Python or the constrained version if it is a `noarch: python` python package"""
@@ -346,7 +345,7 @@ def injection_distutils(folder: str) -> dict:
         if not isinstance(kwargs, dict) or not kwargs:
             return
 
-        def _fix_list_requirements(key_deps: str) -> List:
+        def _fix_list_requirements(key_deps: str) -> list:
             """Fix when dependencies have lists inside of another sequence"""
             val_deps = kwargs.get(key_deps)
             if not val_deps:
@@ -469,8 +468,8 @@ def __run_setup_py(path_setup: str, data_dist: dict, run_py=False, deps_installe
 
 
 def get_compilers(
-    requires_dist: List, sdist_metadata: dict, config: Configuration
-) -> List:
+    requires_dist: list, sdist_metadata: dict, config: Configuration
+) -> list:
     """Return which compilers are necessary"""
     compilers = set(sdist_metadata.get("compilers", []))
     for pkg in requires_dist:
@@ -484,10 +483,10 @@ def get_compilers(
 
 
 def get_py_multiple_selectors(
-    selectors: Dict[PyVer, bool],
+    selectors: dict[PyVer, bool],
     config: Configuration,
     is_selector: bool = False,
-) -> List:
+) -> list:
     """Get python selectors available.
 
     :param selectors: Dict with the Python version and if it is selected
@@ -513,11 +512,11 @@ def get_py_multiple_selectors(
     return all_selector
 
 
-def py_version_to_selector(pypi_metadata: dict, config) -> Optional[str]:
+def py_version_to_selector(pypi_metadata: dict, config) -> str | None:
     return generic_py_ver_to(pypi_metadata, is_selector=True, config=config)
 
 
-def py_version_to_limit_python(pypi_metadata: dict, config=None) -> Optional[str]:
+def py_version_to_limit_python(pypi_metadata: dict, config=None) -> str | None:
     config = config or Configuration(pypi_metadata["name"])
     result = generic_py_ver_to(pypi_metadata, is_selector=False, config=config)
     if not result and config.is_strict_cf:
@@ -557,7 +556,7 @@ def update_requirements_with_pin(requirements: dict):
                 requirements["run"].append(PIN_PKG_COMPILER[pkg_name])
 
 
-def discover_license(metadata: dict) -> List[ShortLicense]:
+def discover_license(metadata: dict) -> list[ShortLicense]:
     """Based on the metadata this method will try to discover what is the
     right license for the package
 
@@ -581,13 +580,13 @@ def discover_license(metadata: dict) -> List[ShortLicense]:
     )
 
 
-def get_test_entry_points(entry_points: Union[List, str]) -> List:
+def get_test_entry_points(entry_points: list | str) -> list:
     if entry_points and isinstance(entry_points, str):
         entry_points = [entry_points]
     return [f"{ep.split('=')[0].strip()} --help" for ep in entry_points]
 
 
-def get_test_imports(metadata: dict, default: Optional[str] = None) -> List:
+def get_test_imports(metadata: dict, default: str | None = None) -> list:
     if default:
         default = default.replace("-", "_")
     if "packages" not in metadata or not metadata["packages"]:
@@ -611,7 +610,7 @@ def get_test_imports(metadata: dict, default: Optional[str] = None) -> List:
     return result
 
 
-def get_entry_points_from_sdist(sdist_metadata: dict) -> List:
+def get_entry_points_from_sdist(sdist_metadata: dict) -> list:
     """Extract entry points from sdist metadata
 
     :param sdist_metadata: sdist metadata
@@ -666,7 +665,7 @@ def get_entry_points_from_sdist(sdist_metadata: dict) -> List:
     return []
 
 
-def download_sdist_pkg(sdist_url: str, dest: str, name: Optional[str] = None):
+def download_sdist_pkg(sdist_url: str, dest: str, name: str | None = None):
     """Download the sdist package
 
     :param sdist_url: sdist url
@@ -821,11 +820,11 @@ def get_sdist_metadata(
     return merge_setup_toml_metadata(metadata, pyproject_metadata)
 
 
-def ensure_pep440_in_req_list(list_req: List[str]) -> List[str]:
+def ensure_pep440_in_req_list(list_req: list[str]) -> list[str]:
     return [ensure_pep440(pkg) for pkg in list_req]
 
 
-def split_deps(deps: str) -> List[str]:
+def split_deps(deps: str) -> list[str]:
     result = []
     for d in deps.split(","):
         constrain = ""

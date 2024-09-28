@@ -9,7 +9,6 @@ import zipfile
 from copy import deepcopy
 from os.path import basename
 from tempfile import mkdtemp
-from typing import Optional
 from urllib.request import Request, urlopen
 
 import requests
@@ -237,7 +236,7 @@ def get_webpage(cran_url):
     return BeautifulSoup(html_page, features="html.parser")
 
 
-def get_cran_index(cran_url: str, pkg_name: str, pkg_version: Optional[str] = None):
+def get_cran_index(cran_url: str, pkg_name: str, pkg_version: str | None = None):
     """Fetch the entire CRAN index and store it."""
     print_msg(f"Fetching main index from {cran_url}")
 

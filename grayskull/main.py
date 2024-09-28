@@ -5,7 +5,6 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import List, Optional
 
 import requests
 from colorama import Fore, Style, init
@@ -447,7 +446,7 @@ def create_r_recipe(pkg_name, sections_populate=None, **kwargs):
     )
 
 
-def add_extra_section(recipe, maintainers: Optional[List] = None):
+def add_extra_section(recipe, maintainers: list | None = None):
     maintainers = maintainers or [get_git_current_user()]
     if "extra" in recipe:
         recipe["extra"]["recipe-maintainers"] = maintainers
