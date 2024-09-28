@@ -33,9 +33,20 @@ jobs:
         micromamba-binary-path: /home/runner/micromamba-bin-versioned/micromamba
         ####
         environment-file: environment.yaml
+        # Added an extra python to the create-args in order to bust the cache:
         create-args: >-
-          "python =${{ matrix.py_ver }}"
+          python=${{ matrix.py_ver }}
+          python
         cache-environment: true
+    - name: Install conda-recipe-manager if possible
+      # Possible when the Python version is >=3.11
+      run: |
+        if [ $(python -c "import sys; print(sys.version_info[:2] >= (3,11))") = "True" ]; then
+          echo "Installing conda-recipe-manager"
+          micromamba install -y -c conda-forge conda-recipe-manager
+        else
+          echo "Skipping conda-recipe-manager installation"
+        fi
     - name: Conda info
       run: |
         conda info --all
