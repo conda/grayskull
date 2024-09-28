@@ -244,7 +244,15 @@ def upgrade_v0_recipe_to_v1(recipe_path: Path) -> None:
           JINJA plugin.
     :param recipe_path: Path to that contains the original recipe file to modify.
     """
-    from conda_recipe_manager.parser.recipe_parser_convert import RecipeParserConvert
+    try:
+        from conda_recipe_manager.parser.recipe_parser_convert import (
+            RecipeParserConvert,
+        )
+    except ImportError as e:
+        raise ImportError(
+            "Please install conda-recipe-manager from conda-forge to enable "
+            "support for the V1 format. (Note that Python >=3.11 is required.)"
+        ) from e
 
     recipe_content: Final[str] = RecipeParserConvert.pre_process_recipe_text(
         recipe_path.read_text()
