@@ -8,6 +8,10 @@ on:
     branches:
      - "*"
 
+defaults:
+  run:
+    shell: bash -l {0}
+
 jobs:
   run:
     runs-on: ${{ matrix.os }}
@@ -21,22 +25,23 @@ jobs:
       PYTHON: ${{ matrix.py_ver }}
     steps:
     - uses: actions/checkout@master
-    - uses: conda-incubator/setup-miniconda@v3.0.4
+    - uses: mamba-org/setup-micromamba@v1
       with:
-        auto-update-conda: true
-        channels: conda-forge,defaults
-        channel-priority: true
-        python-version: ${{ matrix.py_ver }}
+        ####
+        # https://github.com/mamba-org/setup-micromamba/issues/225
+        micromamba-version: 1.5.10-0
+        micromamba-binary-path: /home/runner/micromamba-bin-versioned/micromamba
+        ####
         environment-file: environment.yaml
-        activate-environment: gs
+        create-args: >-
+          "python =${{ matrix.py_ver }}"
+        cache-environment: true
     - name: Conda info
-      shell: bash -l {0}
       run: |
         conda info --all
         conda list
 
     - name: Running doctests
-      shell: bash -l {0}
       run: |
         pytest  grayskull \
                 -vv \
@@ -51,7 +56,6 @@ jobs:
                 --junit-prefix=Linux-py${{ matrix.py_ver }}-serial
 
     - name: Running serial tests
-      shell: bash -l {0}
       run: |
         pytest  tests \
                 -vv \
@@ -67,7 +71,6 @@ jobs:
                 --junit-prefix=Linux-py${{ matrix.py_ver }}-serial
 
     - name: Running parallel tests
-      shell: bash -l {0}
       run: |
         pytest  tests \
                 -vv \
