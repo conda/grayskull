@@ -679,17 +679,15 @@ def download_sdist_pkg(sdist_url: str, dest: str, name: str | None = None):
     response = requests.get(sdist_url, allow_redirects=True, stream=True, timeout=5)
     response.raise_for_status()
     total_size = int(response.headers.get("Content-length", 0))
-    with (
-        manage_progressbar(max_value=total_size, prefix=f"{name} ") as bar,
-        open(dest, "wb") as pkg_file,
-    ):
-        progress_val = 0
-        chunk_size = 512
-        for chunk_data in response.iter_content(chunk_size=chunk_size):
-            if chunk_data:
-                pkg_file.write(chunk_data)
-                progress_val += chunk_size
-                bar.update(min(progress_val, total_size))
+    with manage_progressbar(max_value=total_size, prefix=f"{name} ") as bar:
+        with open(dest, "wb") as pkg_file:
+            progress_val = 0
+            chunk_size = 512
+            for chunk_data in response.iter_content(chunk_size=chunk_size):
+                if chunk_data:
+                    pkg_file.write(chunk_data)
+                    progress_val += chunk_size
+                    bar.update(min(progress_val, total_size))
 
 
 def merge_deps_toml_setup(setup_deps: list, toml_deps: list) -> list:
