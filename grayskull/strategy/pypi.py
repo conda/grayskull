@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import itertools
 import json
 import logging
@@ -6,7 +8,7 @@ import re
 from collections.abc import Mapping
 from pathlib import Path
 from tempfile import mkdtemp
-from typing import Dict, Iterable, List, Optional
+from typing import Iterable
 
 import requests
 from colorama import Fore
@@ -121,7 +123,7 @@ def adjust_source_url_to_include_placeholders(url, version):
     return "/".join(url_split)
 
 
-def get_url_filename(metadata: dict, default: Optional[str] = None) -> str:
+def get_url_filename(metadata: dict, default: str | None = None) -> str:
     """Method responsible to get the filename and right extension to add
     to the pypi url
 
@@ -164,7 +166,7 @@ def get_sdist_url_from_pypi(metadata: dict) -> str:
             return sdist_url["url"]
 
 
-def skip_pypi_requirement(list_extra: List) -> bool:
+def skip_pypi_requirement(list_extra: list) -> bool:
     """Test if it should skip the requirement
 
     :param list_extra: list with all extra requirements
@@ -176,7 +178,7 @@ def skip_pypi_requirement(list_extra: List) -> bool:
     )
 
 
-def merge_requires_dist(pypi_metadata: dict, sdist_metadata: dict) -> List:
+def merge_requires_dist(pypi_metadata: dict, sdist_metadata: dict) -> list:
     """Merge requirements metadata from pypi and sdist.
 
     :param pypi_metadata: pypi metadata
@@ -296,7 +298,7 @@ def get_pypi_metadata(config: Configuration) -> dict:
     }
 
 
-def get_run_req_from_requires_dist(requires_dist: List, config: Configuration) -> List:
+def get_run_req_from_requires_dist(requires_dist: list, config: Configuration) -> list:
     """Get the run requirements looking for the `requires_dist` key
     present in the metadata"""
     run_req = []
@@ -320,7 +322,7 @@ def get_run_req_from_requires_dist(requires_dist: List, config: Configuration) -
     return run_req
 
 
-def get_all_selectors_pypi(list_extra: List, config: Configuration) -> List:
+def get_all_selectors_pypi(list_extra: list, config: Configuration) -> list:
     """Get the selectors looking for the pypi data
 
     :param list_extra: List of extra requirements from pypi
@@ -487,7 +489,7 @@ def get_metadata(recipe, config) -> dict:
         }
 
 
-def remove_all_inner_nones(metadata: Dict) -> Dict:
+def remove_all_inner_nones(metadata: dict) -> dict:
     """Remove all inner None values from a dictionary."""
     if not isinstance(metadata, Mapping):
         return metadata
@@ -498,7 +500,7 @@ def remove_all_inner_nones(metadata: Dict) -> Dict:
     return metadata
 
 
-def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]):
+def update_recipe(recipe: Recipe, config: Configuration, all_sections: list[str]):
     """Update one specific section."""
     from souschef.section import Section
 
@@ -541,7 +543,7 @@ def update_recipe(recipe: Recipe, config: Configuration, all_sections: List[str]
 
 
 def check_noarch_python_for_new_deps(
-    host_req: List, run_req: List, config: Configuration
+    host_req: list, run_req: list, config: Configuration
 ):
     if not config.is_arch:
         return
@@ -559,7 +561,7 @@ def check_noarch_python_for_new_deps(
     config.is_arch = False
 
 
-def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]:
+def extract_requirements(metadata: dict, config, recipe) -> dict[str, list[str]]:
     """Extract the requirements for `build`, `host` and `run`"""
     name = metadata["name"]
     requires_dist = format_dependencies(metadata.get("requires_dist", []), name)
@@ -628,7 +630,7 @@ def extract_requirements(metadata: dict, config, recipe) -> Dict[str, List[str]]
     return result
 
 
-def sort_reqs(reqs: Iterable[str], alphabetize: bool = False) -> List[str]:
+def sort_reqs(reqs: Iterable[str], alphabetize: bool = False) -> list[str]:
     """Sort requirements. Put python first, then optionally sort alphabetically."""
     reqs_list = list(reqs)
 
@@ -644,8 +646,8 @@ def sort_reqs(reqs: Iterable[str], alphabetize: bool = False) -> List[str]:
 
 
 def remove_selectors_pkgs_if_needed(
-    list_req: List, config_file: Optional[Path] = None
-) -> List:
+    list_req: list, config_file: Path | None = None
+) -> list:
     info_pkgs = _get_track_info_from_file(config_file or PYPI_CONFIG)
     re_selector = re.compile(r"\s+#\s+\[.*", re.DOTALL)
     result = []
@@ -657,7 +659,7 @@ def remove_selectors_pkgs_if_needed(
     return result
 
 
-def extract_optional_requirements(metadata: dict, config) -> Dict[str, List[str]]:
+def extract_optional_requirements(metadata: dict, config) -> dict[str, list[str]]:
     """Extract all optional requirements that are specified in the configuration"""
     keys = set()
     if config.extras_require_all:
@@ -678,7 +680,7 @@ def extract_optional_requirements(metadata: dict, config) -> Dict[str, List[str]
     return result
 
 
-def normalize_requirements_list(requirements: List[str], config) -> List[str]:
+def normalize_requirements_list(requirements: list[str], config) -> list[str]:
     """Adapt requirements to PEP440, Conda and Conda-Forge"""
     requirements = solve_list_pkg_name(requirements, PYPI_CONFIG)
     requirements = ensure_pep440_in_req_list(requirements)
@@ -689,7 +691,7 @@ def normalize_requirements_list(requirements: List[str], config) -> List[str]:
     return requirements
 
 
-def compose_test_section(metadata: dict, test_requirements: List[str]) -> dict:
+def compose_test_section(metadata: dict, test_requirements: list[str]) -> dict:
     test_imports = get_test_imports(metadata, metadata["name"])
     test_requirements = ["pip"] + test_requirements
     test_commands = ["pip check"]

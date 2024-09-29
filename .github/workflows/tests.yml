@@ -8,6 +8,10 @@ on:
     branches:
      - "*"
 
+defaults:
+  run:
+    shell: bash -l {0}
+
 jobs:
   run:
     runs-on: ${{ matrix.os }}
@@ -15,28 +19,40 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        py_ver: ["3.11", "3.12"]
+        py_ver: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     env:
       OS: ${{ matrix.os }}
       PYTHON: ${{ matrix.py_ver }}
     steps:
     - uses: actions/checkout@master
-    - uses: conda-incubator/setup-miniconda@v3.0.4
+    - uses: mamba-org/setup-micromamba@v1
       with:
-        auto-update-conda: true
-        channels: conda-forge,defaults
-        channel-priority: true
-        python-version: ${{ matrix.py_ver }}
+        ####
+        # https://github.com/mamba-org/setup-micromamba/issues/225
+        micromamba-version: 1.5.10-0
+        micromamba-binary-path: /home/runner/micromamba-bin-versioned/micromamba
+        ####
         environment-file: environment.yaml
-        activate-environment: gs
+        # Added an extra python to the create-args in order to bust the cache:
+        create-args: >-
+          python=${{ matrix.py_ver }}
+          python
+        cache-environment: true
+    - name: Install conda-recipe-manager if possible
+      # Possible when the Python version is >=3.11
+      run: |
+        if [ $(python -c "import sys; print(sys.version_info[:2] >= (3,11))") = "True" ]; then
+          echo "Installing conda-recipe-manager"
+          micromamba install -y -c conda-forge conda-recipe-manager
+        else
+          echo "Skipping conda-recipe-manager installation"
+        fi
     - name: Conda info
-      shell: bash -l {0}
       run: |
         conda info --all
         conda list
 
     - name: Running doctests
-      shell: bash -l {0}
       run: |
         pytest  grayskull \
                 -vv \
@@ -51,7 +67,6 @@ jobs:
                 --junit-prefix=Linux-py${{ matrix.py_ver }}-serial
 
     - name: Running serial tests
-      shell: bash -l {0}
       run: |
         pytest  tests \
                 -vv \
@@ -67,7 +82,6 @@ jobs:
                 --junit-prefix=Linux-py${{ matrix.py_ver }}-serial
 
     - name: Running parallel tests
-      shell: bash -l {0}
       run: |
         pytest  tests \
                 -vv \
