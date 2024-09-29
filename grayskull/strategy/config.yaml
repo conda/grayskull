@@ -516,6 +516,11 @@ trino:
   conda_forge: trino-python-client
   import_name: trino
 
+typing-extensions:
+  conda_forge: typing_extensions
+  import_name: typing_extensions
+  avoid_selector: true
+
 typing:
   conda_forge: typing
   import_name: typing
