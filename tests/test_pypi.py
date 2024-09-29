@@ -1031,8 +1031,8 @@ def test_mypy_deps_normalization_and_entry_points():
     assert "mypy-extensions >=0.4.3,<0.5.0" not in recipe["requirements"]["run"]
     assert "typed-ast >=1.4.0,<1.5.0" in recipe["requirements"]["run"]
     assert "typed_ast <1.5.0,>=1.4.0" not in recipe["requirements"]["run"]
-    assert "typing-extensions >=3.7.4" in recipe["requirements"]["run"]
-    assert "typing_extensions >=3.7.4" not in recipe["requirements"]["run"]
+    assert "typing-extensions >=3.7.4" not in recipe["requirements"]["run"]
+    assert "typing_extensions >=3.7.4" in recipe["requirements"]["run"]
 
     assert recipe["build"]["entry_points"] == [
         "mypy=mypy.__main__:console_entry",
