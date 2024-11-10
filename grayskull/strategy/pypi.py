@@ -7,7 +7,7 @@ import os
 import re
 from pathlib import Path
 from tempfile import mkdtemp
-from typing import Iterable, MutableMapping
+from typing import Iterable, MutableMapping, TypedDict
 
 import requests
 from colorama import Fore
@@ -240,7 +240,27 @@ def get_origin_wise_metadata(config):
     return sdist_metadata, pypi_metadata
 
 
-def get_pypi_metadata(config: Configuration) -> dict:
+class SourceSection(TypedDict):
+    url: str
+    sha256: str
+
+
+class PypiMetadata(TypedDict):
+    name: str
+    version: str
+    requires_dist: list[str]
+    requires_python: str | None
+    summary: str | None
+    project_urls: dict[str, str]
+    doc_url: str | None
+    dev_url: str | None
+    url: str | None
+    license: str | None
+    source: SourceSection
+    sdist_url: str
+
+
+def get_pypi_metadata(config: Configuration) -> PypiMetadata:
     """Method responsible to communicate with the pypi api endpoints and
     get the whole metadata available for the specified package and version.
 
@@ -277,24 +297,25 @@ def get_pypi_metadata(config: Configuration) -> dict:
     sdist_url = get_sdist_url_from_pypi(metadata)
     if sdist_url is None:
         raise AttributeError(f"There is no sdist package on pypi for {config.name}.")
-    return {
-        "name": config.name,
-        "version": info["version"],
-        "requires_dist": info.get("requires_dist", []),
-        "requires_python": info.get("requires_python", None),
-        "summary": info.get("summary"),
-        "project_urls": info.get("project_urls") or info.get("project_url"),
-        "doc_url": info.get("docs_url"),
-        "dev_url": project_urls.get("Source"),
-        "url": info.get("home_page"),
-        "license": info.get("license"),
-        "source": {
-            "url": config.url_pypi + "/packages/source/{{ name[0] }}/{{ name }}/"
-            f"{get_url_filename(metadata)}",
-            "sha256": get_sha256_from_pypi_metadata(metadata),
-        },
-        "sdist_url": sdist_url,
-    }
+    return PypiMetadata(
+        name=config.name,
+        version=info["version"],
+        requires_dist=info.get("requires_dist", []),
+        requires_python=info.get("requires_python"),
+        summary=info.get("summary"),
+        project_urls=info.get("project_urls") or info.get("project_url", {}),
+        doc_url=info.get("docs_url"),
+        dev_url=project_urls.get("Source"),
+        url=info.get("home_page"),
+        license=info.get("license"),
+        source=SourceSection(
+            url=config.url_pypi
+            + "/packages/source/{{ name[0] }}/{{ name }}/"
+            + get_url_filename(metadata),
+            sha256=get_sha256_from_pypi_metadata(metadata),
+        ),
+        sdist_url=sdist_url,
+    )
 
 
 def get_run_req_from_requires_dist(requires_dist: list, config: Configuration) -> list:
