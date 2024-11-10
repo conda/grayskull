@@ -5,10 +5,9 @@ import json
 import logging
 import os
 import re
-from collections.abc import Mapping
 from pathlib import Path
 from tempfile import mkdtemp
-from typing import Iterable
+from typing import Iterable, MutableMapping
 
 import requests
 from colorama import Fore
@@ -155,7 +154,7 @@ def get_sha256_from_pypi_metadata(pypi_metadata: dict) -> str:
     raise AttributeError("Hash information for sdist was not found on PyPi metadata.")
 
 
-def get_sdist_url_from_pypi(metadata: dict) -> str:
+def get_sdist_url_from_pypi(metadata: dict) -> str | None:
     """Return the sdist url looking for the pypi metadata
 
     :param metadata: pypi metadata
@@ -489,9 +488,9 @@ def get_metadata(recipe, config) -> dict:
         }
 
 
-def remove_all_inner_nones(metadata: dict) -> dict:
+def remove_all_inner_nones(metadata):
     """Remove all inner None values from a dictionary."""
-    if not isinstance(metadata, Mapping):
+    if not isinstance(metadata, MutableMapping):
         return metadata
     for k, v in metadata.items():
         if not isinstance(v, list):
@@ -500,7 +499,7 @@ def remove_all_inner_nones(metadata: dict) -> dict:
     return metadata
 
 
-def update_recipe(recipe: Recipe, config: Configuration, all_sections: list[str]):
+def update_recipe(recipe: Recipe, config: Configuration, all_sections: Iterable[str]):
     """Update one specific section."""
     from souschef.section import Section
 
