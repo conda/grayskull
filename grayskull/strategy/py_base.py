@@ -16,7 +16,6 @@ from tempfile import mkdtemp
 from urllib.parse import urlparse
 
 import requests
-import tomli
 from colorama import Fore, Style
 from packaging.specifiers import SpecifierSet
 from packaging.utils import canonicalize_version
@@ -36,6 +35,11 @@ from grayskull.utils import (
     origin_is_github,
     sha256_checksum,
 )
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
 log = logging.getLogger(__name__)
 RE_DEPS_NAME = re.compile(r"^\s*([\.a-zA-Z0-9_-]+)", re.MULTILINE)
@@ -630,8 +634,8 @@ def get_entry_points_from_sdist(sdist_metadata: dict) -> list:
                 all_parts[-1] = f"'{all_parts[-1]}'"
             all_lines.append("=".join(all_parts))
         try:
-            all_entry_points = tomli.loads("\n".join(all_lines))
-        except tomli.TOMLDecoderError:
+            all_entry_points = tomllib.loads("\n".join(all_lines))
+        except tomllib.TOMLDecoderError:
             return []
 
     if all_entry_points.get("console_scripts") or all_entry_points.get("gui_scripts"):
