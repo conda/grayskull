@@ -794,7 +794,7 @@ def get_sdist_metadata(
         metadata["source"] = {"url": sdist_url, "sha256": sha256_checksum(path_pkg)}
     if config.from_local_sdist:
         metadata["source"] = {
-            "url": f"file://{path_pkg}",
+            "url": Path(path_pkg).as_uri(),
             "sha256": sha256_checksum(path_pkg),
         }
 
