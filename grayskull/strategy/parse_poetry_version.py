@@ -194,7 +194,22 @@ def encode_poetry_version(poetry_specifier: str) -> str:
     '>=1.2.0,<1.3.0'
     >>> encode_poetry_version("~1.2.3")
     '>=1.2.3,<1.3.0'
+
+    # handle or operator correctly
+    >>> encode_poetry_version("1.2.3|1.2.4")
+    '1.2.3|1.2.4'
+    >>> encode_poetry_version("^5|| ^6 | ^7")
+    '>=5.0.0,<6.0.0|>=6.0.0,<7.0.0|>=7.0.0,<8.0.0'
     """
+    if "|" in poetry_specifier:
+        poetry_or_clauses = [clause.strip() for clause in poetry_specifier.split("|")]
+        conda_or_clauses = [
+            encode_poetry_version(clause)
+            for clause in poetry_or_clauses
+            if clause != ""
+        ]
+        return "|".join(conda_or_clauses)
+
     poetry_clauses = poetry_specifier.split(",")
 
     conda_clauses = []
