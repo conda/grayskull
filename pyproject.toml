@@ -87,3 +87,6 @@ grayskull = { path = ".", editable = true }
 default = { solve-group = "default" }
 docs = { features = ["docs"], solve-group = "default" }
 testing = { features = ["testing"], solve-group = "default" }
+
+[tool.pixi.dependencies]
+pixi-pycharm = ">=0.0.8,<0.0.9"
