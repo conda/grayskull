@@ -74,6 +74,7 @@ test:
     - langchain-server --help
   requires:
     - pip
+    - python
 
 about:
   home: https://www.github.com/hwchase17/langchain

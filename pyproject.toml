@@ -38,8 +38,10 @@ testing = [
     "pytest",
     "pytest-console-scripts",
     "pytest-cov",
+    "pytest-xdist",
     "pytest-mock",
     "setuptools-scm",
+    "numpy"
 ]
 
 docs = [
