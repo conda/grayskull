@@ -1,4 +1,9 @@
-from typing import Self
+try:
+    from typing import Self
+except ImportError:
+    from typing import TypeVar
+
+    Self = TypeVar("Self", bound="CLIConfig")
 
 import progressbar
 
