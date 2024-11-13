@@ -1459,9 +1459,9 @@ def test_check_noarch_python_for_new_deps():
 @pytest.mark.parametrize(
     "section, expected",
     [
-        ("host", "python <{ python_min }}.*"),
+        ("host", "python <{ python_min }}"),
         ("run", "python >=<{ python_min }}"),
-        ("test", "python =<{ python_min }}"),
+        ("test", "python <{ python_min }}"),
     ],
 )
 def test_set_python_min(section, expected):
