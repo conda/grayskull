@@ -1,12 +1,16 @@
+import sys
 from collections import defaultdict
 from functools import singledispatch
 from pathlib import Path
 from typing import Tuple, Union
 
-import tomli
-
 from grayskull.strategy.parse_poetry_version import encode_poetry_version
 from grayskull.utils import nested_dict
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
 
 class InvalidPoetryDependency(BaseException):
@@ -207,7 +211,7 @@ def add_pep725_metadata(metadata: dict, toml_metadata: dict):
 
 def get_all_toml_info(path_toml: Union[Path, str]) -> dict:
     with open(path_toml, "rb") as f:
-        toml_metadata = tomli.load(f)
+        toml_metadata = tomllib.load(f)
     toml_metadata = defaultdict(dict, toml_metadata)
     metadata = nested_dict()
     toml_project = toml_metadata.get("project", {}) or {}
