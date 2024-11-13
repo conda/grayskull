@@ -12,7 +12,7 @@ readme = "README.md"
 keywords = ["conda"]
 license = { text = "Apache-2.0" }
 dynamic = ["version"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "beautifulsoup4",
     "colorama",
@@ -75,3 +75,15 @@ select = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/data/**" = ["E", "F"]
+
+[tool.pixi.project]
+channels = ["conda-forge"]
+platforms = ["linux-64", "win-64", "osx-arm64"]
+
+[tool.pixi.pypi-dependencies]
+grayskull = { path = ".", editable = true }
+
+[tool.pixi.environments]
+default = { solve-group = "default" }
+docs = { features = ["docs"], solve-group = "default" }
+testing = { features = ["testing"], solve-group = "default" }

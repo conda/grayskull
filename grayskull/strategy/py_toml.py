@@ -2,7 +2,6 @@ import sys
 from collections import defaultdict
 from functools import singledispatch
 from pathlib import Path
-from typing import Union
 
 from grayskull.strategy.parse_poetry_version import encode_poetry_version
 from grayskull.utils import nested_dict
@@ -18,7 +17,7 @@ class InvalidPoetryDependency(BaseException):
 
 
 @singledispatch
-def get_constrained_dep(dep_spec: Union[str, dict], dep_name: str) -> str:
+def get_constrained_dep(dep_spec: str | dict, dep_name: str) -> str:
     raise InvalidPoetryDependency(
         "Expected Poetry dependency specification to be of type str or dict, "
         f"received {type(dep_spec).__name__}"
@@ -209,7 +208,7 @@ def add_pep725_metadata(metadata: dict, toml_metadata: dict):
     return metadata
 
 
-def get_all_toml_info(path_toml: Union[Path, str]) -> dict:
+def get_all_toml_info(path_toml: Path | str) -> dict:
     with open(path_toml, "rb") as f:
         toml_metadata = tomllib.load(f)
     toml_metadata = defaultdict(dict, toml_metadata)

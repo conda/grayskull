@@ -1,6 +1,6 @@
 import logging
 import subprocess
-from typing import Any, Union
+from typing import Any
 from urllib.parse import urlparse, urlunparse
 
 import requests
@@ -88,7 +88,7 @@ def get_most_similar_tag_in_repo(git_url: str, query: str) -> str:
 
 def handle_gh_version(
     name: str, version: str, url: str, tag: str
-) -> tuple[Union[str, Any], Any, Any]:
+) -> tuple[str | Any, Any, Any]:
     """Method responsible for handling the version of the GitHub package.
     If version is specified, gets the closest tag in the repo.
     If not, gets the latest version.

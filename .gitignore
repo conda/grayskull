@@ -133,3 +133,7 @@ dmypy.json
 
 # Project version
 grayskull/_version.py
+
+# pixi environments
+.pixi
+*.egg-info
