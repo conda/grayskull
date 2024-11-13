@@ -3,7 +3,6 @@ import re
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Union
 
 from pkg_resources import parse_version  # noqa
 from ruamel.yaml import YAML
@@ -27,19 +26,17 @@ class ConfigPkg:
             self.conda_forge = self.name
 
 
-def track_package(pkg_name: str, config_file: Union[Path, str]) -> ConfigPkg:
+def track_package(pkg_name: str, config_file: Path | str) -> ConfigPkg:
     all_pkg = _get_track_info_from_file(config_file)
     return ConfigPkg(pkg_name, **(all_pkg.get(pkg_name, {})))
 
 
-def solve_list_pkg_name(
-    list_pkg: list[str], config_file: Union[Path, str]
-) -> list[str]:
+def solve_list_pkg_name(list_pkg: list[str], config_file: Path | str) -> list[str]:
     re_norm = re.compile(r",\s+")
     return [re_norm.sub(",", solve_pkg_name(pkg, config_file)) for pkg in list_pkg]
 
 
-def solve_pkg_name(pkg: str, config_file: Union[Path, str]) -> str:
+def solve_pkg_name(pkg: str, config_file: Path | str) -> str:
     pkg_name_sep = pkg.strip().split()
     config_pkg = track_package(pkg_name_sep[0], config_file)
     all_delimiter = " ".join(pkg_name_sep[1:])
@@ -51,7 +48,7 @@ def solve_pkg_name(pkg: str, config_file: Union[Path, str]) -> str:
 
 
 @lru_cache(maxsize=5)
-def _get_track_info_from_file(config_file: Union[Path, str]) -> dict:
+def _get_track_info_from_file(config_file: Path | str) -> dict:
     yaml = YAML()
     with open(config_file, encoding="utf_8") as yaml_file:
         return yaml.load(yaml_file)

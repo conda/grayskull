@@ -9,7 +9,7 @@ from functools import lru_cache
 from glob import glob
 from pathlib import Path
 from shutil import copyfile
-from typing import Final, Union
+from typing import Final
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -120,7 +120,7 @@ def string_similarity(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
 
-def rm_duplicated_deps(all_requirements: Union[list, set, None]) -> list | None:
+def rm_duplicated_deps(all_requirements: list | set | None) -> list | None:
     if not all_requirements:
         return None
     # Keep track of requirements which have already been added to the list.
@@ -193,7 +193,7 @@ def format_dependencies(all_dependencies: list, name: str) -> list:
 def generate_recipe(
     recipe: Recipe,
     config,
-    folder_path: Union[str, Path] = ".",
+    folder_path: str | Path = ".",
     use_v1_format: bool = False,
 ):
     """Write the recipe in a location. It will create a folder with the
