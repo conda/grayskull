@@ -241,7 +241,7 @@ def search_license_file(
     git_url: str | None = None,
     version: str | None = None,
     license_name_metadata: str | None = None,
-    folders_exclude_search: tuple[str] = tuple(),
+    folders_exclude_search: tuple[str, ...] = tuple(),
 ) -> list[ShortLicense]:
     """Search for the license file. First it will try to find it in the given
     folder, after that it will search on the github api and for the last it will
@@ -334,7 +334,7 @@ def _get_api_github_url(github_url: str, version: str | None = None) -> str:
 def search_license_folder(
     path: str | Path,
     default: str | None = None,
-    folders_exclude_search: tuple[str] = tuple(),
+    folders_exclude_search: tuple[str, ...] = tuple(),
 ) -> list[ShortLicense]:
     """Search for the license in the given folder
 
@@ -369,7 +369,7 @@ def search_license_repo(
     git_url: str,
     version: str | None,
     default: str | None = None,
-    folders_exclude_search: tuple[str] = tuple(),
+    folders_exclude_search: tuple[str, ...] = tuple(),
 ) -> list[ShortLicense] | None:
     """Search for the license file in the given github repository
 

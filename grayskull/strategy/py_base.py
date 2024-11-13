@@ -13,6 +13,7 @@ from glob import glob
 from pathlib import Path
 from subprocess import check_output
 from tempfile import mkdtemp
+from typing import ContextManager
 from urllib.parse import urlparse
 
 import requests
@@ -319,7 +320,7 @@ def get_setup_cfg(source_path: str) -> dict:
 
 
 @contextmanager
-def injection_distutils(folder: str) -> dict:
+def injection_distutils(folder: str) -> ContextManager[dict]:
     """This is a bit of "dark magic", please don't do it at home.
     It is injecting code in the distutils.core.setup and replacing the
     setup function by the inner function __fake_distutils_setup.
@@ -836,7 +837,7 @@ def split_deps(deps: str) -> list[str]:
     return result
 
 
-def ensure_pep440(pkg: str) -> str:
+def ensure_pep440(pkg: str | None) -> str | None:
     if not pkg or RE_PEP725_PURL.match(pkg):
         return pkg
     pkg = pkg.strip()

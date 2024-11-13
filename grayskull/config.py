@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Iterable, List, Optional, Tuple
 
 from grayskull.cli.parser import parse_pkg_name_version
 from grayskull.utils import PyVer
@@ -50,11 +50,11 @@ class Configuration:
     missing_deps: set = field(default_factory=set)
     extras_require_test: Optional[str] = None
     github_release_tag: Optional[str] = None
-    extras_require_include: Tuple[str] = tuple()
-    extras_require_exclude: Tuple[str] = tuple()
+    extras_require_include: Iterable[str] = tuple()
+    extras_require_exclude: Iterable[str] = tuple()
     extras_require_all: bool = False
     extras_require_split: bool = False
-    licence_exclude_folders: Tuple[str] = tuple()
+    licence_exclude_folders: Iterable[str] = tuple()
 
     def get_oldest_py3_version(self, list_py_ver: List[PyVer]) -> PyVer:
         list_py_ver = sorted(list_py_ver)

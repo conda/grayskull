@@ -181,7 +181,7 @@ def get_archive_metadata(path):
 
 
 def scrap_main_page_cran_find_latest_package(
-    cran_url: str, pkg_name: str, pkg_version: str
+    cran_url: str, pkg_name: str, pkg_version: str | None
 ):
     pkg_name = pkg_name.strip().lower()
     pkg_version = pkg_version.strip().lower() if pkg_version else None
