@@ -1982,9 +1982,9 @@ def test_compute_home():
 @pytest.mark.parametrize(
     "section, expected",
     [
-        ("host", "python <{ python_min }}.*"),
+        ("host", "python <{ python_min }}"),
         ("run", "python >=<{ python_min }}"),
-        ("test", "python =<{ python_min }}"),
+        ("test", "python <{ python_min }}"),
     ],
 )
 def test_set_python_min(section, expected):
