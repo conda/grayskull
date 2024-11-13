@@ -3,7 +3,7 @@ import re
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Union
 
 from pkg_resources import parse_version  # noqa
 from ruamel.yaml import YAML
@@ -33,8 +33,8 @@ def track_package(pkg_name: str, config_file: Union[Path, str]) -> ConfigPkg:
 
 
 def solve_list_pkg_name(
-    list_pkg: List[str], config_file: Union[Path, str]
-) -> List[str]:
+    list_pkg: list[str], config_file: Union[Path, str]
+) -> list[str]:
     re_norm = re.compile(r",\s+")
     return [re_norm.sub(",", solve_pkg_name(pkg, config_file)) for pkg in list_pkg]
 
@@ -51,7 +51,7 @@ def solve_pkg_name(pkg: str, config_file: Union[Path, str]) -> str:
 
 
 @lru_cache(maxsize=5)
-def _get_track_info_from_file(config_file: Union[Path, str]) -> Dict:
+def _get_track_info_from_file(config_file: Union[Path, str]) -> dict:
     yaml = YAML()
     with open(config_file, encoding="utf_8") as yaml_file:
         return yaml.load(yaml_file)
@@ -72,7 +72,7 @@ def solve_version_delimiter(delimiter_exp: str, pkg_cfg: ConfigPkg) -> str:
         return ",".join(result)
 
 
-def _version_solver(list_exp: List, pkg_cfg: ConfigPkg) -> List:
+def _version_solver(list_exp: list, pkg_cfg: ConfigPkg) -> list:
     result = []
     for op, version in list_exp:
         if op in ["==", ""]:
@@ -98,7 +98,7 @@ def _version_solver(list_exp: List, pkg_cfg: ConfigPkg) -> List:
     return result
 
 
-def parse_delimiter(delimiter_exp: str) -> List[Optional[Tuple[str, str]]]:
+def parse_delimiter(delimiter_exp: str) -> list[tuple[str, str] | None]:
     re_search = re.compile(r"([!=><]+)\s*([a-z0-9\-\.\_]+)", re.IGNORECASE)
     result = re_search.findall(delimiter_exp)
     if not result:

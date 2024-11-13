@@ -12,7 +12,7 @@ readme = "README.md"
 keywords = ["conda"]
 license = { text = "Apache-2.0" }
 dynamic = ["version"]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "beautifulsoup4",
     "colorama",

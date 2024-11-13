@@ -1,4 +1,9 @@
-from typing import Optional
+try:
+    from typing import Self
+except ImportError:
+    from typing import TypeVar
+
+    Self = TypeVar("Self", bound="CLIConfig")
 
 import progressbar
 
@@ -13,7 +18,7 @@ WIDGET_BAR_DOWNLOAD = [
 
 
 class CLIConfig:
-    __instance: Optional["CLIConfig"] = None
+    __instance: Self | None = None
 
     def __new__(cls, stdout: bool = False, list_missing_deps: bool = False):
         if CLIConfig.__instance is None:

@@ -2,7 +2,7 @@ import sys
 from collections import defaultdict
 from functools import singledispatch
 from pathlib import Path
-from typing import Tuple, Union
+from typing import Union
 
 from grayskull.strategy.parse_poetry_version import encode_poetry_version
 from grayskull.utils import nested_dict
@@ -37,7 +37,7 @@ def __get_constrained_dep_str(dep_spec: str, dep_name: str) -> str:
     return f"{dep_name} {conda_version}"
 
 
-def encode_poetry_deps(poetry_deps: dict) -> Tuple[list, list]:
+def encode_poetry_deps(poetry_deps: dict) -> tuple[list, list]:
     run = []
     run_constrained = []
     for dep_name, dep_spec in poetry_deps.items():

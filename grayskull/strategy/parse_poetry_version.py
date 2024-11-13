@@ -1,5 +1,4 @@
 import re
-from typing import Dict, Optional
 
 import semver
 
@@ -21,7 +20,7 @@ class InvalidVersion(BaseException):
     pass
 
 
-def parse_version(version: str) -> Dict[str, Optional[int]]:
+def parse_version(version: str) -> dict[str, int | None]:
     """
     Parses a version string (not necessarily semver) to a dictionary with keys
     "major", "minor", and "patch". "minor" and "patch" are possibly None.
@@ -45,7 +44,7 @@ def parse_version(version: str) -> Dict[str, Optional[int]]:
     }
 
 
-def vdict_to_vinfo(version_dict: Dict[str, Optional[int]]) -> semver.VersionInfo:
+def vdict_to_vinfo(version_dict: dict[str, int | None]) -> semver.VersionInfo:
     """
     Coerces version dictionary to a semver.VersionInfo object. If minor or patch
     numbers are missing, 0 is substituted in their place.

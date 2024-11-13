@@ -1,7 +1,6 @@
 import re
 from contextlib import contextmanager
 from copy import deepcopy
-from typing import Dict, List
 
 import progressbar
 from colorama import Fore, Style
@@ -62,7 +61,7 @@ def progressbar_with_status(max_value: int):
 
 
 def print_requirements(
-    requirements: Dict[str, List[str]], optional_requirements: Dict[str, List[str]]
+    requirements: dict[str, list[str]], optional_requirements: dict[str, list[str]]
 ) -> set:
     all_missing_deps = set()
     re_search = re.compile(r"^\s*([a-z0-9\.\-\_]+)(.*)", re.IGNORECASE | re.DOTALL)

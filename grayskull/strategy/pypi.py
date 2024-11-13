@@ -5,9 +5,10 @@ import json
 import logging
 import os
 import re
+from collections.abc import Iterable, MutableMapping
 from pathlib import Path
 from tempfile import mkdtemp
-from typing import Iterable, MutableMapping, TypedDict
+from typing import TypedDict
 
 import requests
 from colorama import Fore
