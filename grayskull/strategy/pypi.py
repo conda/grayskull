@@ -641,9 +641,9 @@ def set_python_min(req_list: list, section: str) -> list:
         return req_list
     python_min = "<{ python_min }}"
     map_section = {
-        "test": f"={python_min}",
         "host": f"{python_min}.*",
         "run": f">={python_min}",
+        "test": f"={python_min}",
     }
     return [
         f"python {map_section[section]}" if dep.lower().strip() == "python" else dep

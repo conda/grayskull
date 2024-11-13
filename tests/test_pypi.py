@@ -51,6 +51,7 @@ from grayskull.strategy.pypi import (
     normalize_requirements_list,
     remove_all_inner_nones,
     remove_selectors_pkgs_if_needed,
+    set_python_min,
     sort_reqs,
     update_recipe,
 )
@@ -1976,3 +1977,16 @@ def test_compute_home():
         is None
     )
     assert compute_home({}) is None
+
+
+@pytest.mark.parametrize(
+    "section, expected",
+    [
+        ("host", "python <{ python_min }}.*"),
+        ("run", "python >=<{ python_min }}"),
+        ("test", "python =<{ python_min }}"),
+    ],
+)
+def test_set_python_min(section, expected):
+    req = ["pip", "python"]
+    assert set_python_min(req, section) == ["pip", expected]
