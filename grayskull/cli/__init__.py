@@ -1,3 +1,5 @@
+from typing import Self
+
 import progressbar
 
 WIDGET_BAR_DOWNLOAD = [
@@ -11,7 +13,7 @@ WIDGET_BAR_DOWNLOAD = [
 
 
 class CLIConfig:
-    __instance: "CLIConfig" | None = None
+    __instance: Self | None = None
 
     def __new__(cls, stdout: bool = False, list_missing_deps: bool = False):
         if CLIConfig.__instance is None:
