@@ -1,6 +1,5 @@
 from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
 
 from grayskull.cli.parser import parse_pkg_name_version
 from grayskull.utils import PyVer
@@ -13,8 +12,8 @@ DEFAULT_PYPI_META_URL = "https://pypi.org/pypi"
 class Configuration:
     name: str
     version: str = ""
-    files_to_copy: List = field(default_factory=list)
-    supported_py: List[PyVer] = field(
+    files_to_copy: list = field(default_factory=list)
+    supported_py: list[PyVer] = field(
         default_factory=lambda: [
             PyVer(2, 7),
             PyVer(3, 6),
@@ -26,7 +25,7 @@ class Configuration:
             PyVer(3, 12),
         ]
     )
-    py_cf_supported: List[PyVer] = field(
+    py_cf_supported: list[PyVer] = field(
         default_factory=lambda: [
             PyVer(3, 7),
             PyVer(3, 8),
@@ -37,27 +36,27 @@ class Configuration:
         ]
     )
     is_strict_cf: bool = False
-    pkg_need_c_compiler: Tuple = field(
+    pkg_need_c_compiler: tuple = field(
         default_factory=lambda: ("cython", "cython-blis", "blis")
     )
-    pkg_need_cxx_compiler: Tuple = field(default_factory=lambda: ("pybind11",))
+    pkg_need_cxx_compiler: tuple = field(default_factory=lambda: ("pybind11",))
     url_pypi: str = DEFAULT_PYPI_URL
     url_pypi_metadata: str = DEFAULT_PYPI_META_URL
     download: bool = False
     is_arch: bool = False
-    repo_github: Optional[str] = None
+    repo_github: str | None = None
     from_local_sdist: bool = False
-    local_sdist: Optional[str] = None
+    local_sdist: str | None = None
     missing_deps: set = field(default_factory=set)
-    extras_require_test: Optional[str] = None
-    github_release_tag: Optional[str] = None
+    extras_require_test: str | None = None
+    github_release_tag: str | None = None
     extras_require_include: Iterable[str] = tuple()
     extras_require_exclude: Iterable[str] = tuple()
     extras_require_all: bool = False
     extras_require_split: bool = False
     licence_exclude_folders: Iterable[str] = tuple()
 
-    def get_oldest_py3_version(self, list_py_ver: List[PyVer]) -> PyVer:
+    def get_oldest_py3_version(self, list_py_ver: list[PyVer]) -> PyVer:
         list_py_ver = sorted(list_py_ver)
         min_python_version = (
             self.py_cf_supported[0] if self.is_strict_cf else PyVer(3, 0)
@@ -68,8 +67,8 @@ class Configuration:
         return min_python_version
 
     def get_py_version_available(
-        self, req_python: List[Tuple[str, str, str]]
-    ) -> Dict[PyVer, bool]:
+        self, req_python: list[tuple[str, str, str]]
+    ) -> dict[PyVer, bool]:
         """Get the python version available given the requires python received
 
         :param req_python: Requires python

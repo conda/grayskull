@@ -1,10 +1,9 @@
 import os
 from functools import lru_cache
-from typing import List
 
 
 @lru_cache(maxsize=2)
-def get_all_licenses() -> List:
+def get_all_licenses() -> list:
     data_folder = os.path.dirname(__file__)
     all_licenses = []
     for license_file in os.listdir(data_folder):

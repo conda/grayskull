@@ -9,7 +9,7 @@ from functools import lru_cache
 from glob import glob
 from pathlib import Path
 from shutil import copyfile
-from typing import Final, List, Optional, Union
+from typing import Final, Union
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -29,7 +29,7 @@ RE_PEP725_PURL = re.compile(r"[a-z]+\:[\.a-z0-9_-]+\/[\.a-z0-9_-]+", re.IGNORECA
 
 
 @lru_cache(maxsize=10)
-def get_std_modules() -> List:
+def get_std_modules() -> list:
     from stdlib_list import stdlib_list
 
     all_libs = set()
@@ -65,7 +65,7 @@ def get_all_modules_imported_script(script_file: str) -> set:
     return modules
 
 
-def get_vendored_dependencies(script_file: str) -> List:
+def get_vendored_dependencies(script_file: str) -> list:
     """Get all third part dependencies which are being in use in the setup.py
 
     :param script_file: Path to the setup.py
@@ -82,7 +82,7 @@ def get_vendored_dependencies(script_file: str) -> List:
 
 
 @lru_cache(maxsize=20)
-def get_local_modules(sdist_folder: str) -> List:
+def get_local_modules(sdist_folder: str) -> list:
     result = []
     for py_file in glob(f"{sdist_folder}/*.py"):
         py_file = os.path.basename(py_file)
@@ -120,7 +120,7 @@ def string_similarity(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
 
-def rm_duplicated_deps(all_requirements: Union[list, set, None]) -> Optional[list]:
+def rm_duplicated_deps(all_requirements: Union[list, set, None]) -> list | None:
     if not all_requirements:
         return None
     # Keep track of requirements which have already been added to the list.
@@ -157,7 +157,7 @@ def rm_duplicated_deps(all_requirements: Union[list, set, None]) -> Optional[lis
     return [re.sub(r"\s+(#)", "  \\1", v.strip()) for v in new_reqs.values()]
 
 
-def format_dependencies(all_dependencies: List, name: str) -> List:
+def format_dependencies(all_dependencies: list, name: str) -> list:
     """Just format the given dependency to a string which is valid for the
     recipe
 

@@ -6,14 +6,13 @@ import re
 import shutil
 import sys
 from collections import defaultdict
-from contextlib import contextmanager
+from contextlib import AbstractContextManager, contextmanager
 from copy import deepcopy
 from distutils import core
 from glob import glob
 from pathlib import Path
 from subprocess import check_output
 from tempfile import mkdtemp
-from typing import ContextManager
 from urllib.parse import urlparse
 
 import requests
@@ -320,7 +319,7 @@ def get_setup_cfg(source_path: str) -> dict:
 
 
 @contextmanager
-def injection_distutils(folder: str) -> ContextManager[dict]:
+def injection_distutils(folder: str) -> AbstractContextManager[dict]:
     """This is a bit of "dark magic", please don't do it at home.
     It is injecting code in the distutils.core.setup and replacing the
     setup function by the inner function __fake_distutils_setup.

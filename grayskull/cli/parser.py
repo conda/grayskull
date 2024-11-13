@@ -1,13 +1,12 @@
 import re
 from pathlib import Path
-from typing import Optional, Tuple
 
 from grayskull.utils import origin_is_github, origin_is_local_sdist
 
 
 def parse_pkg_name_version(
     pkg_name: str,
-) -> Tuple[str, str, Optional[str]]:
+) -> tuple[str, str, str | None]:
     origin = ""
     if origin_is_local_sdist(pkg_name):
         # Try to get package name and version from sdist archive
