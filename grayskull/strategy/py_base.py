@@ -358,7 +358,7 @@ def injection_distutils(folder: str) -> AbstractContextManager[dict]:
             if isinstance(val_deps, str):
                 val_deps = [val_deps]
             for val in val_deps:
-                if isinstance(val, (tuple, list)):
+                if isinstance(val, tuple | list):
                     list_req.extend(list(map(str, val)))
                 else:
                     list_req.append(str(val))
