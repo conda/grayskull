@@ -320,21 +320,11 @@ def parse_python_version(selector: str):
     operator = "==" if operator in {None, "="} else operator
     version = match.group("version")
 
-    # Normalize version to major.minor (drop patch if present)
-    # or major if minor is 0
-    #
-    # Some timing to justify this choice:
-    #   Using str.endswith: 0.065 seconds
-    #   Using regex       : 0.088 seconds
-    #   Using replace     : 0.088 seconds
-    #   Using split       : 0.085-0.126 seconds
-    if version.endswith(".0.0"):
-        normalized_version = version[:-4]
-    elif version.endswith(".0"):
-        normalized_version = version[:-2]
-    else:
-        normalized_version = version
-    return operator, normalized_version
+    # Split into major, minor, and discard the rest (patch or additional parts)
+    major, minor, *_ = version.split(".")
+
+    # Return only major if minor is "0", otherwise return major.minor
+    return operator, major if minor == "0" else f"{major}.{minor}"
 
 
 def combine_conda_selectors(python_selector: str, platform_selector: str):

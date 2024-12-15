@@ -6,6 +6,7 @@ from grayskull.strategy.parse_poetry_version import (
     InvalidVersion,
     combine_conda_selectors,
     encode_poetry_python_version_to_selector_item,
+    parse_python_version,
     parse_version,
 )
 
@@ -50,6 +51,23 @@ def test_encode_poetry_python_version_to_selector_item(
     assert exp_selector_item == encode_poetry_python_version_to_selector_item(
         poetry_python_specifier
     )
+
+
+@pytest.mark.parametrize(
+    "python_version, exp_operator_version",
+    [
+        (">=3.8", (">=", "3.8")),
+        (">=3.8.0", (">=", "3.8")),
+        ("<4.0.0", ("<", "4")),
+        ("3.12", ("==", "3.12")),
+        ("=3.8", ("==", "3.8")),
+        ("=3.8.1", ("==", "3.8")),
+        ("3.8.1", ("==", "3.8")),
+    ],
+)
+def test_parse_python_version(python_version, exp_operator_version):
+    operator, version = parse_python_version(python_version)
+    assert (operator, version) == exp_operator_version
 
 
 @pytest.mark.parametrize(
