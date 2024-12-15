@@ -234,6 +234,21 @@ def test_poetry_get_constrained_dep_multiple_constraints_dependencies_nannyml():
     )
 
 
+def test_poetry_get_constrained_dep_mult_constraints_deps_databricks_sql_connector():
+    assert list(
+        get_constrained_dep(
+            [
+                {"version": ">=6.0.0", "python": ">=3.7,<3.11"},
+                {"version": ">=10.0.1", "python": ">=3.11"},
+            ],
+            "pyarrow",
+        )
+    ) == [
+        "pyarrow >=6.0.0  # [py>=37 or py<311]",
+        "pyarrow >=10.0.1  # [py>=311]",
+    ]
+
+
 def test_poetry_entrypoints():
     poetry = {
         "requirements": {"host": ["setuptools"], "run": ["python"]},
