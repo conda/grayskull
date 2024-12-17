@@ -36,14 +36,17 @@ def test_parse_version_failure(invalid_version):
         (">3.12", "py>312"),
         ("!=3.7", "py!=37"),
         # multiple specifiers
-        (">3.7,<3.12", "py>37 or py<312"),
+        (">3.7,<3.12", "py>37 and py<312"),
+        (">3.7,<3.12,!=3.9", "py>37 and py<312 and py!=39"),
+        # TODO: how this case will render?
+        # ("<3.7,>=3.10", "(py<37 or py>=310)"),
         # poetry specifiers
-        ("^3.10", "py>=310 or py<4"),
-        ("~3.10", "py>=310 or py<311"),
+        ("^3.10", "py>=310 and py<4"),
+        ("~3.10", "py>=310 and py<311"),
         # PEP 440 not common specifiers
-        # ("~=3.7", "<37", "<37"),
-        # ("3.*", "<37", "<37"),
-        # ("!=3.*", "<37", "<37"),
+        # ("~=3.7", "", ""),
+        # ("3.*", "", ""),
+        # ("!=3.*", "", ""),
     ],
 )
 def test_encode_poetry_python_version_to_selector_item(
@@ -72,20 +75,18 @@ def test_parse_python_version(python_version, exp_operator_version):
 
 
 @pytest.mark.parametrize(
-    "python_selector, platform_selector, exp_conda_selector_content",
+    "python_selector, platform_selector, expected_conda_selector",
     [
-        ("py>=38 or py<312", "osx", "(py>=38 or py<312) and osx"),
-        ("py>=38 or py<312", "", "py>=38 or py<312"),
-        ("", "osx", "osx"),
-        ("py>=38", "", "py>=38"),
-        ("py<310", "win", "py<310 and win"),
+        ("", "", ""),
+        ("py>=38 and py<312", "osx", "  # [py>=38 and py<312 and osx]"),
+        ("py>=38 and py<312", "", "  # [py>=38 and py<312]"),
+        ("", "osx", "  # [osx]"),
+        ("py>=38", "", "  # [py>=38]"),
+        ("py<310", "win", "  # [py<310 and win]"),
     ],
 )
 def test_combine_conda_selectors(
-    python_selector, platform_selector, exp_conda_selector_content
+    python_selector, platform_selector, expected_conda_selector
 ):
     conda_selector = combine_conda_selectors(python_selector, platform_selector)
-    expected = (
-        f"  # [{exp_conda_selector_content}]" if exp_conda_selector_content else ""
-    )
-    assert conda_selector == expected
+    assert conda_selector == expected_conda_selector

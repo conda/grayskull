@@ -44,7 +44,7 @@ def __get_constrained_dep_dict(
         dep_name:
             "pandas",
         result yield:
-            "pandas >=1.5.0,<2.0.0  # [(py>=38 or py<312) and osx]"
+            "pandas >=1.5.0,<2.0.0  # [py>=38 and py<312 and osx]"
     """
     conda_version = encode_poetry_version(dep_spec.get("version", ""))
     if conda_version:

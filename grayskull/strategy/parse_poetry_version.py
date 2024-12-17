@@ -257,27 +257,36 @@ def encode_poetry_python_version_to_selector_item(poetry_specifier: str) -> str:
     """
     Encodes Poetry Python version specifier as a Conda selector.
 
-    Example: ">=3.8,<3.12" => "py>=38 or py<312"
+    Example:
+        ">=3.8,<3.12" => "py>=38 and py<312"
+        ">=3.8,<3.12,!=3.11" => "py>=38 and py<312 and py!=311"
+        # TODO: how this case will render?
+        "<3.8,>=3.10" => "py<38 or py>=310"
+        "<3.8,>=3.10,!=3.11" => "(py<38 or py>=310) and py!=311"
 
     # handle exact version specifiers correctly
     >>> encode_poetry_python_version_to_selector_item("3")
     'py==3'
     >>> encode_poetry_python_version_to_selector_item("3.8")
-    "py==38"
+    'py==38'
     >>> encode_poetry_python_version_to_selector_item("==3.8")
-    "py==38"
+    'py==38'
     >>> encode_poetry_python_version_to_selector_item("!=3.8")
-    "py!=38"
+    'py!=38'
+    >>> encode_poetry_python_version_to_selector_item("!=3.8.1")
+    'py!=38'
 
     # handle caret operator correctly
-    >>> encode_poetry_python_version_to_selector_item("^3.10")
-    # renders '>=3.10.0,<4.0.0'
-    "py>=310 or py<4"
+    >>> encode_poetry_python_version_to_selector_item("^3.10") # '>=3.10.0,<4.0.0'
+    'py>=310 and py<4'
 
     # handle tilde operator correctly
-    >>> encode_poetry_python_version_to_selector_item("~3.10")
-    # renders '>=3.10.0,<3.11.0'
-    "py>=310 or py<311"
+    >>> encode_poetry_python_version_to_selector_item("~3.10") # '>=3.10.0,<3.11.0'
+    'py>=310 and py<311'
+
+    # handle multiple requirements correctly
+    >>> encode_poetry_python_version_to_selector_item(">=3.8,<3.12,!=3.11")
+    'py>=38 and py<312 and py!=311'
     """
 
     if not poetry_specifier:
@@ -292,7 +301,7 @@ def encode_poetry_python_version_to_selector_item(poetry_specifier: str) -> str:
         operator, version = parse_python_version(conda_clause)
         version_selector = version.replace(".", "")
         conda_selectors.append(f"py{operator}{version_selector}")
-    selectors = " or ".join(conda_selectors)
+    selectors = " and ".join(conda_selectors)
     return selectors
 
 
@@ -355,8 +364,6 @@ def combine_conda_selectors(python_selector: str, platform_selector: str):
     Combine selectors based on presence
     """
     if python_selector and platform_selector:
-        if " or " in python_selector:
-            python_selector = f"({python_selector})"
         selector = f"{python_selector} and {platform_selector}"
     elif python_selector:
         selector = f"{python_selector}"

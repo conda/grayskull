@@ -141,7 +141,7 @@ def test_poetry_get_constrained_dep_caret_version_python_version_min_max_and_pla
                 "pandas",
             )
         )
-        == "pandas >=1.5.0,<2.0.0  # [(py>=38 or py<312) and osx]"
+        == "pandas >=1.5.0,<2.0.0  # [py>=38 and py<312 and osx]"
     )
 
 
@@ -194,7 +194,7 @@ def test_poetry_get_constrained_dep_multiple_constraints_dependencies_with_platf
     ) == [
         "numpy >=1.24.0,<2.0.0  # [py<310]",
         "numpy >=1.26.0,<2.0.0  # [py>=310]",
-        "numpy >=1.26.0,<2.0.0  # [(py>=38 or py<310) and osx]",
+        "numpy >=1.26.0,<2.0.0  # [py>=38 and py<310 and osx]",
     ]
 
 
@@ -230,7 +230,7 @@ def test_poetry_get_constrained_dep_multiple_constraints_dependencies_nannyml():
                 "pandas",
             )
         )
-        == "pandas >=1.5.0,<2.0.0  # [py>=38 or py<312]"
+        == "pandas >=1.5.0,<2.0.0  # [py>=38 and py<312]"
     )
 
 
@@ -244,7 +244,7 @@ def test_poetry_get_constrained_dep_mult_constraints_deps_databricks_sql_connect
             "pyarrow",
         )
     ) == [
-        "pyarrow >=6.0.0  # [py>=37 or py<311]",
+        "pyarrow >=6.0.0  # [py>=37 and py<311]",
         "pyarrow >=10.0.1  # [py>=311]",
     ]
 
