@@ -147,6 +147,21 @@ def test_poetry_get_constrained_dep_caret_version_python_version_min_max_and_pla
     )
 
 
+def test_poetry_get_constrained_dep_caret_version_python_version_in_or_and_platform():
+    assert next(
+        get_constrained_dep(
+            {
+                "version": "^1.5",
+                "python": "<=3.7,!=3.4|>=3.10,!=3.12",
+                "platform": "darwin",
+            },
+            "pandas",
+        )
+    ) == (
+        "pandas >=1.5.0,<2.0.0  # [(py<=37 and py!=34 or py>=310 and py!=312) and osx]"
+    )
+
+
 def test_poetry_get_constrained_dep_no_version_only_platform():
     assert (
         next(
