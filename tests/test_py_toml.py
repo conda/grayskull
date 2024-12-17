@@ -78,6 +78,8 @@ def test_poetry_langchain_snapshot(tmpdir):
     output_path = tmpdir / "langchain" / "meta.yaml"
 
     parser = init_parser()
+    # Check pyproject.toml for version 0.0.119
+    # https://inspector.pypi.io/project/langchain/0.0.119
     args = parser.parse_args(
         ["pypi", "langchain==0.0.119", "-o", str(tmpdir), "-m", "AddYourGitHubIdHere"]
     )
@@ -247,6 +249,18 @@ def test_poetry_get_constrained_dep_mult_constraints_deps_databricks_sql_connect
         "pyarrow >=6.0.0  # [py>=37 and py<311]",
         "pyarrow >=10.0.1  # [py>=311]",
     ]
+
+
+def test_poetry_get_constrained_dep_mult_constraints_deps_langchain_0_0_119():
+    assert (
+        next(
+            get_constrained_dep(
+                {"version": "^2.11.0", "optional": True, "python": "^3.10, <3.12"},
+                "tensorflow-text",
+            )
+        )
+        == "tensorflow-text >=2.11.0,<3.0.0  # [py>=310 and py<4 and py<312]"
+    )
 
 
 def test_poetry_entrypoints():
