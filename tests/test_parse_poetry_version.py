@@ -85,6 +85,12 @@ def test_parse_python_version(python_version, exp_operator_version):
         ("", "osx", "  # [osx]"),
         ("py>=38", "", "  # [py>=38]"),
         ("py<310", "win", "  # [py<310 and win]"),
+        (
+            "py<38 or py>=310 and py!=311",
+            "osx",
+            "  # [(py<38 or py>=310 and py!=311) and osx]",
+        ),
+        ("py<38 or py>=310", "osx", "  # [(py<38 or py>=310) and osx]"),
     ],
 )
 def test_combine_conda_selectors(

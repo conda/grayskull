@@ -377,6 +377,8 @@ def combine_conda_selectors(python_selector: str, platform_selector: str):
     Combine selectors based on presence
     """
     if python_selector and platform_selector:
+        if " or " in python_selector:
+            python_selector = f"({python_selector})"
         selector = f"{python_selector} and {platform_selector}"
     elif python_selector:
         selector = f"{python_selector}"
