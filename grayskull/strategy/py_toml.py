@@ -1,9 +1,15 @@
 import sys
 from collections import defaultdict
+from collections.abc import Iterator
 from functools import singledispatch
 from pathlib import Path
 
-from grayskull.strategy.parse_poetry_version import encode_poetry_version
+from grayskull.strategy.parse_poetry_version import (
+    combine_conda_selectors,
+    encode_poetry_platform_to_selector_item,
+    encode_poetry_python_version_to_selector_item,
+    encode_poetry_version,
+)
 from grayskull.utils import nested_dict
 
 if sys.version_info >= (3, 11):
@@ -17,35 +23,68 @@ class InvalidPoetryDependency(BaseException):
 
 
 @singledispatch
-def get_constrained_dep(dep_spec: str | dict, dep_name: str) -> str:
+def get_constrained_dep(dep_spec: list | str | dict, dep_name: str) -> str:
     raise InvalidPoetryDependency(
-        "Expected Poetry dependency specification to be of type str or dict, "
+        "Expected Poetry dependency specification to be of type list, str or dict, "
         f"received {type(dep_spec).__name__}"
     )
 
 
 @get_constrained_dep.register
-def __get_constrained_dep_dict(dep_spec: dict, dep_name: str) -> str:
+def __get_constrained_dep_dict(
+    dep_spec: dict, dep_name: str
+) -> Iterator[str, None, None]:
+    """
+    Yield a dependency entry in conda format from a Poetry entry
+    with version, python version, and platform
+
+    Example:
+        dep_spec:
+            {"version": "^1.5", "python": ">=3.8,<3.12", "platform": "darwin"},
+        dep_name:
+            "pandas",
+        result yield:
+            "pandas >=1.5.0,<2.0.0  # [py>=38 and py<312 and osx]"
+    """
     conda_version = encode_poetry_version(dep_spec.get("version", ""))
-    return f"{dep_name} {conda_version}".strip()
+    if conda_version:
+        conda_version = f" {conda_version}"
+    python_selector = encode_poetry_python_version_to_selector_item(
+        dep_spec.get("python", "")
+    )
+    platform_selector = encode_poetry_platform_to_selector_item(
+        dep_spec.get("platform", "")
+    )
+    conda_selector = combine_conda_selectors(python_selector, platform_selector)
+    yield f"{dep_name}{conda_version}{conda_selector}".strip()
 
 
 @get_constrained_dep.register
-def __get_constrained_dep_str(dep_spec: str, dep_name: str) -> str:
+def __get_constrained_dep_str(
+    dep_spec: str, dep_name: str
+) -> Iterator[str, None, None]:
     conda_version = encode_poetry_version(dep_spec)
-    return f"{dep_name} {conda_version}"
+    yield f"{dep_name} {conda_version}"
+
+
+@get_constrained_dep.register
+def __get_constrained_dep_list(
+    dep_spec_list: list, dep_name: str
+) -> Iterator[str, None, None]:
+    for dep_spec in dep_spec_list:
+        yield from get_constrained_dep(dep_spec, dep_name)
 
 
 def encode_poetry_deps(poetry_deps: dict) -> tuple[list, list]:
     run = []
     run_constrained = []
     for dep_name, dep_spec in poetry_deps.items():
-        constrained_dep = get_constrained_dep(dep_spec, dep_name)
-        try:
-            assert dep_spec.get("optional", False)
-            run_constrained.append(constrained_dep)
-        except (AttributeError, AssertionError):
-            run.append(constrained_dep)
+        for constrained_dep in get_constrained_dep(dep_spec, dep_name):
+            try:
+                assert dep_spec.get("optional", False)
+                run_constrained.append(constrained_dep)
+            except (AttributeError, AssertionError):
+                run.append(constrained_dep)
     return run, run_constrained
 
 
