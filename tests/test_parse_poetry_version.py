@@ -38,8 +38,10 @@ def test_parse_version_failure(invalid_version):
         # multiple specifiers
         (">3.7,<3.12", "py>37 and py<312"),
         (">3.7,<3.12,!=3.9", "py>37 and py<312 and py!=39"),
-        # TODO: how this case will render?
-        # ("<3.7,>=3.10", "(py<37 or py>=310)"),
+        # version specifiers in "or" ("and" takes precedence)
+        ("<3.7|>=3.10", "py<37 or py>=310"),
+        ("<3.8|>=3.10,!=3.11", "py<38 or py>=310 and py!=311"),
+        ("<3.8|>=3.10|=3.9", "py<38 or py>=310 or py==39"),
         # poetry specifiers
         ("^3.10", "py>=310 and py<4"),
         ("~3.10", "py>=310 and py<311"),
