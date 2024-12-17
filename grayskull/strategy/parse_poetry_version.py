@@ -260,6 +260,8 @@ def encode_poetry_python_version_to_selector_item(poetry_specifier: str) -> str:
     Example: ">=3.8,<3.12" => "py>=38 or py<312"
 
     # handle exact version specifiers correctly
+    >>> encode_poetry_python_version_to_selector_item("3")
+    'py==3'
     >>> encode_poetry_python_version_to_selector_item("3.8")
     "py==38"
     >>> encode_poetry_python_version_to_selector_item("==3.8")
@@ -299,17 +301,33 @@ def parse_python_version(selector: str):
     Return operator and normalized version from a version selector
 
     Examples:
+        ">=3"   -> ">=", "3"
+        ">=3.0"   -> ">=", "3"
         ">=3.8"   -> ">=", "3.8"
         ">=3.8.0" -> ">=", "3.8"
         "<4.0.0"  -> "<", "4"
         "3.12"    -> "==", 3.12"
         "=3.8"    -> "==", "3.8"
+        ">=3.8.0.1" -> ">=", "3.8"
+
+    >>> parse_python_version(">=3.8")
+    ('>=', '3.8')
+    >>> parse_python_version("3.12")
+    ('==', '3.12')
+    >>> parse_python_version("<4.0.0")
+    ('<', '4')
+    >>> parse_python_version(">=3")
+    ('>=', '3')
+    >>> parse_python_version(">=3.8.0")
+    ('>=', '3.8')
+    >>> parse_python_version(">=3.8.0.1")
+    ('>=', '3.8')
 
     The version is normalized to "major.minor" (drop patch if present)
     or "major" if minor is 0
     """
     # Regex to split operator and version
-    pattern = r"^(?P<operator>\^|~|>=|<=|!=|==|>|<|=)?(?P<version>\d+(\.\d+){0,2})$"
+    pattern = r"^(?P<operator>\^|~|>=|<=|!=|==|>|<|=)?(?P<version>\d+(\.\d+){0,3})$"
     match = re.match(pattern, selector)
     if not match:
         raise ValueError(f"Invalid version selector: {selector}")
@@ -321,7 +339,12 @@ def parse_python_version(selector: str):
     version = match.group("version")
 
     # Split into major, minor, and discard the rest (patch or additional parts)
-    major, minor, *_ = version.split(".")
+    try:
+        # Attempt to unpack major, minor, and ignore the rest
+        major, minor, *_ = version.split(".")
+    except ValueError:
+        # If unpacking fails, assume only major is provided
+        return operator, version
 
     # Return only major if minor is "0", otherwise return major.minor
     return operator, major if minor == "0" else f"{major}.{minor}"

@@ -32,6 +32,7 @@ def test_parse_version_failure(invalid_version):
         ("=3.10", "py==310"),
         ("==3.10", "py==310"),
         ("==3", "py==3"),
+        ("3", "py==3"),
         (">3.12", "py>312"),
         ("!=3.7", "py!=37"),
         # multiple specifiers
