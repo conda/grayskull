@@ -6,7 +6,7 @@ from grayskull.strategy.parse_poetry_version import (
     InvalidVersion,
     combine_conda_selectors,
     encode_poetry_python_version_to_selector_item,
-    parse_python_version,
+    parse_python_version_specifier_to_selector,
     parse_version,
 )
 
@@ -46,9 +46,9 @@ def test_parse_version_failure(invalid_version):
         ("^3.10", "py>=310 and py<4"),
         ("~3.10", "py>=310 and py<311"),
         # PEP 440 not common specifiers
-        # ("~=3.7", "", ""),
-        # ("3.*", "", ""),
-        # ("!=3.*", "", ""),
+        ("~=3.8", "py>=38 and py<4"),
+        ("3.*", "py>=3 and py<4"),
+        ("!=3.*", "py<3 or py>=4"),
     ],
 )
 def test_encode_poetry_python_version_to_selector_item(
@@ -60,20 +60,39 @@ def test_encode_poetry_python_version_to_selector_item(
 
 
 @pytest.mark.parametrize(
-    "python_version, exp_operator_version",
+    "python_version, expected_conda_selector",
     [
-        (">=3.8", (">=", "3.8")),
-        (">=3.8.0", (">=", "3.8")),
-        ("<4.0.0", ("<", "4")),
-        ("3.12", ("==", "3.12")),
-        ("=3.8", ("==", "3.8")),
-        ("=3.8.1", ("==", "3.8")),
-        ("3.8.1", ("==", "3.8")),
+        (">=3", "py>=3"),
+        (">=3.8", "py>=38"),
+        (">=3.8.0", "py>=38"),
+        (">=3.8.0.1", "py>=38"),
+        ("<4.0.0.0", "py<4"),
+        ("<4.0.0", "py<4"),
+        ("<4.0", "py<4"),
+        ("3", "py==3"),
+        ("3.12", "py==312"),
+        ("3.12.1", "py==312"),
+        ("3.12.1.1", "py==312"),
+        ("=3", "py==3"),
+        ("=3.8", "py==38"),
+        ("=3.8.1", "py==38"),
+        ("=3.8.1.1", "py==38"),
+        ("===3", "py==3"),
+        ("===3.8", "py==38"),
+        ("===3.8.1", "py==38"),
+        ("===3.8.1.1", "py==38"),
+        ("!=3", "py!=3"),
+        ("!=3.8", "py!=38"),
+        ("!=3.8.1", "py!=38"),
+        ("!=3.8.1.1", "py!=38"),
+        ("~=3.8", "py>=38 and py<4"),
     ],
 )
-def test_parse_python_version(python_version, exp_operator_version):
-    operator, version = parse_python_version(python_version)
-    assert (operator, version) == exp_operator_version
+def test_parse_python_version_specifier_to_selector(
+    python_version, expected_conda_selector
+):
+    conda_selector = parse_python_version_specifier_to_selector(python_version)
+    assert conda_selector == expected_conda_selector
 
 
 @pytest.mark.parametrize(
