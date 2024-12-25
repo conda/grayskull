@@ -1,6 +1,5 @@
 import re
 
-import semver
 from packaging.version import Version
 
 VERSION_REGEX = re.compile(
@@ -45,30 +44,49 @@ def parse_version(version: str) -> dict[str, int | None]:
     }
 
 
-def vdict_to_vinfo(version_dict: dict[str, int | None]) -> semver.VersionInfo:
+def get_padded_base_version(version: str | Version) -> str:
     """
-    Coerces version dictionary to a semver.VersionInfo object. If minor or patch
-    numbers are missing, 0 is substituted in their place.
+    Returns the same PEP440 version padded with zeroes if
+    minor or micro are not specified.
+
+    >>> get_padded_base_version("0.2.3")
+    '0.2.3'
+    >>> get_padded_base_version("1")
+    '1.0.0'
+    >>> get_padded_base_version("1.2")
+    '1.2.0'
+    >>> get_padded_base_version("1.2.3")
+    '1.2.3'
+    >>> get_padded_base_version("1.2.3.post1")
+    '1.2.3.post1'
+    >>> get_padded_base_version("2!1.2.post1")
+    '2!1.2.0.post1'
     """
-    ver = {key: 0 if value is None else value for key, value in version_dict.items()}
-    return semver.VersionInfo(**ver)
+    if not isinstance(version, Version):
+        version = Version(version)
+
+    # Start with the normalized release
+    floor = f"{version.major}.{version.minor}.{version.micro}"
+
+    # Add other components as they appear
+    if version.epoch is not None and version.epoch > 0:
+        floor = f"{version.epoch}!{floor}"  # Add epoch if present
+    if version.pre is not None:
+        floor += (
+            f"{version.pre[0]}{version.pre[1]}"  # Add pre-release (e.g., a1, b1, rc1)
+        )
+    if version.post is not None:
+        floor += f".post{version.post}"  # Add post-release (e.g., .post1)
+    if version.dev is not None:
+        floor += f".dev{version.dev}"  # Add development release (e.g., .dev1)
+    if version.local is not None:
+        floor += f"+{version.local}"  # Add local metadata (e.g., +local)
+    return floor
 
 
-def coerce_to_semver(version: str) -> str:
+def get_caret_ceiling(version: str | Version) -> str:
     """
-    Coerces a version string to a semantic version.
-    """
-    if semver.VersionInfo.is_valid(version):
-        return version
-
-    parsed_version = parse_version(version)
-    vinfo = vdict_to_vinfo(parsed_version)
-    return str(vinfo)
-
-
-def get_caret_ceiling(target: str) -> str:
-    """
-    Accepts a Poetry caret target and returns the exclusive version ceiling.
+    Accepts a Poetry caret version and returns the exclusive version ceiling.
 
     Targets that are invalid semver strings (e.g. "1.2", "0") are handled
     according to the Poetry caret requirements specification, which is based on
@@ -97,34 +115,24 @@ def get_caret_ceiling(target: str) -> str:
     '2.0.0'
     >>> get_caret_ceiling("1.2.3")
     '2.0.0'
+    >>> get_caret_ceiling("1.2.3.post1")
+    '2.0.0'
+    >>> get_caret_ceiling("2!1.2.3.post1")
+    '2.0.0'
     """
-    if not semver.VersionInfo.is_valid(target):
-        target_dict = parse_version(target)
-
-        if target_dict["major"] == 0:
-            if target_dict["minor"] is None:
-                target_dict["major"] += 1
-            elif target_dict["patch"] is None:
-                target_dict["minor"] += 1
-            else:
-                target_dict["patch"] += 1
-            return str(vdict_to_vinfo(target_dict))
-
-        vdict_to_vinfo(target_dict)
-        return str(vdict_to_vinfo(target_dict).bump_major())
-
-    target_vinfo = semver.VersionInfo.parse(target)
-
-    if target_vinfo.major == 0:
-        if target_vinfo.minor == 0:
-            return str(target_vinfo.bump_patch())
-        else:
-            return str(target_vinfo.bump_minor())
+    if not isinstance(version, Version):
+        version = Version(version)
+    # Determine the upper bound
+    if version.major > 0 or len(version.release) == 1:
+        ceiling = f"{version.major + 1}.0.0"
+    elif version.minor > 0 or len(version.release) == 2:
+        ceiling = f"0.{version.minor + 1}.0"
     else:
-        return str(target_vinfo.bump_major())
+        ceiling = f"0.0.{version.micro + 1}"
+    return ceiling
 
 
-def get_tilde_ceiling(target: str) -> str:
+def get_tilde_ceiling(version: str | Version) -> str:
     """
     Accepts a Poetry tilde target and returns the exclusive version ceiling.
 
@@ -136,11 +144,14 @@ def get_tilde_ceiling(target: str) -> str:
     >>> get_tilde_ceiling("1.2.3")
     '1.3.0'
     """
-    target_dict = parse_version(target)
-    if target_dict["minor"]:
-        return str(vdict_to_vinfo(target_dict).bump_minor())
-
-    return str(vdict_to_vinfo(target_dict).bump_major())
+    if not isinstance(version, Version):
+        version = Version(version)
+    # Determine the upper bound based on the specified components
+    if len(version.release) in [2, 3]:  # Major, Minor, Micro, or Major, Minor
+        tilde_ceiling = f"{version.major}.{version.minor + 1}.0"
+    else:  # Major, Minor or Only Major
+        tilde_ceiling = f"{version.major + 1}.0.0"
+    return tilde_ceiling
 
 
 def encode_poetry_version(poetry_specifier: str) -> str:
@@ -190,6 +201,11 @@ def encode_poetry_version(poetry_specifier: str) -> str:
     >>> encode_poetry_version("^1.2.3")
     '>=1.2.3,<2.0.0'
 
+    # handle caret operator with a PEP440 version
+    # correctly
+    >>> encode_poetry_version("^0.8.post1")
+    '>=0.8.0.post1,<0.9.0'
+
     # handle tilde operator correctly
     # examples from Poetry docs
     >>> encode_poetry_version("~1")
@@ -198,6 +214,11 @@ def encode_poetry_version(poetry_specifier: str) -> str:
     '>=1.2.0,<1.3.0'
     >>> encode_poetry_version("~1.2.3")
     '>=1.2.3,<1.3.0'
+
+    # # handle tilde operator with a PEP440 version
+    # # correctly
+    # >>> encode_poetry_version("~0.8.post1")
+    # '>=0.8.0.post1,<0.9.0.a0'
 
     # handle or operator correctly
     >>> encode_poetry_version("1.2.3|1.2.4")
@@ -221,9 +242,9 @@ def encode_poetry_version(poetry_specifier: str) -> str:
         poetry_clause = poetry_clause.replace(" ", "")
         if poetry_clause.startswith("^"):
             # handle ^ operator
-            target = poetry_clause[1:]
-            floor = coerce_to_semver(target)
-            ceiling = get_caret_ceiling(target)
+            caret_version = Version(poetry_clause[1:])
+            floor = get_padded_base_version(caret_version)
+            ceiling = get_caret_ceiling(caret_version)
             conda_clauses.append(">=" + floor)
             conda_clauses.append("<" + ceiling)
             continue
@@ -236,9 +257,9 @@ def encode_poetry_version(poetry_specifier: str) -> str:
 
         if poetry_clause.startswith("~"):
             # handle ~ operator
-            target = poetry_clause[1:]
-            floor = coerce_to_semver(target)
-            ceiling = get_tilde_ceiling(target)
+            tilde_version = poetry_clause[1:]
+            floor = get_padded_base_version(tilde_version)
+            ceiling = get_tilde_ceiling(tilde_version)
             conda_clauses.append(">=" + floor)
             conda_clauses.append("<" + ceiling)
             continue

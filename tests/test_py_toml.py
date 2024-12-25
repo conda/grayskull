@@ -111,6 +111,22 @@ def test_poetry_get_constrained_dep_caret_version_string():
     assert next(get_constrained_dep("^1.24.0", "numpy")) == "numpy >=1.24.0,<2.0.0"
 
 
+def test_poetry_get_constrained_dep_caret_PEP440_version_string():
+    assert (
+        next(get_constrained_dep("^0.8.post1", "pyfiglet"))
+        == "pyfiglet >=0.8.0.post1,<0.9.0"
+    )
+
+
+def test_poetry_get_constrained_dep_caret_PEP440_version_regression_534():
+    # Regression test for #534
+    # https://github.com/conda/grayskull/issues/534
+    assert (
+        next(get_constrained_dep("^0.10.11.post1", "llama-index-core"))
+        == "llama-index-core >=0.10.11.post1,<0.11.0"
+    )
+
+
 def test_poetry_get_constrained_dep_no_version_only_python():
     assert (
         next(
