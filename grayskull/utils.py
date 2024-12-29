@@ -177,6 +177,7 @@ def format_dependencies(all_dependencies: list, name: str) -> list:
     formatted_dependencies = []
     re_deps = re.compile(r"^\s*([\.a-zA-Z0-9_-]+)\s*(.*)\s*$", re.MULTILINE | re.DOTALL)
     re_remove_space = re.compile(r"([<>!=]+)\s+")
+    re_selector = re.compile(r"\s+#\s+\[.*\]", re.DOTALL)
     re_remove_tags = re.compile(r"\s*(\[.*\])", re.DOTALL)
     re_remove_comments = re.compile(r"\s+#.*", re.DOTALL)
     for req in all_dependencies:
@@ -193,6 +194,10 @@ def format_dependencies(all_dependencies: list, name: str) -> list:
             if len(match_req) > 1:
                 deps_name = " ".join(match_req)
         deps_name = re_remove_space.sub(r"\1", deps_name.strip())
+        if re_selector.search(deps_name):
+            # don't want to remove selectors
+            formatted_dependencies.append(deps_name)
+            continue
         deps_name = re_remove_tags.sub(r" ", deps_name.strip())
         deps_name = re_remove_comments.sub("", deps_name)
         formatted_dependencies.append(deps_name.strip())
