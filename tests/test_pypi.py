@@ -683,18 +683,17 @@ def test_merge_pypi_sdist_metadata():
 
 
 def test_pypi_metadata_constraints_for_python_versions():
-    config = Configuration(name="apache-airflow-providers-trino",
-                           version="6.0.0")
+    config = Configuration(name="apache-airflow-providers-trino", version="6.0.0")
     pypi_metadata = get_pypi_metadata(config)
     assert sorted(pypi_metadata["requires_dist"]) == sorted(
         [
-            'apache-airflow-providers-common-sql>=1.20.0',
-            'apache-airflow>=2.9.0',
+            "apache-airflow-providers-common-sql>=1.20.0",
+            "apache-airflow>=2.9.0",
             'pandas<2.2,>=1.5.3; python_version < "3.9"',
             'pandas<2.2,>=2.1.2; python_version >= "3.9"',
-            'trino>=0.318.0',
+            "trino>=0.318.0",
             'apache-airflow-providers-google; extra == "google"',
-            'apache-airflow-providers-openlineage; extra == "openlineage"'
+            'apache-airflow-providers-openlineage; extra == "openlineage"',
         ]
     )
 
@@ -703,34 +702,33 @@ def test_pypi_metadata_constraints_for_python_versions():
     assert sorted(pypi_metadata["requires_dist"]) == sorted(
         [
             'alembic<2.0.0,>=1.0.11; extra == "alembic"',
-            'lz4<5.0.0,>=4.0.2',
+            "lz4<5.0.0,>=4.0.2",
             'numpy>=1.16.6; python_version >= "3.8" and python_version < "3.11"',
             'numpy>=1.23.4; python_version >= "3.11"',
-            'oauthlib<4.0.0,>=3.1.0',
-            'openpyxl<4.0.0,>=3.0.10',
+            "oauthlib<4.0.0,>=3.1.0",
+            "openpyxl<4.0.0,>=3.0.10",
             'pandas<2.3.0,>=1.2.5; python_version >= "3.8"',
-            'pyarrow>=14.0.1',
-            'requests<3.0.0,>=2.18.1',
+            "pyarrow>=14.0.1",
+            "requests<3.0.0,>=2.18.1",
             'sqlalchemy>=2.0.21; extra == "sqlalchemy" or extra == "alembic"',
-            'thrift<0.21.0,>=0.16.0',
-            'urllib3>=1.26',
+            "thrift<0.21.0,>=0.16.0",
+            "urllib3>=1.26",
         ]
     )
 
 
 def test_sdist_metadata_from_toml_project_dependencies():
-    config = Configuration(name="apache-airflow-providers-trino",
-                           version="6.0.0")
+    config = Configuration(name="apache-airflow-providers-trino", version="6.0.0")
     pypi_metadata = get_pypi_metadata(config)
     sdist_metadata = get_sdist_metadata(pypi_metadata["sdist_url"], config)
     assert sorted(sdist_metadata["install_requires"]) == sorted(
         [
-            'apache-airflow-providers-common-sql>=1.20.0',
-            'apache-airflow>=2.9.0',
+            "apache-airflow-providers-common-sql>=1.20.0",
+            "apache-airflow>=2.9.0",
             'pandas>=1.5.3,<2.2;python_version<"3.9"',
             'pandas>=2.1.2,<2.2;python_version>="3.9"',
-            'trino>=0.318.0',
-            'python ~=3.9'
+            "trino>=0.318.0",
+            "python ~=3.9",
         ]
     )
 
@@ -741,17 +739,17 @@ def test_sdist_metadata_from_toml_poetry_dependencies():
     sdist_metadata = get_sdist_metadata(pypi_metadata["sdist_url"], config)
     assert sorted(sdist_metadata["install_requires"]) == sorted(
         [
-            'python >=3.8.0,<4.0.0',
-            'thrift >=0.16.0,<0.21.0',
-            'pandas >=1.2.5,<2.3.0  # [py>=38]',
-            'pyarrow >=14.0.1',
-            'lz4 >=4.0.2,<5.0.0',
-            'requests >=2.18.1,<3.0.0',
-            'oauthlib >=3.1.0,<4.0.0',
-            'numpy >=1.16.6  # [py>=38 and py<311]',
-            'numpy >=1.23.4  # [py>=311]',
-            'openpyxl >=3.0.10,<4.0.0',
-            'urllib3 >=1.26'
+            "python >=3.8.0,<4.0.0",
+            "thrift >=0.16.0,<0.21.0",
+            "pandas >=1.2.5,<2.3.0  # [py>=38]",
+            "pyarrow >=14.0.1",
+            "lz4 >=4.0.2,<5.0.0",
+            "requests >=2.18.1,<3.0.0",
+            "oauthlib >=3.1.0,<4.0.0",
+            "numpy >=1.16.6  # [py>=38 and py<311]",
+            "numpy >=1.23.4  # [py>=311]",
+            "openpyxl >=3.0.10,<4.0.0",
+            "urllib3 >=1.26",
         ]
     )
 
@@ -762,40 +760,37 @@ def test_merge_pypi_sdist_metadata_from_toml():
     config = Configuration(name="databricks-sql-connector", version="3.7.0")
     pypi_metadata = get_pypi_metadata(config)
     sdist_metadata = get_sdist_metadata(pypi_metadata["sdist_url"], config)
-    merged_data = merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata,
-                                            config)
+    merged_data = merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata, config)
     assert sorted(merged_data["requires_dist"]) == sorted(
         [
-            'python >=3.8.0,<4.0.0',
-            'thrift >=0.16.0,<0.21.0',
-            'pandas >=1.2.5,<2.3.0  # [py>=38]',
-            'pyarrow >=14.0.1',
-            'lz4 >=4.0.2,<5.0.0',
-            'requests >=2.18.1,<3.0.0',
-            'oauthlib >=3.1.0,<4.0.0',
-            'numpy >=1.16.6  # [py>=38 and py<311]',
-            'numpy >=1.23.4  # [py>=311]',
-            'openpyxl >=3.0.10,<4.0.0',
-            'urllib3 >=1.26'
+            "python >=3.8.0,<4.0.0",
+            "thrift >=0.16.0,<0.21.0",
+            "pandas >=1.2.5,<2.3.0  # [py>=38]",
+            "pyarrow >=14.0.1",
+            "lz4 >=4.0.2,<5.0.0",
+            "requests >=2.18.1,<3.0.0",
+            "oauthlib >=3.1.0,<4.0.0",
+            "numpy >=1.16.6  # [py>=38 and py<311]",
+            "numpy >=1.23.4  # [py>=311]",
+            "openpyxl >=3.0.10,<4.0.0",
+            "urllib3 >=1.26",
         ]
     )
 
     # tests merging pyproject.toml project dependencies with pypi data,
     # including multiple pandas constraints with python version selectors
-    config = Configuration(name="apache-airflow-providers-trino",
-                           version="6.0.0")
+    config = Configuration(name="apache-airflow-providers-trino", version="6.0.0")
     pypi_metadata = get_pypi_metadata(config)
     sdist_metadata = get_sdist_metadata(pypi_metadata["sdist_url"], config)
-    merged_data = merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata,
-                                            config)
+    merged_data = merge_pypi_sdist_metadata(pypi_metadata, sdist_metadata, config)
     assert sorted(merged_data["requires_dist"]) == sorted(
         [
-            'apache-airflow-providers-common-sql>=1.20.0',
-            'apache-airflow>=2.9.0',
+            "apache-airflow-providers-common-sql>=1.20.0",
+            "apache-airflow>=2.9.0",
             'pandas>=1.5.3,<2.2;python_version<"3.9"',
             'pandas>=2.1.2,<2.2;python_version>="3.9"',
-            'trino>=0.318.0',
-            'python ~=3.9'
+            "trino>=0.318.0",
+            "python ~=3.9",
         ]
     )
 
@@ -906,8 +901,7 @@ def test_run_requirements_sdist():
     )
 
     # a more complex example with selectors
-    config = Configuration(name="apache-airflow-providers-trino",
-                           version="6.0.0")
+    config = Configuration(name="apache-airflow-providers-trino", version="6.0.0")
     recipe = GrayskullFactory.create_recipe("pypi", config)
     assert "noarch" not in recipe["build"]
     selectors = {
@@ -916,7 +910,7 @@ def test_run_requirements_sdist():
         "apache-airflow >=2.9.0": None,
         "pandas >=1.5.3,<2.2": "[py<39]",
         "pandas >=2.1.2,<2.2": "[py>=39]",
-        "trino-python-client >=0.318.0": None
+        "trino-python-client >=0.318.0": None,
     }
 
     for dep in recipe["requirements"]["run"]:
@@ -943,7 +937,7 @@ def test_run_requirements_sdist():
         "numpy >=1.16.6": "[py>=38 and py<311]",
         "numpy >=1.23.4": "[py>=311]",
         "openpyxl >=3.0.10,<4.0.0": None,
-        "urllib3 >=1.26": None
+        "urllib3 >=1.26": None,
     }
 
     for dep in recipe["requirements"]["run"]:

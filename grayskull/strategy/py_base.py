@@ -709,10 +709,12 @@ def merge_deps_toml_setup(setup_deps: list, toml_deps: list) -> list:
     for dep_name, dep in zip(setup_dep_names, setup_deps):
         if not dep_name.strip():
             continue
-        alternatives = [dep_name, dep_name.replace("_", "-"),
-                        dep_name.replace("-", "_")]
-        found = any([alternative in toml_dep_names for alternative in
-                     alternatives])
+        alternatives = [
+            dep_name,
+            dep_name.replace("_", "-"),
+            dep_name.replace("-", "_"),
+        ]
+        found = any([alternative in toml_dep_names for alternative in alternatives])
         # only add the setup dep if no alternative name was found
         if not found:
             merged_deps.append(dep)

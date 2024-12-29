@@ -137,7 +137,7 @@ def rm_duplicated_deps(all_requirements: list | set | None) -> list | None:
         dep_name, *constrains = re_split.split(dep.strip())
         dep_name = dep_name.strip()
 
-        if '#' in dep:
+        if "#" in dep:
             selector = dep.split("#")[-1]
         else:
             selector = ""

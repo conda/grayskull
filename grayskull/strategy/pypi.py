@@ -185,6 +185,7 @@ def merge_requires_dist(pypi_metadata: dict, sdist_metadata: dict) -> list:
     :param sdist_metadata: sdist metadata
     :return: list with all requirements
     """
+
     def _get_pkg_names(deps, current_pkg, bar, pos):
         """
         Get pkg names for each dep, dropping deps where no pkg name is found
@@ -219,10 +220,8 @@ def merge_requires_dist(pypi_metadata: dict, sdist_metadata: dict) -> list:
     # takes awhile
     with progressbar_with_status(count) as bar:
         pos = 0
-        sdist_pkgs, sdist_deps = _get_pkg_names(sdist_deps, current_pkg, bar,
-                                                pos)
-        pypi_pkgs, pypi_deps = _get_pkg_names(pypi_deps, current_pkg, bar,
-                                              pos)
+        sdist_pkgs, sdist_deps = _get_pkg_names(sdist_deps, current_pkg, bar, pos)
+        pypi_pkgs, pypi_deps = _get_pkg_names(pypi_deps, current_pkg, bar, pos)
 
     # prefer sdist over pypi; only add pypi deps if not found in sdist
     requires_dist = sdist_deps
