@@ -128,7 +128,7 @@ def rm_duplicated_deps(all_requirements: list | set | None) -> list | None:
     # and underscores converted to dashes. The value is the requirement itself,
     # as it should be added.
     # (This is order-preserving since dicts are ordered by first insertion.)
-    new_reqs: dict[str, str] = {}
+    new_reqs: dict[tuple[str, str], str] = {}
     re_split = re.compile(r"\s+(|>|=|<|~|!|#)+")
     for dep in all_requirements:
         if dep.strip().startswith(("{{", "<{")):
@@ -136,6 +136,12 @@ def rm_duplicated_deps(all_requirements: list | set | None) -> list | None:
             continue
         dep_name, *constrains = re_split.split(dep.strip())
         dep_name = dep_name.strip()
+
+        if '#' in dep:
+            selector = dep.split("#")[-1]
+        else:
+            selector = ""
+
         constrains = [
             c.strip()
             for c in constrains
@@ -143,17 +149,20 @@ def rm_duplicated_deps(all_requirements: list | set | None) -> list | None:
         ]
         canonicalized = dep_name.replace("_", "-").lower()
         constrains.insert(0, dep_name)
-        if canonicalized in new_reqs:
+        # a canonicalized dependency is only redundant if it also has the same
+        # selector as a pervious dependency
+        key = (canonicalized, selector)
+        if key in new_reqs:
             # In order to break ties deterministically, we prioritize the requirement
             # which is alphanumerically lowest. This happens to prioritize the "-"
             # character over "_".
             # Example: given "importlib_metadata" and "importlib-metadata", we will
             # keep "importlib-metadata" because it is alphabetically lower.
-            previous_req = new_reqs[canonicalized]
+            previous_req = new_reqs[key]
             if len(dep) > len(previous_req) or "-" in dep_name:
-                new_reqs[canonicalized] = " ".join(constrains)
+                new_reqs[key] = " ".join(constrains)
         else:
-            new_reqs[canonicalized] = " ".join(constrains)
+            new_reqs[key] = " ".join(constrains)
     return [re.sub(r"\s+(#)", "  \\1", v.strip()) for v in new_reqs.values()]
 
 
