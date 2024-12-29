@@ -342,8 +342,13 @@ def get_pypi_metadata(config: Configuration) -> PypiMetadata:
 def get_run_req_from_requires_dist(requires_dist: list, config: Configuration) -> list:
     """Get the run requirements looking for the `requires_dist` key
     present in the metadata"""
+    re_selector = re.compile(r"\s+#\s+\[.*\]", re.DOTALL)
     run_req = []
     for req in requires_dist:
+        if re_selector.search(req):
+            # if there's already a selector, make sure we're arch
+            config.is_arch = True
+
         list_raw_requirements = req.split(";")
         selector = ""
         if len(list_raw_requirements) > 1:
