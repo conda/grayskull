@@ -128,7 +128,7 @@ def rm_duplicated_deps(all_requirements: list | set | None) -> list | None:
     # and underscores converted to dashes. The value is the requirement itself,
     # as it should be added.
     # (This is order-preserving since dicts are ordered by first insertion.)
-    new_reqs: dict[str, str] = {}
+    new_reqs: dict[tuple[str, str], str] = {}
     re_split = re.compile(r"\s+(|>|=|<|~|!|#)+")
     for dep in all_requirements:
         if dep.strip().startswith(("{{", "<{")):
@@ -136,6 +136,12 @@ def rm_duplicated_deps(all_requirements: list | set | None) -> list | None:
             continue
         dep_name, *constrains = re_split.split(dep.strip())
         dep_name = dep_name.strip()
+
+        if "#" in dep:
+            selector = dep.split("#")[-1]
+        else:
+            selector = ""
+
         constrains = [
             c.strip()
             for c in constrains
@@ -143,17 +149,20 @@ def rm_duplicated_deps(all_requirements: list | set | None) -> list | None:
         ]
         canonicalized = dep_name.replace("_", "-").lower()
         constrains.insert(0, dep_name)
-        if canonicalized in new_reqs:
+        # a canonicalized dependency is only redundant if it also has the same
+        # selector as a pervious dependency
+        key = (canonicalized, selector)
+        if key in new_reqs:
             # In order to break ties deterministically, we prioritize the requirement
             # which is alphanumerically lowest. This happens to prioritize the "-"
             # character over "_".
             # Example: given "importlib_metadata" and "importlib-metadata", we will
             # keep "importlib-metadata" because it is alphabetically lower.
-            previous_req = new_reqs[canonicalized]
+            previous_req = new_reqs[key]
             if len(dep) > len(previous_req) or "-" in dep_name:
-                new_reqs[canonicalized] = " ".join(constrains)
+                new_reqs[key] = " ".join(constrains)
         else:
-            new_reqs[canonicalized] = " ".join(constrains)
+            new_reqs[key] = " ".join(constrains)
     return [re.sub(r"\s+(#)", "  \\1", v.strip()) for v in new_reqs.values()]
 
 
@@ -168,6 +177,7 @@ def format_dependencies(all_dependencies: list, name: str) -> list:
     formatted_dependencies = []
     re_deps = re.compile(r"^\s*([\.a-zA-Z0-9_-]+)\s*(.*)\s*$", re.MULTILINE | re.DOTALL)
     re_remove_space = re.compile(r"([<>!=]+)\s+")
+    re_selector = re.compile(r"\s+#\s+\[.*\]", re.DOTALL)
     re_remove_tags = re.compile(r"\s*(\[.*\])", re.DOTALL)
     re_remove_comments = re.compile(r"\s+#.*", re.DOTALL)
     for req in all_dependencies:
@@ -184,6 +194,10 @@ def format_dependencies(all_dependencies: list, name: str) -> list:
             if len(match_req) > 1:
                 deps_name = " ".join(match_req)
         deps_name = re_remove_space.sub(r"\1", deps_name.strip())
+        if re_selector.search(deps_name):
+            # don't want to remove selectors
+            formatted_dependencies.append(deps_name)
+            continue
         deps_name = re_remove_tags.sub(r" ", deps_name.strip())
         deps_name = re_remove_comments.sub("", deps_name)
         formatted_dependencies.append(deps_name.strip())

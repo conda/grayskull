@@ -696,18 +696,30 @@ def download_sdist_pkg(sdist_url: str, dest: str, name: str | None = None):
 
 def merge_deps_toml_setup(setup_deps: list, toml_deps: list) -> list:
     re_split = re.compile(r"\s+|>|=|<|~|!")
-    all_deps = defaultdict(list)
-    for dep in toml_deps + setup_deps:
-        if dep.strip():
-            dep_name = re_split.split(dep)[0]
-            if dep_name not in all_deps:
-                if dep_name.replace("_", "-") in all_deps:
-                    dep_name = dep_name.replace("_", "-")
-                elif dep_name.replace("-", "_") in all_deps:
-                    dep_name = dep_name.replace("-", "_")
-            all_deps[dep_name].append(dep)
+    # drop any empty deps
+    setup_deps = [dep for dep in setup_deps if dep.strip()]
+    toml_deps = [dep for dep in toml_deps if dep.strip()]
 
-    return [deps[0] for deps in all_deps.values()]
+    # get dep names
+    toml_dep_names = [re_split.split(dep)[0] for dep in toml_deps]
+    setup_dep_names = [re_split.split(dep)[0] for dep in setup_deps]
+
+    # prefer toml over setup; only add setup deps if not found in toml
+    merged_deps = toml_deps
+    for dep_name, dep in zip(setup_dep_names, setup_deps):
+        if not dep_name.strip():
+            continue
+        alternatives = [
+            dep_name,
+            dep_name.replace("_", "-"),
+            dep_name.replace("-", "_"),
+        ]
+        found = any([alternative in toml_dep_names for alternative in alternatives])
+        # only add the setup dep if no alternative name was found
+        if not found:
+            merged_deps.append(dep)
+
+    return merged_deps
 
 
 def merge_setup_toml_metadata(setup_metadata: dict, pyproject_metadata: dict) -> dict:

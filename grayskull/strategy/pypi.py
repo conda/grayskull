@@ -185,18 +185,16 @@ def merge_requires_dist(pypi_metadata: dict, sdist_metadata: dict) -> list:
     :param sdist_metadata: sdist metadata
     :return: list with all requirements
     """
-    all_deps = sdist_metadata.get("install_requires") or []
-    all_deps += pypi_metadata.get("requires_dist") or []
 
-    re_search = re.compile(r";\s*extra")
-    all_deps = [pkg for pkg in all_deps if not re_search.search(pkg)]
-    current_pkg = pypi_metadata.get("name", "")
-
-    requires_dist = []
-    pypi_deps_name = set()
-    with progressbar_with_status(len(all_deps)) as bar:
-        for pos, sdist_pkg in enumerate(all_deps, 1):
-            match_deps = RE_DEPS_NAME.match(sdist_pkg)
+    def _get_pkg_names(deps, current_pkg, bar, pos):
+        """
+        Get pkg names for each dep, dropping deps where no pkg name is found
+        """
+        new_deps = []
+        pkg_names = []
+        for dep in deps:
+            pos += 1
+            match_deps = RE_DEPS_NAME.match(dep)
             if not match_deps:
                 bar.update(pos)
                 continue
@@ -205,11 +203,32 @@ def merge_requires_dist(pypi_metadata: dict, sdist_metadata: dict) -> list:
             bar.update(pos, pkg_name=pkg_name)
             if current_pkg and current_pkg == pkg_name:
                 continue
-            if pkg_name in pypi_deps_name:
-                continue
+            new_deps.append(dep.replace(match_deps, pkg_name))
+            pkg_names.append(pkg_name)
+        return pkg_names, new_deps
 
-            pypi_deps_name.add(pkg_name)
-            requires_dist.append(sdist_pkg.replace(match_deps, pkg_name))
+    sdist_deps = sdist_metadata.get("install_requires") or []
+    pypi_deps = pypi_metadata.get("requires_dist") or []
+
+    re_search = re.compile(r";\s*extra")
+    sdist_deps = [pkg for pkg in sdist_deps if not re_search.search(pkg)]
+    pypi_deps = [pkg for pkg in pypi_deps if not re_search.search(pkg)]
+    current_pkg = pypi_metadata.get("name", "")
+
+    count = len(sdist_deps) + len(pypi_deps)
+    # progress bar here because calling normalize_pkg_name() on each package
+    # takes awhile
+    with progressbar_with_status(count) as bar:
+        pos = 0
+        sdist_pkgs, sdist_deps = _get_pkg_names(sdist_deps, current_pkg, bar, pos)
+        pypi_pkgs, pypi_deps = _get_pkg_names(pypi_deps, current_pkg, bar, pos)
+
+    # prefer sdist over pypi; only add pypi deps if not found in sdist
+    requires_dist = sdist_deps
+    for pkg_name, dep in zip(pypi_pkgs, pypi_deps):
+        if pkg_name not in sdist_pkgs:
+            requires_dist.append(dep)
+
     return requires_dist
 
 
@@ -322,8 +341,13 @@ def get_pypi_metadata(config: Configuration) -> PypiMetadata:
 def get_run_req_from_requires_dist(requires_dist: list, config: Configuration) -> list:
     """Get the run requirements looking for the `requires_dist` key
     present in the metadata"""
+    re_selector = re.compile(r"\s+#\s+\[.*\]", re.DOTALL)
     run_req = []
     for req in requires_dist:
+        if re_selector.search(req):
+            # if there's already a selector, make sure we're arch
+            config.is_arch = True
+
         list_raw_requirements = req.split(";")
         selector = ""
         if len(list_raw_requirements) > 1:
