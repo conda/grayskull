@@ -298,8 +298,7 @@ def main(args=None):
 
     if args.grayskull_power:
         print(
-            f"{Fore.BLUE}By the power of Grayskull...\n"
-            f"{Style.BRIGHT}I have the power!"
+            f"{Fore.BLUE}By the power of Grayskull...\n{Style.BRIGHT}I have the power!"
         )
         return
 

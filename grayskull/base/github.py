@@ -44,7 +44,7 @@ def verify_github_repo_tag(git_url, tag):
     if isinstance(response.json(), list):
         print_msg(
             f"""Found multiple tags matching requested {tag}, possible
-            matches: {[i['ref'].split('/')[-1] for i in response.json()]}"""
+            matches: {[i["ref"].split("/")[-1] for i in response.json()]}"""
         )
         return False
     elif response.json()["ref"].split("/")[-1] == tag:
@@ -147,7 +147,6 @@ def get_git_current_user() -> str:
             f" Exception: {err}"
         )
     print_msg(
-        f"Using default recipe maintainer:"
-        f" {Fore.LIGHTMAGENTA_EX}AddYourGitHubIdHere"
+        f"Using default recipe maintainer: {Fore.LIGHTMAGENTA_EX}AddYourGitHubIdHere"
     )
     return "AddYourGitHubIdHere"
