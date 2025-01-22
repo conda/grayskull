@@ -205,7 +205,7 @@ def scrap_main_page_cran_find_latest_package(
 def scrap_cran_archive_page_for_package_folder_url(cran_url: str, pkg_name: str):
     for url_a in get_webpage(cran_url).findAll("a"):
         if url_a.get_text().strip().lower() == f"{pkg_name.strip().lower()}/":
-            return f'{cran_url}/{url_a.get("href")}'
+            return f"{cran_url}/{url_a.get('href')}"
     raise ValueError(
         f"It was not possible to find the package requested. pkg: {pkg_name}"
     )
