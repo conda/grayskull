@@ -13,7 +13,8 @@ def is_pkg_available(pkg_name: str, channel: str = "conda-forge") -> bool:
     """
     try:
         response = requests.get(
-            url=f"https://anaconda.org/{channel}/{pkg_name}/files", allow_redirects=False
+            url=f"https://anaconda.org/{channel}/{pkg_name}/files",
+            allow_redirects=False,
         )
     except requests.exceptions.SSLError:
         return False
