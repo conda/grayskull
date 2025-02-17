@@ -11,9 +11,12 @@ def is_pkg_available(pkg_name: str, channel: str = "conda-forge") -> bool:
     :param channel: Anaconda channel
     :return: Return True if the package is present on the given channel
     """
-    response = requests.get(
-        url=f"https://anaconda.org/{channel}/{pkg_name}/files", allow_redirects=False
-    )
+    try:
+        response = requests.get(
+            url=f"https://anaconda.org/{channel}/{pkg_name}/files", allow_redirects=False
+        )
+    except requests.exceptions.SSLError:
+        return False
     return response.status_code == 200
 
 
