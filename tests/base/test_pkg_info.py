@@ -1,8 +1,10 @@
-from grayskull.base.pkg_info import is_pkg_available, normalize_pkg_name
-import pytest
 from unittest import mock
-from grayskull.cli import CLIConfig
+
+import pytest
 import requests
+
+from grayskull.base.pkg_info import is_pkg_available, normalize_pkg_name
+from grayskull.cli import CLIConfig
 
 
 def test_pkg_available():
@@ -17,7 +19,7 @@ def test_pkg_not_available():
 def test_is_pkg_available_with_full_url(mock_get):
     # Clear the cache to ensure the function is actually called
     is_pkg_available.cache_clear()
-    
+
     # Setup mock response
     mock_response = mock.Mock()
     mock_response.status_code = 200
@@ -25,7 +27,7 @@ def test_is_pkg_available_with_full_url(mock_get):
 
     # Test with a full URL
     result = is_pkg_available("pytest", "https://internal-conda.example.com")
-    
+
     # Verify the function called requests.get with the correct URL
     mock_get.assert_called_once_with(
         url="https://internal-conda.example.com/pytest/files",
@@ -38,7 +40,7 @@ def test_is_pkg_available_with_full_url(mock_get):
 def test_is_pkg_available_with_channel_name(mock_get):
     # Clear the cache to ensure the function is actually called
     is_pkg_available.cache_clear()
-    
+
     # Setup mock response
     mock_response = mock.Mock()
     mock_response.status_code = 200
@@ -46,7 +48,7 @@ def test_is_pkg_available_with_channel_name(mock_get):
 
     # Test with a channel name
     result = is_pkg_available("pytest", "test-channel")
-    
+
     # Verify the function called requests.get with the correct URL
     mock_get.assert_called_once_with(
         url="https://anaconda.org/test-channel/pytest/files",
@@ -60,30 +62,41 @@ def test_is_pkg_available_with_channel_name(mock_get):
 def test_is_pkg_available_with_multiple_indexes(mock_cli_config, mock_get):
     # Clear the cache to ensure the function is actually called
     is_pkg_available.cache_clear()
-    
+
     # Setup mock CLIConfig to return our custom package indexes
     mock_cli_config_instance = mock.MagicMock()
-    mock_cli_config_instance.package_indexes = ["test-channel", "https://internal-conda.example.com"]
+    mock_cli_config_instance.package_indexes = [
+        "test-channel",
+        "https://internal-conda.example.com",
+    ]
     mock_cli_config.return_value = mock_cli_config_instance
-    
+
     # Setup mock responses
     mock_response1 = mock.Mock()
     mock_response1.status_code = 404  # First index doesn't have the package
-    
+
     mock_response2 = mock.Mock()
     mock_response2.status_code = 200  # Second index has the package
-    
+
     mock_get.side_effect = [mock_response1, mock_response2]
 
     # Test with multiple indexes
     result = is_pkg_available("pytest")
-    
+
     # Verify the function called requests.get with the correct URLs
     assert mock_get.call_count == 2
-    mock_get.assert_has_calls([
-        mock.call(url="https://anaconda.org/test-channel/pytest/files", allow_redirects=False),
-        mock.call(url="https://internal-conda.example.com/pytest/files", allow_redirects=False),
-    ])
+    mock_get.assert_has_calls(
+        [
+            mock.call(
+                url="https://anaconda.org/test-channel/pytest/files",
+                allow_redirects=False,
+            ),
+            mock.call(
+                url="https://internal-conda.example.com/pytest/files",
+                allow_redirects=False,
+            ),
+        ]
+    )
     assert result is True
 
 
@@ -91,13 +104,13 @@ def test_is_pkg_available_with_multiple_indexes(mock_cli_config, mock_get):
 def test_is_pkg_available_with_request_exception(mock_get):
     # Clear the cache to ensure the function is actually called
     is_pkg_available.cache_clear()
-    
+
     # Setup mock to raise an exception
     mock_get.side_effect = requests.exceptions.RequestException("Connection error")
 
     # Test with an exception
     result = is_pkg_available("pytest", "test-channel")
-    
+
     # Verify the function handled the exception gracefully
     assert result is False
 
@@ -106,7 +119,7 @@ def test_is_pkg_available_with_request_exception(mock_get):
 def test_is_pkg_available_not_found(mock_get):
     # Clear the cache to ensure the function is actually called
     is_pkg_available.cache_clear()
-    
+
     # Setup mock response for package not found
     mock_response = mock.Mock()
     mock_response.status_code = 404
@@ -114,7 +127,7 @@ def test_is_pkg_available_not_found(mock_get):
 
     # Test with a package that doesn't exist
     result = is_pkg_available("NOT_PACKAGE_654987321", "test-channel")
-    
+
     # Verify the function returns False for non-200 status codes
     assert result is False
 
@@ -128,13 +141,13 @@ def test_normalize_pkg_name_with_custom_indexes(mock_is_pkg_available):
         elif pkg_name == "package_name":
             return True
         return False
-    
+
     mock_is_pkg_available.side_effect = side_effect
-    
+
     # Test normalize_pkg_name with custom indexes
     CLIConfig(package_indexes=["custom-channel", "https://internal-conda.example.com"])
     result = normalize_pkg_name("package-name")
-    
+
     # Verify the function returns the correct normalized name
     assert result == "package_name"
     assert mock_is_pkg_available.call_count == 2
@@ -154,12 +167,12 @@ def reset_cli_config():
 def test_is_pkg_available_with_url_pattern_matching(mock_get):
     # Clear the cache to ensure the function is actually called
     is_pkg_available.cache_clear()
-    
+
     # Setup mock responses
     mock_response = mock.Mock()
     mock_response.status_code = 200
     mock_get.return_value = mock_response
-    
+
     # Test with different URL formats
     urls_to_test = [
         "https://example.com",
@@ -168,7 +181,7 @@ def test_is_pkg_available_with_url_pattern_matching(mock_get):
         "http://example.com/",
         "https://internal-conda.example.com:8080",
     ]
-    
+
     for url in urls_to_test:
         is_pkg_available.cache_clear()
         result = is_pkg_available("pytest", url)

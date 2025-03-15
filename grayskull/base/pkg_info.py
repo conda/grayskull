@@ -1,5 +1,6 @@
-from functools import lru_cache
 import re
+from functools import lru_cache
+
 import requests
 
 from grayskull.cli import CLIConfig
@@ -14,16 +15,16 @@ def is_pkg_available(pkg_name: str, channel: str = None) -> bool:
     :return: Return True if the package is present on any of the given channels or URLs
     """
     channels_to_check = [channel] if channel else CLIConfig().package_indexes
-    
+
     for channel_to_check in channels_to_check:
         try:
             # Check if the channel is a full URL
-            if re.match(r'^https?://', channel_to_check):
+            if re.match(r"^https?://", channel_to_check):
                 url = f"{channel_to_check.rstrip('/')}/{pkg_name}/files"
             else:
                 # Default to anaconda.org if not a full URL
                 url = f"https://anaconda.org/{channel_to_check}/{pkg_name}/files"
-                
+
             response = requests.get(
                 url=url,
                 allow_redirects=False,
