@@ -110,10 +110,18 @@ This will check if packages exist in `my-channel`, `company-channel`, or `conda-
 You can also specify full URLs for internal package indexes that don't use anaconda.org:
 
 ```bash
-grayskull pypi --package-indexes https://internal-conda.example.com https://another-index.example.com conda-forge pytest
+grayskull pypi --package-indexes https://internal-conda.example.com http://another-conda.example.com conda-forge pytest
 ```
 
-This is particularly useful for internal networks that don't have access to anaconda.org.
+Both HTTP and HTTPS protocols are supported for custom package indexes. This is particularly useful for internal networks that don't have access to anaconda.org.
+
+For internal package indexes with custom API structures, you can use the `{pkg_name}` placeholder in your URL:
+
+```bash
+grayskull pypi --package-indexes "https://internal-conda.example.com/api/{pkg_name}/available" conda-forge pytest
+```
+
+This allows you to specify exactly how your internal package index API works, rather than using the default `/pkg_name/files` path structure.
 
 ### Online Grayskull
 

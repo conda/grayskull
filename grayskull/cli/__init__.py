@@ -20,7 +20,12 @@ WIDGET_BAR_DOWNLOAD = [
 class CLIConfig:
     __instance: Self | None = None
 
-    def __new__(cls, stdout: bool = False, list_missing_deps: bool = False, package_indexes: list[str] = None):
+    def __new__(
+        cls,
+        stdout: bool = False,
+        list_missing_deps: bool = False,
+        package_indexes: list[str] = None,
+    ):
         if CLIConfig.__instance is None:
             CLIConfig.__instance = object.__new__(cls)
             CLIConfig.__instance.stdout = stdout

@@ -8,7 +8,6 @@ import grayskull
 import grayskull.main as cli
 from grayskull.base.factory import GrayskullFactory
 from grayskull.config import Configuration
-from grayskull.cli import CLIConfig
 
 
 def test_version(capsys):
@@ -140,28 +139,35 @@ def test_part_reload_recipe(tmpdir, index, name, version):
 
 def test_package_indexes_option(mocker, tmpdir):
     folder = tmpdir.mkdir("package_indexes_test")
-    
+
     # Mock CLIConfig to capture the package_indexes value
     mock_cli_config = mocker.patch("grayskull.main.CLIConfig")
     mock_cli_config_instance = mocker.MagicMock()
     mock_cli_config.return_value = mock_cli_config_instance
-    
+
     # Mock is_pkg_available to prevent actual network calls
     mocker.patch("grayskull.cli.stdout.is_pkg_available", return_value=True)
-    
+
     # Mock generate_recipe to prevent actual recipe generation
     mocker.patch("grayskull.main.generate_recipe")
-    
-    # Run with custom package indexes
-    cli.main([
-        "pypi", 
-        "pytest", 
-        "--package-indexes", 
-        "custom-channel", 
-        "https://internal-conda.example.com", 
-        "-o", 
-        str(folder)
-    ])
-    
+
+    # Run with custom package indexes including both HTTP and HTTPS URLs
+    cli.main(
+        [
+            "pypi",
+            "pytest",
+            "--package-indexes",
+            "custom-channel",
+            "https://internal-conda.example.com",
+            "http://another-conda.example.com",
+            "-o",
+            str(folder),
+        ]
+    )
+
     # Verify that package_indexes was set correctly in CLIConfig
-    assert mock_cli_config_instance.package_indexes == ["custom-channel", "https://internal-conda.example.com"]
+    assert mock_cli_config_instance.package_indexes == [
+        "custom-channel",
+        "https://internal-conda.example.com",
+        "http://another-conda.example.com",
+    ]
