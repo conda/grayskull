@@ -108,17 +108,29 @@ def print_requirements(
         print_req(req_list)
 
     print_msg(
-        f"\n{Fore.RED}RED{Style.RESET_ALL}: Package names not available on conda-forge"
+        f"\n{Fore.RED}RED{Style.RESET_ALL}: "
+        "Package names not available on specified package indexes"
     )
     print_msg(
         f"{Fore.YELLOW}YELLOW{Style.RESET_ALL}: "
         "PEP-725 PURLs that did not map to known package"
     )
-    print_msg(f"{Fore.GREEN}GREEN{Style.RESET_ALL}: Packages available on conda-forge")
+    print_msg(
+        f"{Fore.GREEN}GREEN{Style.RESET_ALL}: "
+        "Packages available on specified package indexes"
+    )
 
     if CLIConfig().list_missing_deps:
         if all_missing_deps:
-            print_msg(f"Missing dependencies: {', '.join(all_missing_deps)}")
+            indexes = ", ".join(f"'{idx}'" for idx in CLIConfig().package_indexes)
+            print_msg(
+                f"Missing dependencies (not found in {indexes}): "
+                f"{', '.join(all_missing_deps)}"
+            )
         else:
-            print_msg("All dependencies are already on conda-forge.")
+            indexes = ", ".join(f"'{idx}'" for idx in CLIConfig().package_indexes)
+            print_msg(
+                f"All dependencies are already available "
+                f"in the specified package indexes ({indexes})."
+            )
     return all_missing_deps

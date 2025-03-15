@@ -45,6 +45,20 @@ def init_parser():
         help="After the execution Grayskull will print all the missing dependencies.",
     )
     cran_parser.add_argument(
+        "--package-indexes",
+        default=["conda-forge"],
+        nargs="+",
+        dest="package_indexes",
+        help="""
+        List of package indexes to check for existing packages.
+        Can be channel names (e.g., conda-forge) or full URLs
+        (e.g., https://internal-conda.example.com).
+        For custom API structures, use the {pkg_name} placeholder
+        (e.g., https://internal-conda.example.com/api/{pkg_name}/available).
+        Default is conda-forge.",
+        """,
+    )
+    cran_parser.add_argument(
         "--download",
         "-d",
         dest="download",
@@ -162,6 +176,19 @@ def init_parser():
         action="store_true",
         dest="list_missing_deps",
         help="After the execution Grayskull will print all the missing dependencies.",
+    )
+    pypi_parser.add_argument(
+        "--package-indexes",
+        default=["conda-forge"],
+        nargs="+",
+        dest="package_indexes",
+        help="""
+        List of package indexes to check for existing packages.
+        Can be channel names (e.g., conda-forge) or full URLs (e.g., https://internal-conda.example.com).
+        For custom API structures, use the {pkg_name} placeholder
+        (e.g., https://internal-conda.example.com/api/{pkg_name}/available).
+        Default is conda-forge.",
+        """,
     )
     pypi_parser.add_argument(
         "--strict-conda-forge",
@@ -304,6 +331,8 @@ def main(args=None):
 
     CLIConfig().stdout = args.stdout
     CLIConfig().list_missing_deps = args.list_missing_deps
+    if hasattr(args, "package_indexes"):
+        CLIConfig().package_indexes = args.package_indexes
 
     print_msg(Style.RESET_ALL)
 
