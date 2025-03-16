@@ -39,6 +39,7 @@ testing = [
     "pytest-cov",
     "pytest-mock",
     "setuptools-scm",
+    "numpy",
 ]
 
 docs = [

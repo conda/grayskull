@@ -97,6 +97,32 @@ grayskull pypi --pypi-mirror-url https://pypi.example.com --pypi-metadata-url ht
 
 > *Note:* `--pypi-metadata-url` is a replacement for `--pypi-url`; `--pypi-url` is deprecated and will be removed in a future release.
 
+### Checking package availability against custom indexes
+
+By default, Grayskull checks if packages are available on conda-forge and highlights missing dependencies. You can specify custom package indexes to check against using the `--package-indexes` argument:
+
+```bash
+grayskull pypi --package-indexes my-channel company-channel conda-forge pytest
+```
+
+This will check if packages exist in `my-channel`, `company-channel`, or `conda-forge` (in that order) and mark them accordingly in the output.
+
+You can also specify full URLs for internal package indexes that don't use anaconda.org:
+
+```bash
+grayskull pypi --package-indexes https://internal-conda.example.com http://another-conda.example.com conda-forge pytest
+```
+
+Both HTTP and HTTPS protocols are supported for custom package indexes. This is particularly useful for internal networks that don't have access to anaconda.org.
+
+For internal package indexes with custom API structures, you can use the `{pkg_name}` placeholder in your URL:
+
+```bash
+grayskull pypi --package-indexes "https://internal-conda.example.com/api/{pkg_name}/available" conda-forge pytest
+```
+
+This allows you to specify exactly how your internal package index API works, rather than using the default `/pkg_name/files` path structure.
+
 ### Online Grayskull
 
 It is also possible to use Grayskull without any installation. You can go to this website [marcelotrevisani.com/grayskull](https://www.marcelotrevisani.com/grayskull) and inform the name and the version (optional) of the package and it will create the recipe for you.
