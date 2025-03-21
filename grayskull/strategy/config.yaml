@@ -22,6 +22,10 @@ annoy:
   conda_forge: python-annoy
   import_name: annoy
 
+arrakis:
+  conda_forge: arrakis-python
+  import_name: arrakis
+
 art:
   conda_forge: ascii-art
   import_name: art
