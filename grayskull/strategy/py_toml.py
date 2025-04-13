@@ -121,7 +121,14 @@ def add_poetry_metadata(metadata: dict, toml_metadata: dict) -> dict:
     # add required test dependencies and ignore optional test dependencies, as
     # there doesn't appear to be a way to specify them in Conda recipe metadata.
     test_reqs, _ = encode_poetry_deps(poetry_test_deps)
-    metadata["test"].get("requires", []).extend(test_reqs)
+    if test_reqs:
+        extra_metadata = metadata["requirements"].setdefault("extra", {})
+        for name in ("test", "tests", "testing"):
+            if name in extra_metadata:
+                extra_metadata[name] += test_reqs
+                break
+        else:
+            extra_metadata["test"] = test_reqs
     return metadata
 
 
@@ -255,16 +262,11 @@ def get_all_toml_info(path_toml: Path | str) -> dict:
     toml_project = toml_metadata.get("project", {}) or {}
     metadata["requirements"]["host"] = toml_metadata["build-system"].get("requires", [])
     metadata["requirements"]["run"] = toml_project.get("dependencies", [])
+    metadata["requirements"]["extra"] = toml_project.get("optional-dependencies", {})
     license = toml_project.get("license")
     if isinstance(license, dict):
         license = license.get("text", "")
     metadata["about"]["license"] = license
-    optional_deps = toml_project.get("optional-dependencies", {})
-    metadata["test"]["requires"] = (
-        optional_deps.get("testing", [])
-        or optional_deps.get("test", [])
-        or optional_deps.get("tests", [])
-    )
 
     tom_urls = toml_project.get("urls", {})
     if homepage := tom_urls.get("Homepage"):
