@@ -37,8 +37,8 @@ def test_add_poetry_metadata():
         "requirements": {
             "host": ["pkg_host1 >=1.0.0", "pkg_host2"],
             "run": ["pkg_run1", "pkg_run2 >=2.0.0"],
+            "extra": {"test": ["mock", "pkg_test >=1.0.0"]},
         },
-        "test": {"requires": ["mock", "pkg_test >=1.0.0"]},
     }
     assert add_poetry_metadata(metadata, toml_metadata) == {
         "requirements": {
@@ -49,9 +49,14 @@ def test_add_poetry_metadata():
                 "tomli >=1.0.0",
                 "requests >=1.0.0",
             ],
-        },
-        "test": {
-            "requires": ["mock", "pkg_test >=1.0.0", "tox >=1.0.0", "pytest >=1.0.0"]
+            "extra": {
+                "test": [
+                    "mock",
+                    "pkg_test >=1.0.0",
+                    "tox >=1.0.0",
+                    "pytest >=1.0.0",
+                ]
+            },
         },
     }
 
@@ -59,8 +64,9 @@ def test_add_poetry_metadata():
 def test_poetry_dependencies():
     toml_path = Path(__file__).parent / "data" / "poetry" / "poetry.toml"
     result = get_all_toml_info(toml_path)
-
-    assert result["test"]["requires"] == ["cachy 0.3.0", "deepdiff >=6.2.0,<7.0.0"]
+    assert result["requirements"]["extra"] == {
+        "test": ["cachy 0.3.0", "deepdiff >=6.2.0,<7.0.0"]
+    }
     assert result["requirements"]["host"] == ["setuptools>=1.1.0", "poetry-core"]
     assert result["requirements"]["run"] == [
         "python >=3.7.0,<4.0.0",

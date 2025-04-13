@@ -737,11 +737,6 @@ def merge_setup_toml_metadata(setup_metadata: dict, pyproject_metadata: dict) ->
         setup_metadata["entry_points"]["console_scripts"] = pyproject_metadata["build"][
             "entry_points"
         ]
-    if pyproject_metadata["test"]["requires"]:
-        setup_metadata["extras_require"]["testing"] = merge_deps_toml_setup(
-            setup_metadata["extras_require"].get("testing", []),
-            pyproject_metadata["test"]["requires"],
-        )
     if pyproject_metadata["requirements"]["host"]:
         setup_metadata["setup_requires"] = merge_deps_toml_setup(
             setup_metadata.get("setup_requires", []),
@@ -751,6 +746,13 @@ def merge_setup_toml_metadata(setup_metadata: dict, pyproject_metadata: dict) ->
         setup_metadata["install_requires"] = merge_deps_toml_setup(
             setup_metadata.get("install_requires", []),
             pyproject_metadata["requirements"]["run"],
+        )
+    for extra_name, extra_requirements in pyproject_metadata["requirements"][
+        "extra"
+    ].items():
+        setup_metadata["extras_require"][extra_name] = merge_deps_toml_setup(
+            setup_metadata["extras_require"].get(extra_name, []),
+            extra_requirements,
         )
     # this is not a valid setup_metadata field, but we abuse it to pass it
     # through to the conda recipe generator downstream. It's because setup.py

@@ -176,7 +176,7 @@ def test_get_extra_from_requires_dist():
 
 
 @pytest.fixture(scope="module")
-def dask_sdist_metadata():
+def dask_sdist_metadata_setup():
     config = Configuration(name="dask")
     return get_sdist_metadata(
         "https://pypi.org/packages/source/d/dask/dask-2022.6.1.tar.gz",
@@ -184,10 +184,10 @@ def dask_sdist_metadata():
     )
 
 
-def test_get_extra_requirements(dask_sdist_metadata):
+def test_get_extra_requirements_setup(dask_sdist_metadata_setup):
     received = {
         extra: set(req_lst)
-        for extra, req_lst in dask_sdist_metadata["extras_require"].items()
+        for extra, req_lst in dask_sdist_metadata_setup["extras_require"].items()
     }
     expected = {
         "array": {"numpy >= 1.18"},
@@ -208,10 +208,10 @@ def test_get_extra_requirements(dask_sdist_metadata):
     assert received == expected
 
 
-def test_extract_optional_requirements(dask_sdist_metadata):
+def test_extract_optional_requirements_setup(dask_sdist_metadata_setup):
     config = Configuration(name="dask")
 
-    received = extract_optional_requirements(dask_sdist_metadata, config)
+    received = extract_optional_requirements(dask_sdist_metadata_setup, config)
     assert not received
 
     all_optional_reqs = {
@@ -230,7 +230,7 @@ def test_extract_optional_requirements(dask_sdist_metadata):
     }
 
     config.extras_require_all = True
-    received = extract_optional_requirements(dask_sdist_metadata, config)
+    received = extract_optional_requirements(dask_sdist_metadata_setup, config)
     received = {k: set(v) for k, v in received.items()}
     expected = {k: set(v) for k, v in all_optional_reqs.items()}
     assert received == expected
@@ -238,7 +238,7 @@ def test_extract_optional_requirements(dask_sdist_metadata):
     config.extras_require_all = True
     config.extras_require_include = None
     config.extras_require_exclude = ["complete"]
-    received = extract_optional_requirements(dask_sdist_metadata, config)
+    received = extract_optional_requirements(dask_sdist_metadata_setup, config)
     received = {k: set(v) for k, v in received.items()}
     expected = {k: set(v) for k, v in all_optional_reqs.items() if k != "complete"}
     assert received == expected
@@ -246,7 +246,7 @@ def test_extract_optional_requirements(dask_sdist_metadata):
     config.extras_require_all = False
     config.extras_require_include = ["complete"]
     config.extras_require_exclude = None
-    received = extract_optional_requirements(dask_sdist_metadata, config)
+    received = extract_optional_requirements(dask_sdist_metadata_setup, config)
     received = {k: set(v) for k, v in received.items()}
     expected = {k: set(v) for k, v in all_optional_reqs.items() if k == "complete"}
     assert received == expected
@@ -254,7 +254,7 @@ def test_extract_optional_requirements(dask_sdist_metadata):
     config.extras_require_all = True
     config.extras_require_include = ["complete"]
     config.extras_require_exclude = None
-    received = extract_optional_requirements(dask_sdist_metadata, config)
+    received = extract_optional_requirements(dask_sdist_metadata_setup, config)
     received = {k: set(v) for k, v in received.items()}
     expected = {k: set(v) for k, v in all_optional_reqs.items()}
     assert received == expected
@@ -262,7 +262,7 @@ def test_extract_optional_requirements(dask_sdist_metadata):
     config.extras_require_all = True
     config.extras_require_include = None
     config.extras_require_exclude = ["complete", "test"]
-    received = extract_optional_requirements(dask_sdist_metadata, config)
+    received = extract_optional_requirements(dask_sdist_metadata_setup, config)
     received = {k: set(v) for k, v in received.items()}
     expected = {
         k: set(v) for k, v in all_optional_reqs.items() if k not in ("complete", "test")
@@ -273,10 +273,175 @@ def test_extract_optional_requirements(dask_sdist_metadata):
     config.extras_require_include = None
     config.extras_require_exclude = ["complete", "test"]
     config.extras_require_test = "test"
-    received = extract_optional_requirements(dask_sdist_metadata, config)
+    received = extract_optional_requirements(dask_sdist_metadata_setup, config)
     received = {k: set(v) for k, v in received.items()}
     expected = {k: set(v) for k, v in all_optional_reqs.items() if k != "complete"}
     assert received == expected
+
+
+def test_compose_test_section_with_requirements_setup(dask_sdist_metadata_setup):
+    config = Configuration(name="dask", version="2022.6.1")
+    metadata = get_pypi_metadata(config)
+    test_requirements = dask_sdist_metadata_setup["extras_require"]["test"]
+    test_section = compose_test_section(metadata, test_requirements)
+    test_section = {k: set(v) for k, v in test_section.items()}
+    expected = {
+        "imports": {"dask"},
+        "commands": {"pip check", "pytest --pyargs dask"},
+        "requires": {
+            "pip",
+            "pytest",
+            "pytest-xdist",
+            "pytest-rerunfailures",
+            "pre-commit",
+        },
+    }
+    assert test_section == expected
+
+
+@pytest.fixture(scope="module")
+def dask_sdist_metadata_pyproject():
+    config = Configuration(name="dask")
+    return get_sdist_metadata(
+        "https://pypi.org/packages/source/d/dask/dask-2025.3.0.tar.gz",
+        config,
+    )
+
+
+def test_get_extra_requirements_pyproject(dask_sdist_metadata_pyproject):
+    received = {
+        extra: set(req_lst)
+        for extra, req_lst in dask_sdist_metadata_pyproject["extras_require"].items()
+    }
+    expected = {
+        "array": {"numpy >= 1.24"},
+        "bag": set(),
+        "complete": {
+            "dask[array,dataframe,distributed,diagnostics]",
+            "lz4 >= 4.3.2",
+            "pyarrow >= 14.0.1",
+        },
+        "dataframe": {"dask[array]", "pyarrow>=14.0.1", "pandas >= 2.0"},
+        "delayed": set(),
+        "diagnostics": {"jinja2 >= 2.10.3", "bokeh >= 3.1.0"},
+        "distributed": {"distributed == 2025.3.0"},
+        "test": {
+            "pandas[test]",
+            "pre-commit",
+            "pytest",
+            "pytest-cov",
+            "pytest-mock",
+            "pytest-rerunfailures",
+            "pytest-timeout",
+            "pytest-xdist",
+        },
+    }
+
+    assert received == expected
+
+
+def test_extract_optional_requirements_pyproject(dask_sdist_metadata_pyproject):
+    config = Configuration(name="dask")
+
+    received = extract_optional_requirements(dask_sdist_metadata_pyproject, config)
+    assert not received
+
+    all_optional_reqs = {
+        "array": {"numpy >=1.24"},
+        "complete": {
+            "dask",
+            "lz4 >=4.3.2",
+            "pyarrow >=14.0.1",
+        },
+        "dataframe": {"dask", "pyarrow >=14.0.1", "pandas >=2.0"},
+        "diagnostics": {"jinja2 >=2.10.3", "bokeh >=3.1.0"},
+        "distributed": {"distributed ==2025.3.0"},
+        "test": {
+            "pandas",
+            "pre-commit",
+            "pytest",
+            "pytest-cov",
+            "pytest-mock",
+            "pytest-rerunfailures",
+            "pytest-timeout",
+            "pytest-xdist",
+        },
+    }
+
+    config.extras_require_all = True
+    received = extract_optional_requirements(dask_sdist_metadata_pyproject, config)
+    received = {k: set(v) for k, v in received.items()}
+    expected = {k: set(v) for k, v in all_optional_reqs.items()}
+    assert received == expected
+
+    config.extras_require_all = True
+    config.extras_require_include = None
+    config.extras_require_exclude = ["complete"]
+    received = extract_optional_requirements(dask_sdist_metadata_pyproject, config)
+    received = {k: set(v) for k, v in received.items()}
+    expected = {k: set(v) for k, v in all_optional_reqs.items() if k != "complete"}
+    assert received == expected
+
+    config.extras_require_all = False
+    config.extras_require_include = ["complete"]
+    config.extras_require_exclude = None
+    received = extract_optional_requirements(dask_sdist_metadata_pyproject, config)
+    received = {k: set(v) for k, v in received.items()}
+    expected = {k: set(v) for k, v in all_optional_reqs.items() if k == "complete"}
+    assert received == expected
+
+    config.extras_require_all = True
+    config.extras_require_include = ["complete"]
+    config.extras_require_exclude = None
+    received = extract_optional_requirements(dask_sdist_metadata_pyproject, config)
+    received = {k: set(v) for k, v in received.items()}
+    expected = {k: set(v) for k, v in all_optional_reqs.items()}
+    assert received == expected
+
+    config.extras_require_all = True
+    config.extras_require_include = None
+    config.extras_require_exclude = ["complete", "test"]
+    received = extract_optional_requirements(dask_sdist_metadata_pyproject, config)
+    received = {k: set(v) for k, v in received.items()}
+    expected = {
+        k: set(v) for k, v in all_optional_reqs.items() if k not in ("complete", "test")
+    }
+    assert received == expected
+
+    config.extras_require_all = True
+    config.extras_require_include = None
+    config.extras_require_exclude = ["complete", "test"]
+    config.extras_require_test = "test"
+    received = extract_optional_requirements(dask_sdist_metadata_pyproject, config)
+    received = {k: set(v) for k, v in received.items()}
+    expected = {k: set(v) for k, v in all_optional_reqs.items() if k != "complete"}
+    assert received == expected
+
+
+def test_compose_test_section_with_requirements_pyproject(
+    dask_sdist_metadata_pyproject,
+):
+    config = Configuration(name="dask", version="2025.3.0")
+    metadata = get_pypi_metadata(config)
+    test_requirements = dask_sdist_metadata_pyproject["extras_require"]["test"]
+    test_section = compose_test_section(metadata, test_requirements)
+    test_section = {k: set(v) for k, v in test_section.items()}
+    expected = {
+        "imports": {"dask"},
+        "commands": {"pip check", "pytest --pyargs dask"},
+        "requires": {
+            "pip",
+            "pandas[test]",
+            "pre-commit",
+            "pytest",
+            "pytest-cov",
+            "pytest-mock",
+            "pytest-rerunfailures",
+            "pytest-timeout",
+            "pytest-xdist",
+        },
+    }
+    assert test_section == expected
 
 
 def test_compose_test_section_with_console_scripts():
@@ -293,26 +458,6 @@ def test_compose_test_section_with_console_scripts():
         "imports": {"pytest"},
         "commands": {"pip check", "py.test --help", "pytest --help"},
         "requires": {"pip"},
-    }
-    assert test_section == expected
-
-
-def test_compose_test_section_with_requirements(dask_sdist_metadata):
-    config = Configuration(name="dask", version="2022.7.1")
-    metadata = get_pypi_metadata(config)
-    test_requirements = dask_sdist_metadata["extras_require"]["test"]
-    test_section = compose_test_section(metadata, test_requirements)
-    test_section = {k: set(v) for k, v in test_section.items()}
-    expected = {
-        "imports": {"dask"},
-        "commands": {"pip check", "pytest --pyargs dask"},
-        "requires": {
-            "pip",
-            "pytest",
-            "pytest-xdist",
-            "pytest-rerunfailures",
-            "pre-commit",
-        },
     }
     assert test_section == expected
 
