@@ -217,6 +217,27 @@ def get_pep725_mapping(purl: str):
         "pkg:generic/singular": "singular",
         "pkg:generic/symmetrica": "symmetrica",
         "pkg:generic/sympow": "sympow",
+        "pkg:generic/lrslib": "lrslib",
+        "pkg:generic/bliss": "bliss",
+        "pkg:generic/coxeter3": "# coxeter3 # Not available on conda-forge",
+        "pkg:generic/mcqd": "# mcqd # Not available on conda-forge",
+        "pkg:generic/meataxe": "# meataxe # Not available on conda-forge",
+        "pkg:generic/sirocco": "sirocco",
+        "pkg:generic/tdlib": "# tdlib # Not available on conda-forge",
+        "pkg:generic/4ti2": "4ti2",
+        "pkg:generic/benzene": "# benzene # Not available on conda-forge",
+        "pkg:generic/buckygen": "# buckygen # Not available on conda-forge",
+        "pkg:generic/csdp": "# csdp # Not available on conda-forge",
+        "pkg:generic/frobby": "# frobby # Not available on conda-forge",
+        "pkg:generic/kenzo": "# kenzo # Not available on conda-forge",
+        "pkg:generic/latte-integrale": "latte-integrale",
+        "pkg:generic/plantri": "# plantri # Not available on conda-forge",
+        "pkg:generic/qepcad": "# qepcad # Not available on conda-forge",
+        "pkg:generic/tides": "# tides # Not available on conda-forge",
+        "pkg:generic/tachyon": "tachyon",
+        "pkg:generic/sagemath-elliptic-curves": "sagemath-db-elliptic-curves",
+        "pkg:generic/sagemath-polytopes-db": "sagemath-db-polytopes",
+        "pkg:generic/sagemath-graphs": "sagemath-db-graphs",
     }
     return package_mapping.get(purl, purl)
 
@@ -239,13 +260,14 @@ def add_pep725_metadata(metadata: dict, toml_metadata: dict):
         requirements[conda_section].extend(
             [get_pep725_mapping(purl) for purl in externals.get(pep725_section, [])]
         )
-        # TODO: handle optional dependencies properly
-        optional_features = toml_metadata.get(f"optional-{pep725_section}", {})
+        optional_features = externals.get(f"optional-{pep725_section}", {})
         for feature_name, feature_deps in optional_features.items():
             requirements[conda_section].append(
                 f'# OPTIONAL dependencies from feature "{feature_name}"'
             )
-            requirements[conda_section].extend(feature_deps)
+            requirements[conda_section].extend(
+                [get_pep725_mapping(purl) for purl in feature_deps]
+            )
         if not requirements[conda_section]:
             del requirements[conda_section]
 
