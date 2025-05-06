@@ -22,7 +22,7 @@ for [conda-forge](https://conda-forge.org/).
 The Grayskull project was created with the intention to eventually replace `conda skeleton`. <br>
 Presently Grayskull can generate recipes for Python packages available on PyPI and also those not published on PyPI but available as GitHub repositories.
 Grayskull can also generate recipes for R packages published on CRAN.
-Future versions of Grayskull will support recipe generation for packages of other repositories such as Conan and CPAN etc..
+Future versions of Grayskull will support recipe generation for packages of other repositories such as Conan and CPAN etc.
 
 ## Installation
 
