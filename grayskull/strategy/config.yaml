@@ -500,6 +500,10 @@ symengine:
   conda_forge: python-symengine
   import_name: symengine
 
+systemd-python:
+  conda_forge: python-systemd
+  import_name: systemd
+
 tables:
   import_name: pytables
   conda_forge: pytables
