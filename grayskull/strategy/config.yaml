@@ -387,10 +387,6 @@ pvlib:
   conda_forge: pvlib-python
   import_name: pvlib
 
-pyct:
-  conda_forge: pyct-core
-  import_name: pyct
-
 pyqt4:
   import_name: pyqt4
   conda_forge: pyqt
