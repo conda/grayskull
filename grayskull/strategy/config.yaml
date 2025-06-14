@@ -307,6 +307,10 @@ libaio:
   conda_forge: python-libaio
   import_name: libaio
 
+libnacl:
+  conda-forge: libnacl-python-bindings
+  import_name: libnacl
+
 matplotlib:
   import_name: matplotlib
   conda_forge: matplotlib-base
