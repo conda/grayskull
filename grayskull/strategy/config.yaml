@@ -516,21 +516,21 @@ termstyle:
   conda_forge: python-termstyle
   import_name: termstyle
 
-torch:
-  conda_forge: pytorch
-  import_name: torch
-
 torch-cluster:
   conda_forge: pytorch_cluster
   import_name: torch_cluster
 
-torch_geometric:
-  conda_forge: pytorch_geometric
-  import_name: torch_geometric
-
 torch-sparse:
   conda_forge: pytorch_sparse
   import_name: torch_sparse
+
+torch:
+  conda_forge: pytorch
+  import_name: torch
+
+torch_geometric:
+  conda_forge: pytorch_geometric
+  import_name: torch_geometric
 
 trino:
   conda_forge: trino-python-client
