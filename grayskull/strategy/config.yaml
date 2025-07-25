@@ -311,6 +311,10 @@ libnacl:
   conda_forge: libnacl-python-bindings
   import_name: libnacl
 
+lmdb:
+  conda_forge: python-lmdb
+  import_name: lmdb
+
 matplotlib:
   import_name: matplotlib
   conda_forge: matplotlib-base
@@ -516,9 +520,17 @@ torch:
   conda_forge: pytorch
   import_name: torch
 
+torch-cluster:
+  conda_forge: pytorch_cluster
+  import_name: torch_cluster
+
 torch_geometric:
   conda_forge: pytorch_geometric
   import_name: torch_geometric
+
+torch-sparse:
+  conda_forge: pytorch_sparse
+  import_name: torch_sparse
 
 trino:
   conda_forge: trino-python-client
