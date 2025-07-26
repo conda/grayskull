@@ -127,6 +127,14 @@ delegator.py:
   conda_forge: delegator
   import_name: delegator
 
+dftd3:
+  conda_forge: dftd3-python
+  import_name: dftd3
+
+dftd4:
+  conda_forge: dftd4-python
+  import_name: dftd4
+
 dials_data:
   conda_forge: dials-data
   import_name: dials_data
@@ -512,6 +520,10 @@ tables:
   import_name: pytables
   conda_forge: pytables
 
+tblite:
+  conda_forge: tblite-python
+  import_name: tblite
+
 termstyle:
   conda_forge: python-termstyle
   import_name: termstyle
@@ -553,6 +565,10 @@ useDAVE:
 vsts:
   conda_forge: vsts-python-api
   import_name: vsts
+
+xtb:
+  conda_forge: xtb-python
+  import_name: xtb
 
 xxhash:
   import_name: xxhash
