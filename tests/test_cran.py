@@ -113,16 +113,16 @@ def test_get_cran_metadata_github_url_detection(mock_github_metadata, mock_is_gi
     # Setup
     mock_is_github.return_value = True
     mock_github_metadata.return_value = ({"package": "test"}, "# comment")
-    
+
     config = Configuration(name="https://github.com/user/repo")
-    
+
     # Call
     result, comment = get_cran_metadata(config, "https://cran.r-project.org")
-    
+
     # Verify GitHub path was taken
     mock_is_github.assert_called_once_with("https://github.com/user/repo")
     mock_github_metadata.assert_called_once_with(config)
-    
+
     assert result == {"package": "test"}
     assert comment == "# comment"
 
@@ -138,21 +138,25 @@ def test_get_cran_metadata_regular_cran_package(
     """Test that get_cran_metadata handles regular CRAN packages correctly"""
     # Setup
     mock_is_github.return_value = False
-    mock_get_index.return_value = ("testpkg", "1.0.0", "http://cran.../testpkg_1.0.0.tar.gz")
+    mock_get_index.return_value = (
+        "testpkg",
+        "1.0.0",
+        "http://cran.../testpkg_1.0.0.tar.gz",
+    )
     mock_download.return_value = "/tmp/testpkg_1.0.0.tar.gz"
     mock_sha256.return_value = "fake_sha256_hash"
     mock_get_archive.return_value = {
         "Package": "testpkg",
         "Version": "1.0.0",
         "orig_lines": ["Package: testpkg"],
-        "URL": "http://example.com"
+        "URL": "http://example.com",
     }
-    
+
     config = Configuration(name="testpkg")
-    
+
     # Call
     result, comment = get_cran_metadata(config, "https://cran.r-project.org")
-    
+
     # Verify CRAN path was taken
     # Note: origin_is_github is not called for regular CRAN packages anymore
     # as the logic now checks for config.repo_github attribute first
@@ -172,7 +176,7 @@ def test_get_github_r_metadata_basic_flow(
     """Test basic flow of get_github_r_metadata"""
     # Setup
     config = Configuration(name="https://github.com/user/testpkg", version="1.0.0")
-    
+
     mock_handle_version.return_value = ("1.0.0", "v1.0.0")
     mock_gen_url.return_value = "https://github.com/user/testpkg/archive/v1.0.0.tar.gz"
     mock_download.return_value = "/tmp/testpkg-1.0.0.tar.gz"
@@ -184,23 +188,23 @@ def test_get_github_r_metadata_basic_flow(
         "License": "MIT",
         "Imports": "dplyr",
         "NeedsCompilation": "no",
-        "orig_lines": ["Package: testpkg", "Version: 1.0.0"]
+        "orig_lines": ["Package: testpkg", "Version: 1.0.0"],
     }
-    
+
     # Call
     result, comment = get_github_r_metadata(config)
-    
+
     # Verify structure
     assert "package" in result
     assert "source" in result
     assert "requirements" in result
     assert "about" in result
-    
+
     # Verify GitHub-specific fields
     assert result["about"]["home"] == "https://github.com/user/testpkg"
     assert result["about"]["dev_url"] == "https://github.com/user/testpkg"
     assert "v{{ version }}" in result["source"]["url"]
-    
+
     # Verify dependencies
     assert "r-dplyr" in result["requirements"]["host"]
     assert "r-base" in result["requirements"]["host"]

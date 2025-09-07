@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 import os
 import re
-import shutil
 import sys
 import tarfile
 import zipfile
@@ -55,12 +54,12 @@ class CranStrategy(AbstractStrategy):
             metadata_section = metadata.get(sec)
             if metadata_section:
                 recipe[sec] = metadata_section
-                
+
         # Set Jinja2 global variables for the recipe
         set_global_jinja_var(recipe, "name", config.name)
         if config.version:
             set_global_jinja_var(recipe, "version", config.version)
-            
+
         if metadata.get("need_compiler", False):
             set_global_jinja_var(recipe, "posix", 'm2-" if win else "')
             set_global_jinja_var(recipe, "native", 'm2w64-" if win else "')
@@ -268,19 +267,23 @@ def get_cran_metadata(config: Configuration, cran_url: str):
     :return: CRAN metadata"""
     if config.name.startswith("r-"):
         config.name = config.name[2:]
-    
+
     # Check if this is a GitHub repository
     # Use repo_github if it exists (set by Configuration when parsing GitHub URLs)
-    if hasattr(config, 'repo_github') and config.repo_github and origin_is_github(config.repo_github):
+    if (
+        hasattr(config, "repo_github")
+        and config.repo_github
+        and origin_is_github(config.repo_github)
+    ):
         return get_github_r_metadata(config)
-    
+
     pkg_name = config.name
     pkg_version = str(config.version) if config.version else None
     _, pkg_version, pkg_url = get_cran_index(cran_url, pkg_name, pkg_version)
-    
+
     # Set version as global jinja variable for consistent recipe generation
     config.version = pkg_version
-    
+
     print_msg(pkg_name)
     print_msg(pkg_version)
     download_file = download_cran_pkg(config, pkg_url)
@@ -293,7 +296,7 @@ def get_cran_metadata(config: Configuration, cran_url: str):
 
     imports = []
     r_base_version = None
-    
+
     # Extract dependencies from both 'Depends' and 'Imports' fields
     # Process 'Depends' first to extract R version requirements
     for s in metadata.get("Depends", "").split(","):
@@ -304,7 +307,9 @@ def get_cran_metadata(config: Configuration, cran_url: str):
             # Extract R version constraint
             r_parts = s.split("(")
             if len(r_parts) > 1:
-                r_version_constraint = r_parts[1].strip().replace(")", "").replace(" ", "")
+                r_version_constraint = (
+                    r_parts[1].strip().replace(")", "").replace(" ", "")
+                )
                 r_base_version = r_version_constraint
         else:
             # Regular package dependency
@@ -314,7 +319,7 @@ def get_cran_metadata(config: Configuration, cran_url: str):
             else:
                 constrain = r[1].strip().replace(")", "").replace(" ", "")
                 imports.append(f"r-{r[0].strip()} {constrain.strip()}")
-    
+
     # Extract 'imports' from metadata.
     # Imports is equivalent to run and host dependencies.
     # Add 'r-' suffix to all packages listed in imports.
@@ -395,45 +400,44 @@ def get_cran_metadata(config: Configuration, cran_url: str):
 
 def get_github_r_metadata(config: Configuration):
     """Method responsible for getting R metadata from GitHub repositories.
-    
+
     :param config: Configuration object containing package information
     :return: R metadata dictionary and recipe comment
     """
     print_msg("Fetching R package metadata from GitHub repository...")
-    
+
     # Extract GitHub URL and package name
     # Use repo_github if available (set by Configuration.__post_init__), otherwise use config.name
-    github_url = getattr(config, 'repo_github', None) or config.name
-    if github_url.endswith('/'):
-        github_url = github_url.rstrip('/')
-    
+    github_url = getattr(config, "repo_github", None) or config.name
+    if github_url.endswith("/"):
+        github_url = github_url.rstrip("/")
+
     # Extract package name from URL (last part) or use config.name if it's already parsed
-    if hasattr(config, 'repo_github') and config.repo_github:
+    if hasattr(config, "repo_github") and config.repo_github:
         pkg_name = config.name  # Already parsed by Configuration
     else:
-        pkg_name = github_url.split('/')[-1]
-    
+        pkg_name = github_url.split("/")[-1]
+
     # Handle version and get the appropriate Git reference
     version, version_tag = handle_gh_version(
-        name=pkg_name,
-        version=config.version,
-        url=github_url,
-        tag=None
+        name=pkg_name, version=config.version, url=github_url, tag=None
     )
-    
+
     # Generate archive URL for the specific version/tag
-    archive_url = generate_git_archive_tarball_url(git_url=github_url, git_ref=version_tag)
-    
+    archive_url = generate_git_archive_tarball_url(
+        git_url=github_url, git_ref=version_tag
+    )
+
     print_msg(f"Package: {pkg_name}")
     print_msg(f"Version: {version}")
     print_msg(f"Archive URL: {archive_url}")
-    
+
     # Download and extract the GitHub archive
     download_file = download_github_r_pkg(config, archive_url, pkg_name, version)
-    
+
     # Extract metadata from the DESCRIPTION file
     metadata = get_github_archive_metadata(download_file)
-    
+
     r_recipe_end_comment = "\n".join(
         [f"# {line}" for line in metadata["orig_lines"] if line]
     )
@@ -442,7 +446,7 @@ def get_github_r_metadata(config: Configuration):
 
     imports = []
     r_base_version = None
-    
+
     # Extract dependencies from both 'Depends' and 'Imports' fields
     # Process 'Depends' first to extract R version requirements
     for s in metadata.get("Depends", "").split(","):
@@ -453,7 +457,9 @@ def get_github_r_metadata(config: Configuration):
             # Extract R version constraint
             r_parts = s.split("(")
             if len(r_parts) > 1:
-                r_version_constraint = r_parts[1].strip().replace(")", "").replace(" ", "")
+                r_version_constraint = (
+                    r_parts[1].strip().replace(")", "").replace(" ", "")
+                )
                 r_base_version = r_version_constraint
         else:
             # Regular package dependency
@@ -463,7 +469,7 @@ def get_github_r_metadata(config: Configuration):
             else:
                 constrain = r[1].strip().replace(")", "").replace(" ", "")
                 imports.append(f"r-{r[0].strip()} {constrain.strip()}")
-    
+
     # Extract 'imports' from metadata.
     # Imports is equivalent to run and host dependencies.
     # Add 'r-' suffix to all packages listed in imports.
@@ -487,7 +493,7 @@ def get_github_r_metadata(config: Configuration):
 
     # Create source URL with placeholders for templating
     source_url = archive_url.replace(version_tag, "{{ version }}")
-    if version_tag.startswith('v') and not version.startswith('v'):
+    if version_tag.startswith("v") and not version.startswith("v"):
         source_url = archive_url.replace(version_tag, "v{{ version }}")
 
     dict_metadata = {
@@ -527,7 +533,7 @@ def get_github_r_metadata(config: Configuration):
             or metadata.get("License", ""),
         },
     }
-    
+
     if metadata.get("NeedsCompilation", "no").lower() == "yes":
         dict_metadata["need_compiler"] = True
         dict_metadata["requirements"]["build"].extend(
@@ -543,84 +549,88 @@ def get_github_r_metadata(config: Configuration):
         )
     if not dict_metadata["requirements"]["build"]:
         del dict_metadata["requirements"]["build"]
-        
+
     # Set the package name and version in config for recipe generation
     config.name = pkg_name
     config.version = version
-        
+
     return dict_metadata, r_recipe_end_comment
 
 
-def download_github_r_pkg(config: Configuration, archive_url: str, pkg_name: str, version: str):
+def download_github_r_pkg(
+    config: Configuration, archive_url: str, pkg_name: str, version: str
+):
     """Download R package archive from GitHub.
-    
+
     :param config: Configuration object
-    :param archive_url: GitHub archive URL  
+    :param archive_url: GitHub archive URL
     :param pkg_name: Package name
     :param version: Package version
     :return: Path to downloaded file
     """
     tarball_name = f"{pkg_name}-{version}.tar.gz"
     print_msg(f"Downloading from: {archive_url}")
-    
+
     response = requests.get(archive_url, timeout=30)
     response.raise_for_status()
-    
+
     download_file = os.path.join(
         str(mkdtemp(f"grayskull-github-r-{pkg_name}-")), tarball_name
     )
-    
+
     with open(download_file, "wb") as f:
         f.write(response.content)
-    
+
     return download_file
 
 
 def get_github_archive_metadata(archive_path: str):
     """Extract metadata from GitHub R package archive.
-    
+
     :param archive_path: Path to the downloaded archive
     :return: Metadata dictionary
     """
     print_msg("Extracting metadata from GitHub R package...")
-    
+
     # Create temporary directory for extraction
     temp_dir = mkdtemp(prefix="grayskull-github-r-extract-")
-    
+
     try:
         # Extract the archive
         with tarfile.open(archive_path, "r:gz") as tar:
-            tar.extractall(temp_dir, filter='data')
-        
+            tar.extractall(temp_dir, filter="data")
+
         # Find the DESCRIPTION file
         # GitHub archives typically have a top-level directory
-        extracted_dirs = [d for d in os.listdir(temp_dir) 
-                         if os.path.isdir(os.path.join(temp_dir, d))]
-        
+        extracted_dirs = [
+            d for d in os.listdir(temp_dir) if os.path.isdir(os.path.join(temp_dir, d))
+        ]
+
         if not extracted_dirs:
             raise ValueError("No directories found in the archive")
-        
+
         # Use the first directory (there should be only one)
         package_dir = os.path.join(temp_dir, extracted_dirs[0])
         description_path = os.path.join(package_dir, "DESCRIPTION")
-        
+
         if not os.path.exists(description_path):
             raise ValueError("DESCRIPTION file not found in the R package")
-        
+
         # Read and parse the DESCRIPTION file
-        with open(description_path, "r", encoding="utf-8") as f:
+        with open(description_path, encoding="utf-8") as f:
             description_content = f.read()
-        
+
         # Parse the DESCRIPTION file content
         lines = description_content.strip().split("\n")
         lines = remove_package_line_continuations(lines)
         metadata = dict_from_cran_lines(lines)
-        
+
         return metadata
-        
+
     finally:
         # Clean up temporary directory
         import shutil
+
         shutil.rmtree(temp_dir, ignore_errors=True)
 
 

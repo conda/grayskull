@@ -28,7 +28,10 @@ def init_parser():
     # create parser for cran
     cran_parser = subparsers.add_parser("cran", help="Options to generate CRAN recipes")
     cran_parser.add_argument(
-        "cran_packages", nargs="+", help="Specify the CRAN packages name. Grayskull can also accept a GitHub URL for R packages.", default=[]
+        "cran_packages",
+        nargs="+",
+        help="Specify the CRAN packages name. Grayskull can also accept a GitHub URL for R packages.",
+        default=[],
     )
     cran_parser.add_argument(
         "--stdout",
