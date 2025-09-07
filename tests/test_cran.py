@@ -5,6 +5,7 @@ import pytest
 from grayskull.config import Configuration
 from grayskull.strategy.cran import (
     get_cran_metadata,
+    get_github_r_metadata,
     scrap_cran_archive_page_for_package_folder_url,
     scrap_cran_pkg_folder_page_for_full_url,
     scrap_main_page_cran_find_latest_package,
@@ -103,3 +104,98 @@ def test_get_cran_metadata_need_compilation(
         "{{ compiler('m2w64_cxx') }}  # [win]",
         "posix  # [win]",
     ]
+
+
+@patch("grayskull.strategy.cran.origin_is_github")
+@patch("grayskull.strategy.cran.get_github_r_metadata")
+def test_get_cran_metadata_github_url_detection(mock_github_metadata, mock_is_github):
+    """Test that get_cran_metadata detects GitHub URLs and uses GitHub strategy"""
+    # Setup
+    mock_is_github.return_value = True
+    mock_github_metadata.return_value = ({"package": "test"}, "# comment")
+    
+    config = Configuration(name="https://github.com/user/repo")
+    
+    # Call
+    result, comment = get_cran_metadata(config, "https://cran.r-project.org")
+    
+    # Verify GitHub path was taken
+    mock_is_github.assert_called_once_with("https://github.com/user/repo")
+    mock_github_metadata.assert_called_once_with(config)
+    
+    assert result == {"package": "test"}
+    assert comment == "# comment"
+
+
+@patch("grayskull.strategy.cran.origin_is_github")
+@patch("grayskull.strategy.cran.get_cran_index")
+@patch("grayskull.strategy.cran.download_cran_pkg")
+@patch("grayskull.strategy.cran.get_archive_metadata")
+def test_get_cran_metadata_regular_cran_package(
+    mock_get_archive, mock_download, mock_get_index, mock_is_github
+):
+    """Test that get_cran_metadata handles regular CRAN packages correctly"""
+    # Setup
+    mock_is_github.return_value = False
+    mock_get_index.return_value = ("testpkg", "1.0.0", "http://cran.../testpkg_1.0.0.tar.gz")
+    mock_download.return_value = "/tmp/testpkg_1.0.0.tar.gz"
+    mock_get_archive.return_value = {
+        "Package": "testpkg",
+        "Version": "1.0.0",
+        "orig_lines": ["Package: testpkg"],
+        "URL": "http://example.com"
+    }
+    
+    config = Configuration(name="testpkg")
+    
+    # Call
+    result, comment = get_cran_metadata(config, "https://cran.r-project.org")
+    
+    # Verify CRAN path was taken
+    mock_is_github.assert_called_once_with("testpkg")
+    mock_get_index.assert_called_once()
+    assert "package" in result
+    assert result["package"]["name"] == "r-{{ name }}"
+
+
+@patch("grayskull.strategy.cran.handle_gh_version")
+@patch("grayskull.strategy.cran.generate_git_archive_tarball_url")
+@patch("grayskull.strategy.cran.download_github_r_pkg")
+@patch("grayskull.strategy.cran.get_github_archive_metadata")
+def test_get_github_r_metadata_basic_flow(
+    mock_get_metadata, mock_download, mock_gen_url, mock_handle_version
+):
+    """Test basic flow of get_github_r_metadata"""
+    # Setup
+    config = Configuration(name="https://github.com/user/testpkg", version="1.0.0")
+    
+    mock_handle_version.return_value = ("1.0.0", "v1.0.0")
+    mock_gen_url.return_value = "https://github.com/user/testpkg/archive/v1.0.0.tar.gz"
+    mock_download.return_value = "/tmp/testpkg-1.0.0.tar.gz"
+    mock_get_metadata.return_value = {
+        "Package": "testpkg",
+        "Version": "1.0.0",
+        "Description": "Test package",
+        "License": "MIT",
+        "Imports": "dplyr",
+        "NeedsCompilation": "no",
+        "orig_lines": ["Package: testpkg", "Version: 1.0.0"]
+    }
+    
+    # Call
+    result, comment = get_github_r_metadata(config)
+    
+    # Verify structure
+    assert "package" in result
+    assert "source" in result
+    assert "requirements" in result
+    assert "about" in result
+    
+    # Verify GitHub-specific fields
+    assert result["about"]["home"] == "https://github.com/user/testpkg"
+    assert result["about"]["dev_url"] == "https://github.com/user/testpkg"
+    assert "v{{ version }}" in result["source"]["url"]
+    
+    # Verify dependencies
+    assert "r-dplyr" in result["requirements"]["host"]
+    assert "r-base" in result["requirements"]["host"]

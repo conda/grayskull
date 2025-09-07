@@ -28,7 +28,7 @@ def init_parser():
     # create parser for cran
     cran_parser = subparsers.add_parser("cran", help="Options to generate CRAN recipes")
     cran_parser.add_argument(
-        "cran_packages", nargs="+", help="Specify the CRAN packages name.", default=[]
+        "cran_packages", nargs="+", help="Specify the CRAN packages name. Grayskull can also accept a GitHub URL for R packages.", default=[]
     )
     cran_parser.add_argument(
         "--stdout",
@@ -432,10 +432,15 @@ def create_python_recipe(pkg_name, sections_populate=None, **kwargs):
 
 
 def generate_r_recipes_from_list(list_pkgs, args):
-    cran_label = " (cran)"
     for pkg_name in list_pkgs:
         logging.debug(f"Starting grayskull for pkg: {pkg_name}")
         from_local_sdist = origin_is_local_sdist(pkg_name)
+        if origin_is_github(pkg_name):
+            cran_label = " (github)"
+        elif from_local_sdist:
+            cran_label = " (local)"
+        else:
+            cran_label = " (cran)"
         print_msg(
             f"{Fore.GREEN}\n\n"
             f"#### Initializing recipe for "
@@ -456,6 +461,8 @@ def generate_r_recipes_from_list(list_pkgs, args):
 
         if args.sections_populate is None or "extra" in args.sections_populate:
             add_extra_section(recipe, args.maintainers)
+
+        generate_recipe(recipe, config, args.output, args.use_v1_format)
 
         generate_recipe(recipe, config, args.output, args.use_v1_format)
         print_msg(
