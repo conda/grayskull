@@ -277,6 +277,10 @@ def get_cran_metadata(config: Configuration, cran_url: str):
     pkg_name = config.name
     pkg_version = str(config.version) if config.version else None
     _, pkg_version, pkg_url = get_cran_index(cran_url, pkg_name, pkg_version)
+    
+    # Set version as global jinja variable for consistent recipe generation
+    config.version = pkg_version
+    
     print_msg(pkg_name)
     print_msg(pkg_version)
     download_file = download_cran_pkg(config, pkg_url)
