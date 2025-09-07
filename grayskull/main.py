@@ -463,8 +463,6 @@ def generate_r_recipes_from_list(list_pkgs, args):
             add_extra_section(recipe, args.maintainers)
 
         generate_recipe(recipe, config, args.output, args.use_v1_format)
-
-        generate_recipe(recipe, config, args.output, args.use_v1_format)
         print_msg(
             f"\n{Fore.GREEN}#### Recipe generated on "
             f"{os.path.realpath(args.output)} for {pkg_name} ####\n\n"

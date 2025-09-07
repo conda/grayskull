@@ -55,6 +55,12 @@ class CranStrategy(AbstractStrategy):
             metadata_section = metadata.get(sec)
             if metadata_section:
                 recipe[sec] = metadata_section
+                
+        # Set Jinja2 global variables for the recipe
+        set_global_jinja_var(recipe, "name", config.name)
+        if config.version:
+            set_global_jinja_var(recipe, "version", config.version)
+            
         if metadata.get("need_compiler", False):
             set_global_jinja_var(recipe, "posix", 'm2-" if win else "')
             set_global_jinja_var(recipe, "native", 'm2w64-" if win else "')
@@ -282,6 +288,29 @@ def get_cran_metadata(config: Configuration, cran_url: str):
     print_msg(r_recipe_end_comment)
 
     imports = []
+    r_base_version = None
+    
+    # Extract dependencies from both 'Depends' and 'Imports' fields
+    # Process 'Depends' first to extract R version requirements
+    for s in metadata.get("Depends", "").split(","):
+        if not s.strip():
+            continue
+        s = s.strip()
+        if s.startswith("R "):
+            # Extract R version constraint
+            r_parts = s.split("(")
+            if len(r_parts) > 1:
+                r_version_constraint = r_parts[1].strip().replace(")", "").replace(" ", "")
+                r_base_version = r_version_constraint
+        else:
+            # Regular package dependency
+            r = s.split("(")
+            if len(r) == 1:
+                imports.append(f"r-{r[0].strip()}")
+            else:
+                constrain = r[1].strip().replace(")", "").replace(" ", "")
+                imports.append(f"r-{r[0].strip()} {constrain.strip()}")
+    
     # Extract 'imports' from metadata.
     # Imports is equivalent to run and host dependencies.
     # Add 'r-' suffix to all packages listed in imports.
@@ -298,7 +327,11 @@ def get_cran_metadata(config: Configuration, cran_url: str):
     # Every CRAN package will always depend on the R base package.
     # Hence, the 'r-base' package is always present
     # in the host and run requirements.
-    imports.append("r-base")
+    # Add version constraint if found in Depends field
+    if r_base_version:
+        imports.append(f"r-base {r_base_version}")
+    else:
+        imports.append("r-base")
     imports.sort()  # this is not a requirement in conda but good for readability
 
     dict_metadata = {
@@ -404,6 +437,29 @@ def get_github_r_metadata(config: Configuration):
     print_msg(r_recipe_end_comment)
 
     imports = []
+    r_base_version = None
+    
+    # Extract dependencies from both 'Depends' and 'Imports' fields
+    # Process 'Depends' first to extract R version requirements
+    for s in metadata.get("Depends", "").split(","):
+        if not s.strip():
+            continue
+        s = s.strip()
+        if s.startswith("R "):
+            # Extract R version constraint
+            r_parts = s.split("(")
+            if len(r_parts) > 1:
+                r_version_constraint = r_parts[1].strip().replace(")", "").replace(" ", "")
+                r_base_version = r_version_constraint
+        else:
+            # Regular package dependency
+            r = s.split("(")
+            if len(r) == 1:
+                imports.append(f"r-{r[0].strip()}")
+            else:
+                constrain = r[1].strip().replace(")", "").replace(" ", "")
+                imports.append(f"r-{r[0].strip()} {constrain.strip()}")
+    
     # Extract 'imports' from metadata.
     # Imports is equivalent to run and host dependencies.
     # Add 'r-' suffix to all packages listed in imports.
@@ -418,7 +474,11 @@ def get_github_r_metadata(config: Configuration):
             imports.append(f"r-{r[0].strip()} {constrain.strip()}")
 
     # Every CRAN package will always depend on the R base package.
-    imports.append("r-base")
+    # Add version constraint if found in Depends field
+    if r_base_version:
+        imports.append(f"r-base {r_base_version}")
+    else:
+        imports.append("r-base")
     imports.sort()  # this is not a requirement in conda but good for readability
 
     # Create source URL with placeholders for templating
@@ -480,8 +540,9 @@ def get_github_r_metadata(config: Configuration):
     if not dict_metadata["requirements"]["build"]:
         del dict_metadata["requirements"]["build"]
         
-    # Set the package name in config for recipe generation
+    # Set the package name and version in config for recipe generation
     config.name = pkg_name
+    config.version = version
         
     return dict_metadata, r_recipe_end_comment
 
