@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
-from pkg_resources import parse_version  # noqa
+from packaging.version import Version  # noqa
 from ruamel.yaml import YAML
 
 log = logging.getLogger(__name__)
@@ -75,18 +75,12 @@ def _version_solver(list_exp: list, pkg_cfg: ConfigPkg) -> list:
         if op in ["==", ""]:
             return list_exp
         elif ">" in op and pkg_cfg.delimiter_min:
-            if eval(
-                f'parse_version("{pkg_cfg.delimiter_min}")'
-                f'{op}parse_version("{version}")'
-            ):
+            if eval(f'Version("{pkg_cfg.delimiter_min}"){op}Version("{version}")'):
                 result.append(f">={pkg_cfg.delimiter_min}")
             else:
                 result.append(f"{op}{version}")
         elif "<" in op and pkg_cfg.delimiter_max:
-            if eval(
-                f'parse_version("{version}")'
-                f'{op}parse_version("{pkg_cfg.delimiter_max}")'
-            ):
+            if eval(f'Version("{version}"){op}Version("{pkg_cfg.delimiter_max}")'):
                 result.append(f"{op}{version}")
             else:
                 result.append(f"<{pkg_cfg.delimiter_max}")
