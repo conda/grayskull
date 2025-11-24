@@ -1,3 +1,8 @@
+# The top-level key is the normalized PyPI name, defined in
+# <https://packaging.python.org/en/latest/specifications/name-normalization/>.
+# It contains only lowercase, numbers, and dashes, and can be computed via the
+# `canonicalize_name` function from `packaging.utils`.
+
 Boruta:
   conda_forge: boruta_py
   import_name: boruta
