@@ -67,14 +67,14 @@ def test_track_package(path_example: Path):
 
 def test_get_track_info_from_file(path_example):
     dict_exp = {
-        "foo_pkg": {
+        "foo-pkg": {
             "import_name": "foo_import",
             "conda_forge": "foo_conda_forge",
             "delimiter_min": "1.2.3",
             "delimiter_max": "2.1.0",
         },
-        "bar_pkg": {"import_name": "bar_import", "conda_forge": "bar_conda_forge"},
-        "foo_bar": {"conda_forge": "foo_bar_cf"},
+        "bar-pkg": {"import_name": "bar_import", "conda_forge": "bar_conda_forge"},
+        "foo-bar": {"conda_forge": "foo_bar_cf"},
     }
     assert _get_track_info_from_file(path_example) == dict_exp
     assert _get_track_info_from_file(str(path_example)) == dict_exp
