@@ -3,23 +3,7 @@
 # It contains only lowercase, numbers, and dashes, and can be computed via the
 # `canonicalize_name` function from `packaging.utils`.
 
-Boruta:
-  conda_forge: boruta_py
-  import_name: boruta
-
-Flask-Cors:
-  conda_forge: flask_cors
-  import_name: flask_cors
-
-Flask-JSON:
-  conda_forge: flask_json
-  import_name: flask_json
-
-SoundFile:
-  conda_forge: pysoundfile
-  import_name: soundfile
-
-aiohttp_cors:
+aiohttp-cors:
   conda_forge: aiohttp-cors
   import_name: aiohttp_cors
 
@@ -43,7 +27,7 @@ backtrace:
   conda_forge: python-backtrace
   import_name: backtrace
 
-bash_completion:
+bash-completion:
   conda_forge: py-bash-completion
   import_name: bash_completion
 
@@ -54,6 +38,10 @@ bilby-pipe:
 blis:
   conda_forge: cython-blis
   import_name: blis
+
+boruta:
+  conda_forge: boruta_py
+  import_name: boruta
 
 build:
   conda_forge: python-build
@@ -67,7 +55,7 @@ cdo:
   conda_forge: python-cdo
   import_name: cdo
 
-click_config_file:
+click-config-file:
   conda_forge: click-config-file
   import_name: click_config_file
 
@@ -75,11 +63,11 @@ cockroachdb:
   conda_forge: cockroachdb-python
   import_name: cockroachdb
 
-conda_lock:
+conda-lock:
   conda_forge: conda-lock
   import_name: conda_lock
 
-conda_mirror:
+conda-mirror:
   conda_forge: conda-mirror
   import_name: conda_mirror
 
@@ -95,7 +83,7 @@ coreschema:
   conda_forge: python-coreschema
   import_name: coreschema
 
-cryptography_vectors:
+cryptography-vectors:
   conda_forge: cryptography-vectors
   import_name: cryptography_vectors
 
@@ -124,11 +112,11 @@ datadotworld:
   conda_forge: datadotworld-py
   import_name: datadotworld
 
-datalad_container:
+datalad-container:
   conda_forge: datalad-container
   import_name: datalad_container
 
-delegator.py:
+delegator-py:
   conda_forge: delegator
   import_name: delegator
 
@@ -140,7 +128,7 @@ dftd4:
   conda_forge: dftd4-python
   import_name: dftd4
 
-dials_data:
+dials-data:
   conda_forge: dials-data
   import_name: dials_data
 
@@ -152,7 +140,7 @@ duckdb:
   import_name: duckdb
   conda_forge: python-duckdb
 
-dye_score:
+dye-score:
   conda_forge: dye-score
   import_name: dye_score
 
@@ -160,7 +148,7 @@ eccodes:
   conda_forge: python-eccodes
   import_name: eccodes
 
-empyrical_dist:
+empyrical-dist:
   conda_forge: empyrical-dist
   import_name: empyrical_dist
 
@@ -173,7 +161,7 @@ esprima:
   conda_forge: esprima-python
   import_name: esprima
 
-et_xmlfile:
+et-xmlfile:
   conda_forge: et-xmlfile
   import_name: et_xmlfile
 
@@ -198,9 +186,17 @@ flair:
   conda_forge: python-flair
   import_name: flair
 
-flake8_nb:
+flake8-nb:
   conda_forge: flake8-nb
   import_name: flake8_nb
+
+flask-cors:
+  conda_forge: flask_cors
+  import_name: flask_cors
+
+flask-json:
+  conda_forge: flask_json
+  import_name: flask_json
 
 flatbuffers:
   conda_forge: python-flatbuffers
@@ -210,7 +206,7 @@ flex:
   conda_forge: flex-swagger
   import_name: flex
 
-flit_core:
+flit-core:
   conda_forge: flit-core
   import_name: flit-core
 
@@ -254,20 +250,20 @@ htcondor:
   conda_forge: python-htcondor
   import_name: htcondor
 
-iam_units:
+iam-units:
   conda_forge: iam-units
   import_name: iam_units
 
-ib_insync:
+ib-insync:
   conda_forge: ib-insync
   import_name: ib_insync
 
-import_metadata:
+import-metadata:
   conda_forge: import_metadata
   import_name: import_metadata
   avoid_selector: true
 
-importlib_metadata:
+importlib-metadata:
   conda_forge: importlib-metadata
   import_name: importlib-metadata
   avoid_selector: true
@@ -280,11 +276,11 @@ intake-astro:
   conda_forge: intake-accumulo
   import_name: intake_astro
 
-intake_geopandas:
+intake-geopandas:
   conda_forge: intake-geopandas
   import_name: intake_geopandas
 
-ioos_tools:
+ioos-tools:
   conda_forge: ioos-tools
   import_name: ioos_tools
 
@@ -296,15 +292,15 @@ jupyter-client:
   conda_forge: jupyter_client
   import_name: jupyter_client
 
-jupyter_jaeger:
+jupyter-jaeger:
   conda_forge: jupyter-jaeger
   import_name: jupyter_jaeger
 
-jupyterlab_git:
+jupyterlab-git:
   conda_forge: jupyterlab-git
   import_name: jupyterlab_git
 
-jupyterlab_latex:
+jupyterlab-latex:
   conda_forge: jupyterlab-latex
   import_name: jupyterlab_latex
 
@@ -332,11 +328,11 @@ matplotlib:
   import_name: matplotlib
   conda_forge: matplotlib-base
 
-md_toc:
+md-toc:
   conda_forge: md-toc
   import_name: md_toc
 
-message_ix:
+message-ix:
   conda_forge: message-ix
   import_name: message_ix
 
@@ -348,11 +344,11 @@ mss:
   conda_forge: python-mss
   import_name: mss
 
-nbconvert_utils:
+nbconvert-utils:
   conda_forge: nbconvert-utils
   import_name: nbconvert_utils
 
-ndarray_listener:
+ndarray-listener:
   conda_forge: ndarray-listener
   import_name: ndarray_listener
 
@@ -364,7 +360,7 @@ neo:
   conda_forge: python-neo
   import_name: neo
 
-nest_asyncio:
+nest-asyncio:
   conda_forge: nest-asyncio
   import_name: nest_asyncio
 
@@ -392,7 +388,7 @@ p-astro:
   conda_forge: p_astro
   import_name: ligo.p_astro
 
-pandas_flavor:
+pandas-flavor:
   conda_forge: pandas-flavor
   import_name: pandas_flavor
 
@@ -420,7 +416,7 @@ pyqt5:
   delimiter_min: "5.0.0"
   delimiter_max: "6.0.0"
 
-pytest_check_links:
+pytest-check-links:
   conda_forge: pytest-check-links
   import_name: pytest_check_links
 
@@ -461,7 +457,7 @@ quantum-grove:
   conda_forge: grove
   import_name: grove
 
-radio_beam:
+radio-beam:
   conda_forge: radio-beam
   import_name: radio_beam
 
@@ -473,15 +469,15 @@ rocketpyalpha:
   conda_forge: rocketpy
   import_name: rocketpy
 
-sage_flatsurf:
+sage-flatsurf:
   conda_forge: sage-flatsurf
   import_name: flatsurf
 
-sagemaker_inference:
+sagemaker-inference:
   conda_forge: sagemaker-inference-toolkit
   import_name: sagemaker_inference
 
-sagemaker_mxnet_training:
+sagemaker-mxnet-training:
   conda_forge: sagemaker_mxnet_container
   import_name: sagemaker_mxnet_container
 
@@ -493,13 +489,17 @@ scikit-learn:
   conda_forge: scikit-learn
   import_name: sklearn
 
-setuptools_scm:
+setuptools-scm:
   conda_forge: setuptools-scm
   import_name: setuptools_scm
 
 sounddevice:
   conda_forge: python-sounddevice
   import_name: sounddevice
+
+soundfile:
+  conda_forge: pysoundfile
+  import_name: soundfile
 
 spherical-functions:
   conda_forge: spherical_functions
@@ -537,6 +537,10 @@ torch-cluster:
   conda_forge: pytorch_cluster
   import_name: torch_cluster
 
+torch-geometric:
+  conda_forge: pytorch_geometric
+  import_name: torch_geometric
+
 torch-sparse:
   conda_forge: pytorch_sparse
   import_name: torch_sparse
@@ -544,10 +548,6 @@ torch-sparse:
 torch:
   conda_forge: pytorch
   import_name: torch
-
-torch_geometric:
-  conda_forge: pytorch_geometric
-  import_name: torch_geometric
 
 trino:
   conda_forge: trino-python-client
@@ -563,7 +563,7 @@ typing:
   import_name: typing
   avoid_selector: true
 
-useDAVE:
+usedave:
   conda_forge: dave
   import_name: numpy
 
