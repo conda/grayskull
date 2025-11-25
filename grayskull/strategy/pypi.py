@@ -12,6 +12,7 @@ from typing import TypedDict
 
 import requests
 from colorama import Fore
+from packaging.utils import canonicalize_name
 from souschef.jinja_expression import set_global_jinja_var
 from souschef.recipe import Recipe
 
@@ -697,7 +698,8 @@ def remove_selectors_pkgs_if_needed(
     re_selector = re.compile(r"\s+#\s+\[.*", re.DOTALL)
     result = []
     for pkg in list_req:
-        pkg_cfg_info = info_pkgs.get(pkg.strip().split()[0], {})
+        pkg_name = canonicalize_name(pkg.strip().split()[0])
+        pkg_cfg_info = info_pkgs.get(pkg_name, {})
         if pkg_cfg_info.get("avoid_selector", False):
             pkg = re_selector.sub("", pkg)
         result.append(pkg)

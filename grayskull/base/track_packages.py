@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
+from packaging.utils import canonicalize_name
 from packaging.version import Version  # noqa
 from ruamel.yaml import YAML
 
@@ -28,7 +29,8 @@ class ConfigPkg:
 
 def track_package(pkg_name: str, config_file: Path | str) -> ConfigPkg:
     all_pkg = _get_track_info_from_file(config_file)
-    return ConfigPkg(pkg_name, **(all_pkg.get(pkg_name, {})))
+    canonical_name = canonicalize_name(pkg_name)
+    return ConfigPkg(pkg_name, **(all_pkg.get(canonical_name, {})))
 
 
 def solve_list_pkg_name(list_pkg: list[str], config_file: Path | str) -> list[str]:
