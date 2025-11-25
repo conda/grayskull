@@ -692,17 +692,18 @@ def sort_reqs(reqs: Iterable[str], alphabetize: bool = False) -> list[str]:
 
 
 def remove_selectors_pkgs_if_needed(
-    list_req: list, config_file: Path | None = None
+    pypi_reqs: list, config_file: Path | None = None
 ) -> list:
-    info_pkgs = _get_track_info_from_file(config_file or PYPI_CONFIG)
+    pypi_to_conda_map = _get_track_info_from_file(config_file or PYPI_CONFIG)
     re_selector = re.compile(r"\s+#\s+\[.*", re.DOTALL)
     result = []
-    for pkg in list_req:
-        pkg_name = canonicalize_name(pkg.strip().split()[0])
-        pkg_cfg_info = info_pkgs.get(pkg_name, {})
+    for pypi_req in pypi_reqs:
+        raw_pypi_name = pypi_req.strip().split()[0]
+        normalized_pypi_name = canonicalize_name(raw_pypi_name)
+        pkg_cfg_info = pypi_to_conda_map.get(normalized_pypi_name, {})
         if pkg_cfg_info.get("avoid_selector", False):
-            pkg = re_selector.sub("", pkg)
-        result.append(pkg)
+            pypi_req = re_selector.sub("", pypi_req)
+        result.append(pypi_req)
     return result
 
 

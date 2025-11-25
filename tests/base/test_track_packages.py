@@ -21,45 +21,45 @@ def path_example() -> Path:
 
 
 def test_config_pkg():
-    cfg = ConfigPkg("name", "import_name", "conda_forge", "min", "max")
-    assert cfg.name == "name"
+    cfg = ConfigPkg("pypi_name", "import_name", "conda_forge", "min", "max")
+    assert cfg.pypi_name == "pypi_name"
     assert cfg.import_name == "import_name"
     assert cfg.conda_forge == "conda_forge"
     assert cfg.delimiter_min == "min"
     assert cfg.delimiter_max == "max"
 
-    cfg = ConfigPkg("name")
-    assert cfg.name == "name"
-    assert cfg.import_name == "name"
-    assert cfg.conda_forge == "name"
+    cfg = ConfigPkg("pypi_name")
+    assert cfg.pypi_name == "pypi_name"
+    assert cfg.import_name == "pypi_name"
+    assert cfg.conda_forge == "pypi_name"
     assert cfg.delimiter_min == ""
     assert cfg.delimiter_max == ""
 
 
 def test_track_package(path_example: Path):
     foo_pkg = track_package("foo_pkg", path_example)
-    assert foo_pkg.name == "foo_pkg"
+    assert foo_pkg.pypi_name == "foo_pkg"
     assert foo_pkg.import_name == "foo_import"
     assert foo_pkg.conda_forge == "foo_conda_forge"
     assert foo_pkg.delimiter_min == "1.2.3"
     assert foo_pkg.delimiter_max == "2.1.0"
 
     bar_pkg = track_package("bar_pkg", path_example)
-    assert bar_pkg.name == "bar_pkg"
+    assert bar_pkg.pypi_name == "bar_pkg"
     assert bar_pkg.import_name == "bar_import"
     assert bar_pkg.conda_forge == "bar_conda_forge"
     assert bar_pkg.delimiter_min == ""
     assert bar_pkg.delimiter_max == ""
 
     foo_bar_pkg = track_package("foo_bar", path_example)
-    assert foo_bar_pkg.name == "foo_bar"
+    assert foo_bar_pkg.pypi_name == "foo_bar"
     assert foo_bar_pkg.import_name == "foo_bar"
     assert foo_bar_pkg.conda_forge == "foo_bar_cf"
     assert foo_bar_pkg.delimiter_min == ""
     assert foo_bar_pkg.delimiter_max == ""
 
     no_pkg = track_package("NO_PKG", path_example)
-    assert no_pkg.name == "NO_PKG"
+    assert no_pkg.pypi_name == "NO_PKG"
     assert no_pkg.import_name == "NO_PKG"
     assert no_pkg.conda_forge == "NO_PKG"
     assert no_pkg.delimiter_min == ""
