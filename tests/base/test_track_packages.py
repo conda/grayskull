@@ -12,6 +12,7 @@ from grayskull.base.track_packages import (
     solve_version_delimiter,
     track_package,
 )
+from grayskull.strategy.pypi import PYPI_CONFIG
 
 
 @pytest.fixture
@@ -147,3 +148,16 @@ def test_solve_list_pkg_name(path_example):
     assert solve_list_pkg_name(
         ["foo_pkg >1.5.0,<=2.5.0", "normal_pkg", "bar_pkg"], path_example
     ) == ["foo_conda_forge >1.5.0,<2.1.0", "normal_pkg", "bar_conda_forge"]
+
+
+def test_non_canonical_name_resolution():
+    """Test that non-canonical PyPI names are correctly resolved.
+
+    PyPI package names can appear in various forms (underscores, hyphens,
+    mixed case) but should all resolve to the same canonical entry in
+    config.yaml. This test verifies that the lookup correctly canonicalizes
+    names before matching.
+    """
+    assert solve_list_pkg_name(
+        ["SoundFile >=5", "python...fileInspector >1"], PYPI_CONFIG
+    ) == ["pysoundfile >=5", "fileinspector >1"]
