@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
+from packaging.utils import canonicalize_name
 from packaging.version import Version  # noqa
 from ruamel.yaml import YAML
 
@@ -12,7 +13,9 @@ log = logging.getLogger(__name__)
 
 @dataclass
 class ConfigPkg:
-    name: str
+    """Configuration for mapping a PyPI package to its conda-forge equivalent."""
+
+    pypi_name: str
     import_name: str = ""
     conda_forge: str = ""
     delimiter_min: str = ""
@@ -21,30 +24,35 @@ class ConfigPkg:
 
     def __post_init__(self):
         if not self.import_name:
-            self.import_name = self.name
+            self.import_name = self.pypi_name
         if not self.conda_forge:
-            self.conda_forge = self.name
+            self.conda_forge = self.pypi_name
 
 
-def track_package(pkg_name: str, config_file: Path | str) -> ConfigPkg:
-    all_pkg = _get_track_info_from_file(config_file)
-    return ConfigPkg(pkg_name, **(all_pkg.get(pkg_name, {})))
+def track_package(raw_pypi_name: str, config_file: Path | str) -> ConfigPkg:
+    """Look up a PyPI package name in the config and return its mapping info."""
+    pypi_to_conda_map = _get_track_info_from_file(config_file)
+    normalized_pypi_name = canonicalize_name(raw_pypi_name)
+    return ConfigPkg(raw_pypi_name, **(pypi_to_conda_map.get(normalized_pypi_name, {})))
 
 
-def solve_list_pkg_name(list_pkg: list[str], config_file: Path | str) -> list[str]:
+def solve_list_pkg_name(pypi_reqs: list[str], config_file: Path | str) -> list[str]:
+    """Convert a list of PyPI requirements to conda-forge package names."""
     re_norm = re.compile(r",\s+")
-    return [re_norm.sub(",", solve_pkg_name(pkg, config_file)) for pkg in list_pkg]
+    return [
+        re_norm.sub(",", solve_pkg_name(pypi_req, config_file))
+        for pypi_req in pypi_reqs
+    ]
 
 
-def solve_pkg_name(pkg: str, config_file: Path | str) -> str:
-    pkg_name_sep = pkg.strip().split()
-    config_pkg = track_package(pkg_name_sep[0], config_file)
-    all_delimiter = " ".join(pkg_name_sep[1:])
-    return (
-        " ".join(
-            [config_pkg.conda_forge, solve_version_delimiter(all_delimiter, config_pkg)]
-        )
-    ).strip()
+def solve_pkg_name(pypi_req: str, config_file: Path | str) -> str:
+    """Convert a single PyPI requirement (name + version spec) to conda-forge format."""
+    parts = pypi_req.strip().split()
+    raw_pypi_name = parts[0]
+    version_spec = " ".join(parts[1:])
+    pkg_config = track_package(raw_pypi_name, config_file)
+    resolved_version_spec = solve_version_delimiter(version_spec, pkg_config)
+    return " ".join([pkg_config.conda_forge, resolved_version_spec]).strip()
 
 
 @lru_cache(maxsize=5)

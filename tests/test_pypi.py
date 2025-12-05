@@ -6,11 +6,13 @@ from unittest.mock import patch
 
 import pytest
 from colorama import Fore, Style
+from packaging.utils import canonicalize_name
 from souschef.jinja_expression import get_global_jinja_var
 from souschef.recipe import Recipe
 
 from grayskull.base.factory import GrayskullFactory
 from grayskull.base.pkg_info import normalize_pkg_name
+from grayskull.base.track_packages import _get_track_info_from_file
 from grayskull.cli import CLIConfig
 from grayskull.cli.parser import parse_pkg_name_version
 from grayskull.config import Configuration
@@ -32,6 +34,7 @@ from grayskull.strategy.py_base import (
     update_requirements_with_pin,
 )
 from grayskull.strategy.pypi import (
+    PYPI_CONFIG,
     PypiStrategy,
     check_noarch_python_for_new_deps,
     compose_test_section,
@@ -1746,3 +1749,30 @@ def test_check_noarch_python_for_new_deps():
         config,
     )
     assert config.is_arch is False
+
+
+def test_pypi_names_in_config_yaml_are_canonical():
+    """Enforce that the keys in the config.yaml file are normalized PEP 503 PyPI names.
+
+    For example, My_Package -> my-package.
+
+    Loop over the top-level keys in config.yaml and verify that they are
+    normalized. If not, add them to the non_canonical_names dictionary, and
+    print a message with the required replacements.
+    """
+    config = _get_track_info_from_file(PYPI_CONFIG)
+    non_canonical_names: dict[str, str] = {}
+    for raw_pypi_name in config.keys():
+        normalized_pypi_name = canonicalize_name(raw_pypi_name)
+        if raw_pypi_name != normalized_pypi_name:
+            non_canonical_names[raw_pypi_name] = normalized_pypi_name
+    plural = "s" if len(non_canonical_names) > 1 else ""
+    assert len(non_canonical_names) == 0, (
+        f"Found {len(non_canonical_names)} non-canonical name{plural} in config.yaml.\n"
+        f"Please make the following replacements in config.yaml:\n\n"
+        + "\n".join(
+            f"  {raw_pypi_name} -> {normalized_pypi_name}"
+            for raw_pypi_name, normalized_pypi_name in non_canonical_names.items()
+        )
+        + "\n"
+    )
