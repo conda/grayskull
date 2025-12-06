@@ -63,6 +63,16 @@ def get_all_licenses_from_spdx() -> list:
     ]
 
 
+def _replace_dashes(s: str) -> str:
+    """
+    Replace dashes with spaces.
+
+    :param s: string to replace dashes with spaces
+    :return: string with dashes replaced by spaces
+    """
+    return s.replace("-", " ")
+
+
 def _match_scrambled_exact(candidate, licenses) -> str | None:
     """
     Return license with rearranged word order only.
@@ -88,6 +98,9 @@ def match_license(name: str) -> dict:
         return {}
     name = re.sub(r"\s+license\s*", "", name.strip(), flags=re.IGNORECASE)
     name = name.strip()
+
+    if name in _get_all_license_choice(all_licenses):
+        return _get_license(name, all_licenses)
 
     exact_match = _match_scrambled_exact(name, _get_all_license_choice(all_licenses))
     if exact_match:
@@ -131,12 +144,21 @@ def match_license(name: str) -> dict:
                 lic[0] for lic in original_matches if lic[1] >= spdx_license[1]
             ]
             if len(best_matches) > 1:
+                # we replace dashes by spaces here to match instances like
+                # "3-Clause BSD" with "BSD-3-Clause" which otherwise would
+                # not work with word-based scores like token_sort_ratio
                 spdx_license = process.extractOne(
-                    name, best_matches, scorer=token_sort_ratio
+                    name,
+                    best_matches,
+                    scorer=token_sort_ratio,
+                    processor=_replace_dashes,
                 )
             if original_matches and original_matches[0][1] < 0.55:
                 spdx_license = process.extractOne(
-                    name, [m[0] for m in original_matches], scorer=token_sort_ratio
+                    name,
+                    [m[0] for m in original_matches],
+                    scorer=token_sort_ratio,
+                    processor=_replace_dashes,
                 )
 
     if spdx_license[1] != 100 and spdx_license[0].startswith("MIT"):
