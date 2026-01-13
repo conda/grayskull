@@ -1441,8 +1441,7 @@ def test_recipe_with_just_py_modules():
 def test_recipe_extension():
     recipe = create_python_recipe("azure-identity=1.3.1")[0]
     assert (
-        recipe["source"]["url"]
-        == "https://pypi.org/packages/source/a/azure-identity/"
+        recipe["source"]["url"] == "https://pypi.org/packages/source/a/azure-identity/"
         "azure-identity-{{ version }}.zip"
     )
 
