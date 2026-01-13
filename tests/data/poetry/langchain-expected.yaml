@@ -6,7 +6,7 @@ package:
   version: {{ version }}
 
 source:
-  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/langchain-{{ version }}.tar.gz
+  url: https://pypi.org/packages/source/l/langchain/langchain-{{ version }}.tar.gz
   sha256: 95a93c966b1a2ff056c43870747aba1c39924c145179f0b8ffa27fef6a525610
 
 build:
