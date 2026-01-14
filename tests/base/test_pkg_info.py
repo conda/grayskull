@@ -15,8 +15,16 @@ from grayskull.cli import CLIConfig
     "channel_or_url,pkg_name,expected_url",
     [
         # Channel name tests
-        ("conda-forge", "pytest", "https://anaconda.org/conda-forge/pytest/files"),
-        ("test-channel", "numpy", "https://anaconda.org/test-channel/numpy/files"),
+        (
+            "conda-forge",
+            "pytest",
+            "https://api.anaconda.org/package/conda-forge/pytest",
+        ),
+        (
+            "test-channel",
+            "numpy",
+            "https://api.anaconda.org/package/test-channel/numpy",
+        ),
         # HTTPS URL tests
         (
             "https://internal-conda.example.com",
@@ -46,7 +54,7 @@ from grayskull.cli import CLIConfig
             "https://internal-conda.example.com:8080/pytest/files",
         ),
         # Edge cases
-        ("", "pytest", "https://anaconda.org//pytest/files"),
+        ("", "pytest", "https://api.anaconda.org/package//pytest"),
         ("https://example.com///", "pytest", "https://example.com/pytest/files"),
         # URLs with query parameters and fragments - actual behavior
         (

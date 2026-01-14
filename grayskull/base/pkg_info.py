@@ -18,7 +18,7 @@ def build_package_url(channel_or_url: str, pkg_name: str) -> str:
         return f"{channel_or_url.rstrip('/')}/{pkg_name}/files"
     else:
         # Default to anaconda.org if not a full URL
-        return f"https://anaconda.org/{channel_or_url}/{pkg_name}/files"
+        return f"https://api.anaconda.org/package/{channel_or_url}/{pkg_name}"
 
 
 @lru_cache(maxsize=35)
