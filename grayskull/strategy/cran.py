@@ -295,7 +295,7 @@ def get_cran_metadata(config: Configuration, cran_url: str):
 
     dict_metadata = {
         "package": {
-            "name": "r-{{ name }}",
+            "name": f"r-{config.name.lower()}",
             "version": "{{ version }}",
         },
         "source": {

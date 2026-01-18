@@ -1,8 +1,7 @@
-{% set name = "langchain" %}
 {% set version = "0.0.119" %}
 
 package:
-  name: {{ name|lower }}
+  name: langchain
   version: {{ version }}
 
 source:

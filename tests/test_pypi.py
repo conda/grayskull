@@ -497,7 +497,7 @@ def test_get_include_extra_requirements():
     # extras are not used
     config = Configuration(name="dask", version="2022.6.1")
     recipe = GrayskullFactory.create_recipe("pypi", config)
-    assert recipe["package"]["name"] == "<{ name|lower }}"
+    assert recipe["package"]["name"] == "dask"
     assert set(recipe["outputs"]) == set()
     assert set(recipe["requirements"]["host"]) == set(host_requirements)
     assert set(recipe["requirements"]["run"]) == set(base_requirements)
@@ -506,7 +506,7 @@ def test_get_include_extra_requirements():
     # all extras are included in the requirements
     config = Configuration(name="dask", version="2022.6.1", extras_require_all=True)
     recipe = GrayskullFactory.create_recipe("pypi", config)
-    assert recipe["package"]["name"] == "<{ name|lower }}"
+    assert recipe["package"]["name"] == "dask"
     assert set(recipe["outputs"]) == set()
 
     expected = list(base_requirements)
@@ -527,7 +527,7 @@ def test_get_include_extra_requirements():
         extras_require_test="test",
     )
     recipe = GrayskullFactory.create_recipe("pypi", config)
-    assert recipe["package"]["name"] == "<{ name|lower }}"
+    assert recipe["package"]["name"] == "dask"
     assert set(recipe["outputs"]) == set()
 
     expected = list(base_requirements)
@@ -544,7 +544,7 @@ def test_get_include_extra_requirements():
         name="dask", version="2022.6.1", extras_require_include=("array",)
     )
     recipe = GrayskullFactory.create_recipe("pypi", config)
-    assert recipe["package"]["name"] == "<{ name|lower }}"
+    assert recipe["package"]["name"] == "dask"
     assert set(recipe["outputs"]) == set()
     assert set(recipe["requirements"]["host"]) == set(host_requirements)
     assert set_of_strings(recipe["requirements"]["run"]) == {
@@ -563,7 +563,7 @@ def test_get_include_extra_requirements():
         extras_require_test="test",
     )
     recipe = GrayskullFactory.create_recipe("pypi", config)
-    assert recipe["package"]["name"] == "<{ name|lower }}"
+    assert recipe["package"]["name"] == "dask"
     assert set(recipe["outputs"]) == set()
     assert set(recipe["requirements"]["host"]) == set(host_requirements)
     assert set_of_strings(recipe["requirements"]["run"]) == set(base_requirements)
@@ -579,7 +579,7 @@ def test_get_include_extra_requirements():
         extras_require_split=True,
     )
     recipe = GrayskullFactory.create_recipe("pypi", config)
-    assert recipe["package"]["name"] == "<{ name|lower }}"
+    assert recipe["package"]["name"] == "dask"
     assert set(recipe["outputs"]) == set()
     assert set(recipe["requirements"]["host"]) == set(host_requirements)
     assert set_of_strings(recipe["requirements"]["run"]) == set(base_requirements)
@@ -595,7 +595,7 @@ def test_get_include_extra_requirements():
         extras_require_split=True,
     )
     recipe = GrayskullFactory.create_recipe("pypi", config)
-    assert recipe["package"]["name"] == "<{ name|lower }}"
+    assert recipe["package"]["name"] == "dask"
     assert set(recipe["requirements"]["host"]) == set(host_requirements)
     assert set(recipe["requirements"]["run"]) == set(base_requirements)
     assert len(recipe["outputs"]) == 6
