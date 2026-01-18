@@ -331,7 +331,7 @@ def get_pypi_metadata(config: Configuration) -> PypiMetadata:
         license=info.get("license"),
         source=SourceSection(
             url=config.url_pypi
-            + "/packages/source/{{ name[0] }}/{{ name }}/"
+            + f"/packages/source/{config.name[0]}/{config.name}/"
             + get_url_filename(metadata),
             sha256=get_sha256_from_pypi_metadata(metadata),
         ),

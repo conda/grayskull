@@ -16,7 +16,7 @@ requires-python = ">=3.10"
 dependencies = [
     "beautifulsoup4",
     "colorama",
-    "conda-souschef >=2.2.3",
+    "conda-souschef >=3.0.1",
     "packaging >=21.3",
     "pip",
     "pkginfo",

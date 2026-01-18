@@ -24,8 +24,8 @@ jobs:
       OS: ${{ matrix.os }}
       PYTHON: ${{ matrix.py_ver }}
     steps:
-    - uses: actions/checkout@master
-    - uses: mamba-org/setup-micromamba@v1
+    - uses: actions/checkout@v4
+    - uses: mamba-org/setup-micromamba@v2
       with:
         ####
         # https://github.com/mamba-org/setup-micromamba/issues/225
@@ -96,7 +96,7 @@ jobs:
                 --junit-xml=Linux-py${{ matrix.py_ver }}-parallel.xml \
                 --junit-prefix=Linux-py${{ matrix.py_ver }}-parallel
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4.5.0
+      uses: codecov/codecov-action@v5
       with:
         files: ./coverage-serial.xml,./coverage-parallel.xml
         directory: .
