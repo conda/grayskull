@@ -2,11 +2,11 @@ name: Tests
 
 on:
   push:
-   branches:
-     - master
+    branches:
+      - main
   pull_request:
     branches:
-     - "*"
+      - "*"
 
 defaults:
   run:
@@ -19,24 +19,18 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        py_ver: ["3.10", "3.11", "3.12"]
+        py_ver: ["3.10", "3.11", "3.12", "3.13"]
     env:
       OS: ${{ matrix.os }}
       PYTHON: ${{ matrix.py_ver }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - uses: mamba-org/setup-micromamba@v2
       with:
-        ####
-        # https://github.com/mamba-org/setup-micromamba/issues/225
-        micromamba-version: 1.5.10-0
-        micromamba-binary-path: /home/runner/micromamba-bin-versioned/micromamba
-        ####
+        micromamba-version: "2.5.0-1"
         environment-file: environment.yaml
-        # Added an extra python to the create-args in order to bust the cache:
         create-args: >-
           python=${{ matrix.py_ver }}
-          python
         cache-environment: true
     - name: Install conda-recipe-manager if possible
       # Possible when the Python version is >=3.11
@@ -85,7 +79,7 @@ jobs:
       run: |
         pytest  tests \
                 -vv \
-                -n 0 \
+                -n auto \
                 -m "not serial" \
                 --color=yes \
                 --cov=./ \

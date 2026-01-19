@@ -1334,6 +1334,10 @@ def test_normalize_pkg_name():
     assert normalize_pkg_name("pytest") == "pytest"
 
 
+@pytest.mark.skipif(
+    sys.version_info >= (3, 13),
+    reason="mypy 0.770 is incompatible with Python 3.13+",
+)
 def test_mypy_deps_normalization_and_entry_points():
     config = Configuration(name="mypy", version="0.770")
     recipe = GrayskullFactory.create_recipe("pypi", config)
