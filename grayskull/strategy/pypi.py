@@ -394,6 +394,29 @@ def get_all_selectors_pypi(list_extra: list, config: Configuration) -> list:
     return result_selector
 
 
+def compute_home(metadata: dict) -> str | None:
+    if metadata.get("project_urls") and metadata["project_urls"].get("Homepage"):
+        return metadata["project_urls"]["Homepage"]
+    elif metadata.get("project_url"):
+        return metadata["project_url"]
+    elif metadata.get("url"):
+        return metadata["url"]
+
+
+def compute_doc_url(metadata: dict) -> str | None:
+    if metadata.get("project_urls") and metadata["project_urls"].get("Documentation"):
+        return metadata["project_urls"]["Documentation"]
+    elif metadata.get("docs_url"):
+        return metadata["docs_url"]
+
+
+def compute_dev_url(metadata: str) -> str | None:
+    if metadata.get("project_urls") and metadata["project_urls"].get("Source"):
+        return metadata["project_urls"]["Source"]
+    elif metadata.get("dev_url"):
+        return metadata["dev_url"]
+
+
 def get_metadata(recipe, config) -> dict:
     """Method responsible to get the whole metadata available. It will
     merge metadata from multiple sources (pypi, setup.py, setup.cfg)
@@ -457,36 +480,11 @@ def get_metadata(recipe, config) -> dict:
     test_requirements = optional_requirements.pop(config.extras_require_test, [])
     test_section = compose_test_section(metadata, test_requirements)
 
-    # Compute home, doc_url, and dev_url for the "about" section
-
-    if metadata.get("project_urls") and metadata["project_urls"].get("Homepage"):
-        home = metadata["project_urls"]["Homepage"]
-    elif metadata.get("project_url"):
-        home = metadata["project_url"]
-    elif metadata.get("url"):
-        home = metadata["url"]
-    else:
-        home = None
-
-    if metadata.get("project_urls") and metadata["project_urls"].get("Documentation"):
-        doc_url = metadata["project_urls"]["Documentation"]
-    elif metadata.get("docs_url"):
-        doc_url = metadata["docs_url"]
-    else:
-        doc_url = None
-
-    if metadata.get("project_urls") and metadata["project_urls"].get("Source"):
-        dev_url = metadata["project_urls"]["Source"]
-    elif metadata.get("dev_url"):
-        dev_url = metadata["dev_url"]
-    else:
-        dev_url = None
-
     about_section = {
-        "home": home,
+        "home": compute_home(metadata),
         "summary": metadata.get("summary"),
-        "doc_url": doc_url,
-        "dev_url": dev_url,
+        "doc_url": compute_doc_url(metadata),
+        "dev_url": compute_dev_url(metadata),
         "license": license_name,
         "license_file": license_file,
     }
