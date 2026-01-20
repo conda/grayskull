@@ -38,6 +38,9 @@ from grayskull.strategy.pypi import (
     PypiStrategy,
     check_noarch_python_for_new_deps,
     compose_test_section,
+    compute_dev_url,
+    compute_doc_url,
+    compute_home,
     extract_optional_requirements,
     extract_requirements,
     get_all_selectors_pypi,
@@ -1779,3 +1782,163 @@ def test_pypi_names_in_config_yaml_are_canonical():
         )
         + "\n"
     )
+
+
+def test_compute_dev_url():
+    assert (
+        compute_dev_url({"dev_url": "https://example.com/git"})
+        == "https://example.com/git"
+    )
+    assert (
+        compute_dev_url(
+            {
+                "project_urls": {"Homepage": "https://example.com"},
+                "dev_url": "https://example.com/git",
+            }
+        )
+        == "https://example.com/git"
+    )
+    assert (
+        compute_dev_url(
+            {
+                "project_urls": {
+                    "Homepage": "https://example.com",
+                    "Source": "https://example.com/newgit",
+                },
+                "dev_url": "https://example.com/git",
+            }
+        )
+        == "https://example.com/newgit"
+    )
+    assert (
+        compute_dev_url(
+            {
+                "project_urls": {
+                    "Homepage": "https://example.com",
+                    "Source": "https://example.com/newgit",
+                },
+            }
+        )
+        == "https://example.com/newgit"
+    )
+    assert (
+        compute_dev_url(
+            {
+                "project_urls": {"Homepage": "https://example.com"},
+            }
+        )
+        is None
+    )
+    assert compute_dev_url({}) is None
+
+
+def test_compute_doc_url():
+    assert (
+        compute_doc_url({"docs_url": "https://example.com/doc"})
+        == "https://example.com/doc"
+    )
+    assert (
+        compute_doc_url(
+            {
+                "project_urls": {"Homepage": "https://example.com"},
+                "docs_url": "https://example.com/doc",
+            }
+        )
+        == "https://example.com/doc"
+    )
+    assert (
+        compute_doc_url(
+            {
+                "project_urls": {
+                    "Homepage": "https://example.com",
+                    "Documentation": "https://example.com/newdoc",
+                },
+                "docs_url": "https://example.com/doc",
+            }
+        )
+        == "https://example.com/newdoc"
+    )
+    assert (
+        compute_doc_url(
+            {
+                "project_urls": {
+                    "Homepage": "https://example.com",
+                    "Documentation": "https://example.com/newdoc",
+                },
+            }
+        )
+        == "https://example.com/newdoc"
+    )
+    assert (
+        compute_doc_url(
+            {
+                "project_urls": {"Homepage": "https://example.com"},
+            }
+        )
+        is None
+    )
+    assert compute_doc_url({}) is None
+
+
+def test_compute_home():
+    assert compute_home({"url": "https://example.com/old"}) == "https://example.com/old"
+    assert compute_home({"project_url": "https://example.com"}) == "https://example.com"
+    assert (
+        compute_home(
+            {
+                "project_urls": {"Homepage": "https://example.com/new"},
+            }
+        )
+        == "https://example.com/new"
+    )
+    assert (
+        compute_home(
+            {
+                "project_urls": {
+                    "Source": "https://example.com/git",
+                },
+                "project_url": "https://example.com",
+            }
+        )
+        == "https://example.com"
+    )
+    assert (
+        compute_home(
+            {
+                "project_urls": {
+                    "Source": "https://example.com/git",
+                },
+                "url": "https://example.com/old",
+            }
+        )
+        == "https://example.com/old"
+    )
+    assert (
+        compute_home(
+            {
+                "project_urls": {
+                    "Homepage": "https://example.com/new",
+                },
+                "project_url": "https://example.com",
+                "url": "https://example.com/old",
+            }
+        )
+        == "https://example.com/new"
+    )
+    assert (
+        compute_home(
+            {"project_url": "https://example.com", "url": "https://example.com/old"}
+        )
+        == "https://example.com"
+    )
+    assert (
+        compute_home(
+            {
+                "project_urls": {
+                    "Source": "https://example.com/git",
+                },
+            }
+        )
+        is None
+    )
+    assert compute_home({}) is None
