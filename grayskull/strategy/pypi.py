@@ -481,7 +481,9 @@ def get_metadata(recipe, config) -> dict:
     test_section = compose_test_section(metadata, test_requirements)
 
     if config.is_strict_cf and not config.is_arch:
-        test_section["requires"] = set_python_min(test_section["requires"], "test")
+        test_section["requires"] = set_python_min(
+            test_section["requires"], "test", recipe
+        )
 
     about_section = {
         "home": compute_home(metadata),
@@ -636,17 +638,32 @@ def check_noarch_python_for_new_deps(
     config.is_arch = False
 
 
-def set_python_min(req_list: list, section: str) -> list:
+def set_python_min(req_list: list, section: str, recipe) -> list:
     if not req_list:
         return req_list
-    python_min = "<{ python_min }}"
+    python_min = "{{ python_min }}"
     map_section = {
         "host": f"{python_min}",
         "run": f">={python_min}",
         "test": f"{python_min}",
     }
+
+    # see if there's a single lower bound right now
+    # TODO: do we need to account for different python deps across dependency types?
+    python_req_re = re.compile(r"python\s*>=(\d+\.\d+)", re.IGNORECASE)
+    python_min_req = set(
+        dep.strip() for dep in req_list if python_req_re.fullmatch(dep)
+    )
+
+    python_match = "python"
+    if len(python_min_req) == 1:
+        python_match = python_min_req.pop()
+        set_global_jinja_var(
+            recipe, "python_min", python_req_re.fullmatch(python_match).group(1)
+        )
+
     return [
-        f"python {map_section[section]}" if dep.lower().strip() == "python" else dep
+        f"python {map_section[section]}" if dep.lower().strip() == python_match else dep
         for dep in req_list
     ]
 
@@ -666,8 +683,8 @@ def extract_requirements(metadata: dict, config, recipe) -> dict[str, list[str]]
                 "run": ["python"],
             }
             return {
-                "host": set_python_min(requirements["host"], "host"),
-                "run": set_python_min(requirements["run"], "run"),
+                "host": set_python_min(requirements["host"], "host", recipe),
+                "run": set_python_min(requirements["run"], "run", recipe),
             }
         else:
             return {"host": ["python", "pip"], "run": ["python"]}
@@ -718,8 +735,8 @@ def extract_requirements(metadata: dict, config, recipe) -> dict[str, list[str]]
         result.update({"run_constrained": metadata["requirements_run_constrained"]})
     update_requirements_with_pin(result)
     if config.is_strict_cf and not config.is_arch:
-        result["host"] = set_python_min(result["host"], "host")
-        result["run"] = set_python_min(result["run"], "run")
+        result["host"] = set_python_min(result["host"], "host", recipe)
+        result["run"] = set_python_min(result["run"], "run", recipe)
     return result
 
 
