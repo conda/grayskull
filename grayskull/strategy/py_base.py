@@ -847,6 +847,8 @@ def split_deps(deps: str) -> list[str]:
         for val in re.split(r"([><!=~^]+)", d):
             if not val:
                 continue
+            # fix {{var}} back to {{ var }} (broken by split/join)
+            val = val.replace("{{", "{{ ").replace("}}", " }}")
             if {">", "<", "=", "!", "~", "^"} & set(val):
                 constrain = val.strip()
             else:
