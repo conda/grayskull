@@ -301,6 +301,7 @@ def test_compose_test_section_with_requirements_setup(dask_sdist_metadata_setup)
             "pytest-xdist",
             "pytest-rerunfailures",
             "pre-commit",
+            "python",
         },
     }
     assert test_section == expected
@@ -446,6 +447,7 @@ def test_compose_test_section_with_requirements_pyproject(
             "pytest-rerunfailures",
             "pytest-timeout",
             "pytest-xdist",
+            "python",
         },
     }
     assert test_section == expected
@@ -469,10 +471,10 @@ def test_compose_test_section_with_console_scripts():
     assert test_section == expected
 
 
-def test_compose_test_section_with_requirements(dask_sdist_metadata):
+def test_compose_test_section_with_requirements(dask_sdist_metadata_setup):
     config = Configuration(name="dask", version="2022.7.1")
     metadata = get_pypi_metadata(config)
-    test_requirements = dask_sdist_metadata["extras_require"]["test"]
+    test_requirements = dask_sdist_metadata_setup["extras_require"]["test"]
     test_section = compose_test_section(metadata, test_requirements)
     test_section = {k: set(v) for k, v in test_section.items()}
     expected = {
@@ -1458,7 +1460,7 @@ def test_sequence_inside_another_in_dependencies(freeze_py_cf_supported):
     )[0]
     assert sorted(recipe["requirements"]["host"]) == sorted(
         [
-            "python >=3.6",
+            "python {{ python_min }}",
             "argparse",
             "pip",
             "six >=1.4",
@@ -1467,7 +1469,7 @@ def test_sequence_inside_another_in_dependencies(freeze_py_cf_supported):
     )
     assert sorted(recipe["requirements"]["run"]) == sorted(
         [
-            "python >=3.6",
+            "python >={{ python_min }}",
             "argparse",
             "six >=1.4",
             "traceback2",
@@ -1586,8 +1588,8 @@ def test_add_python_min_to_strict_conda_forge(freeze_py_cf_supported):
         py_cf_supported=freeze_py_cf_supported,
     )[0]
     assert recipe["build"]["noarch"] == "python"
-    assert recipe["requirements"]["host"][0] == "python >=3.6"
-    assert "python >=3.6" in recipe["requirements"]["run"]
+    assert recipe["requirements"]["host"][0] == "python {{ python_min }}"
+    assert "python >={{ python_min }}" in recipe["requirements"]["run"]
 
 
 def test_get_test_imports_clean_modules():
@@ -1709,7 +1711,7 @@ def test_remove_selectors_pkgs_if_needed_with_recipe():
             "importlib-metadata",
             "numpy >=1.17",
             "packaging",
-            "python",
+            "python >={{ python_min }}",
             "regex !=2019.12.17",
             "requests",
             "sacremoses",
@@ -1727,7 +1729,7 @@ def test_noarch_python_min_constrain(freeze_py_cf_supported):
         version="0.1.1",
         py_cf_supported=freeze_py_cf_supported,
     )
-    assert recipe["requirements"]["run"] == ["python >=<{python_min}}"]
+    assert recipe["requirements"]["run"] == ["python >={{ python_min }}"]
 
 
 def test_cpp_language_extra():
@@ -1982,11 +1984,22 @@ def test_compute_home():
 @pytest.mark.parametrize(
     "section, expected",
     [
-        ("host", "python <{ python_min }}"),
-        ("run", "python >=<{ python_min }}"),
-        ("test", "python <{ python_min }}"),
+        ("host", "python {{ python_min }}"),
+        ("run", "python >={{ python_min }}"),
+        ("test", "python {{ python_min }}"),
     ],
 )
 def test_set_python_min(section, expected):
     req = ["pip", "python"]
-    assert set_python_min(req, section) == ["pip", expected]
+    # recipe arg shouldn't be used here
+    assert set_python_min(req, section, None) == ["pip", expected]
+
+    req = ["pip", "python >=3.9"]
+    recipe = Recipe(name="test")
+    assert set_python_min(req, section, recipe) == ["pip", expected]
+    # TODO: why there's a #% in here? the real recipe looks correct.
+    assert recipe[0] == '#% set python_min = "3.9" %}'
+
+    # two disjoint constraints should stop us from changing anything
+    req = ["pip", "python >=3.9", "python >=3.11"]
+    assert set_python_min(req, section, None) == req
