@@ -1460,7 +1460,7 @@ def test_sequence_inside_another_in_dependencies(freeze_py_cf_supported):
     )[0]
     assert sorted(recipe["requirements"]["host"]) == sorted(
         [
-            "python {{ python_min }}",
+            "python {{ python_min }}.*",
             "argparse",
             "pip",
             "six >=1.4",
@@ -1588,7 +1588,7 @@ def test_add_python_min_to_strict_conda_forge(freeze_py_cf_supported):
         py_cf_supported=freeze_py_cf_supported,
     )[0]
     assert recipe["build"]["noarch"] == "python"
-    assert recipe["requirements"]["host"][0] == "python {{ python_min }}"
+    assert recipe["requirements"]["host"][0] == "python {{ python_min }}.*"
     assert "python >={{ python_min }}" in recipe["requirements"]["run"]
 
 
@@ -1984,9 +1984,9 @@ def test_compute_home():
 @pytest.mark.parametrize(
     "section, expected",
     [
-        ("host", "python {{ python_min }}"),
+        ("host", "python {{ python_min }}.*"),
         ("run", "python >={{ python_min }}"),
-        ("test", "python {{ python_min }}"),
+        ("test", "python {{ python_min }}.*"),
     ],
 )
 def test_set_python_min(section, expected):

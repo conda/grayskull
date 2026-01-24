@@ -643,9 +643,9 @@ def set_python_min(req_list: list, section: str, recipe) -> list:
         return req_list
     python_min = "{{ python_min }}"
     map_section = {
-        "host": f"{python_min}",
+        "host": f"{python_min}.*",
         "run": f">={python_min}",
-        "test": f"{python_min}",
+        "test": f"{python_min}.*",
     }
 
     # see if there's a single lower bound right now
