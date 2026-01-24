@@ -480,6 +480,11 @@ def get_metadata(recipe, config) -> dict:
     test_requirements = optional_requirements.pop(config.extras_require_test, [])
     test_section = compose_test_section(metadata, test_requirements)
 
+    if config.is_strict_cf and not config.is_arch:
+        test_section["requires"] = set_python_min(
+            test_section["requires"], "test", recipe
+        )
+
     about_section = {
         "home": compute_home(metadata),
         "summary": metadata.get("summary"),
@@ -633,6 +638,36 @@ def check_noarch_python_for_new_deps(
     config.is_arch = False
 
 
+def set_python_min(req_list: list, section: str, recipe) -> list:
+    if not req_list:
+        return req_list
+    python_min = "{{ python_min }}"
+    map_section = {
+        "host": f"{python_min}.*",
+        "run": f">={python_min}",
+        "test": f"{python_min}.*",
+    }
+
+    # see if there's a single lower bound right now
+    # TODO: do we need to account for different python deps across dependency types?
+    python_req_re = re.compile(r"python\s*>=(\d+\.\d+)", re.IGNORECASE)
+    python_min_req = set(
+        dep.strip() for dep in req_list if python_req_re.fullmatch(dep)
+    )
+
+    python_match = "python"
+    if len(python_min_req) == 1:
+        python_match = python_min_req.pop()
+        set_global_jinja_var(
+            recipe, "python_min", python_req_re.fullmatch(python_match).group(1)
+        )
+
+    return [
+        f"python {map_section[section]}" if dep.lower().strip() == python_match else dep
+        for dep in req_list
+    ]
+
+
 def extract_requirements(metadata: dict, config, recipe) -> dict[str, list[str]]:
     """Extract the requirements for `build`, `host` and `run`"""
     name = metadata["name"]
@@ -643,13 +678,13 @@ def extract_requirements(metadata: dict, config, recipe) -> dict[str, list[str]]
     build_req = format_dependencies(build_requires or [], config.name)
     if not requires_dist and not host_req and not metadata.get("requires_python"):
         if config.is_strict_cf:
-            py_constrain = (
-                f" >={config.py_cf_supported[0].major}"
-                f".{config.py_cf_supported[0].minor}"
-            )
+            requirements = {
+                "host": ["python", "pip"],
+                "run": ["python"],
+            }
             return {
-                "host": [f"python {py_constrain}", "pip"],
-                "run": [f"python {py_constrain}"],
+                "host": set_python_min(requirements["host"], "host", recipe),
+                "run": set_python_min(requirements["run"], "run", recipe),
             }
         else:
             return {"host": ["python", "pip"], "run": ["python"]}
@@ -699,6 +734,9 @@ def extract_requirements(metadata: dict, config, recipe) -> dict[str, list[str]]
     if metadata.get("requirements_run_constrained", None):
         result.update({"run_constrained": metadata["requirements_run_constrained"]})
     update_requirements_with_pin(result)
+    if config.is_strict_cf and not config.is_arch:
+        result["host"] = set_python_min(result["host"], "host", recipe)
+        result["run"] = set_python_min(result["run"], "run", recipe)
     return result
 
 
@@ -768,6 +806,8 @@ def normalize_requirements_list(requirements: list[str], config) -> list[str]:
 def compose_test_section(metadata: dict, test_requirements: list[str]) -> dict:
     test_imports = get_test_imports(metadata, metadata["name"])
     test_requirements = ["pip"] + test_requirements
+    if "python" not in test_requirements:
+        test_requirements.append("python")
     test_commands = ["pip check"]
     if any("pytest" in req for req in test_requirements):
         test_commands.extend(f"pytest --pyargs {module}" for module in test_imports)

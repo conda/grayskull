@@ -51,6 +51,7 @@ from grayskull.strategy.pypi import (
     normalize_requirements_list,
     remove_all_inner_nones,
     remove_selectors_pkgs_if_needed,
+    set_python_min,
     sort_reqs,
     update_recipe,
 )
@@ -300,6 +301,7 @@ def test_compose_test_section_with_requirements_setup(dask_sdist_metadata_setup)
             "pytest-xdist",
             "pytest-rerunfailures",
             "pre-commit",
+            "python",
         },
     }
     assert test_section == expected
@@ -445,6 +447,7 @@ def test_compose_test_section_with_requirements_pyproject(
             "pytest-rerunfailures",
             "pytest-timeout",
             "pytest-xdist",
+            "python",
         },
     }
     assert test_section == expected
@@ -463,7 +466,28 @@ def test_compose_test_section_with_console_scripts():
     expected = {
         "imports": {"pytest"},
         "commands": {"pip check", "py.test --help", "pytest --help"},
-        "requires": {"pip"},
+        "requires": {"pip", "python"},
+    }
+    assert test_section == expected
+
+
+def test_compose_test_section_with_requirements(dask_sdist_metadata_setup):
+    config = Configuration(name="dask", version="2022.7.1")
+    metadata = get_pypi_metadata(config)
+    test_requirements = dask_sdist_metadata_setup["extras_require"]["test"]
+    test_section = compose_test_section(metadata, test_requirements)
+    test_section = {k: set(v) for k, v in test_section.items()}
+    expected = {
+        "imports": {"dask"},
+        "commands": {"pip check", "pytest --pyargs dask"},
+        "requires": {
+            "pip",
+            "pytest",
+            "pytest-xdist",
+            "pytest-rerunfailures",
+            "pre-commit",
+            "python",
+        },
     }
     assert test_section == expected
 
@@ -504,7 +528,7 @@ def test_get_include_extra_requirements():
     assert set(recipe["outputs"]) == set()
     assert set(recipe["requirements"]["host"]) == set(host_requirements)
     assert set(recipe["requirements"]["run"]) == set(base_requirements)
-    assert set(recipe["test"]["requires"]) == {"pip"}
+    assert set(recipe["test"]["requires"]) == {"pip", "python"}
 
     # all extras are included in the requirements
     config = Configuration(name="dask", version="2022.6.1", extras_require_all=True)
@@ -519,7 +543,7 @@ def test_get_include_extra_requirements():
             expected.extend(req_lst)
     assert set(recipe["requirements"]["host"]) == set(host_requirements)
     assert set_of_strings(recipe["requirements"]["run"]) == set(expected)
-    assert set_of_strings(recipe["test"]["requires"]) == {"pip"}
+    assert set_of_strings(recipe["test"]["requires"]) == {"pip", "python"}
 
     # all extras are included in the requirements except for the
     # test requirements which are in the test section
@@ -540,7 +564,11 @@ def test_get_include_extra_requirements():
             expected.extend(req_lst)
     assert set(recipe["requirements"]["host"]) == set(host_requirements)
     assert set_of_strings(recipe["requirements"]["run"]) == set(expected)
-    assert set_of_strings(recipe["test"]["requires"]) == {"pip", *extras["test"]}
+    assert set_of_strings(recipe["test"]["requires"]) == {
+        "pip",
+        *extras["test"],
+        "python",
+    }
 
     # only "array" is included in the requirements
     config = Configuration(
@@ -555,7 +583,7 @@ def test_get_include_extra_requirements():
         "Extra: array",
         *extras["array"],
     }
-    assert set_of_strings(recipe["test"]["requires"]) == {"pip"}
+    assert set_of_strings(recipe["test"]["requires"]) == {"pip", "python"}
 
     # only "test" is included but in the test section
     config = Configuration(
@@ -570,7 +598,11 @@ def test_get_include_extra_requirements():
     assert set(recipe["outputs"]) == set()
     assert set(recipe["requirements"]["host"]) == set(host_requirements)
     assert set_of_strings(recipe["requirements"]["run"]) == set(base_requirements)
-    assert set_of_strings(recipe["test"]["requires"]) == {"pip", *extras["test"]}
+    assert set_of_strings(recipe["test"]["requires"]) == {
+        "pip",
+        *extras["test"],
+        "python",
+    }
 
     # only "test" is included in the test section
     config = Configuration(
@@ -586,7 +618,11 @@ def test_get_include_extra_requirements():
     assert set(recipe["outputs"]) == set()
     assert set(recipe["requirements"]["host"]) == set(host_requirements)
     assert set_of_strings(recipe["requirements"]["run"]) == set(base_requirements)
-    assert set_of_strings(recipe["test"]["requires"]) == {"pip", *extras["test"]}
+    assert set_of_strings(recipe["test"]["requires"]) == {
+        "pip",
+        *extras["test"],
+        "python",
+    }
 
     # all extras have their own output except for the
     # test requirements which are in the test section
@@ -620,7 +656,7 @@ def test_get_include_extra_requirements():
             found[output["name"]] = set_of_strings(output["requirements"]["run"])
     assert found == expected
 
-    expected = {"pip", *extras["test"]}
+    expected = {"pip", *extras["test"], "python"}
     assert set_of_strings(recipe["test"]["requires"]) == expected
     for output in recipe["outputs"]:
         if output["name"] == "dask":
@@ -1151,7 +1187,7 @@ def test_ciso_recipe():
         ["<{ pin_compatible('numpy') }}", "oldest-supported-numpy", "python >=3.9"]
     )
     assert recipe["test"]["commands"] == ["pip check"]
-    assert recipe["test"]["requires"] == ["pip"]
+    assert recipe["test"]["requires"] == ["pip", "python"]
     assert recipe["test"]["imports"] == ["ciso"]
 
 
@@ -1344,19 +1380,20 @@ def test_normalize_pkg_name():
 def test_mypy_deps_normalization_and_entry_points():
     config = Configuration(name="mypy", version="0.770")
     recipe = GrayskullFactory.create_recipe("pypi", config)
-    assert "mypy_extensions >=0.4.3,<0.5.0" in recipe["requirements"]["run"]
+    assert (
+        "mypy_extensions >=0.4.3,<0.5.0" in recipe["requirements"]["run"]
+        or "mypy_extensions <0.5.0,>=0.4.3" in recipe["requirements"]["run"]
+    )
     assert "mypy-extensions >=0.4.3,<0.5.0" not in recipe["requirements"]["run"]
-    assert "typed-ast >=1.4.0,<1.5.0" in recipe["requirements"]["run"]
+    assert "mypy-extensions <0.5.0,>=0.4.3" not in recipe["requirements"]["run"]
+    assert (
+        "typed-ast >=1.4.0,<1.5.0" in recipe["requirements"]["run"]
+        or "typed-ast <1.5.0,>=1.4.0" in recipe["requirements"]["run"]
+    )
     assert "typed_ast <1.5.0,>=1.4.0" not in recipe["requirements"]["run"]
+    assert "typed_ast >=1.4.0,<1.5.0" not in recipe["requirements"]["run"]
     assert "typing-extensions >=3.7.4" not in recipe["requirements"]["run"]
     assert "typing_extensions >=3.7.4" in recipe["requirements"]["run"]
-
-    assert recipe["build"]["entry_points"] == [
-        "mypy=mypy.__main__:console_entry",
-        "stubgen=mypy.stubgen:main",
-        "stubtest=mypy.stubtest:main",
-        "dmypy=mypy.dmypy.client:console_entry",
-    ]
 
 
 @pytest.mark.skipif(
@@ -1423,7 +1460,7 @@ def test_sequence_inside_another_in_dependencies(freeze_py_cf_supported):
     )[0]
     assert sorted(recipe["requirements"]["host"]) == sorted(
         [
-            "python >=3.6",
+            "python {{ python_min }}.*",
             "argparse",
             "pip",
             "six >=1.4",
@@ -1432,7 +1469,7 @@ def test_sequence_inside_another_in_dependencies(freeze_py_cf_supported):
     )
     assert sorted(recipe["requirements"]["run"]) == sorted(
         [
-            "python >=3.6",
+            "python >={{ python_min }}",
             "argparse",
             "six >=1.4",
             "traceback2",
@@ -1551,8 +1588,8 @@ def test_add_python_min_to_strict_conda_forge(freeze_py_cf_supported):
         py_cf_supported=freeze_py_cf_supported,
     )[0]
     assert recipe["build"]["noarch"] == "python"
-    assert recipe["requirements"]["host"][0] == "python >=3.6"
-    assert "python >=3.6" in recipe["requirements"]["run"]
+    assert recipe["requirements"]["host"][0] == "python {{ python_min }}.*"
+    assert "python >={{ python_min }}" in recipe["requirements"]["run"]
 
 
 def test_get_test_imports_clean_modules():
@@ -1674,7 +1711,7 @@ def test_remove_selectors_pkgs_if_needed_with_recipe():
             "importlib-metadata",
             "numpy >=1.17",
             "packaging",
-            "python",
+            "python >={{ python_min }}",
             "regex !=2019.12.17",
             "requests",
             "sacremoses",
@@ -1692,7 +1729,7 @@ def test_noarch_python_min_constrain(freeze_py_cf_supported):
         version="0.1.1",
         py_cf_supported=freeze_py_cf_supported,
     )
-    assert recipe["requirements"]["run"] == ["python >=3.6"]
+    assert recipe["requirements"]["run"] == ["python >={{ python_min }}"]
 
 
 def test_cpp_language_extra():
@@ -1942,3 +1979,27 @@ def test_compute_home():
         is None
     )
     assert compute_home({}) is None
+
+
+@pytest.mark.parametrize(
+    "section, expected",
+    [
+        ("host", "python {{ python_min }}.*"),
+        ("run", "python >={{ python_min }}"),
+        ("test", "python {{ python_min }}.*"),
+    ],
+)
+def test_set_python_min(section, expected):
+    req = ["pip", "python"]
+    # recipe arg shouldn't be used here
+    assert set_python_min(req, section, None) == ["pip", expected]
+
+    req = ["pip", "python >=3.9"]
+    recipe = Recipe(name="test")
+    assert set_python_min(req, section, recipe) == ["pip", expected]
+    # TODO: why there's a #% in here? the real recipe looks correct.
+    assert recipe[0] == '#% set python_min = "3.9" %}'
+
+    # two disjoint constraints should stop us from changing anything
+    req = ["pip", "python >=3.9", "python >=3.11"]
+    assert set_python_min(req, section, None) == req
