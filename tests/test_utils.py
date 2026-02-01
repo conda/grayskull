@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import pytest
 
@@ -11,6 +12,7 @@ from grayskull.utils import (
     merge_list_item,
     origin_is_local_sdist,
     rm_duplicated_deps,
+    upgrade_v0_recipe_to_v1,
 )
 
 
@@ -131,3 +133,72 @@ def test_rm_dupliate_deps_with_star():
     assert rm_duplicated_deps(["typing-extensions", "typing_extensions *"]) == [
         "typing_extensions"
     ]
+
+
+@pytest.mark.xfail(
+    reason="Requires fix in conda-recipe-manager to use python_min for noarch recipes"
+)
+@pytest.mark.parametrize(
+    "skip_selector,expected_match",
+    [
+        ("# [py<310]", 'match(python_min, "<3.10")'),
+        ("# [py<39]", 'match(python_min, "<3.9")'),
+        ("# [py<38]", 'match(python_min, "<3.8")'),
+    ],
+)
+def test_upgrade_v0_recipe_to_v1_noarch_uses_python_min_in_skip(
+    tmp_path, skip_selector, expected_match
+):
+    """Test that V1 noarch recipes use python_min instead of python in skip conditions.
+
+    When a noarch recipe has a skip condition based on Python version, the V1 format
+    should use match(python_min, ...) instead of match(python, ...) because:
+    - CFEP-25 introduced python_min as the standard for minimum Python version
+    - The variant config only defines python_min, not python, for noarch recipes
+    - Using match(python, ...) causes rattler-build to skip all variants
+
+    See: https://github.com/conda/grayskull/issues/644
+    """
+    pytest.importorskip("conda_recipe_manager")
+
+    # Create a V0 recipe with both noarch: python AND a skip condition
+    # This can happen when check_noarch_python_for_new_deps() changes is_arch
+    # from True to False after skip was already set
+    v0_recipe = f"""\
+{{% set name = "test-pkg" %}}
+{{% set version = "1.0.0" %}}
+
+package:
+  name: {{{{ name|lower }}}}
+  version: {{{{ version }}}}
+
+build:
+  skip: True  {skip_selector}
+  noarch: python
+  number: 0
+
+requirements:
+  host:
+    - python >=3.10
+    - pip
+  run:
+    - python >=3.10
+"""
+
+    recipe_path = tmp_path / "meta.yaml"
+    recipe_path.write_text(v0_recipe)
+
+    upgrade_v0_recipe_to_v1(recipe_path)
+
+    v1_content = recipe_path.read_text()
+
+    # The V1 recipe should use python_min in the skip condition for noarch recipes
+    assert expected_match in v1_content, (
+        f"Expected '{expected_match}' in V1 recipe for noarch package, "
+        f"but got:\n{v1_content}"
+    )
+    # It should NOT use match(python, ...) for noarch recipes
+    assert 'match(python, "' not in v1_content, (
+        f"V1 noarch recipe should use python_min, not python, in skip condition. "
+        f"Got:\n{v1_content}"
+    )
