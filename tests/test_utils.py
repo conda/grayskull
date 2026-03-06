@@ -11,6 +11,7 @@ from grayskull.utils import (
     merge_list_item,
     origin_is_local_sdist,
     rm_duplicated_deps,
+    upgrade_v0_recipe_to_v1,
 )
 
 
@@ -131,3 +132,54 @@ def test_rm_dupliate_deps_with_star():
     assert rm_duplicated_deps(["typing-extensions", "typing_extensions *"]) == [
         "typing_extensions"
     ]
+
+
+V0_NOARCH_PYTHON_RECIPE = """\
+{% set python_min = "3.9" %}
+{% set version = "1.0.0" %}
+
+package:
+  name: mypkg
+  version: {{ version }}
+
+build:
+  noarch: python
+  number: 0
+  script: python -m pip install . -vv
+
+requirements:
+  host:
+    - python {{ python_min }}.*
+    - pip
+  run:
+    - python >={{ python_min }}
+
+test:
+  requires:
+    - python {{ python_min }}.*
+    - pip
+  imports:
+    - mypkg
+  commands:
+    - pip check
+"""
+
+
+def test_upgrade_v0_to_v1_strict_cf_tests_latest_python(tmp_path):
+    recipe_path = tmp_path / "meta.yaml"
+    recipe_path.write_text(V0_NOARCH_PYTHON_RECIPE)
+    upgrade_v0_recipe_to_v1(recipe_path, is_strict_cf=True)
+    content = recipe_path.read_text()
+    assert "python_version:" in content
+    assert "${{ python_min }}.*" in content
+    assert '"*"' in content
+
+
+def test_upgrade_v0_to_v1_non_strict_cf_no_latest_python(tmp_path):
+    recipe_path = tmp_path / "meta.yaml"
+    recipe_path.write_text(V0_NOARCH_PYTHON_RECIPE)
+    upgrade_v0_recipe_to_v1(recipe_path, is_strict_cf=False)
+    content = recipe_path.read_text()
+    assert "python_version:" in content
+    assert "${{ python_min }}.*" in content
+    assert '"*"' not in content
