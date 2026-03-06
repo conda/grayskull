@@ -82,6 +82,11 @@ platforms = ["linux-64", "win-64", "osx-arm64"]
 
 [tool.pixi.pypi-dependencies]
 grayskull = { path = ".", editable = true }
+conda-recipe-manager = { git = "https://github.com/maresb/conda-recipe-manager.git", branch = "extract-python-version-in-tests" }
+
+[tool.pixi.feature.testing.dependencies]
+conda = "*"
+evalidate = "*"
 
 [tool.pixi.environments]
 default = { solve-group = "default" }
