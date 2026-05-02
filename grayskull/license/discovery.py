@@ -194,17 +194,17 @@ def _get_all_names_from_api(one_license: dict) -> list:
 
 def get_other_names_from_opensource(license_spdx: str) -> list:
     lic = get_opensource_license(license_spdx)
-    return [_license["name"] for _license in lic.get("other_names", [])]
+    onames = [_license["name"] for _license in lic.get("other_names", [])]
+    if "name" in lic:
+        onames += [lic["name"]]
+    return onames
 
 
 def get_opensource_license(license_spdx: str) -> dict:
     opensource = get_opensource_license_data()
     for lic in opensource:
-        if lic["id"] == license_spdx:
+        if lic["spdx_id"] == license_spdx:
             return lic
-        for _id in lic["identifiers"]:
-            if _id["scheme"].lower() == "spdx" and license_spdx == _id["identifier"]:
-                return lic
     return {}
 
 
