@@ -216,7 +216,7 @@ def read_licence_cache():
 @lru_cache(maxsize=10)
 def get_opensource_license_data() -> list:
     try:
-        response = requests.get(url="https://api.opensource.org/licenses/", timeout=5)
+        response = requests.get(url="https://opensource.org/api/license", timeout=5)
     except requests.exceptions.RequestException:
         return read_licence_cache()
     if response.status_code != 200:
