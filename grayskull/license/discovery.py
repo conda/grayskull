@@ -214,6 +214,7 @@ def get_other_names_from_opensource(license_spdx: str) -> list:
     if "name" in lic:
         onames += [lic["name"]]
     onames += OTHER_NAMES.get(license_spdx, [])
+    onames += [license_spdx]
     onames = list(set(onames))
     return onames
 
