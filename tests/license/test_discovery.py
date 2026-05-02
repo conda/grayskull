@@ -65,7 +65,7 @@ licence_skip_mark = pytest.mark.xfail(
 @pytest.mark.parametrize(
     "licence_name, short_licence",
     [
-        ("MIT License", "MIT"),
+        ("Expat", "MIT"),
         ("The MIT License", "MIT"),
         ("GPL 2.0", "GPL-2.0-or-later"),
         pytest.param("GPL 3.0", "GPL-3.0-only", marks=licence_skip_mark),
@@ -82,7 +82,9 @@ def test_short_license_id(licence_name, short_licence):
 
 
 def test_get_other_names_from_opensource():
-    assert sorted(get_other_names_from_opensource("MIT")) == sorted(["The MIT License"])
+    assert sorted(get_other_names_from_opensource("MIT")) == sorted(
+        ["Expat", "MIT", "The MIT License"]
+    )
 
 
 def test_get_license(spdx_org_license_mit):
@@ -91,13 +93,13 @@ def test_get_license(spdx_org_license_mit):
 
 def test_get_all_names_from_api(spdx_org_license_mit):
     assert sorted(_get_all_names_from_api(spdx_org_license_mit[0])) == sorted(
-        ["MIT", "MIT License", "The MIT License"]
+        ["Expat", "MIT", "MIT License", "The MIT License"]
     )
 
 
 def test_get_all_license_choice(spdx_org_license_mit):
     assert sorted(_get_all_license_choice(spdx_org_license_mit)) == sorted(
-        ["MIT", "MIT License", "The MIT License"]
+        ["Expat", "MIT", "MIT License", "The MIT License"]
     )
 
 

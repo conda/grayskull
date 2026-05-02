@@ -24,6 +24,22 @@ from grayskull.license.data import get_all_licenses  # noqa
 
 log = logging.getLogger(__name__)
 
+# A small mapping of SPDX IDs to other historical license names.
+# This data was pulled from the old OSI API json blob. They no
+# longer supply it.  - MRB
+OTHER_NAMES = {
+    "MIT": ["Expat"],
+    "BSD-3-Clause": [
+        "Revised BSD License",
+        "Modified BSD License",
+        "New BSD License",
+    ],
+    "BSD-2-Clause": [
+        "Simplified BSD License",
+        "FreeBSD License",
+    ],
+}
+
 
 @dataclass
 class ShortLicense:
@@ -197,6 +213,8 @@ def get_other_names_from_opensource(license_spdx: str) -> list:
     onames = [_license["name"] for _license in lic.get("other_names", [])]
     if "name" in lic:
         onames += [lic["name"]]
+    onames += OTHER_NAMES.get(license_spdx, [])
+    onames = list(set(onames))
     return onames
 
 
@@ -221,7 +239,10 @@ def get_opensource_license_data() -> list:
         return read_licence_cache()
     if response.status_code != 200:
         return read_licence_cache()
-    return response.json()
+    try:
+        return response.json()
+    except requests.exceptions.JSONDecodeError:
+        return read_licence_cache()
 
 
 def _get_all_license_choice(all_licenses: list) -> list:
