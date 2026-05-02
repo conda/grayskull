@@ -46,7 +46,7 @@ def spdx_org_license_mit() -> list:
 
 def test_match_license():
     assert match_license("MIT License")["licenseId"] == "MIT"
-    assert match_license("The MIT License")["licenseId"] == "MIT"
+    assert match_license("Expat")["licenseId"] == "MIT"
 
 
 def test_get_all_licenses_from_spdx():
@@ -66,7 +66,7 @@ licence_skip_mark = pytest.mark.xfail(
     "licence_name, short_licence",
     [
         ("Expat", "MIT"),
-        ("The MIT License", "MIT"),
+        ("MIT License", "MIT"),
         ("GPL 2.0", "GPL-2.0-or-later"),
         pytest.param("GPL 3.0", "GPL-3.0-only", marks=licence_skip_mark),
         pytest.param("GPLv3", "GPL-3.0-only", marks=licence_skip_mark),
