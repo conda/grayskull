@@ -65,8 +65,8 @@ licence_skip_mark = pytest.mark.xfail(
 @pytest.mark.parametrize(
     "licence_name, short_licence",
     [
-        ("Expat", "MIT"),
         ("MIT License", "MIT"),
+        ("Expat", "MIT"),
         ("GPL 2.0", "GPL-2.0-or-later"),
         pytest.param("GPL 3.0", "GPL-3.0-only", marks=licence_skip_mark),
         pytest.param("GPLv3", "GPL-3.0-only", marks=licence_skip_mark),
