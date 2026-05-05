@@ -589,10 +589,11 @@ def update_recipe(recipe: Recipe, config: Configuration, all_sections: Iterable[
             if section == "package":
                 package_metadata = dict(metadata[section])
                 if package_metadata["name"].lower() == config.name.lower():
-                    if config.from_local_sdist:
-                        # Initial name set in the recipe came from the sdist filename
-                        set_global_jinja_var(recipe, "name", package_metadata["name"])
-                    package_metadata.pop("name")
+                    # In case of from_local_sdist, the initial name set in the recipe
+                    # came from the sdist filename and shall be updated.
+                    # No need otherwise.
+                    if not config.from_local_sdist:
+                        package_metadata.pop("name")
                 else:
                     package_metadata["name"] = package_metadata["name"].replace(
                         config.name, "<{ name|lower }}"

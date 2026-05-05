@@ -1631,7 +1631,13 @@ def test_create_recipe_from_local_sdist(pkg_pytest):
     assert recipe["about"]["summary"] == "pytest: simple powerful testing with Python"
     assert recipe["about"]["license"] == "MIT"
     assert recipe["about"]["license_file"] == "LICENSE"
-    assert get_global_jinja_var(recipe, "name") == "pytest"
+    assert recipe["package"]["name"] == "pytest"
+    # No name variable defined
+    with pytest.raises(
+        ValueError, match=r"It was not possible to find the requested jinja variable"
+    ):
+        get_global_jinja_var(recipe, "name")
+    assert recipe["package"]["version"] == "<{ version }}"
     assert get_global_jinja_var(recipe, "version") == "5.3.5"
 
 
