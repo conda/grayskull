@@ -1,13 +1,14 @@
 include LICENSE
-include README.rst
-include licence/licence_cache.json
-recursive-include license/data * *.*
+include README.md
+graft grayskull/license
 
-exclude .github
-exclude azure-pipelines.yml
+prune .github
+exclude .gitattributes
 exclude .gitignore
 exclude .pre-commit-config.yaml
 exclude .coveragerc
+exclude *.lock
+exclude *.y[a]ml
 prune tests/
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
