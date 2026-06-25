@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from grayskull.cli.parser import parse_pkg_name_version
 from grayskull.utils import PyVer
 
-DEFAULT_PYPI_URL = "https://pypi.org"
+DEFAULT_PYPI_URL = "https://files.pythonhosted.org"
 DEFAULT_PYPI_META_URL = "https://pypi.org/pypi"
 
 
