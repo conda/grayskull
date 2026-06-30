@@ -186,7 +186,7 @@ def test_get_extra_from_requires_dist():
 def dask_sdist_metadata_setup():
     config = Configuration(name="dask")
     return get_sdist_metadata(
-        "https://pypi.org/packages/source/d/dask/dask-2022.6.1.tar.gz",
+        "https://files.pythonhosted.org/packages/source/d/dask/dask-2022.6.1.tar.gz",
         config,
     )
 
@@ -311,7 +311,7 @@ def test_compose_test_section_with_requirements_setup(dask_sdist_metadata_setup)
 def dask_sdist_metadata_pyproject():
     config = Configuration(name="dask")
     return get_sdist_metadata(
-        "https://pypi.org/packages/source/d/dask/dask-2025.3.0.tar.gz",
+        "https://files.pythonhosted.org/packages/source/d/dask/dask-2025.3.0.tar.gz",
         config,
     )
 
@@ -457,7 +457,8 @@ def test_compose_test_section_with_console_scripts():
     config = Configuration(name="pytest", version="7.1.2")
     metadata1 = get_pypi_metadata(config)
     metadata2 = get_sdist_metadata(
-        "https://pypi.org/packages/source/p/pytest/pytest-7.1.2.tar.gz", config
+        "https://files.pythonhosted.org/packages/source/p/pytest/pytest-7.1.2.tar.gz",
+        config,
     )
     metadata = merge_pypi_sdist_metadata(metadata1, metadata2, config)
     test_requirements = []
@@ -791,7 +792,7 @@ def test_get_sha256_from_pypi_metadata():
 def test_injection_distutils(name):
     config = Configuration(name="hypothesis")
     data = get_sdist_metadata(
-        "https://pypi.org/packages/source/h/hypothesis/hypothesis-5.5.1.tar.gz",
+        "https://files.pythonhosted.org/packages/source/h/hypothesis/hypothesis-5.5.1.tar.gz",
         config,
     )
     assert sorted(data["install_requires"]) == sorted(
@@ -808,7 +809,8 @@ def test_injection_distutils(name):
 def test_injection_distutils_pytest():
     config = Configuration(name="pytest", version="5.3.2")
     data = get_sdist_metadata(
-        "https://pypi.org/packages/source/p/pytest/pytest-5.3.2.tar.gz", config
+        "https://files.pythonhosted.org/packages/source/p/pytest/pytest-5.3.2.tar.gz",
+        config,
     )
     assert sorted(data["install_requires"]) == sorted(
         [
@@ -833,7 +835,7 @@ def test_injection_distutils_pytest():
 def test_injection_distutils_compiler_gsw():
     config = Configuration(name="gsw", version="3.6.19")
     data = get_sdist_metadata(
-        "https://pypi.org/packages/source/g/gsw/gsw-3.6.19.tar.gz", config
+        "https://files.pythonhosted.org/packages/source/g/gsw/gsw-3.6.19.tar.gz", config
     )
     assert data.get("compilers") == ["c"]
     assert data["name"] == "gsw"
@@ -843,7 +845,7 @@ def test_injection_distutils_setup_reqs_ensure_list():
     pkg_name, pkg_ver = "pyinstaller-hooks-contrib", "2020.7"
     config = Configuration(name=pkg_name, version=pkg_ver)
     data = get_sdist_metadata(
-        f"https://pypi.org/packages/source/p/{pkg_name}/{pkg_name}-{pkg_ver}.tar.gz",
+        f"https://files.pythonhosted.org/packages/source/p/{pkg_name}/{pkg_name}-{pkg_ver}.tar.gz",
         config,
     )
     assert data.get("setup_requires") == ["setuptools >= 30.3.0"]
@@ -1485,7 +1487,8 @@ def test_recipe_with_just_py_modules():
 def test_recipe_extension():
     recipe = create_python_recipe("azure-identity=1.3.1")[0]
     assert (
-        recipe["source"]["url"] == "https://pypi.org/packages/source/a/azure-identity/"
+        recipe["source"]["url"]
+        == "https://files.pythonhosted.org/packages/source/a/azure-identity/"
         "azure-identity-{{ version }}.zip"
     )
 

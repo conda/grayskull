@@ -129,7 +129,7 @@ def test_get_sdist_metadata_packages_top_level():
     name_nor = name.replace("-", "_")
     pkg_ver = "0.11.1"
     sdist_metadata = get_sdist_metadata(
-        f"https://pypi.org/packages/source/t/{name}/{name_nor}-{pkg_ver}.tar.gz",
+        f"https://files.pythonhosted.org/packages/source/t/{name}/{name_nor}-{pkg_ver}.tar.gz",
         Configuration(name=name, version=pkg_ver),
     )
     assert sdist_metadata["name"] == name
@@ -144,7 +144,7 @@ def test_get_sdist_metadata_no_top_level():
     name_nor = name.replace("-", "_")
     pkg_ver = "0.7.2"
     sdist_metadata = get_sdist_metadata(
-        f"https://pypi.org/packages/source/g/{name}/{name_nor}-{pkg_ver}.tar.gz",
+        f"https://files.pythonhosted.org/packages/source/g/{name}/{name_nor}-{pkg_ver}.tar.gz",
         Configuration(name=name, version=pkg_ver),
     )
     assert sdist_metadata["name"] == name
