@@ -87,7 +87,15 @@ def test_poetry_langchain_snapshot(tmpdir):
     # Check pyproject.toml for version 0.0.119
     # https://inspector.pypi.io/project/langchain/0.0.119
     args = parser.parse_args(
-        ["pypi", "langchain==0.0.119", "-o", str(tmpdir), "-m", "AddYourGitHubIdHere"]
+        [
+            "pypi",
+            "langchain==0.0.119",
+            "-o",
+            str(tmpdir),
+            "-m",
+            "AddYourGitHubIdHere",
+            "--no-use-v1-format",
+        ]
     )
 
     generate_recipes_from_list(args.pypi_packages, args)
