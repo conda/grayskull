@@ -240,14 +240,16 @@ def generate_recipe(
     clean_yaml(recipe)
     recipe.save(recipe_path)
     if use_v1_format:
-        upgrade_v0_recipe_to_v1(recipe_path)
+        upgrade_v0_recipe_to_v1(
+            recipe_path, is_strict_cf=getattr(config, "is_strict_cf", False)
+        )
     for file_to_recipe in config.files_to_copy:
         name = file_to_recipe.split(os.path.sep)[-1]
         if os.path.isfile(file_to_recipe):
             copyfile(file_to_recipe, os.path.join(recipe_folder, name))
 
 
-def upgrade_v0_recipe_to_v1(recipe_path: Path) -> None:
+def upgrade_v0_recipe_to_v1(recipe_path: Path, *, is_strict_cf: bool = False) -> None:
     """
     Takes a V0 (pre CEP-13) recipe and converts it to a V1 (post CEP-13) recipe file.
     Upgraded recipes are saved to the provided file path.
@@ -257,21 +259,28 @@ def upgrade_v0_recipe_to_v1(recipe_path: Path) -> None:
           can get ruamel to dump to a string stream without blowing up on the
           JINJA plugin.
     :param recipe_path: Path to that contains the original recipe file to modify.
+    :param is_strict_cf: If True, enable conda-forge conventions (e.g. expand
+        python_version to also test on the latest Python).
     """
     try:
         from conda_recipe_manager.parser.recipe_parser_convert import (
             RecipeParserConvert,
         )
+        from conda_recipe_manager.parser.types import RecipeReaderFlags
     except ImportError as e:
         raise ImportError(
             "Please install conda-recipe-manager from conda-forge to enable "
             "support for the V1 format. (Note that Python >=3.11 is required.)"
         ) from e
 
+    flags = RecipeReaderFlags.NONE
+    if is_strict_cf:
+        flags |= RecipeReaderFlags.ALSO_TEST_LATEST_PYTHON
+
     recipe_content: Final[str] = RecipeParserConvert.pre_process_recipe_text(
         recipe_path.read_text()
     )
-    recipe_converter = RecipeParserConvert(recipe_content)
+    recipe_converter = RecipeParserConvert(recipe_content, flags=flags)
     v1_content, _, _ = recipe_converter.render_to_v1_recipe_format()
     recipe_path.write_text(v1_content, encoding="utf-8")
 

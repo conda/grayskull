@@ -38,10 +38,12 @@ jobs:
         cache-environment: true
     - name: Install conda-recipe-manager if possible
       # Possible when the Python version is >=3.11
+      # REVERT BEFORE MERGE: install from PR branch instead of conda-forge
       run: |
         if [ $(python -c "import sys; print(sys.version_info[:2] >= (3,11))") = "True" ]; then
-          echo "Installing conda-recipe-manager"
-          micromamba install -y -c conda-forge conda-recipe-manager
+          echo "Installing conda-recipe-manager from PR branch"
+          micromamba install -y -c conda-forge conda evalidate
+          pip install "conda-recipe-manager @ git+https://github.com/maresb/conda-recipe-manager.git@extract-python-version-in-tests"
         else
           echo "Skipping conda-recipe-manager installation"
         fi
