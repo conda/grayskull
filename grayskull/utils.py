@@ -230,7 +230,7 @@ def generate_recipe(
         recipe_dir = Path(folder_path) / pkg_name
         logging.debug(f"Generating recipe on: {recipe_dir}")
         if not recipe_dir.is_dir():
-            recipe_dir.mkdir()
+            recipe_dir.mkdir(parents=True, exist_ok=True)
         recipe_path = (
             recipe_dir / "recipe.yaml" if use_v1_format else recipe_dir / "meta.yaml"
         )
