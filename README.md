@@ -54,7 +54,8 @@ grayskull pypi pytest
 ```
 
 After that `grayskull` will create a folder with the same name as the package
-and inside this folder the generated recipe will be present (`meta.yaml`).
+and inside this folder the generated recipe will be present (`recipe.yaml`).
+Pass `--no-use-v1-format` to generate a legacy `meta.yaml` recipe instead.
 
 * Example with `pytest` (`grayskull pypi pytest`):
 
@@ -129,6 +130,6 @@ It is also possible to use Grayskull without any installation. You can go to thi
 
 
 ## License
-Copyright Marcelo Duarte Trevisani and contributors, 2020-2023.
+Copyright Marcelo Duarte Trevisani and contributors, 2020-2026.
 
 Distributed under the terms of the Apache 2.0 license, grayskull is free and open source software.

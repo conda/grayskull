@@ -1,19 +1,18 @@
-{% set name = "langchain" %}
 {% set version = "0.0.119" %}
 
 package:
-  name: {{ name|lower }}
+  name: langchain
   version: {{ version }}
 
 source:
-  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/langchain-{{ version }}.tar.gz
+  url: https://files.pythonhosted.org/packages/source/l/langchain/langchain-{{ version }}.tar.gz
   sha256: 95a93c966b1a2ff056c43870747aba1c39924c145179f0b8ffa27fef6a525610
 
 build:
   entry_points:
     - langchain-server = langchain.server:main
   noarch: python
-  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  script: {{ PYTHON }} -m pip install . -vv
   number: 0
 
 requirements:
@@ -74,6 +73,7 @@ test:
     - langchain-server --help
   requires:
     - pip
+    - python
 
 about:
   home: https://www.github.com/hwchase17/langchain

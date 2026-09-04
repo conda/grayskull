@@ -12,6 +12,7 @@ from typing import TypedDict
 
 import requests
 from colorama import Fore
+from packaging.utils import canonicalize_name
 from souschef.jinja_expression import set_global_jinja_var
 from souschef.recipe import Recipe
 
@@ -63,9 +64,7 @@ class PypiStrategy(AbstractStrategy):
     def fetch_data(recipe, config, sections=None):
         update_recipe(recipe, config, sections or ALL_SECTIONS)
         if not (recipe["build"] and recipe["build"]["script"]):
-            recipe["build"]["script"] = (
-                "<{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation"
-            )
+            recipe["build"]["script"] = "<{ PYTHON }} -m pip install . -vv"
 
 
 def merge_pypi_sdist_metadata(
@@ -103,12 +102,13 @@ def merge_pypi_sdist_metadata(
             pypi_metadata.get("requires_python")
             or sdist_metadata.get("python_requires")
         ),
-        "doc_url": get_val("doc_url"),
+        "docs_url": get_val("docs_url"),
         "dev_url": get_val("dev_url"),
         "license": get_val("license"),
         "setup_requires": get_val("setup_requires"),
         "extra_requires": get_val("extra_requires"),
         "project_url": get_val("project_url"),
+        "project_urls": get_val("project_urls"),
         "extras_require": get_val("extras_require"),
         "requires_dist": requires_dist,
         "sdist_path": get_val("sdist_path"),
@@ -271,8 +271,9 @@ class PypiMetadata(TypedDict):
     requires_dist: list[str]
     requires_python: str | None
     summary: str | None
+    project_url: str | None
     project_urls: dict[str, str]
-    doc_url: str | None
+    docs_url: str | None
     dev_url: str | None
     url: str | None
     license: str | None
@@ -311,7 +312,6 @@ def get_pypi_metadata(config: Configuration) -> PypiMetadata:
             json.dump(metadata, f, indent=4)
         config.files_to_copy.append(download_file)
     info = metadata["info"]
-    project_urls = info.get("project_urls") or {}
     log.info(f"Package: {config.name}=={info['version']}")
     log.debug(f"Full PyPI metadata:\n{metadata}")
     sdist_url = get_sdist_url_from_pypi(metadata)
@@ -323,14 +323,16 @@ def get_pypi_metadata(config: Configuration) -> PypiMetadata:
         requires_dist=info.get("requires_dist", []),
         requires_python=info.get("requires_python"),
         summary=info.get("summary"),
-        project_urls=info.get("project_urls") or info.get("project_url", {}),
-        doc_url=info.get("docs_url"),
-        dev_url=project_urls.get("Source"),
+        project_url=info.get("project_url"),
+        project_urls=info.get("project_urls") or {},
+        docs_url=info.get("docs_url"),
+        home_page=info.get("home_page"),
+        dev_url=info.get("dev_url"),
         url=info.get("home_page"),
         license=info.get("license"),
         source=SourceSection(
             url=config.url_pypi
-            + "/packages/source/{{ name[0] }}/{{ name }}/"
+            + f"/packages/source/{config.name[0]}/{config.name}/"
             + get_url_filename(metadata),
             sha256=get_sha256_from_pypi_metadata(metadata),
         ),
@@ -388,6 +390,29 @@ def get_all_selectors_pypi(list_extra: list, config: Configuration) -> list:
     if result_selector and result_selector[-1] in ["and", "or"]:
         del result_selector[-1]
     return result_selector
+
+
+def compute_home(metadata: dict) -> str | None:
+    if metadata.get("project_urls") and metadata["project_urls"].get("Homepage"):
+        return metadata["project_urls"]["Homepage"]
+    elif metadata.get("project_url"):
+        return metadata["project_url"]
+    elif metadata.get("url"):
+        return metadata["url"]
+
+
+def compute_doc_url(metadata: dict) -> str | None:
+    if metadata.get("project_urls") and metadata["project_urls"].get("Documentation"):
+        return metadata["project_urls"]["Documentation"]
+    elif metadata.get("docs_url"):
+        return metadata["docs_url"]
+
+
+def compute_dev_url(metadata: str) -> str | None:
+    if metadata.get("project_urls") and metadata["project_urls"].get("Source"):
+        return metadata["project_urls"]["Source"]
+    elif metadata.get("dev_url"):
+        return metadata["dev_url"]
 
 
 def get_metadata(recipe, config) -> dict:
@@ -453,11 +478,16 @@ def get_metadata(recipe, config) -> dict:
     test_requirements = optional_requirements.pop(config.extras_require_test, [])
     test_section = compose_test_section(metadata, test_requirements)
 
+    if config.is_strict_cf and not config.is_arch:
+        test_section["requires"] = set_python_min(
+            test_section["requires"], "test", recipe
+        )
+
     about_section = {
-        "home": metadata["url"] if metadata.get("url") else metadata.get("project_url"),
+        "home": compute_home(metadata),
         "summary": metadata.get("summary"),
-        "doc_url": metadata.get("doc_url"),
-        "dev_url": metadata.get("dev_url"),
+        "doc_url": compute_doc_url(metadata),
+        "dev_url": compute_dev_url(metadata),
         "license": license_name,
         "license_file": license_file,
     }
@@ -555,17 +585,10 @@ def update_recipe(recipe: Recipe, config: Configuration, all_sections: Iterable[
         metadata[section] = remove_all_inner_nones(metadata.get(section, {}))
         if metadata.get(section):
             if section == "package":
+                # Update both name and version keys in that section
+                # name is usually correct in the initial recipe but
+                # might not in some cases (local sdist)
                 package_metadata = dict(metadata[section])
-                if package_metadata["name"].lower() == config.name.lower():
-                    if config.from_local_sdist:
-                        # Initial name set in the recipe came from the sdist filename
-                        set_global_jinja_var(recipe, "name", package_metadata["name"])
-                    package_metadata.pop("name")
-                else:
-                    package_metadata["name"] = package_metadata["name"].replace(
-                        config.name, "<{ name|lower }}"
-                    )
-
                 set_global_jinja_var(recipe, "version", package_metadata["version"])
                 config.version = package_metadata["version"]
                 package_metadata["version"] = "<{ version }}"
@@ -606,6 +629,36 @@ def check_noarch_python_for_new_deps(
     config.is_arch = False
 
 
+def set_python_min(req_list: list, section: str, recipe) -> list:
+    if not req_list:
+        return req_list
+    python_min = "{{ python_min }}"
+    map_section = {
+        "host": f"{python_min}.*",
+        "run": f">={python_min}",
+        "test": f"{python_min}.*",
+    }
+
+    # see if there's a single lower bound right now
+    # TODO: do we need to account for different python deps across dependency types?
+    python_req_re = re.compile(r"python\s*>=(\d+\.\d+)", re.IGNORECASE)
+    python_min_req = set(
+        dep.strip() for dep in req_list if python_req_re.fullmatch(dep)
+    )
+
+    python_match = "python"
+    if len(python_min_req) == 1:
+        python_match = python_min_req.pop()
+        set_global_jinja_var(
+            recipe, "python_min", python_req_re.fullmatch(python_match).group(1)
+        )
+
+    return [
+        f"python {map_section[section]}" if dep.lower().strip() == python_match else dep
+        for dep in req_list
+    ]
+
+
 def extract_requirements(metadata: dict, config, recipe) -> dict[str, list[str]]:
     """Extract the requirements for `build`, `host` and `run`"""
     name = metadata["name"]
@@ -616,13 +669,13 @@ def extract_requirements(metadata: dict, config, recipe) -> dict[str, list[str]]
     build_req = format_dependencies(build_requires or [], config.name)
     if not requires_dist and not host_req and not metadata.get("requires_python"):
         if config.is_strict_cf:
-            py_constrain = (
-                f" >={config.py_cf_supported[0].major}"
-                f".{config.py_cf_supported[0].minor}"
-            )
+            requirements = {
+                "host": ["python", "pip"],
+                "run": ["python"],
+            }
             return {
-                "host": [f"python {py_constrain}", "pip"],
-                "run": [f"python {py_constrain}"],
+                "host": set_python_min(requirements["host"], "host", recipe),
+                "run": set_python_min(requirements["run"], "run", recipe),
             }
         else:
             return {"host": ["python", "pip"], "run": ["python"]}
@@ -672,6 +725,9 @@ def extract_requirements(metadata: dict, config, recipe) -> dict[str, list[str]]
     if metadata.get("requirements_run_constrained", None):
         result.update({"run_constrained": metadata["requirements_run_constrained"]})
     update_requirements_with_pin(result)
+    if config.is_strict_cf and not config.is_arch:
+        result["host"] = set_python_min(result["host"], "host", recipe)
+        result["run"] = set_python_min(result["run"], "run", recipe)
     return result
 
 
@@ -691,16 +747,18 @@ def sort_reqs(reqs: Iterable[str], alphabetize: bool = False) -> list[str]:
 
 
 def remove_selectors_pkgs_if_needed(
-    list_req: list, config_file: Path | None = None
+    pypi_reqs: list, config_file: Path | None = None
 ) -> list:
-    info_pkgs = _get_track_info_from_file(config_file or PYPI_CONFIG)
+    pypi_to_conda_map = _get_track_info_from_file(config_file or PYPI_CONFIG)
     re_selector = re.compile(r"\s+#\s+\[.*", re.DOTALL)
     result = []
-    for pkg in list_req:
-        pkg_cfg_info = info_pkgs.get(pkg.strip().split()[0], {})
+    for pypi_req in pypi_reqs:
+        raw_pypi_name = pypi_req.strip().split()[0]
+        normalized_pypi_name = canonicalize_name(raw_pypi_name)
+        pkg_cfg_info = pypi_to_conda_map.get(normalized_pypi_name, {})
         if pkg_cfg_info.get("avoid_selector", False):
-            pkg = re_selector.sub("", pkg)
-        result.append(pkg)
+            pypi_req = re_selector.sub("", pypi_req)
+        result.append(pypi_req)
     return result
 
 
@@ -739,6 +797,8 @@ def normalize_requirements_list(requirements: list[str], config) -> list[str]:
 def compose_test_section(metadata: dict, test_requirements: list[str]) -> dict:
     test_imports = get_test_imports(metadata, metadata["name"])
     test_requirements = ["pip"] + test_requirements
+    if "python" not in test_requirements:
+        test_requirements.append("python")
     test_commands = ["pip check"]
     if any("pytest" in req for req in test_requirements):
         test_commands.extend(f"pytest --pyargs {module}" for module in test_imports)

@@ -8,22 +8,25 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   sphinx:
 
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           architecture: "x64"
           cache: "pip"
       - name: Build Documentation
         run: |
-          pip install -e .[docs]
-          pip install -r docs/requirements.txt  # redundant?
+          pip install -e . --group docs
           cd docs
           make html
       - name: Upload artifact
@@ -51,4 +54,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4

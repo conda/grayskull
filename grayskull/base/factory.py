@@ -44,7 +44,16 @@ class GrayskullFactory(ABC):
             pkg_name = pkg_name or config.name
             recipe = Recipe(name=pkg_name, version=config.version)
         if config.name.startswith(("<{", "{{", "r-{{", "r-<{")):
-            config.name = get_global_jinja_var(recipe, "name")
+            try:
+                config.name = get_global_jinja_var(recipe, "name")
+            except ValueError:
+                # If the name jinja variable is not defined, extract from package name
+                match = re.match(r"r-[<{]+\s*(\w+)", config.name)
+                if match:
+                    config.name = match.group(1)
+                else:
+                    # Strip jinja delimiters and use as-is
+                    config.name = re.sub(r"[<{%}>\s]", "", config.name)
         GrayskullFactory.REGISTERED_STRATEGY[repo_type.lower()].fetch_data(
             recipe, config, sections=sections_populate
         )

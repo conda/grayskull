@@ -11,6 +11,7 @@ from grayskull.utils import (
     merge_list_item,
     origin_is_local_sdist,
     rm_duplicated_deps,
+    upgrade_v0_recipe_to_v1,
 )
 
 
@@ -131,3 +132,53 @@ def test_rm_dupliate_deps_with_star():
     assert rm_duplicated_deps(["typing-extensions", "typing_extensions *"]) == [
         "typing_extensions"
     ]
+
+
+def test_upgrade_v0_recipe_to_v1_python_version_noarch(tmp_path):
+    """V1 conversion should expand `tests.python.python_version` for noarch.
+
+    Regression test for conda/grayskull#667: a `noarch: python` package with a
+    pinned test Python (e.g. `{{ python_min }}.*`) must produce a
+    `python_version` list that also tests the latest Python (`*`).
+    """
+    pytest.importorskip(
+        "conda_recipe_manager", reason="conda-recipe-manager is not installed"
+    )
+    v0 = tmp_path / "meta.yaml"
+    v0.write_text(
+        """\
+package:
+  name: mypkg
+  version: 1.0.0
+
+build:
+  noarch: python
+
+requirements:
+  host:
+    - python {{ python_min }}.*
+    - pip
+  run:
+    - python >={{ python_min }}
+
+test:
+  imports:
+    - mypkg
+  commands:
+    - pip check
+  requires:
+    - pip
+    - python {{ python_min }}.*
+
+about:
+  home: https://example.com
+  license: MIT
+  summary: test package
+"""
+    )
+    upgrade_v0_recipe_to_v1(v0)
+
+    v1 = v0.read_text()
+    assert "python_version:" in v1
+    assert "{{ python_min }}.*" in v1
+    assert '"*"' in v1 or "'*'" in v1

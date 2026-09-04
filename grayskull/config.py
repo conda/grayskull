@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from grayskull.cli.parser import parse_pkg_name_version
 from grayskull.utils import PyVer
 
-DEFAULT_PYPI_URL = "https://pypi.org"
+DEFAULT_PYPI_URL = "https://files.pythonhosted.org"
 DEFAULT_PYPI_META_URL = "https://pypi.org/pypi"
 
 
@@ -23,16 +23,16 @@ class Configuration:
             PyVer(3, 10),
             PyVer(3, 11),
             PyVer(3, 12),
+            PyVer(3, 13),
         ]
     )
     py_cf_supported: list[PyVer] = field(
         default_factory=lambda: [
-            PyVer(3, 7),
-            PyVer(3, 8),
             PyVer(3, 9),
             PyVer(3, 10),
             PyVer(3, 11),
             PyVer(3, 12),
+            PyVer(3, 13),
         ]
     )
     is_strict_cf: bool = False

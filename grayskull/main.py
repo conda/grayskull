@@ -113,11 +113,10 @@ def init_parser():
     cran_parser.add_argument(
         "--use-v1-format",
         "-u",
-        default=False,
-        action="store_true",
+        default=True,
+        action=argparse.BooleanOptionalAction,
         dest="use_v1_format",
-        help="Returns a recipe file in the V1 format, used by rattler-build."
-        " NOTE: This is experimental.",
+        help="Return a recipe file in the V1 format (default).",
     )
     # create parser for pypi
     pypi_parser = subparsers.add_parser("pypi", help="Options to generate PyPI recipes")
@@ -303,11 +302,10 @@ def init_parser():
     pypi_parser.add_argument(
         "--use-v1-format",
         "-u",
-        default=False,
-        action="store_true",
+        default=True,
+        action=argparse.BooleanOptionalAction,
         dest="use_v1_format",
-        help="Returns a recipe file in the V1 format, used by rattler-build."
-        " NOTE: This is experimental.",
+        help="Return a recipe file in the V1 format (default).",
     )
 
     return parser

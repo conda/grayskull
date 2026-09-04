@@ -1,2979 +1,3647 @@
 [
   {
-    "id": "AAL",
-    "identifiers": [
-      {
-        "identifier": "AAL",
-        "scheme": "SPDX"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "License :: OSI Approved :: Attribution Assurance License",
-        "scheme": "Trove"
+      "html": {
+        "href": "https://opensource.org/license/cddl-1-1"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/cddl-1-1"
       }
-    ],
+    },
+    "approval_date": "20250718",
+    "approved": true,
+    "board_minutes": "https://opensource.org/meeting-minutes/2025-07-18",
+    "id": "cddl-1-1",
     "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
+      "uncategorized"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/AAL"
-      }
+    "license_steward_url": "https://javaee.github.io/glassfish/LICENSE",
+    "license_steward_version": "",
+    "name": "COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)",
+    "spdx_id": "CDDL-1.1",
+    "stewards": [
+      "oracle"
     ],
-    "name": "Attribution Assurance License",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/AAL"
-      }
-    ]
+    "submission_date": "20250502",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2025-May/005756.html",
+    "submitter_name": "Brian Warner",
+    "version": "1.1"
   },
   {
-    "id": "AFL-3.0",
-    "identifiers": [
-      {
-        "identifier": "AFL-3.0",
-        "scheme": "SPDX"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "License :: OSI Approved :: Academic Free License (AFL)",
-        "scheme": "Trove"
+      "html": {
+        "href": "https://opensource.org/license/wordnet"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/wordnet"
       }
-    ],
+    },
+    "approval_date": "20250718",
+    "approved": true,
+    "board_minutes": "https://opensource.org/meeting-minutes/2025-07-18",
+    "id": "wordnet",
     "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
+      "non-reusable"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/AFL-3.0"
-      }
-    ],
-    "name": "Academic Free License, Version 3.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/AFL-3.0"
-      }
-    ]
+    "license_steward_url": "https://wordnet.princeton.edu/license-and-commercial-use",
+    "license_steward_version": "",
+    "name": "WordNet",
+    "spdx_id": "WordNet",
+    "stewards": [],
+    "submission_date": "20250430",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2025-April/thread.html",
+    "submitter_name": "Brian Warner",
+    "version": "3.0"
   },
   {
-    "id": "AGPL-3.0",
-    "identifiers": [
-      {
-        "identifier": "AGPL-3.0",
-        "scheme": "SPDX"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "License :: OSI Approved :: GNU Affero General Public License v3",
-        "scheme": "Trove"
+      "html": {
+        "href": "https://opensource.org/license/bsd-3-clause-open-mpi"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/bsd-3-clause-open-mpi"
       }
-    ],
+    },
+    "approval_date": "20250718",
+    "approved": true,
+    "board_minutes": "https://opensource.org/meeting-minutes/2025-07-18",
+    "id": "bsd-3-clause-open-mpi",
     "keywords": [
-      "osi-approved"
+      "other-miscellaneous"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/AGPL-3.0"
-      }
+    "license_steward_url": "https://www.open-mpi.org/community/license.php",
+    "license_steward_version": "",
+    "name": "BSD-3-Clause-Open-MPI",
+    "spdx_id": "BSD-3-Clause-Open-MPI",
+    "stewards": [
+      "open-mpi"
     ],
-    "name": "GNU AFFERO GENERAL PUBLIC LICENSE, Version 3 (AGPL-3.0)",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/AGPL-3.0"
-      }
-    ]
+    "submission_date": "20250520",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2025-May/005785.html",
+    "submitter_name": "McCoy Smith",
+    "version": ""
   },
   {
-    "id": "APL-1.0",
-    "identifiers": [
-      {
-        "identifier": "APL-1.0",
-        "scheme": "SPDX"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/osc-1-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/osc-1-0"
       }
-    ],
+    },
+    "approval_date": "20250321",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/2025-03-21",
+    "id": "osc-1-0",
     "keywords": [
-      "osi-approved",
-      "miscellaneous"
+      "international"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/APL-1.0"
-      }
-    ],
-    "name": "Adaptive Public License, Version 1.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/APL-1.0"
-      }
-    ]
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "OSC License 1.0",
+    "spdx_id": "OSC-1.0",
+    "stewards": [],
+    "submission_date": "20241223",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2024-December/005616.html",
+    "submitter_name": "Langenheim, Niccolo ",
+    "version": "1.0"
   },
   {
-    "id": "APSL-2.0",
-    "identifiers": [
-      {
-        "identifier": "APSL-2.0",
-        "scheme": "SPDX"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "License :: OSI Approved :: Apple Public Source License",
-        "scheme": "Trove"
+      "html": {
+        "href": "https://opensource.org/license/los-alamos-national-labs-bsd-3-variant"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/los-alamos-national-labs-bsd-3-variant"
       }
-    ],
+    },
+    "approval_date": "20240920",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/2024-09-20",
+    "id": "los-alamos-national-labs-bsd-3-variant",
     "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
+      "non-reusable"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/APSL-2.0"
-      }
-    ],
-    "name": "Apple Public Source License, Version 2.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/APSL-2.0"
-      }
-    ]
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Los Alamos National Labs BSD-3 Variant",
+    "spdx_id": "",
+    "stewards": [],
+    "submission_date": "20240626",
+    "submission_url": " https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2024-June/005490.html",
+    "submitter_name": "Pettinger, Adam L",
+    "version": ""
   },
   {
-    "id": "Apache-1.1",
-    "identifiers": [
-      {
-        "identifier": "Apache-1.1",
-        "scheme": "SPDX"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/mit-cmu"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/mit-cmu"
       }
-    ],
-    "keywords": [
-      "discouraged",
-      "obsolete",
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/Apache-1.1"
-      }
-    ],
-    "name": "Apache Software License, Version 1.1",
-    "other_names": [],
-    "superseded_by": "Apache-2.0",
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/Apache-1.1"
-      }
-    ]
+    },
+    "approval_date": "20240920",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/2024-09-20",
+    "id": "mit-cmu",
+    "keywords": [],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "CMU License",
+    "spdx_id": "MIT-CMU",
+    "stewards": [],
+    "submission_date": "20240614",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2024-June/005479.html",
+    "submitter_name": "Jeffrey Clark ",
+    "version": ""
   },
   {
-    "id": "Apache-2.0",
-    "identifiers": [
-      {
-        "identifier": "Apache-2.0",
-        "scheme": "DEP5"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "Apache-2.0",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/blueoak-1-0-0"
       },
-      {
-        "identifier": "License :: OSI Approved :: Apache Software License",
-        "scheme": "Trove"
+      "self": {
+        "href": "https://opensource.org/api/license/blueoak-1-0-0"
       }
-    ],
+    },
+    "approval_date": "20240119",
+    "approved": false,
+    "board_minutes": "https://opensource.org/?post_type=meeting-minutes&amp;p=17014",
+    "id": "blueoak-1-0-0",
     "keywords": [
-      "osi-approved",
-      "popular",
-      "permissive"
+      "redundant-with-more-popular"
     ],
-    "links": [
-      {
-        "note": "tl;dr legal",
-        "url": "https://tldrlegal.com/license/apache-license-2.0-%28apache-2.0%29"
-      },
-      {
-        "note": "Wikipedia page",
-        "url": "https://en.wikipedia.org/wiki/Apache_License"
-      },
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/Apache-2.0"
-      }
-    ],
-    "name": "Apache License, Version 2.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://www.apache.org/licenses/LICENSE-2.0"
-      }
-    ]
+    "license_steward_url": "https://blueoakcouncil.org/license/1.0.0",
+    "license_steward_version": "",
+    "name": "Blue Oak Model License",
+    "spdx_id": "BlueOak-1.0.0",
+    "stewards": [],
+    "submission_date": "20231109",
+    "submission_url": "http://lists.opensource.org/pipermail/license-review_lists.opensource.org/2023-November/005441.html",
+    "submitter_name": "Luis Villa",
+    "version": "1.0.0"
   },
   {
-    "id": "Artistic-1.0",
-    "identifiers": [
-      {
-        "identifier": "Artistic-1.0",
-        "scheme": "DEP5"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "Artistic-1.0",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/unicode-3-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/unicode-3-0"
       }
-    ],
+    },
+    "approval_date": "20231117",
+    "approved": false,
+    "board_minutes": "",
+    "id": "unicode-3-0",
     "keywords": [
-      "osi-approved",
-      "discouraged",
-      "obsolete"
+      "special-purpose"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/Artistic-1.0"
-      }
+    "license_steward_url": "https://www.unicode.org/license.txt",
+    "license_steward_version": "",
+    "name": "UNICODE LICENSE V3",
+    "spdx_id": "Unicode-3.0",
+    "stewards": [
+      "unicode-consortium"
     ],
-    "name": "Artistic License, Version 1.0",
-    "other_names": [],
-    "superseded_by": "Artistic-2.0",
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/Artistic-1.0"
-      }
-    ]
+    "submission_date": "20230824",
+    "submission_url": "http://lists.opensource.org/pipermail/license-review_lists.opensource.org/2023-August/005404.html",
+    "submitter_name": "McCoy Smith",
+    "version": "3"
   },
   {
-    "id": "Artistic-2.0",
-    "identifiers": [
-      {
-        "identifier": "Artistic-2.0",
-        "scheme": "DEP5"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "Artistic-2.0",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/icu"
       },
-      {
-        "identifier": "License :: OSI Approved :: Artistic License",
-        "scheme": "Trove"
+      "self": {
+        "href": "https://opensource.org/api/license/icu"
       }
-    ],
-    "keywords": [
-      "miscellaneous",
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/Artistic-2.0"
-      }
-    ],
-    "name": "Artistic License, Version 2.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/Artistic-2.0"
-      }
-    ]
+    },
+    "approval_date": "20231020",
+    "approved": false,
+    "board_minutes": "",
+    "id": "icu",
+    "keywords": [],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "ICU License",
+    "spdx_id": "ICU",
+    "stewards": [],
+    "submission_date": "20230816",
+    "submission_url": "http://lists.opensource.org/pipermail/license-review_lists.opensource.org/2023-August/005 393.html",
+    "submitter_name": "Jeff Johnson",
+    "version": ""
   },
   {
-    "id": "BSD-2",
-    "identifiers": [
-      {
-        "identifier": "BSD-2-clause",
-        "scheme": "DEP5"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "BSD-2-Clause",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/olfl-1-3"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/olfl-1-3"
       }
-    ],
+    },
+    "approval_date": "20230317",
+    "approved": false,
+    "board_minutes": "https://wiki.opensource.org/bin/Main/OSI%20Board%20of%20Directors/Board%20minutes/2023/2023-03-17%20Minutes/",
+    "id": "olfl-1-3",
     "keywords": [
-      "osi-approved",
-      "popular",
-      "permissive"
+      "special-purpose"
     ],
-    "links": [
-      {
-        "note": "Wikipedia Page",
-        "url": "https://en.wikipedia.org/wiki/BSD_licenses#2-clause"
-      },
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/BSD-2-Clause"
-      }
+    "license_steward_url": "https://openlogisticsfoundation.org/licenses/",
+    "license_steward_version": "",
+    "name": "Open Logistics Foundation License v1.3",
+    "spdx_id": "OLFL-1.3",
+    "stewards": [
+      "open-logistics-foundation"
     ],
-    "name": "BSD 2-Clause License",
-    "other_names": [
-      {
-        "name": "Simplified BSD License",
-        "note": null
-      },
-      {
-        "name": "FreeBSD License",
-        "note": null
-      }
-    ],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/BSD-2-Clause"
-      }
-    ]
+    "submission_date": "20230117",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2023-January/005333.html",
+    "submitter_name": "Andreas Nettstr\u00e4ter",
+    "version": "1.3"
   },
   {
-    "id": "BSD-3",
-    "identifiers": [
-      {
-        "identifier": "BSD-3-clause",
-        "scheme": "DEP5"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "BSD-3-Clause",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/eupl-1-1"
       },
-      {
-        "identifier": "License :: OSI Approved :: BSD License",
-        "scheme": "Trove"
+      "self": {
+        "href": "https://opensource.org/api/license/eupl-1-1"
       }
-    ],
+    },
+    "approval_date": "20090304",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20090304/",
+    "id": "eupl-1-1",
     "keywords": [
-      "osi-approved",
-      "popular",
-      "permissive"
+      "superseded"
     ],
-    "links": [
-      {
-        "note": "Wikipedia Page",
-        "url": "https://en.wikipedia.org/wiki/BSD_licenses#3-clause"
+    "license_steward_url": "https://wayback.archive-it.org/12090/20200210204548/https://ec.europa.eu/idabc/en/document/7774.html",
+    "license_steward_version": "",
+    "name": "The European Union Public License, version 1.1",
+    "spdx_id": "EUPL-1.1",
+    "stewards": [
+      "european-commission"
+    ],
+    "submission_date": "20080513",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2008-May/000205.html",
+    "submitter_name": "Patrice-Emmanuel Schmitz",
+    "version": "1.1"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/BSD-3-Clause"
-      }
-    ],
-    "name": "BSD 3-Clause License",
-    "other_names": [
-      {
-        "name": "Revised BSD License",
-        "note": null
+      "html": {
+        "href": "https://opensource.org/license/jam"
       },
-      {
-        "name": "Modified BSD License",
-        "note": null
+      "self": {
+        "href": "https://opensource.org/api/license/jam"
+      }
+    },
+    "approval_date": "20210917",
+    "approved": false,
+    "board_minutes": "https://wiki.opensource.org/bin/Main/OSI%20Board%20of%20Directors/Board%20minutes/2021/2021-09-17/",
+    "id": "jam",
+    "keywords": [
+      "other-miscellaneous"
+    ],
+    "license_steward_url": "https://web.archive.org/web/20160330173339/https://swarm.workshop.perforce.com/files/guest/perforce_software/jam/src/README",
+    "license_steward_version": "",
+    "name": "JAM License",
+    "spdx_id": "Jam",
+    "stewards": [
+      "jam-software"
+    ],
+    "submission_date": "20210425",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2021-April/005139.html",
+    "submitter_name": "Jack Hill",
+    "version": "N/A"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "name": "New BSD License",
-        "note": null
-      }
-    ],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/BSD-3-Clause"
-      }
-    ]
-  },
-  {
-    "id": "BSL-1.0",
-    "identifiers": [
-      {
-        "identifier": "BSL-1.0",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/BSL-1.0"
-      }
-    ],
-    "name": "Boost Software License 1.0 (BSL-1.0)",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/BSL-1.0"
-      }
-    ]
-  },
-  {
-    "id": "CATOSL-1.1",
-    "identifiers": [
-      {
-        "identifier": "CATOSL-1.1",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/CATOSL-1.1"
-      }
-    ],
-    "name": "Computer Associates Trusted Open Source License, Version 1.1",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/CATOSL-1.1"
-      }
-    ]
-  },
-  {
-    "id": "CDDL-1.0",
-    "identifiers": [
-      {
-        "identifier": "CDDL-1.0",
-        "scheme": "DEP5"
+      "html": {
+        "href": "https://opensource.org/license/zpl-2-1"
       },
-      {
-        "identifier": "CDDL-1.0",
-        "scheme": "SPDX"
+      "self": {
+        "href": "https://opensource.org/api/license/zpl-2-1"
       }
-    ],
+    },
+    "approval_date": "20210625",
+    "approved": false,
+    "board_minutes": "https://wiki.opensource.org/bin/Main/OSI%20Board%20of%20Directors/Board%20minutes/2021/2021-06-25/",
+    "id": "zpl-2-1",
     "keywords": [
-      "osi-approved",
-      "popular"
+      "redundant-with-more-popular"
     ],
-    "links": [
-      {
-        "note": "Wikipedia page",
-        "url": "https://en.wikipedia.org/wiki/Common_Development_and_Distribution_License"
+    "license_steward_url": "https://public.dhe.ibm.com/aix/freeSoftware/aixtoolbox/LICENSES/ZPL-2.1.txt",
+    "license_steward_version": "",
+    "name": "Zope Public License 2.1",
+    "spdx_id": "ZPL-2.1",
+    "stewards": [
+      "zope-foundation"
+    ],
+    "submission_date": "20210406",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2021-April/005124.html",
+    "submitter_name": "Jens Vagelpohl",
+    "version": "2.1"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/CDDL-1.0"
-      }
-    ],
-    "name": "Common Development and Distribution License, Version 1.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/CDDL-1.0"
-      }
-    ]
-  },
-  {
-    "id": "CECILL-2.1",
-    "identifiers": [
-      {
-        "identifier": "License :: OSI Approved :: CEA CNRS Inria Logiciel Libre License, version 2.1 (CeCILL-2.1)",
-        "scheme": "Trove"
-      }
-    ],
-    "keywords": [
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/CECILL-2.1"
-      }
-    ],
-    "name": "Cea Cnrs Inria Logiciel Libre License, Version 2.1",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/CECILL-2.1"
-      }
-    ]
-  },
-  {
-    "id": "CNRI-Python",
-    "identifiers": [
-      {
-        "identifier": "CNRI-Python",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/cern-ohl-s-2-0"
       },
-      {
-        "identifier": "License :: OSI Approved :: Python License (CNRI Python License)",
-        "scheme": "Trove"
+      "self": {
+        "href": "https://opensource.org/api/license/cern-ohl-s-2-0"
       }
-    ],
+    },
+    "approval_date": "20210115",
+    "approved": false,
+    "board_minutes": "https://wiki.opensource.org/bin/Main/OSI%20Board%20of%20Directors/Board%20minutes/2021/2021-01-15/",
+    "id": "cern-ohl-s-2-0",
     "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
+      "special-purpose"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/CNRI-Python"
-      }
+    "license_steward_url": "https://ohwr.org/cern_ohl_s_v2.txt",
+    "license_steward_version": "",
+    "name": "CERN Open Hardware Licence Version 2 - Strongly Reciprocal",
+    "spdx_id": "CERN-OHL-S-2.0 ",
+    "stewards": [
+      "cern"
     ],
-    "name": "CNRI portion of the multi-part Python License",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/CNRI-Python"
-      }
-    ]
+    "submission_date": "20200629",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2020-June/004892.html",
+    "submitter_name": "Andrew Katz",
+    "version": "2"
   },
   {
-    "id": "CPAL-1.0",
-    "identifiers": [
-      {
-        "identifier": "CPAL-1.0",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/CPAL-1.0"
-      }
-    ],
-    "name": "Common Public Attribution License Version 1.0 (CPAL-1.0)",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/CPAL-1.0"
-      }
-    ]
-  },
-  {
-    "id": "CPL-1.0",
-    "identifiers": [
-      {
-        "identifier": "CPL",
-        "scheme": "DEP5"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "CPL-1.0",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/cern-ohl-w-2-0"
       },
-      {
-        "identifier": "License :: OSI Approved :: Common Public License",
-        "scheme": "Trove"
+      "self": {
+        "href": "https://opensource.org/api/license/cern-ohl-w-2-0"
       }
-    ],
+    },
+    "approval_date": "20210115",
+    "approved": false,
+    "board_minutes": "https://wiki.opensource.org/bin/Main/OSI%20Board%20of%20Directors/Board%20minutes/2021/2021-01-15/",
+    "id": "cern-ohl-w-2-0",
     "keywords": [
-      "discouraged",
-      "obsolete",
-      "osi-approved"
+      "special-purpose"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/CPL-1.0"
-      }
+    "license_steward_url": "https://ohwr.org/cern_ohl_w_v2.txt",
+    "license_steward_version": "",
+    "name": "CERN Open Hardware Licence Version 2 - Weakly Reciprocal",
+    "spdx_id": "CERN-OHL-W-2.0",
+    "stewards": [
+      "cern"
     ],
-    "name": "Common Public License, Version 1.0",
-    "other_names": [],
-    "superseded_by": "EPL-1.0",
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/CPL-1.0"
-      }
-    ]
+    "submission_date": "20200629",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2020-June/004892.html",
+    "submitter_name": "Andrew Katz",
+    "version": "2"
   },
   {
-    "id": "CUA-OPL-1.0",
-    "identifiers": [
-      {
-        "identifier": "CUA-OPL-1.0",
-        "scheme": "SPDX"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/cern-ohl-p-2-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/cern-ohl-p-2-0"
       }
-    ],
+    },
+    "approval_date": "20210115",
+    "approved": false,
+    "board_minutes": "https://wiki.opensource.org/bin/Main/OSI%20Board%20of%20Directors/Board%20minutes/2021/2021-01-15/",
+    "id": "cern-ohl-p-2-0",
     "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
+      "special-purpose"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/CUA-OPL-1.0"
-      }
+    "license_steward_url": "https://ohwr.org/cern_ohl_p_v2.txt",
+    "license_steward_version": "",
+    "name": "CERN Open Hardware Licence Version 2 - Permissive",
+    "spdx_id": "CERN-OHL-P-2.0",
+    "stewards": [
+      "cern"
     ],
-    "name": "CUA Office Public License",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/CUA-OPL-1.0"
-      }
-    ]
+    "submission_date": "20200629",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2020-June/004892.html",
+    "submitter_name": "Andrew Katz",
+    "version": "2"
   },
   {
-    "id": "CVW",
-    "identifiers": [
-      {
-        "identifier": "License :: OSI Approved :: MITRE Collaborative Virtual Workspace License (CVW)",
-        "scheme": "Trove"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/mit-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/mit-0"
       }
-    ],
+    },
+    "approval_date": "20200814",
+    "approved": false,
+    "board_minutes": "https://wiki.opensource.org/bin/Main/OSI%20Board%20of%20Directors/Board%20minutes/2020/2020-08-14/",
+    "id": "mit-0",
     "keywords": [
-      "discouraged",
-      "retired",
-      "osi-approved"
+      "other-miscellaneous"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/CVW"
-      }
-    ],
-    "name": "The MITRE Collaborative Virtual Workspace License",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/CVW"
-      }
-    ]
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "MIT No Attribution License",
+    "spdx_id": "MIT-0",
+    "stewards": [],
+    "submission_date": "20200515",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2020-May/004856.html",
+    "submitter_name": "Tobie Langel, URL N/A",
+    "version": "N/A"
   },
   {
-    "id": "ECL-1.0",
-    "identifiers": [
-      {
-        "identifier": "ECL-1.0",
-        "scheme": "SPDX"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/unicode-dfs-2016"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/unicode-dfs-2016"
       }
-    ],
-    "keywords": [
-      "discouraged",
-      "obsolete",
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/ECL-1.0"
-      }
-    ],
-    "name": "Educational Community License, Version 1.0",
-    "other_names": [],
-    "superseded_by": "ECL-2.0",
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/ECL-1.0"
-      }
-    ]
-  },
-  {
-    "id": "ECL-2.0",
-    "identifiers": [
-      {
-        "identifier": "ECL-2.0",
-        "scheme": "SPDX"
-      }
-    ],
+    },
+    "approval_date": "20180430",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes2018springf2f/",
+    "id": "unicode-dfs-2016",
     "keywords": [
       "special-purpose",
-      "osi-approved"
+      "superseded"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/ECL-2.0"
-      }
+    "license_steward_url": "http://www.unicode.org/copyright.html#LICENSE",
+    "license_steward_version": "",
+    "name": "Unicode, Inc. License Agreement - Data Files and Software",
+    "spdx_id": "Unicode-DFS-2016",
+    "stewards": [
+      "unicode-consortium"
     ],
-    "name": "Educational Community License, Version 2.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/ECL-2.0"
-      }
-    ]
+    "submission_date": "20171129",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2017-November/003296.html",
+    "submitter_name": "Sascha Brawer",
+    "version": "N/A"
   },
   {
-    "id": "EFL-1.0",
-    "identifiers": [
-      {
-        "identifier": "EFL-1.0",
-        "scheme": "DEP5"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "EFL-1.0",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/unlicense"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/unlicense"
       }
-    ],
+    },
+    "approval_date": "20200612",
+    "approved": false,
+    "board_minutes": "https://wiki.opensource.org/bin/Main/OSI%20Board%20of%20Directors/Board%20minutes/2020/2020-06-12",
+    "id": "unlicense",
     "keywords": [
-      "osi-approved",
-      "discouraged",
-      "obsolete"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/EFL-1.0"
-      }
-    ],
-    "name": "The Eiffel Forum License, Version 1",
-    "other_names": [],
-    "superseded_by": "EFL-2.0",
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/EFL-1.0"
-      }
-    ]
-  },
-  {
-    "id": "EFL-2.0",
-    "identifiers": [
-      {
-        "identifier": "EFL-2.0",
-        "scheme": "DEP5"
-      },
-      {
-        "identifier": "EFL-2.0",
-        "scheme": "SPDX"
-      },
-      {
-        "identifier": "License :: OSI Approved :: Eiffel Forum License",
-        "scheme": "Trove"
-      }
-    ],
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/EFL-2.0"
-      }
-    ],
-    "name": "Eiffel Forum License, Version 2",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/EFL-2.0"
-      }
-    ]
-  },
-  {
-    "id": "EPL-1.0",
-    "identifiers": [
-      {
-        "identifier": "EPL-1.0",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "osi-approved",
-      "popular"
-    ],
-    "links": [
-      {
-        "note": "Wikipedia page",
-        "url": "https://en.wikipedia.org/wiki/Eclipse_Public_License"
-      },
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/EPL-1.0"
-      }
-    ],
-    "name": "Eclipse Public License, Version 1.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://www.eclipse.org/legal/epl-v10.html"
-      }
-    ]
-  },
-  {
-    "id": "EUDatagrid",
-    "identifiers": [
-      {
-        "identifier": "EUDatagrid",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/EUDatagrid"
-      }
-    ],
-    "name": "EU DataGrid Software License",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/EUDatagrid"
-      }
-    ]
-  },
-  {
-    "id": "EUPL-1.1",
-    "identifiers": [
-      {
-        "identifier": "EUPL-1.1",
-        "scheme": "SPDX"
-      },
-      {
-        "identifier": "License :: OSI Approved :: European Union Public Licence 1.1 (EUPL 1.1)",
-        "scheme": "Trove"
-      }
-    ],
-    "keywords": [
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/EUPL-1.1"
-      }
-    ],
-    "name": "European Union Public License, Version 1.1",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/EUPL-1.1"
-      }
-    ]
-  },
-  {
-    "id": "Entessa",
-    "identifiers": [
-      {
-        "identifier": "Entessa",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/Entessa"
-      }
-    ],
-    "name": "Entessa Public License",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/Entessa"
-      }
-    ]
-  },
-  {
-    "id": "Fair",
-    "identifiers": [
-      {
-        "identifier": "Fair",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/Fair"
-      }
-    ],
-    "name": "Fair License (Fair)",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/Fair"
-      }
-    ]
-  },
-  {
-    "id": "Frameworx-1.0",
-    "identifiers": [
-      {
-        "identifier": "Frameworx-1.0",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/Frameworx-1.0"
-      }
-    ],
-    "name": "Frameworx License, Version 1.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/Frameworx-1.0"
-      }
-    ]
-  },
-  {
-    "id": "GPL-2.0",
-    "identifiers": [
-      {
-        "identifier": "GPL-2.0",
-        "scheme": "DEP5"
-      },
-      {
-        "identifier": "GPL-2.0",
-        "scheme": "SPDX"
-      },
-      {
-        "identifier": "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
-        "scheme": "Trove"
-      }
-    ],
-    "keywords": [
-      "osi-approved",
-      "popular",
-      "copyleft"
-    ],
-    "links": [
-      {
-        "note": "tl;dr legal",
-        "url": "https://tldrlegal.com/license/gnu-general-public-license-v2"
-      },
-      {
-        "note": "Wikipedia page",
-        "url": "https://en.wikipedia.org/wiki/GNU_General_Public_License"
-      },
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/GPL-2.0"
-      }
-    ],
-    "name": "GNU General Public License, Version 2.0",
-    "other_names": [],
-    "superseded_by": "GPL-3.0",
-    "text": [
-      {
-        "media_type": "text/plain",
-        "title": "Plain Text",
-        "url": "https://www.gnu.org/licenses/gpl-2.0.txt"
-      },
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://www.gnu.org/licenses/gpl-2.0-standalone.html"
-      }
-    ]
-  },
-  {
-    "id": "GPL-3.0",
-    "identifiers": [
-      {
-        "identifier": "GPL-3.0",
-        "scheme": "DEP5"
-      },
-      {
-        "identifier": "GPL-3.0",
-        "scheme": "SPDX"
-      },
-      {
-        "identifier": "License :: OSI Approved :: GNU General Public License (GPL)",
-        "scheme": "Trove"
-      },
-      {
-        "identifier": "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-        "scheme": "Trove"
-      }
-    ],
-    "keywords": [
-      "osi-approved",
-      "popular",
-      "copyleft"
-    ],
-    "links": [
-      {
-        "note": "tl;dr legal",
-        "url": "https://tldrlegal.com/license/gnu-general-public-license-v3-%28gpl-3%29"
-      },
-      {
-        "note": "Wikipedia page",
-        "url": "https://en.wikipedia.org/wiki/GNU_General_Public_License"
-      },
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/GPL-3.0"
-      }
-    ],
-    "name": "GNU General Public License, Version 3.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/plain",
-        "title": "Plain Text",
-        "url": "https://www.gnu.org/licenses/gpl-3.0.txt"
-      },
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://www.gnu.org/licenses/gpl-3.0-standalone.html"
-      }
-    ]
-  },
-  {
-    "id": "HPND",
-    "identifiers": [
-      {
-        "identifier": "HPND",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/HPND"
-      }
-    ],
-    "name": "Historical Permission Notice and Disclaimer",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/HPND"
-      }
-    ]
-  },
-  {
-    "id": "IPA",
-    "identifiers": [
-      {
-        "identifier": "IPA",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "osi-approved",
       "special-purpose"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/IPA"
-      }
-    ],
-    "name": "IPA Font License",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/IPA"
-      }
-    ]
+    "license_steward_url": "https://unlicense.org/",
+    "license_steward_version": "",
+    "name": "The Unlicense",
+    "spdx_id": "Unlicense",
+    "stewards": [],
+    "submission_date": "20200328",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2020-March/004795.html",
+    "submitter_name": "Steffen Jaeckel",
+    "version": "N/A"
   },
   {
-    "id": "IPL-1.0",
-    "identifiers": [
-      {
-        "identifier": "IPL-1.0",
-        "scheme": "SPDX"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "License :: OSI Approved :: IBM Public License",
-        "scheme": "Trove"
+      "html": {
+        "href": "https://opensource.org/license/php-3-01"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/php-3-01"
       }
-    ],
+    },
+    "approval_date": "20200511",
+    "approved": false,
+    "board_minutes": "https://wiki.opensource.org/bin/Main/OSI%20Board%20of%20Directors/Board%20minutes/2020/2020-05-11",
+    "id": "php-3-01",
     "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
+      "non-reusable"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/IPL-1.0"
-      }
-    ],
-    "name": "IBM Public License, Version 1.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/IPL-1.0"
-      }
-    ]
+    "license_steward_url": "https://www.php.net/license/3_01.txt",
+    "license_steward_version": "",
+    "name": "PHP License 3.01",
+    "spdx_id": "PHP-3.01",
+    "stewards": [],
+    "submission_date": "20200304",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2020-March/004716.html",
+    "submitter_name": "Ben Ramsey",
+    "version": "3.01"
   },
   {
-    "id": "ISC",
-    "identifiers": [
-      {
-        "identifier": "ISC",
-        "scheme": "DEP5"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "ISC",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/cal-1-0"
       },
-      {
-        "identifier": "License :: OSI Approved :: ISC License (ISCL)",
-        "scheme": "Trove"
+      "self": {
+        "href": "https://opensource.org/api/license/cal-1-0"
       }
-    ],
+    },
+    "approval_date": "20190214",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20200214/",
+    "id": "cal-1-0",
     "keywords": [
-      "osi-approved"
+      "uncategorized"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/ISC"
-      },
-      {
-        "note": "Wikipedia page",
-        "url": "https://en.wikipedia.org/wiki/ISC_license"
-      }
-    ],
-    "name": "ISC License (ISC)",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/ISC"
-      }
-    ]
+    "license_steward_url": "https://www.processmechanics.com/static/CAL-1.0-Beta.pdf",
+    "license_steward_version": "",
+    "name": "Cryptographic Autonomy License",
+    "spdx_id": "CAL-1.0",
+    "stewards": [],
+    "submission_date": "20191204",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2019-December/004455.html",
+    "submitter_name": "Van Lindberg",
+    "version": "1.0"
   },
   {
-    "id": "Intel",
-    "identifiers": [
-      {
-        "identifier": "Intel",
-        "scheme": "SPDX"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "License :: OSI Approved :: Intel Open Source License",
-        "scheme": "Trove"
+      "html": {
+        "href": "https://opensource.org/license/mulanpsl-2-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/mulanpsl-2-0"
       }
-    ],
+    },
+    "approval_date": "20200214",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20200214/",
+    "id": "mulanpsl-2-0",
     "keywords": [
-      "discouraged",
-      "retired",
-      "osi-approved"
+      "international"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/Intel"
-      }
-    ],
-    "name": "The Intel Open Source License",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/Intel"
-      }
-    ]
+    "license_steward_url": "http://license.coscl.org.cn/MulanPSL2",
+    "license_steward_version": "",
+    "name": "Mulan Permissive Software License v2",
+    "spdx_id": "MulanPSL-2.0",
+    "stewards": [],
+    "submission_date": "20200106",
+    "submission_url": " http://lists.opensource.org/pipermail/license-review_lists.opensource.org/2020-January/004640.html",
+    "submitter_name": "Zhou Minghui",
+    "version": "2.0"
   },
   {
-    "id": "LGPL-2.1",
-    "identifiers": [
-      {
-        "identifier": "LGPL-2.1",
-        "scheme": "DEP5"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "LGPL-2.1",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/oldap-2-8"
       },
-      {
-        "identifier": "License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
-        "scheme": "Trove"
+      "self": {
+        "href": "https://opensource.org/api/license/oldap-2-8"
       }
-    ],
+    },
+    "approval_date": "20190920",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20190920/",
+    "id": "oldap-2-8",
     "keywords": [
-      "osi-approved",
-      "popular",
-      "copyleft"
+      "redundant-with-more-popular"
     ],
-    "links": [
-      {
-        "note": "Wikipedia page",
-        "url": "https://en.wikipedia.org/wiki/GNU_Lesser_General_Public_License"
-      },
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/LGPL-2.1"
-      }
+    "license_steward_url": "https://www.openldap.org/software/release/license.html",
+    "license_steward_version": "",
+    "name": "OpenLDAP Public License Version 2.8",
+    "spdx_id": "OLDAP-2.8",
+    "stewards": [
+      "the-openldap-project"
     ],
-    "name": "GNU Lesser General Public License, Version 2.1",
-    "other_names": [],
-    "superseded_by": "LGPL-3.0",
-    "text": [
-      {
-        "media_type": "text/plain",
-        "title": "Plain Text",
-        "url": "https://www.gnu.org/licenses/lgpl-2.1.txt"
-      },
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://www.gnu.org/licenses/lgpl-2.1-standalone.html"
-      }
-    ]
+    "submission_date": "20190813",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2019-August/004266.html",
+    "submitter_name": "Howard Chu",
+    "version": "2.8"
   },
   {
-    "id": "LGPL-3.0",
-    "identifiers": [
-      {
-        "identifier": "LGPL-3.0",
-        "scheme": "DEP5"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "LGPL-3.0",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/bsd-1-clause"
       },
-      {
-        "identifier": "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
-        "scheme": "Trove"
-      },
-      {
-        "identifier": "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
-        "scheme": "Trove"
+      "self": {
+        "href": "https://opensource.org/api/license/bsd-1-clause"
       }
-    ],
+    },
+    "approval_date": "20200313",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20200313/",
+    "id": "bsd-1-clause",
     "keywords": [
-      "osi-approved",
-      "popular",
-      "copyleft"
+      "other-miscellaneous"
     ],
-    "links": [
-      {
-        "note": "Wikipedia page",
-        "url": "https://en.wikipedia.org/wiki/GNU_Lesser_General_Public_License"
-      },
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/LGPL-3.0"
-      }
+    "license_steward_url": "https://svnweb.freebsd.org/base/head/include/ifaddrs.h?revision=326823",
+    "license_steward_version": "",
+    "name": "1-clause BSD License",
+    "spdx_id": "BSD-1-Clause",
+    "stewards": [
+      "berkley-software-design-inc"
     ],
-    "name": "GNU Lesser General Public License, Version 3.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/plain",
-        "title": "Plain Text",
-        "url": "https://www.gnu.org/licenses/lgpl-3.0.txt"
-      },
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://www.gnu.org/licenses/lgpl-3.0-standalone.html"
-      }
-    ]
+    "submission_date": "20191210",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2019-December/004510.html",
+    "submitter_name": "Pedro Giffuni",
+    "version": "N/A"
   },
   {
-    "id": "LPL-1.0",
-    "identifiers": [
-      {
-        "identifier": "LPL-1.0",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "obsolete"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/LPL-1.0"
-      }
-    ],
-    "name": "Lucent Public License, Plan 9, Version 1.0",
-    "other_names": [],
-    "superseded_by": "LPL-1.02",
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/LPL-1.0"
-      }
-    ]
-  },
-  {
-    "id": "LPL-1.02",
-    "identifiers": [
-      {
-        "identifier": "LPL-1.02",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/LPL-1.02"
-      }
-    ],
-    "name": "Lucent Public License, Version 1.02",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/LPL-1.02"
-      }
-    ]
-  },
-  {
-    "id": "LPPL-1.3c",
-    "identifiers": [
-      {
-        "identifier": "LPPL-1.3c",
-        "scheme": "DEP5"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "LPPL-1.3c",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/bsd-3-clause-lbnl"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/bsd-3-clause-lbnl"
       }
-    ],
+    },
+    "approval_date": "20190614",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20190614/",
+    "id": "bsd-3-clause-lbnl",
     "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
+      "special-purpose"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/LPPL-1.3c"
+    "license_steward_url": "https://fedoraproject.org/wiki/Licensing:LBNLBSD",
+    "license_steward_version": "",
+    "name": "Lawrence Berkeley National Labs BSD Variant License",
+    "spdx_id": "BSD-3-Clause-LBNL",
+    "stewards": [],
+    "submission_date": "20190516",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2019-May/004169.html",
+    "submitter_name": "Sebastian Ainslie",
+    "version": "N/A"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/epl-2-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/epl-2-0"
       }
+    },
+    "approval_date": "20170810",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20170810/",
+    "id": "epl-2-0",
+    "keywords": [
+      "popular-strong-community"
     ],
+    "license_steward_url": "https://www.eclipse.org/legal/epl-2.0/",
+    "license_steward_version": "",
+    "name": "Eclipse Public License version 2.0",
+    "spdx_id": "EPL-2.0",
+    "stewards": [
+      "eclipse-foundation"
+    ],
+    "submission_date": "20170615",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2017-June/003048.html",
+    "submitter_name": "Mike Milinkovich",
+    "version": "2.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/lgpl-2-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/lgpl-2-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "lgpl-2-0",
+    "keywords": [
+      "popular-strong-community"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "GNU Library General Public License version 2",
+    "spdx_id": "LGPL-2.0",
+    "stewards": [
+      "free-software-foundation"
+    ],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "2"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/ucl-1-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/ucl-1-0"
+      }
+    },
+    "approval_date": "20170404",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes2017springf2f/",
+    "id": "ucl-1-0",
+    "keywords": [
+      "special-purpose"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Upstream Compatibility License v1.0",
+    "spdx_id": "UCL-1.0",
+    "stewards": [],
+    "submission_date": "20170223",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2017-February/002980.html",
+    "submitter_name": "Nigel T, URL N/A",
+    "version": "1.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/bsd-2-clause-patent"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/bsd-2-clause-patent"
+      }
+    },
+    "approval_date": "20170404",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes2017springf2f/",
+    "id": "bsd-2-clause-patent",
+    "keywords": [
+      "special-purpose"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "BSD+Patent",
+    "spdx_id": "BSD-2-Clause-Patent",
+    "stewards": [],
+    "submission_date": "20160113",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2016-January/002640.html",
+    "submitter_name": "McCoy Smith",
+    "version": "N/A"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/liliq-rplus-1-1"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/liliq-rplus-1-1"
+      }
+    },
+    "approval_date": "20160113",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20160113/",
+    "id": "liliq-rplus-1-1",
+    "keywords": [
+      "international"
+    ],
+    "license_steward_url": "https://forge.gouv.qc.ca/licence/liliq-r+/",
+    "license_steward_version": "",
+    "name": "Licence Libre du Qu\u00e9bec \u2013 R\u00e9ciprocit\u00e9 forte version 1.1",
+    "spdx_id": "LiLiQ-Rplus-1.1",
+    "stewards": [
+      "government-of-quebec"
+    ],
+    "submission_date": "20150915",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2015-September/002548.html",
+    "submitter_name": "Simon Johnson-B\u00e9gin",
+    "version": "1.1"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/liliq-r-1-1"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/liliq-r-1-1"
+      }
+    },
+    "approval_date": "20160113",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20160113/",
+    "id": "liliq-r-1-1",
+    "keywords": [
+      "international"
+    ],
+    "license_steward_url": "https://forge.gouv.qc.ca/licence/liliq-r/",
+    "license_steward_version": "",
+    "name": "Licence Libre du Qu\u00e9bec \u2013 R\u00e9ciprocit\u00e9 version 1.1",
+    "spdx_id": "LiLiQ-R-1.1",
+    "stewards": [
+      "government-of-quebec"
+    ],
+    "submission_date": "20150915",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2015-September/002548.html",
+    "submitter_name": "Simon Johnson-B\u00e9gin",
+    "version": "1.1"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/liliq-p-1-1"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/liliq-p-1-1"
+      }
+    },
+    "approval_date": "20160113",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20160113/",
+    "id": "liliq-p-1-1",
+    "keywords": [
+      "international"
+    ],
+    "license_steward_url": "https://forge.gouv.qc.ca/licence/liliq-p/",
+    "license_steward_version": "",
+    "name": "Licence Libre du Qu\u00e9bec \u2013 Permissive  version 1.1",
+    "spdx_id": "LiLiQ-P-1.1",
+    "stewards": [
+      "government-of-quebec"
+    ],
+    "submission_date": "20150915",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2015-September/002548.html",
+    "submitter_name": "Simon Johnson-B\u00e9gin",
+    "version": "1.1"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/oset-pl-2-1"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/oset-pl-2-1"
+      }
+    },
+    "approval_date": "20151110",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes2015fallf2f/",
+    "id": "oset-pl-2-1",
+    "keywords": [
+      "special-purpose"
+    ],
+    "license_steward_url": "https://www.osetinstitute.org/public-license/",
+    "license_steward_version": "",
+    "name": "OSET Public License version 2.1",
+    "spdx_id": "OSET-PL-2.1",
+    "stewards": [
+      "oset"
+    ],
+    "submission_date": "20150901",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2015-September/002444.html",
+    "submitter_name": "Heather Meeker",
+    "version": "2.1"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/ecos-2-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/ecos-2-0"
+      }
+    },
+    "approval_date": "20150909",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20150909/",
+    "id": "ecos-2-0",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "https://ecos.sourceware.org/license-overview.html",
+    "license_steward_version": "",
+    "name": "eCos License version 2.0",
+    "spdx_id": "eCos-2.0",
+    "stewards": [],
+    "submission_date": "20140829",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2014-August/002187.html",
+    "submitter_name": "John Dallaway",
+    "version": "2.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/0bsd"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/0bsd"
+      }
+    },
+    "approval_date": "20151014",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20151014-2/",
+    "id": "0bsd",
+    "keywords": [
+      "other-miscellaneous"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Zero-Clause BSD",
+    "spdx_id": "0BSD",
+    "stewards": [],
+    "submission_date": "20150830",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2015-August/002438.html",
+    "submitter_name": "Christian Bundy, URL N/A",
+    "version": "N/A"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/upl-1-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/upl-1-0"
+      }
+    },
+    "approval_date": "20150204",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20150204/",
+    "id": "upl-1-0",
+    "keywords": [
+      "other-miscellaneous"
+    ],
+    "license_steward_url": "https://oss.oracle.com/licenses/upl/",
+    "license_steward_version": "",
+    "name": "The Universal Permissive License Version 1.0",
+    "spdx_id": "UPL-1.0",
+    "stewards": [
+      "oracle"
+    ],
+    "submission_date": "20140411",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2014-April/002108.html",
+    "submitter_name": "Jim Wright",
+    "version": "1.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/cecill-2-1"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/cecill-2-1"
+      }
+    },
+    "approval_date": "20130501",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20130501/",
+    "id": "cecill-2-1",
+    "keywords": [
+      "international"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Cea Cnrs Inria Logiciel Libre License, version 2.1",
+    "spdx_id": "CECILL-2.1",
+    "stewards": [
+      "cea-cnrs-inria-logiciel-libre"
+    ],
+    "submission_date": "20120227",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2012-February/001603.html",
+    "submitter_name": "Patrick Moreau, URL N/A",
+    "version": "2.1"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/artistic-1-0-perl"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/artistic-1-0-perl"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "artistic-1-0-perl",
+    "keywords": [
+      "superseded"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Artistic License (Perl) 1.0",
+    "spdx_id": "Artistic-1.0-Perl",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "1.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/mpl-2-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/mpl-2-0"
+      }
+    },
+    "approval_date": "20120109",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20120109/",
+    "id": "mpl-2-0",
+    "keywords": [
+      "popular-strong-community"
+    ],
+    "license_steward_url": "https://www.mozilla.org/en-US/MPL/2.0/",
+    "license_steward_version": "",
+    "name": "Mozilla Public License 2.0",
+    "spdx_id": "MPL-2.0",
+    "stewards": [
+      "mozilla-foundation"
+    ],
+    "submission_date": "20110815",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2011-August/001294.html",
+    "submitter_name": "Luis Villa",
+    "version": "2.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/eupl-1-2"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/eupl-1-2"
+      }
+    },
+    "approval_date": "20170713",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20170713/",
+    "id": "eupl-1-2",
+    "keywords": [
+      "international"
+    ],
+    "license_steward_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=uriserv:OJ.L_.2017.128.01.0059.01.ENG&amp;toc=OJ:L:2017:128:FULL",
+    "license_steward_version": "",
+    "name": "European Union Public Licence, version 1.2",
+    "spdx_id": "EUPL-1.2",
+    "stewards": [
+      "european-commission"
+    ],
+    "submission_date": "20170530",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2017-May/003040.html",
+    "submitter_name": "Patrice-Emmanuel Schmitz",
+    "version": "1.2"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/bsd-3-clause"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/bsd-3-clause"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "bsd-3-clause",
+    "keywords": [
+      "popular-strong-community"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "The 3-Clause BSD License",
+    "spdx_id": "BSD-3-Clause",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": ""
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/lppl-1-3c"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/lppl-1-3c"
+      }
+    },
+    "approval_date": "20091111",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20091111/",
+    "id": "lppl-1-3c",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "https://www.latex-project.org/lppl/",
+    "license_steward_version": "",
     "name": "LaTeX Project Public License, Version 1.3c",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/LPPL-1.3c"
-      }
-    ]
+    "spdx_id": "LPPL-1.3c",
+    "stewards": [],
+    "submission_date": "20090908",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2009-September/000838.html",
+    "submitter_name": "Will Robertson",
+    "version": "1.3c"
   },
   {
-    "id": "LiLiQ-P-1.1",
-    "identifiers": [],
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/gpl-1-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/gpl-1-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "gpl-1-0",
     "keywords": [
-      "osi-approved",
-      "international",
-      "permissive"
+      "superseded"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/LiLiQ-P-1.1"
-      }
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "GNU General Public License, version 1",
+    "spdx_id": "GPL-1.0",
+    "stewards": [
+      "free-software-foundation"
     ],
-    "name": "Licence Libre du Qu\u00e9bec \u2013 Permissive, Version 1.1",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/LiLiQ-P-1.1"
-      }
-    ]
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "1"
   },
   {
-    "id": "LiLiQ-R+",
-    "identifiers": [],
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/postgresql"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/postgresql"
+      }
+    },
+    "approval_date": "20100210",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20100210/",
+    "id": "postgresql",
     "keywords": [
-      "international",
-      "osi-approved",
-      "copyleft"
+      "redundant-with-more-popular"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/LiLiQ-Rplus-1.1"
-      }
-    ],
-    "name": "Licence Libre du Qu\u00e9bec \u2013 R\u00e9ciprocit\u00e9 forte, Version 1.1",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/LiLiQ-Rplus-1.1"
-      }
-    ]
+    "license_steward_url": "https://www.postgresql.org/about/license/",
+    "license_steward_version": "",
+    "name": "The PostgreSQL License",
+    "spdx_id": "PostgreSQL",
+    "stewards": [],
+    "submission_date": "20090924",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2009-September/000873.html",
+    "submitter_name": "Dave Page",
+    "version": "N/A"
   },
   {
-    "id": "LiLiQ-R-1.1",
-    "identifiers": [],
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/ipa"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/ipa"
+      }
+    },
+    "approval_date": "20090401",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20090401/",
+    "id": "ipa",
     "keywords": [
-      "international",
-      "osi-approved",
-      "copyleft"
+      "special-purpose"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/LiLiQ-R-1.1"
-      }
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "IPA Font License",
+    "spdx_id": "IPA",
+    "stewards": [
+      "the-information-technology-promotion-agency"
     ],
-    "name": "Licence Libre du Qu\u00e9bec \u2013 R\u00e9ciprocit\u00e9, Version 1.1",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/LiLiQ-R-1.1"
-      }
-    ]
+    "submission_date": "20090204",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2009-February/000514.html",
+    "submitter_name": "Yuko Noguchi, URL N/A",
+    "version": "1.0"
   },
   {
-    "id": "MIT",
-    "identifiers": [
-      {
-        "identifier": "MIT",
-        "scheme": "DEP5"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "Expat",
-        "scheme": "DEP5"
+      "html": {
+        "href": "https://opensource.org/license/ofl-1-1"
       },
-      {
-        "identifier": "MIT",
-        "scheme": "SPDX"
-      },
-      {
-        "identifier": "License :: OSI Approved :: MIT License",
-        "scheme": "Trove"
+      "self": {
+        "href": "https://opensource.org/api/license/ofl-1-1"
       }
-    ],
+    },
+    "approval_date": "20090401",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20090401/",
+    "id": "ofl-1-1",
     "keywords": [
-      "osi-approved",
-      "popular",
-      "permissive"
+      "special-purpose"
     ],
-    "links": [
-      {
-        "note": "tl;dr legal",
-        "url": "https://tldrlegal.com/license/mit-license"
-      },
-      {
-        "note": "Wikipedia page",
-        "url": "https://en.wikipedia.org/wiki/MIT_License"
-      },
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/mit"
-      }
+    "license_steward_url": "http://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&amp;id=OFL",
+    "license_steward_version": "",
+    "name": "SIL OPEN FONT LICENSE",
+    "spdx_id": "OFL-1.1",
+    "stewards": [
+      "sil-international"
     ],
-    "name": "MIT/Expat License",
-    "other_names": [
-      {
-        "name": "MIT",
-        "note": "Because MIT has used many licenses for software, the Free Software Foundation considers MIT License ambiguous. The MIT License published on the OSI site is the same as the Expat License."
-      },
-      {
-        "name": "Expat",
-        "note": "Because MIT has used many licenses for software, the Free Software Foundation considers MIT License ambiguous. The MIT License published on the OSI site is the same as the Expat License."
-      }
-    ],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/mit"
-      }
-    ]
+    "submission_date": "20081105",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2008-November/000384.html",
+    "submitter_name": "Yuko Noguchi",
+    "version": "1.1"
   },
   {
-    "id": "MPL-1.0",
-    "identifiers": [
-      {
-        "identifier": "MPL-1.0",
-        "scheme": "SPDX"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "License :: OSI Approved :: Mozilla Public License 1.0 (MPL)",
-        "scheme": "Trove"
+      "html": {
+        "href": "https://opensource.org/license/miros"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/miros"
       }
-    ],
+    },
+    "approval_date": "20080910",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20080910/",
+    "id": "miros",
     "keywords": [
-      "osi-approved",
-      "discouraged",
-      "obsolete"
+      "uncategorized"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/MPL-1.0"
-      }
+    "license_steward_url": "http://www.mirbsd.org/MirOS-Licence.htm",
+    "license_steward_version": "",
+    "name": "MirOS Licence",
+    "spdx_id": "MirOS",
+    "stewards": [
+      "miros-bsd"
     ],
-    "name": "Mozilla Public License, Version 1.0",
-    "other_names": [],
-    "superseded_by": "MPL-2.0",
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/MPL-1.0"
-      }
-    ]
+    "submission_date": "20080705",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2008-July/000301.html",
+    "submitter_name": "Thorsten Glaser",
+    "version": "N/A"
   },
   {
-    "id": "MPL-1.1",
-    "identifiers": [
-      {
-        "identifier": "MPL-1.1",
-        "scheme": "DEP5"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "MPL-1.1",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/nposl-3-0"
       },
-      {
-        "identifier": "License :: OSI Approved :: Mozilla Public License 1.1 (MPL 1.1)",
-        "scheme": "Trove"
+      "self": {
+        "href": "https://opensource.org/api/license/nposl-3-0"
       }
-    ],
+    },
+    "approval_date": "20070905",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20070905/",
+    "id": "nposl-3-0",
     "keywords": [
-      "osi-approved",
-      "discouraged",
-      "obsolete"
+      "uncategorized"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/MPL-1.1"
-      }
+    "license_steward_url": "https://trustee.ietf.org/assets/licenses/non-profit-osl-3/",
+    "license_steward_version": "",
+    "name": "Non-Profit Open Software License version 3.0",
+    "spdx_id": "NPOSL-3.0",
+    "stewards": [
+      "ietf"
     ],
-    "name": "Mozilla Public License, Version 1.1",
-    "other_names": [],
-    "superseded_by": "MPL-2.0",
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/MPL-1.1"
-      }
-    ]
+    "submission_date": "20070807",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2007-August/013298.html",
+    "submitter_name": "Lawrence Rosen",
+    "version": "3.0"
   },
   {
-    "id": "MPL-2.0",
-    "identifiers": [
-      {
-        "identifier": "MPL-2.0",
-        "scheme": "SPDX"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
-        "scheme": "Trove"
-      }
-    ],
-    "keywords": [
-      "osi-approved",
-      "popular",
-      "copyleft"
-    ],
-    "links": [
-      {
-        "note": "Wikipedia page",
-        "url": "https://en.wikipedia.org/wiki/MPL_License"
+      "html": {
+        "href": "https://opensource.org/license/ntp"
       },
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/MPL-2.0"
+      "self": {
+        "href": "https://opensource.org/api/license/ntp"
+      }
+    },
+    "approval_date": "20080402",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20080402/",
+    "id": "ntp",
+    "keywords": [
+      "uncategorized"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "NTP License",
+    "spdx_id": "NTP",
+    "stewards": [],
+    "submission_date": "20080226",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2008-February/000085.html",
+    "submitter_name": "Harlan Stenn, URL N/A",
+    "version": "N/A"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "note": "Mozilla Page",
-        "url": "https://www.mozilla.org/en-US/MPL/"
-      }
-    ],
-    "name": "Mozilla Public License, Version 2.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://www.mozilla.org/en-US/MPL/2.0/"
-      }
-    ]
-  },
-  {
-    "id": "MS-PL",
-    "identifiers": [
-      {
-        "identifier": "MS-PL",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/MS-PL"
-      }
-    ],
-    "name": "Microsoft Public License (MS-PL)",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/MS-PL"
-      }
-    ]
-  },
-  {
-    "id": "MS-RL",
-    "identifiers": [
-      {
-        "identifier": "MS-RL",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/MS-RL"
-      }
-    ],
-    "name": "Microsoft Reciprocal License (MS-RL)",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/MS-RL"
-      }
-    ]
-  },
-  {
-    "id": "MirOS",
-    "identifiers": [
-      {
-        "identifier": "MirOS",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/MirOS"
-      }
-    ],
-    "name": "The MirOS Licence (MirOS)",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/MirOS"
-      }
-    ]
-  },
-  {
-    "id": "Motosoto",
-    "identifiers": [
-      {
-        "identifier": "Motosoto",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/agpl-3-0"
       },
-      {
-        "identifier": "License :: OSI Approved :: Motosoto License",
-        "scheme": "Trove"
+      "self": {
+        "href": "https://opensource.org/api/license/agpl-3-0"
       }
-    ],
+    },
+    "approval_date": "20080303",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20080312/",
+    "id": "agpl-3-0",
     "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
+      "uncategorized"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/Motosoto"
-      }
+    "license_steward_url": "https://www.gnu.org/licenses/agpl-3.0.html",
+    "license_steward_version": "",
+    "name": "GNU Affero General Public License version 3",
+    "spdx_id": "AGPL-3.0",
+    "stewards": [
+      "free-software-foundation"
     ],
-    "name": "Motosoto Open Source License, Version 0.9.1",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/Motosoto"
-      }
-    ]
+    "submission_date": "20080130",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2008-January/000058.html",
+    "submitter_name": "Stefano Maffulli",
+    "version": "3.0"
   },
   {
-    "id": "Multics",
-    "identifiers": [
-      {
-        "identifier": "Multics",
-        "scheme": "SPDX"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/isc"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/isc"
       }
-    ],
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "isc",
     "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
+      "uncategorized"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/Multics"
+    "license_steward_url": "https://en.wikipedia.org/wiki/ISC_license",
+    "license_steward_version": "",
+    "name": "ISC License",
+    "spdx_id": "ISC",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "Harlan Stenn",
+    "version": ""
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/rpl-1-5"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/rpl-1-5"
       }
+    },
+    "approval_date": "20090901",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20080109/",
+    "id": "rpl-1-5",
+    "keywords": [
+      "uncategorized"
     ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Reciprocal Public License 1.5",
+    "spdx_id": "RPL-1.5",
+    "stewards": [],
+    "submission_date": "20070724",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2007-July/013075.html",
+    "submitter_name": "William J. Edney, URL N/A",
+    "version": "1.5"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/bsl-1-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/bsl-1-0"
+      }
+    },
+    "approval_date": "20080109",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20080109/",
+    "id": "bsl-1-0",
+    "keywords": [
+      "uncategorized"
+    ],
+    "license_steward_url": "https://www.boost.org/LICENSE_1_0.txt",
+    "license_steward_version": "",
+    "name": "Boost Software License 1.0",
+    "spdx_id": "BSL-1.0",
+    "stewards": [
+      "boost"
+    ],
+    "submission_date": "20070915",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2007-September/014119.html",
+    "submitter_name": "Alexander Terekhov",
+    "version": "1.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/multics"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/multics"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "multics",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
     "name": "Multics License",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/Multics"
-      }
-    ]
+    "spdx_id": "Multics",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": ""
   },
   {
-    "id": "NASA-1.3",
-    "identifiers": [
-      {
-        "identifier": "NASA-1.3",
-        "scheme": "SPDX"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/osl-2-1"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/osl-2-1"
       }
-    ],
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "osl-2-1",
     "keywords": [
-      "osi-approved",
+      "superseded"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Open Software License 2.1",
+    "spdx_id": "OSL-2.1",
+    "stewards": [],
+    "submission_date": "20040325",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2004-March/007999.html",
+    "submitter_name": "Lawrence E. Rosen, URL N/A",
+    "version": ""
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/simpl-2-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/simpl-2-0"
+      }
+    },
+    "approval_date": "20070606",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20070606/",
+    "id": "simpl-2-0",
+    "keywords": [
+      "uncategorized"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Simple Public License",
+    "spdx_id": "SimPL-2.0",
+    "stewards": [],
+    "submission_date": "20070316",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2007-March/012630.html",
+    "submitter_name": "Jim Sfekas",
+    "version": "2.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/lgpl-3-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/lgpl-3-0"
+      }
+    },
+    "approval_date": "20070905",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20070905/",
+    "id": "lgpl-3-0",
+    "keywords": [
+      "popular-strong-community"
+    ],
+    "license_steward_url": "https://www.gnu.org/licenses/lgpl-3.0.en.html",
+    "license_steward_version": "",
+    "name": "GNU Lesser General Public License version 3",
+    "spdx_id": "LGPL-3.0",
+    "stewards": [
+      "free-software-foundation"
+    ],
+    "submission_date": "20070629",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2007-June/012888.html",
+    "submitter_name": "GNU Lesser General Public License ",
+    "version": "3.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/gpl-3-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/gpl-3-0"
+      }
+    },
+    "approval_date": "20070905",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20070905/",
+    "id": "gpl-3-0",
+    "keywords": [
+      "popular-strong-community"
+    ],
+    "license_steward_url": "https://www.gnu.org/licenses/gpl-3.0.en.html",
+    "license_steward_version": "",
+    "name": "GNU General Public License version 3",
+    "spdx_id": "GPL-3.0",
+    "stewards": [
+      "free-software-foundation"
+    ],
+    "submission_date": "20070629",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2007-June/012888.html",
+    "submitter_name": "GNU GENERAL PUBLIC LICENSE",
+    "version": "3.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/ms-rl"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/ms-rl"
+      }
+    },
+    "approval_date": "20071010",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20071010/",
+    "id": "ms-rl",
+    "keywords": [
+      "uncategorized"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Microsoft Reciprocal License",
+    "spdx_id": "MS-RL",
+    "stewards": [
+      "microsoft"
+    ],
+    "submission_date": "20071003",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2007-October/014339.html",
+    "submitter_name": "Rick Moen",
+    "version": "N/A"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/ms-pl"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/ms-pl"
+      }
+    },
+    "approval_date": "20071010",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20071010/",
+    "id": "ms-pl",
+    "keywords": [
+      "uncategorized"
+    ],
+    "license_steward_url": "https://learn.microsoft.com/en-us/previous-versions/msp-n-p/ff647676(v=pandp.10)?redirectedfrom=MSDN",
+    "license_steward_version": "",
+    "name": "Microsoft Public License",
+    "spdx_id": "MS-PL",
+    "stewards": [
+      "microsoft"
+    ],
+    "submission_date": "20071003",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2007-October/014347.html",
+    "submitter_name": "Microsoft Public License (Ms-PL)",
+    "version": "N/A"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/artistic-2-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/artistic-2-0"
+      }
+    },
+    "approval_date": "20070606",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20070606/",
+    "id": "artistic-2-0",
+    "keywords": [
+      "other-miscellaneous"
+    ],
+    "license_steward_url": "https://www.perlfoundation.org/artistic-license-20.html",
+    "license_steward_version": "",
+    "name": "Artistic License 2.0",
+    "spdx_id": "Artistic-2.0",
+    "stewards": [
+      "the-perl-raku-foundation"
+    ],
+    "submission_date": "20070314",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2007-March/012617.html",
+    "submitter_name": "Allison Randal",
+    "version": "2.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/ecl-2-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/ecl-2-0"
+      }
+    },
+    "approval_date": "20070606",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20070606/",
+    "id": "ecl-2-0",
+    "keywords": [
       "special-purpose"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/NASA-1.3"
-      }
-    ],
-    "name": "NASA Open Source Agreement, Version 1.3",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/NASA-1.3"
-      }
-    ]
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Educational Community License, Version 2.0",
+    "spdx_id": "ECL-2.0",
+    "stewards": [],
+    "submission_date": "20070521",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2007-May/012792.html",
+    "submitter_name": "Christopher D. Coppola",
+    "version": "2.0"
   },
   {
-    "id": "NCSA",
-    "identifiers": [
-      {
-        "identifier": "NCSA",
-        "scheme": "SPDX"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "License :: OSI Approved :: University of Illinois/NCSA Open Source License",
-        "scheme": "Trove"
-      }
-    ],
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/NCSA"
-      }
-    ],
-    "name": "The University of Illinois/NCSA Open Source License",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/NCSA"
-      }
-    ]
-  },
-  {
-    "id": "NGPL",
-    "identifiers": [
-      {
-        "identifier": "NGPL",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/epl-1-0"
       },
-      {
-        "identifier": "License :: OSI Approved :: Nethack General Public License",
-        "scheme": "Trove"
+      "self": {
+        "href": "https://opensource.org/api/license/epl-1-0"
       }
-    ],
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "epl-1-0",
     "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
+      "superseded"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/NGPL"
-      }
+    "license_steward_url": "https://www.eclipse.org/org/documents/epl-v10.html",
+    "license_steward_version": "",
+    "name": "Eclipse Public License -v 1.0",
+    "spdx_id": "EPL-1.0",
+    "stewards": [
+      "eclipse-foundation"
     ],
-    "name": "The Nethack General Public License",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/NGPL"
-      }
-    ]
+    "submission_date": "20040308",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2004-March/007932.html",
+    "submitter_name": "Philip Ma",
+    "version": "1.0"
   },
   {
-    "id": "NPOSL-3.0",
-    "identifiers": [
-      {
-        "identifier": "NPOSL-3.0",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/NPOSL-3.0"
-      }
-    ],
-    "name": "The Non-Profit Open Software License, Version 3.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/NPOSL-3.0"
-      }
-    ]
-  },
-  {
-    "id": "NTP",
-    "identifiers": [
-      {
-        "identifier": "NTP",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/NTP"
-      }
-    ],
-    "name": "NTP License (NTP)",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/NTP"
-      }
-    ]
-  },
-  {
-    "id": "Naumen",
-    "identifiers": [
-      {
-        "identifier": "Naumen",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/Naumen"
-      }
-    ],
-    "name": "NAUMEN Public License",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/Naumen"
-      }
-    ]
-  },
-  {
-    "id": "Nokia",
-    "identifiers": [
-      {
-        "identifier": "Nokia",
-        "scheme": "SPDX"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "License :: OSI Approved :: Nokia Open Source License",
-        "scheme": "Trove"
-      }
-    ],
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/Nokia"
-      }
-    ],
-    "name": "Nokia Open Source License, Version 1.0a",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/Nokia"
-      }
-    ]
-  },
-  {
-    "id": "OCLC-2.0",
-    "identifiers": [
-      {
-        "identifier": "OCLC-2.0",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/OCLC-2.0"
-      }
-    ],
-    "name": "The OCLC Research Public License, Version 2.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/OCLC-2.0"
-      }
-    ]
-  },
-  {
-    "id": "OFL-1.1",
-    "identifiers": [
-      {
-        "identifier": "OFL-1.1",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "osi-approved",
-      "special-purpose"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/OFL-1.1"
-      }
-    ],
-    "name": "SIL Open Font License, Version 1.1",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/OFL-1.1"
-      }
-    ]
-  },
-  {
-    "id": "OGTSL",
-    "identifiers": [
-      {
-        "identifier": "OGTSL",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/cpal-1-0"
       },
-      {
-        "identifier": "License :: OSI Approved :: Open Group Test Suite License",
-        "scheme": "Trove"
+      "self": {
+        "href": "https://opensource.org/api/license/cpal-1-0"
       }
-    ],
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "cpal-1-0",
     "keywords": [
-      "osi-approved"
+      "uncategorized"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/OGTSL"
-      }
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Common Public Attribution License Version 1.0",
+    "spdx_id": "CPAL-1.0",
+    "stewards": [
+      "socialtext"
     ],
-    "name": "The Open Group Test Suite License (OGTSL)",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/OGTSL"
-      }
-    ]
+    "submission_date": "20070626",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2007-June/012848.html",
+    "submitter_name": "Ross Mayfield",
+    "version": "1.0"
   },
   {
-    "id": "OPL-2.1",
-    "identifiers": [],
-    "keywords": [
-      "osi-approved",
-      "special-purpose"
-    ],
-    "links": [
-      {
-        "note": "OSET Foundation Page",
-        "url": "https://www.osetfoundation.org/public-license"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/OPL-2.1"
-      }
-    ],
-    "name": "OSET Foundation Public License",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "application/pdf",
-        "title": "PDF",
-        "url": "https://static1.squarespace.com/static/528d46a2e4b059766439fa8b/t/53236a37e4b0db70c9afdf14/1394829879761/OSETPublicLicense_v2.pdf"
+      "html": {
+        "href": "https://opensource.org/license/cpl-1-0"
       },
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/OPL-2.1"
+      "self": {
+        "href": "https://opensource.org/api/license/cpl-1-0"
       }
-    ]
-  },
-  {
-    "id": "OSL-1.0",
-    "identifiers": [
-      {
-        "identifier": "OSL-1.0",
-        "scheme": "SPDX"
-      }
-    ],
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "cpl-1-0",
     "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
+      "superseded"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/OSL-1.0"
-      }
-    ],
-    "name": "Open Software License, Version 1.0",
-    "other_names": [],
-    "superseded_by": "OLS-3.0",
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/OSL-1.0"
-      }
-    ]
+    "license_steward_url": "https://developer.ibm.com/devpractices/open-source-development/",
+    "license_steward_version": "",
+    "name": "Common Public License Version 1.0",
+    "spdx_id": "CPL-1.0",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "Dan Streetman, Steve Gerdt",
+    "version": ""
   },
   {
-    "id": "OSL-2.1",
-    "identifiers": [
-      {
-        "identifier": "OSL-2.1",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/OSL-2.1"
-      }
-    ],
-    "name": "Open Software License, Version 2.1",
-    "other_names": [],
-    "superseded_by": "OLS-3.0",
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/OSL-2.1"
-      }
-    ]
-  },
-  {
-    "id": "OSL-3.0",
-    "identifiers": [
-      {
-        "identifier": "OSL-3.0",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "osi-approved",
-      "miscellaneous"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/OSL-3.0"
-      }
-    ],
-    "name": "Open Software License, Version 3.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/OSL-3.0"
-      }
-    ]
-  },
-  {
-    "id": "PHP-3.0",
-    "identifiers": [
-      {
-        "identifier": "PHP-3.0",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/PHP-3.0"
-      }
-    ],
-    "name": "The PHP License, Version 3.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/PHP-3.0"
-      }
-    ]
-  },
-  {
-    "id": "PostgreSQL",
-    "identifiers": [
-      {
-        "identifier": "PostgreSQL",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/PostgreSQL"
-      }
-    ],
-    "name": "The PostgreSQL Licence",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/PostgreSQL"
-      }
-    ]
-  },
-  {
-    "id": "Python-2.0",
-    "identifiers": [
-      {
-        "identifier": "Python-2.0",
-        "scheme": "DEP5"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "Python-2.0",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/osl-1-0"
       },
-      {
-        "identifier": "License :: OSI Approved :: Python Software Foundation License",
-        "scheme": "Trove"
+      "self": {
+        "href": "https://opensource.org/api/license/osl-1-0"
       }
-    ],
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "osl-1-0",
     "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
+      "superseded"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/Python-2.0"
-      }
-    ],
-    "name": "Python License, Version 2.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/Python-2.0"
-      }
-    ]
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Open Software License, version 1.0",
+    "spdx_id": "OSL-1.0",
+    "stewards": [],
+    "submission_date": "20020728",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2002-July/005521.html",
+    "submitter_name": "Lawrence E. Rosen",
+    "version": ""
   },
   {
-    "id": "QPL-1.0",
-    "identifiers": [
-      {
-        "identifier": "QPL-1.0",
-        "scheme": "DEP5"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "QPL-1.0",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/zlib"
       },
-      {
-        "identifier": "License :: OSI Approved :: Qt Public License (QPL)",
-        "scheme": "Trove"
+      "self": {
+        "href": "https://opensource.org/api/license/zlib"
       }
-    ],
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "zlib",
     "keywords": [
-      "osi-approved"
+      "other-miscellaneous"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/QPL-1.0"
-      }
+    "license_steward_url": "http://zlib.net/zlib_license.html",
+    "license_steward_version": "",
+    "name": "The zlib/libpng License",
+    "spdx_id": "Zlib",
+    "stewards": [
+      "zlib"
     ],
-    "name": "The Q Public License Version (QPL-1.0)",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/QPL-1.0"
-      }
-    ]
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": ""
   },
   {
-    "id": "RPL-1.1",
-    "identifiers": [
-      {
-        "identifier": "RPL-1.1",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "discouraged",
-      "obsolete",
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/RPL-1.1"
-      }
-    ],
-    "name": "Reciprocal Public License, Version 1.1",
-    "other_names": [],
-    "superseded_by": "RPL-1.5",
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/RPL-1.1"
-      }
-    ]
-  },
-  {
-    "id": "RPL-1.5",
-    "identifiers": [
-      {
-        "identifier": "RPL-1.5",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/RPL-1.5"
-      }
-    ],
-    "name": "Reciprocal Public License, Version 1.5",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/RPL-1.5"
-      }
-    ]
-  },
-  {
-    "id": "RPSL-1.0",
-    "identifiers": [
-      {
-        "identifier": "RPSL-1.0",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/RPSL-1.0"
-      }
-    ],
-    "name": "RealNetworks Public Source License, Version 1.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/RPSL-1.0"
-      }
-    ]
-  },
-  {
-    "id": "RSCPL",
-    "identifiers": [
-      {
-        "identifier": "RSCPL",
-        "scheme": "SPDX"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "License :: OSI Approved :: Ricoh Source Code Public License",
-        "scheme": "Trove"
-      }
-    ],
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/RSCPL"
-      }
-    ],
-    "name": "The Ricoh Source Code Public License",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/RSCPL"
-      }
-    ]
-  },
-  {
-    "id": "SISSL",
-    "identifiers": [
-      {
-        "identifier": "SISSL",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/zpl-2-0"
       },
-      {
-        "identifier": "License :: OSI Approved :: Sun Industry Standards Source License (SISSL)",
-        "scheme": "Trove"
+      "self": {
+        "href": "https://opensource.org/api/license/zpl-2-0"
       }
-    ],
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "zpl-2-0",
     "keywords": [
-      "discouraged",
-      "retired",
-      "osi-approved"
+      "superseded"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/SISSL"
-      }
-    ],
-    "name": "Sun Industry Standards Source License",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/SISSL"
-      }
-    ]
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Zope Public License 2.0",
+    "spdx_id": "ZPL-2.0",
+    "stewards": [],
+    "submission_date": "20011121",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2001-November/004585.html",
+    "submitter_name": "Gregor Hoffleit",
+    "version": "2.0"
   },
   {
-    "id": "SPL-1.0",
-    "identifiers": [
-      {
-        "identifier": "SPL-1.0",
-        "scheme": "SPDX"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "License :: OSI Approved :: Sun Public License",
-        "scheme": "Trove"
-      }
-    ],
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/SPL-1.0"
-      }
-    ],
-    "name": "Sun Public License, Version 1.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/SPL-1.0"
-      }
-    ]
-  },
-  {
-    "id": "Simple-2.0",
-    "identifiers": [
-      {
-        "identifier": "SimPL-2.0",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/Simple-2.0"
-      }
-    ],
-    "name": "Simple Public License (SimPL-2.0)",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/Simple-2.0"
-      }
-    ]
-  },
-  {
-    "id": "Sleepycat",
-    "identifiers": [
-      {
-        "identifier": "Sleepycat",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/xnet"
       },
-      {
-        "identifier": "License :: OSI Approved :: Sleepycat License",
-        "scheme": "Trove"
+      "self": {
+        "href": "https://opensource.org/api/license/xnet"
       }
-    ],
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "xnet",
     "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
+      "redundant-with-more-popular"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/Sleepycat"
-      }
-    ],
-    "name": "The Sleepycat License",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/Sleepycat"
-      }
-    ]
-  },
-  {
-    "id": "UPL",
-    "identifiers": [],
-    "keywords": [
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/UPL"
-      }
-    ],
-    "name": "The Universal Permissive License (UPL), Version 1.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/UPL"
-      }
-    ]
-  },
-  {
-    "id": "VSL-1.0",
-    "identifiers": [
-      {
-        "identifier": "VSL-1.0",
-        "scheme": "SPDX"
-      },
-      {
-        "identifier": "License :: OSI Approved :: Vovida Software License 1.0",
-        "scheme": "Trove"
-      }
-    ],
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/VSL-1.0"
-      }
-    ],
-    "name": "The Vovida Software License, Version 1.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/VSL-1.0"
-      }
-    ]
-  },
-  {
-    "id": "W3C",
-    "identifiers": [
-      {
-        "identifier": "W3C",
-        "scheme": "SPDX"
-      },
-      {
-        "identifier": "License :: OSI Approved :: W3C License",
-        "scheme": "Trove"
-      }
-    ],
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/W3C"
-      }
-    ],
-    "name": "The W3C Software Notice and License",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/W3C"
-      }
-    ]
-  },
-  {
-    "id": "WXwindows",
-    "identifiers": [
-      {
-        "identifier": "WXwindows",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/WXwindows"
-      }
-    ],
-    "name": "The wxWindows Library Licence",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/WXwindows"
-      }
-    ]
-  },
-  {
-    "id": "Watcom-1.0",
-    "identifiers": [
-      {
-        "identifier": "Watcom-1.0",
-        "scheme": "SPDX"
-      }
-    ],
-    "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/Watcom-1.0"
-      }
-    ],
-    "name": "The Sybase Open Source Licence",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/Watcom-1.0"
-      }
-    ]
-  },
-  {
-    "id": "Xnet",
-    "identifiers": [
-      {
-        "identifier": "Xnet",
-        "scheme": "SPDX"
-      },
-      {
-        "identifier": "License :: OSI Approved :: X.Net License",
-        "scheme": "Trove"
-      }
-    ],
-    "keywords": [
-      "osi-approved",
-      "discouraged",
-      "redundant"
-    ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/Xnet"
-      }
-    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
     "name": "The X.Net, Inc. License",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/Xnet"
-      }
-    ]
+    "spdx_id": "Xnet",
+    "stewards": [],
+    "submission_date": "20010805",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2001-August/003573.html",
+    "submitter_name": "Carl W. Brown - Russell Nelson",
+    "version": ""
   },
   {
-    "id": "ZPL-2.0",
-    "identifiers": [
-      {
-        "identifier": "Zope-2.0",
-        "scheme": "DEP5"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "ZPL-2.0",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/wxwindows"
       },
-      {
-        "identifier": "License :: OSI Approved :: Zope Public License",
-        "scheme": "Trove"
+      "self": {
+        "href": "https://opensource.org/api/license/wxwindows"
       }
-    ],
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "wxwindows",
     "keywords": [
-      "discouraged",
-      "non-reusable",
-      "osi-approved"
+      "non-reusable"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/ZPL-2.0"
-      }
-    ],
-    "name": "The Zope Public License, Version 2.0",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/ZPL-2.0"
-      }
-    ]
+    "license_steward_url": "https://www.wxwidgets.org/about/licence/",
+    "license_steward_version": "",
+    "name": "The wxWindows Library Licence",
+    "spdx_id": "wxWindows",
+    "stewards": [],
+    "submission_date": "20021022",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2002-October/005896.html",
+    "submitter_name": "Julian Smart ",
+    "version": ""
   },
   {
-    "id": "Zlib",
-    "identifiers": [
-      {
-        "identifier": "Zlib",
-        "scheme": "DEP5"
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
       },
-      {
-        "identifier": "Zlib",
-        "scheme": "SPDX"
+      "html": {
+        "href": "https://opensource.org/license/w3c-20150513"
       },
-      {
-        "identifier": "License :: OSI Approved :: zlib/libpng License",
-        "scheme": "Trove"
+      "self": {
+        "href": "https://opensource.org/api/license/w3c-20150513"
       }
-    ],
+    },
+    "approval_date": "20171129",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes2017fallf2f/",
+    "id": "w3c-20150513",
     "keywords": [
-      "osi-approved"
+      "non-reusable"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/Zlib"
-      }
-    ],
-    "name": "The zlib/libpng License (Zlib)",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/Zlib"
-      }
-    ]
+    "license_steward_url": "https://www.w3.org/copyright/software-license-2023/",
+    "license_steward_version": "",
+    "name": "The W3C\u00ae Software and Document license",
+    "spdx_id": "W3C-20150513",
+    "stewards": [],
+    "submission_date": "20170809",
+    "submission_url": "https://lists.opensource.org/pipermail/license-review_lists.opensource.org/2017-August/003070.html",
+    "submitter_name": "Wendy Seltzer",
+    "version": ""
   },
   {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/vsl-1-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/vsl-1-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "vsl-1-0",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "The Vovida Software License v. 1.0",
+    "spdx_id": "VSL-1.0",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "1.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/ncsa"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/ncsa"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "ncsa",
+    "keywords": [
+      "redundant-with-more-popular"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "The University of Illinois/NCSA Open Source License",
+    "spdx_id": "NCSA",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": ""
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/watcom-1-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/watcom-1-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "watcom-1-0",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "The Sybase Open Source Licence",
+    "spdx_id": "Watcom-1.0",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": ""
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/spl-1-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/spl-1-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "spl-1-0",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Sun Public License, Version 1.0",
+    "spdx_id": "SPL-1.0",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "1.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/sissl"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/sissl"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "sissl",
+    "keywords": [
+      "voluntarily-retired"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Sun Industry Standards Source License",
+    "spdx_id": "SISSL",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "1.1"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/sleepycat"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/sleepycat"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "sleepycat",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "The Sleepycat License",
+    "spdx_id": "Sleepycat",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": ""
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/rscpl"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/rscpl"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "rscpl",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "The Ricoh Source Code Public License",
+    "spdx_id": "RSCPL",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": ""
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/rpl-1-1"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/rpl-1-1"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "rpl-1-1",
+    "keywords": [
+      "superseded"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Reciprocal Public License, version 1.1",
+    "spdx_id": "RPL-1.1",
+    "stewards": [],
+    "submission_date": "20021016",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2002-October/005862.html",
+    "submitter_name": "Randall Burns",
+    "version": "1.1"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/rpsl-1-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/rpsl-1-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "rpsl-1-0",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "RealNetworks Public Source License Version 1.0",
+    "spdx_id": "RPSL-1.0",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": ""
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/qpl-1-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/qpl-1-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "qpl-1-0",
+    "keywords": [
+      "other-miscellaneous"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "The Q Public License Version",
+    "spdx_id": "QPL-1.0",
+    "stewards": [
+      "trolltech-as"
+    ],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "1.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/python-2-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/python-2-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "python-2-0",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Python License, Version 2",
+    "spdx_id": "Python-2.0",
+    "stewards": [
+      "python-software-foundation"
+    ],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "2.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/cnri-python"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/cnri-python"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "cnri-python",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "The CNRI portion of the multi-part Python License",
+    "spdx_id": "CNRI-Python",
+    "stewards": [
+      "python-software-foundation"
+    ],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "Van Lindberg",
+    "version": ""
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/php-3-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/php-3-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "php-3-0",
+    "keywords": [
+      "superseded"
+    ],
+    "license_steward_url": "https://www.php.net/license/3_0.txt",
+    "license_steward_version": "",
+    "name": "PHP License 3.0",
+    "spdx_id": "PHP-3.0",
+    "stewards": [],
+    "submission_date": "20030531",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2003-May/006919.html",
+    "submitter_name": "Rasmus Lerdorf",
+    "version": "3.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/osl-3-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/osl-3-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "osl-3-0",
+    "keywords": [
+      "other-miscellaneous"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "The Open Software License 3.0",
+    "spdx_id": "OSL-3.0",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "3.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/ogtsl"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/ogtsl"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "ogtsl",
+    "keywords": [
+      "uncategorized"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Open Group Test Suite License",
+    "spdx_id": "OGTSL",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": ""
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/oclc-2-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/oclc-2-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "oclc-2-0",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "https://www.oclc.org/content/dam/research/activities/software/license/v2final.pdf",
+    "license_steward_version": "",
+    "name": "The OCLC Research Public License 2.0 License",
+    "spdx_id": "OCLC-2.0",
+    "stewards": [],
+    "submission_date": "20020923",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2002-September/005803.html",
+    "submitter_name": "Russell Nelson",
+    "version": "2.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/nokia"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/nokia"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "nokia",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Nokia Open Source License Version 1.0a",
+    "spdx_id": "NOKIA",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "1.0a"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/ngpl"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/ngpl"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "ngpl",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "The Nethack General Public License",
+    "spdx_id": "NGPL",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": ""
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/naumen"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/naumen"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "naumen",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "NAUMEN Public License",
+    "spdx_id": "Naumen",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": ""
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/nasa-1-3"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/nasa-1-3"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "nasa-1-3",
+    "keywords": [
+      "special-purpose"
+    ],
+    "license_steward_url": "https://www.nasa.gov/pdf/531753main_NOSA%20-%20NASA%20Open%20Source%20Agreement%20v1.3%20-%20Open%20Source%20Initiative.pdf",
+    "license_steward_version": "",
+    "name": "NASA Open Source Agreement v1.3",
+    "spdx_id": "NASA-1.3",
+    "stewards": [
+      "nasa"
+    ],
+    "submission_date": "20040323",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2004-March/007997.html",
+    "submitter_name": "Robert Padilla",
+    "version": "1.3"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/mpl-1-1"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/mpl-1-1"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "mpl-1-1",
+    "keywords": [
+      "superseded"
+    ],
+    "license_steward_url": "https://www.mozilla.org/en-US/MPL/1.1/",
+    "license_steward_version": "",
+    "name": "Mozilla Public License 1.1",
+    "spdx_id": "MPL-1.1",
+    "stewards": [
+      "mozilla-foundation"
+    ],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "1.1"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/mpl-1-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/mpl-1-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "mpl-1-0",
+    "keywords": [
+      "superseded"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Mozilla Public License, version 1.0",
+    "spdx_id": "MPL-1.0",
+    "stewards": [
+      "mozilla-foundation"
+    ],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "1.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/motosoto"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/motosoto"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "motosoto",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Motosoto Open Source License",
+    "spdx_id": "Motosoto",
+    "stewards": [],
+    "submission_date": "20010423",
+    "submission_url": "https://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2001-May/003732.html",
+    "submitter_name": "Leon Gommans",
+    "version": "0.9"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/cvw"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/cvw"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "cvw",
+    "keywords": [
+      "voluntarily-retired"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "MITRE Collaborative Virtual Workspace License",
+    "spdx_id": "",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": ""
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/mit"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/mit"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "mit",
+    "keywords": [
+      "popular-strong-community"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "The MIT License",
+    "spdx_id": "MIT",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "N/A"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/lpl-1-02"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/lpl-1-02"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "lpl-1-02",
+    "keywords": [
+      "redundant-with-more-popular"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Lucent Public License Version 1.02",
+    "spdx_id": "LPL-1.02",
+    "stewards": [],
+    "submission_date": "20030925",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2003-September/007141.html",
+    "submitter_name": "David Presotto",
+    "version": "1.02"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/lpl-1-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/lpl-1-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "lpl-1-0",
+    "keywords": [
+      "superseded"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Lucent Public License, Plan 9, version 1.0",
+    "spdx_id": "LPL-1.0",
+    "stewards": [],
+    "submission_date": "20030409",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2003-April/006800.html",
+    "submitter_name": "David Presotto",
+    "version": "1.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/jabberpl"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/jabberpl"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
     "id": "jabberpl",
-    "identifiers": [
-      {
-        "identifier": "License :: OSI Approved :: Jabber Open Source License",
-        "scheme": "Trove"
-      }
-    ],
     "keywords": [
-      "discouraged",
-      "retired",
-      "osi-approved"
+      "voluntarily-retired"
     ],
-    "links": [
-      {
-        "note": "OSI Page",
-        "url": "https://opensource.org/licenses/jabberpl"
-      }
-    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
     "name": "Jabber Open Source License",
-    "other_names": [],
-    "superseded_by": null,
-    "text": [
-      {
-        "media_type": "text/html",
-        "title": "HTML",
-        "url": "https://opensource.org/licenses/jabberpl"
+    "spdx_id": "",
+    "stewards": [
+      "jabber-foundation"
+    ],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "1.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/intel"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/intel"
       }
-    ]
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "intel",
+    "keywords": [
+      "voluntarily-retired"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Intel Open Source License",
+    "spdx_id": "Intel",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": ""
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/ipl-1-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/ipl-1-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "ipl-1-0",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "IBM Public License Version 1.0",
+    "spdx_id": "IPL-1.0",
+    "stewards": [
+      "ibm"
+    ],
+    "submission_date": "20040815",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2004-August/008518.html",
+    "submitter_name": "Daniel Wallace",
+    "version": "IPL-1.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/hpnd"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/hpnd"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "hpnd",
+    "keywords": [
+      "redundant-with-more-popular"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Historical Permission Notice and Disclaimer",
+    "spdx_id": "HPND",
+    "stewards": [],
+    "submission_date": "20021109",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2002-November/006304.html",
+    "submitter_name": "Bruce Dodson",
+    "version": ""
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/lgpl-2-1"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/lgpl-2-1"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "lgpl-2-1",
+    "keywords": [
+      "popular-strong-community"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "GNU Lesser General Public License version 2.1",
+    "spdx_id": "LGPL-2.1",
+    "stewards": [
+      "free-software-foundation"
+    ],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "2.1"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/gpl-2-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/gpl-2-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "gpl-2-0",
+    "keywords": [
+      "popular-strong-community"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "GNU General Public License version 2",
+    "spdx_id": "GPL-2.0",
+    "stewards": [
+      "free-software-foundation"
+    ],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "2.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/frameworx-1-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/frameworx-1-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "frameworx-1-0",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Frameworx License 1.0",
+    "spdx_id": "Frameworx-1.0",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "1.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/fair"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/fair"
+      }
+    },
+    "approval_date": "20050912",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20050912/",
+    "id": "fair",
+    "keywords": [
+      "redundant-with-more-popular"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Fair License",
+    "spdx_id": "Fair",
+    "stewards": [],
+    "submission_date": "20040126",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2004-January/007573.html",
+    "submitter_name": "James William Pye",
+    "version": ""
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/entessa"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/entessa"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "entessa",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Entessa Public License Version. 1.0",
+    "spdx_id": "Entessa",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "1.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/efl-2-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/efl-2-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "efl-2-0",
+    "keywords": [
+      "redundant-with-more-popular"
+    ],
+    "license_steward_url": "http://www.eiffel-nice.org/license/eiffel-forum-license-2.html",
+    "license_steward_version": "",
+    "name": "Eiffel Forum License, Version 2",
+    "spdx_id": "EFL-2.0",
+    "stewards": [
+      "the-non-profit-international-consortium-for-eiffel-nice"
+    ],
+    "submission_date": "20021206",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2002-December/006315.html",
+    "submitter_name": "Christian Couder",
+    "version": ""
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/efl-1-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/efl-1-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "efl-1-0",
+    "keywords": [
+      "superseded"
+    ],
+    "license_steward_url": "http://www.eiffel-nice.org/license/forum.txt",
+    "license_steward_version": "",
+    "name": "Eiffel Forum License, version 1",
+    "spdx_id": "EFL-1.0",
+    "stewards": [
+      "the-non-profit-international-consortium-for-eiffel-nice"
+    ],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "1.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/ecl-1-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/ecl-1-0"
+      }
+    },
+    "approval_date": "20070606",
+    "approved": false,
+    "board_minutes": "https://opensource.org/meeting-minutes/minutes20070606/",
+    "id": "ecl-1-0",
+    "keywords": [
+      "superseded"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Educational Community License, Version 1.0",
+    "spdx_id": "ECL-1.0",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "1.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/eudatagrid"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/eudatagrid"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "eudatagrid",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "EU DataGrid Software License",
+    "spdx_id": "EUDatagrid",
+    "stewards": [],
+    "submission_date": "20030819",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2003-August/007071.html",
+    "submitter_name": "Bob Jones ",
+    "version": ""
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/cua-opl-1-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/cua-opl-1-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "cua-opl-1-0",
+    "keywords": [
+      "voluntarily-retired"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "CUA Office Public License",
+    "spdx_id": "CUA-OPL-1.0",
+    "stewards": [
+      "cua-office"
+    ],
+    "submission_date": "20031220",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2003-December/007485.html",
+    "submitter_name": "Patranun Limudomporn ",
+    "version": ""
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/cddl-1-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/cddl-1-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "cddl-1-0",
+    "keywords": [
+      "popular-strong-community"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Common Development and Distribution License 1.0",
+    "spdx_id": "CDDL-1.0",
+    "stewards": [
+      "sun-microsystems"
+    ],
+    "submission_date": "20041202",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2004-December/009124.html",
+    "submitter_name": "Claire Giordano",
+    "version": "1.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/catosl-1-1"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/catosl-1-1"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "catosl-1-1",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Computer Associates Trusted Open Source License 1.1",
+    "spdx_id": "CATOSL-1.1",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "1.1"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/bsd-2-clause"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/bsd-2-clause"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "bsd-2-clause",
+    "keywords": [
+      "popular-strong-community"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "The 2-Clause BSD License",
+    "spdx_id": "BSD-2-Clause",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": ""
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/aal"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/aal"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "aal",
+    "keywords": [
+      "redundant-with-more-popular"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Attribution Assurance License",
+    "spdx_id": "AAL",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": ""
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/artistic-1-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/artistic-1-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "artistic-1-0",
+    "keywords": [
+      "superseded"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Artistic License 1.0",
+    "spdx_id": "Artistic-1.0",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "1.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/apsl-2-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/apsl-2-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "apsl-2-0",
+    "keywords": [
+      "non-reusable"
+    ],
+    "license_steward_url": "https://opensource.apple.com/apsl/",
+    "license_steward_version": "",
+    "name": "Apple Public Source License 2.0",
+    "spdx_id": "APSL-2.0",
+    "stewards": [
+      "apple"
+    ],
+    "submission_date": "20030806",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2003-August/007041.html",
+    "submitter_name": "Ernest Pabhakar",
+    "version": "2.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/apache-2-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/apache-2-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "apache-2-0",
+    "keywords": [
+      "popular-strong-community"
+    ],
+    "license_steward_url": "https://www.apache.org/licenses/LICENSE-2.0",
+    "license_steward_version": "",
+    "name": "Apache License, Version 2.0",
+    "spdx_id": "Apache-2.0",
+    "stewards": [
+      "apache-software-foundation"
+    ],
+    "submission_date": "20040208",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2004-February/007654.html",
+    "submitter_name": "Kevin Coar",
+    "version": "2.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/apache-1-1"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/apache-1-1"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "https://www.apache.org/licenses/LICENSE-1.1",
+    "id": "apache-1-1",
+    "keywords": [
+      "superseded"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Apache Software License, version 1.1",
+    "spdx_id": "Apache-1.1",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "",
+    "version": "1.1"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/apl-1-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/apl-1-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "apl-1-0",
+    "keywords": [
+      "other-miscellaneous"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Adaptive Public License 1.0",
+    "spdx_id": "APL-1.0",
+    "stewards": [
+      "university-of-victoria"
+    ],
+    "submission_date": "20030526",
+    "submission_url": "http://lists.opensource.org/pipermail/license-discuss_lists.opensource.org/2003-May/006912.html",
+    "submitter_name": "Carmen Leeming ",
+    "version": "1.0"
+  },
+  {
+    "_links": {
+      "collection": {
+        "href": "https://opensource.org/api/licenses"
+      },
+      "html": {
+        "href": "https://opensource.org/license/afl-3-0"
+      },
+      "self": {
+        "href": "https://opensource.org/api/license/afl-3-0"
+      }
+    },
+    "approval_date": "",
+    "approved": false,
+    "board_minutes": "",
+    "id": "afl-3-0",
+    "keywords": [
+      "redundant-with-more-popular"
+    ],
+    "license_steward_url": "",
+    "license_steward_version": "",
+    "name": "Academic Free License v. 3.0",
+    "spdx_id": "AFL-3.0",
+    "stewards": [],
+    "submission_date": "",
+    "submission_url": "",
+    "submitter_name": "Lawrence Rosen",
+    "version": "3.0"
   }
 ]

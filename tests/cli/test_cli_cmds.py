@@ -19,7 +19,17 @@ def test_version(capsys):
 def test_pypi_cmd(tmpdir):
     out_folder = tmpdir.mkdir("out")
     cli.main(
-        ["pypi", "pytest=5.3.2", "-o", str(out_folder), "-m", "m1", "m2", "--download"]
+        [
+            "pypi",
+            "pytest=5.3.2",
+            "-o",
+            str(out_folder),
+            "-m",
+            "m1",
+            "m2",
+            "--download",
+            "--no-use-v1-format",
+        ]
     )
     pytest_folder = out_folder / "pytest"
     assert pytest_folder.isdir()
@@ -59,7 +69,9 @@ def test_msg_missing_pkg_pypi(capsys):
 
 def test_license_discovery(tmpdir):
     out_folder = tmpdir.mkdir("out-license")
-    cli.main(["pypi", "httplib2shim=0.0.3", "-o", str(out_folder)])
+    cli.main(
+        ["pypi", "httplib2shim=0.0.3", "-o", str(out_folder), "--no-use-v1-format"]
+    )
     assert (out_folder / "httplib2shim" / "LICENSE").exists()
 
 
@@ -76,7 +88,7 @@ def test_change_pypi_url(mocker):
         "pytest=5.3.2",
         is_strict_cf=False,
         download=False,
-        url_pypi="https://pypi.org",
+        url_pypi="https://files.pythonhosted.org",
         url_pypi_metadata="http://url_pypi.com/abc",
         sections_populate=None,
         from_local_sdist=False,
@@ -95,6 +107,13 @@ def test_config_url_pypi_metadata():
     assert config.url_pypi_metadata == "http://url_pypi.com/abc/{pkg_name}/json"
 
 
+@pytest.mark.parametrize("index", ["pypi", "cran"])
+def test_v1_format_is_default(index):
+    parser = cli.init_parser()
+    assert parser.parse_args([index, "pkg"]).use_v1_format
+    assert not parser.parse_args([index, "pkg", "--no-use-v1-format"]).use_v1_format
+
+
 @pytest.mark.parametrize("option", ["-r", "--recursive"])
 def test_recursive_option(mocker, option, tmpdir):
     folder = tmpdir.mkdir(f"recursive_pkg{option}")
@@ -104,7 +123,7 @@ def test_recursive_option(mocker, option, tmpdir):
 
     mocker.patch("grayskull.cli.stdout.is_pkg_available", new=mock_is_pkg_available)
     spy = mocker.spy(cli, "generate_recipes_from_list")
-    cli.main(["pypi", "pytest=5.3.2", option, "-o", str(folder)])
+    cli.main(["pypi", "pytest=5.3.2", option, "-o", str(folder), "--no-use-v1-format"])
     assert spy.call_count == 2
     assert spy.call_args_list[0].args[0] == ["pytest=5.3.2"]
     assert spy.call_args_list[1].args[0] == {"colorama"}
@@ -129,7 +148,9 @@ def test_part_reload_recipe(tmpdir, index, name, version):
     folder = tmpdir.mkdir("reload_recipe")
     recipe_path = folder / "recipe.yaml"
     recipe.save(str(recipe_path))
-    cli.main([index, str(recipe_path), "--sections", "requirements"])
+    cli.main(
+        [index, str(recipe_path), "--sections", "requirements", "--no-use-v1-format"]
+    )
 
     recipe = Recipe(load_file=str(recipe_path))
     assert host == [str(v) for v in recipe["requirements"]["host"] if v]

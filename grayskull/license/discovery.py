@@ -24,6 +24,22 @@ from grayskull.license.data import get_all_licenses  # noqa
 
 log = logging.getLogger(__name__)
 
+# A small mapping of SPDX IDs to other historical license names.
+# This data was pulled from the old OSI API json blob. They no
+# longer supply it.  - MRB
+OTHER_NAMES = {
+    "MIT": ["Expat"],
+    "BSD-3-Clause": [
+        "Revised BSD License",
+        "Modified BSD License",
+        "New BSD License",
+    ],
+    "BSD-2-Clause": [
+        "Simplified BSD License",
+        "FreeBSD License",
+    ],
+}
+
 
 @dataclass
 class ShortLicense:
@@ -194,17 +210,20 @@ def _get_all_names_from_api(one_license: dict) -> list:
 
 def get_other_names_from_opensource(license_spdx: str) -> list:
     lic = get_opensource_license(license_spdx)
-    return [_license["name"] for _license in lic.get("other_names", [])]
+    onames = [_license["name"] for _license in lic.get("other_names", [])]
+    if "name" in lic:
+        onames += [lic["name"]]
+    onames += OTHER_NAMES.get(license_spdx, [])
+    onames += [license_spdx]
+    onames = list(set(onames))
+    return onames
 
 
 def get_opensource_license(license_spdx: str) -> dict:
     opensource = get_opensource_license_data()
     for lic in opensource:
-        if lic["id"] == license_spdx:
+        if lic["spdx_id"] == license_spdx:
             return lic
-        for _id in lic["identifiers"]:
-            if _id["scheme"].lower() == "spdx" and license_spdx == _id["identifier"]:
-                return lic
     return {}
 
 
@@ -216,12 +235,15 @@ def read_licence_cache():
 @lru_cache(maxsize=10)
 def get_opensource_license_data() -> list:
     try:
-        response = requests.get(url="https://api.opensource.org/licenses/", timeout=5)
+        response = requests.get(url="https://opensource.org/api/license", timeout=5)
     except requests.exceptions.RequestException:
         return read_licence_cache()
     if response.status_code != 200:
         return read_licence_cache()
-    return response.json()
+    try:
+        return response.json()
+    except requests.exceptions.JSONDecodeError:
+        return read_licence_cache()
 
 
 def _get_all_license_choice(all_licenses: list) -> list:
