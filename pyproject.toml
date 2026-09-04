@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools >=61", "setuptools_scm[toml]>=6.2"]
+requires = ["setuptools >=77", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -10,7 +10,7 @@ authors = [
 description = "Project to generate recipes for conda packages"
 readme = "README.md"
 keywords = ["conda"]
-license = { text = "Apache-2.0" }
+license = "Apache-2.0"
 dynamic = ["version"]
 requires-python = ">=3.10"
 dependencies = [
@@ -31,23 +31,27 @@ dependencies = [
     "tomli-w",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
+dev = [
+    "pre-commit",
+    {include-group = "testing"},
+    {include-group = "docs"},
+]
 testing = [
     "mock",
+    "numpy",
     "pytest",
     "pytest-console-scripts",
     "pytest-cov",
     "pytest-mock",
     "setuptools-scm",
-    "numpy",
 ]
-
 docs = [
     "furo",
+    "mdit-py-plugins>=0.3.0",
+    "myst-parser",
     "sphinx",
     "sphinx-argparse",
-    "myst-parser",
-    "mdit-py-plugins>=0.3.0",
 ]
 
 [project.scripts]
