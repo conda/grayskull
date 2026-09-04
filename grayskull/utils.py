@@ -262,16 +262,26 @@ def upgrade_v0_recipe_to_v1(recipe_path: Path) -> None:
         from conda_recipe_manager.parser.recipe_parser_convert import (
             RecipeParserConvert,
         )
+        from conda_recipe_manager.parser.types import RecipeReaderFlags
     except ImportError as e:
         raise ImportError(
             "Please install conda-recipe-manager from conda-forge to enable "
             "support for the V1 format. (Note that Python >=3.11 is required.)"
         ) from e
 
+    # Expand `tests.python.python_version` to a list that tests on both the
+    # pinned Python (e.g. `{{ python_min }}.*`) and the latest Python (`*`).
+    # This is the recommended setting for `noarch: python` packages, see:
+    # https://conda-forge.org/docs/how-to/basics/noarch.html#expressing-python-version-requirements
+    # Tolerate older conda-recipe-manager versions that lack the flag.
+    also_test_latest_python = getattr(RecipeReaderFlags, "ALSO_TEST_LATEST_PYTHON", 0)
+
     recipe_content: Final[str] = RecipeParserConvert.pre_process_recipe_text(
         recipe_path.read_text()
     )
-    recipe_converter = RecipeParserConvert(recipe_content)
+    recipe_converter = RecipeParserConvert(
+        recipe_content, flags=also_test_latest_python
+    )
     v1_content, _, _ = recipe_converter.render_to_v1_recipe_format()
     recipe_path.write_text(v1_content, encoding="utf-8")
 
