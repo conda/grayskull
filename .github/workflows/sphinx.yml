@@ -26,8 +26,7 @@ jobs:
           cache: "pip"
       - name: Build Documentation
         run: |
-          pip install -e .[docs]
-          pip install -r docs/requirements.txt  # redundant?
+          pip install -e . --group docs
           cd docs
           make html
       - name: Upload artifact
