@@ -79,7 +79,7 @@ class Configuration:
         )
         sup_python_ver.update(
             {
-                PyVer(int(major), int(minor or 0))
+                PyVer(int(major), 0 if minor == "*" else int(minor or 0))
                 for _, major, minor in req_python
                 if major
             }
@@ -101,9 +101,15 @@ class Configuration:
             for sup_py, is_enabled in py_ver_enabled.items():
                 if is_enabled is False:
                     continue
-                py_ver_enabled[sup_py] = eval(
-                    f"sup_py {op} PyVer(int({major}), int({minor}))"
-                )
+                if minor == "*":
+                    same_major = sup_py.major == int(major)
+                    py_ver_enabled[sup_py] = (
+                        same_major if op == "==" else not same_major
+                    )
+                else:
+                    py_ver_enabled[sup_py] = eval(
+                        f"sup_py {op} PyVer(int({major}), int({minor}))"
+                    )
         return py_ver_enabled
 
     def __post_init__(self):
