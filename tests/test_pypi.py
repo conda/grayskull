@@ -716,6 +716,8 @@ def test_get_selector():
         ("<3", "3k", "skip"),
         ("!=3.7", "==37", "==37"),
         ("~=3.7", "<37", "<37"),
+        ("==3.*", "2k", "<36"),
+        ("!=3.*", "3k", "skip"),
     ],
 )
 def test_py_version_to_selector(requires_python, exp_selector, ex_cf, recipe_config):
@@ -749,6 +751,8 @@ def test_py_version_to_selector(requires_python, exp_selector, ex_cf, recipe_con
         ("<3", "<3.0", "skip"),
         ("!=3.7", "!=3.7", "!=3.7"),
         ("~=3.7", ">=3.7", ">=3.7"),
+        ("==3.*", ">=3.0", ">=3.6"),
+        ("!=3.*", "<3.0", "skip"),
     ],
 )
 def test_py_version_to_limit_python(requires_python, exp_limit, ex_cf, recipe_config):
