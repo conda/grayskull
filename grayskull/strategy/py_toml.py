@@ -1,9 +1,11 @@
+import re
 import sys
 from collections import defaultdict
 from collections.abc import Iterator
 from functools import singledispatch
 from pathlib import Path
 
+from grayskull.base.pkg_info import normalize_pkg_name
 from grayskull.strategy.parse_poetry_version import (
     combine_conda_selectors,
     encode_poetry_platform_to_selector_item,
@@ -11,6 +13,24 @@ from grayskull.strategy.parse_poetry_version import (
     encode_poetry_version,
 )
 from grayskull.utils import nested_dict
+
+RE_REQ_NAME = re.compile(r"^\s*([\.a-zA-Z0-9_-]+)")
+
+
+def normalize_requirement_name(requirement: str) -> str:
+    """Normalize the package name portion of a requirement to the name
+    under which it is actually published on conda-forge (e.g. ``flit_core``
+    -> ``flit-core``), leaving the version specifier untouched.
+    """
+    match = RE_REQ_NAME.match(requirement)
+    if not match:
+        return requirement
+    raw_name = match.group(1)
+    normalized_name = normalize_pkg_name(raw_name)
+    if normalized_name == raw_name:
+        return requirement
+    return requirement.replace(raw_name, normalized_name, 1)
+
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -282,7 +302,10 @@ def get_all_toml_info(path_toml: Path | str) -> dict:
     toml_metadata = defaultdict(dict, toml_metadata)
     metadata = nested_dict()
     toml_project = toml_metadata.get("project", {}) or {}
-    metadata["requirements"]["host"] = toml_metadata["build-system"].get("requires", [])
+    metadata["requirements"]["host"] = [
+        normalize_requirement_name(req)
+        for req in toml_metadata["build-system"].get("requires", [])
+    ]
     metadata["requirements"]["run"] = toml_project.get("dependencies", [])
     metadata["requirements"]["extra"] = toml_project.get("optional-dependencies", {})
     license = toml_project.get("license")

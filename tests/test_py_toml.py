@@ -2,6 +2,7 @@
 
 import filecmp
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
@@ -12,6 +13,7 @@ from grayskull.strategy.py_toml import (
     add_poetry_metadata,
     get_all_toml_info,
     get_constrained_dep,
+    normalize_requirement_name,
 )
 
 
@@ -74,6 +76,36 @@ def test_poetry_dependencies():
         "html5lib >=1.0.0,<2.0.0",
         "urllib3 >=1.26.0,<2.0.0",
     ]
+
+
+@mock.patch("grayskull.strategy.py_toml.normalize_pkg_name")
+def test_normalize_requirement_name(mock_normalize_pkg_name):
+    mock_normalize_pkg_name.side_effect = lambda pkg_name: {
+        "flit_core": "flit-core",
+        "setuptools": "setuptools",
+    }[pkg_name]
+
+    assert normalize_requirement_name("flit_core >=3.2,<4") == "flit-core >=3.2,<4"
+    assert normalize_requirement_name("setuptools>=61.0") == "setuptools>=61.0"
+
+
+def test_get_all_toml_info_normalizes_host_requirement_names(tmpdir):
+    """flit_core is published on PyPI with an underscore, but on conda-forge
+    the package is named flit-core. build-system.requires should be
+    normalized to the conda-forge name, same as run/extra requirements
+    already are (see issue #527)."""
+    toml_path = tmpdir / "pyproject.toml"
+    toml_path.write(
+        "[build-system]\n"
+        'requires = ["flit_core >=3.2,<4"]\n'
+        'build-backend = "flit_core.buildapi"\n'
+        "\n"
+        "[project]\n"
+        'name = "some-flit-pkg"\n'
+        'version = "0.1.0"\n'
+    )
+    result = get_all_toml_info(str(toml_path))
+    assert result["requirements"]["host"] == ["flit-core >=3.2,<4"]
 
 
 def test_poetry_langchain_snapshot(tmpdir):
