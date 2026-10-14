@@ -501,6 +501,10 @@ soundfile:
   conda_forge: pysoundfile
   import_name: soundfile
 
+sox:
+  conda_forge: pysox
+  import_name: sox
+
 spherical-functions:
   conda_forge: spherical_functions
   import_name: spherical_functions
