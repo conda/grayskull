@@ -23,6 +23,10 @@ asana:
   conda_forge: python-asana
   import_name: asana
 
+astropy:
+  conda_forge: astropy-base
+  import_name: astropy
+
 backtrace:
   conda_forge: python-backtrace
   import_name: backtrace
@@ -131,6 +135,10 @@ dftd4:
 dials-data:
   conda_forge: dials-data
   import_name: dials_data
+
+dirac:
+  conda_forge: dirac-grid
+  import_name: DIRAC
 
 docker:
   import_name: docker
