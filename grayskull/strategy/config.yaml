@@ -372,6 +372,10 @@ nvidia-ml-py3:
   conda_forge: nvidia-ml
   import_name: pynvml
 
+ollama:
+  conda_forge: ollama-python
+  import_name: ollama
+
 opencv-python-headless:
   import_name: cv2
   conda_forge: opencv
