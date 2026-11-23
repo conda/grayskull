@@ -396,6 +396,10 @@ paragraph:
   conda_forge: python-paragraph
   import_name: paragraph
 
+pgvector:
+  conda_forge: pgvector-python
+  import_name: pgvector
+
 prince:
   conda_forge: prince-factor-analysis
   import_name: prince
